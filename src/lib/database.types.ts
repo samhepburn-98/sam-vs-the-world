@@ -75,9 +75,11 @@ export type Database = {
           date: string
           format: number | null
           id: string
+          let_resets_serve: boolean
           notes: string | null
           player1_id: string
           player2_id: string
+          serves_per_point: number
           target_score: number
           tiebreak: Database["public"]["Enums"]["tiebreak"]
           updated_at: string
@@ -89,9 +91,11 @@ export type Database = {
           date?: string
           format?: number | null
           id?: string
+          let_resets_serve?: boolean
           notes?: string | null
           player1_id: string
           player2_id: string
+          serves_per_point?: number
           target_score?: number
           tiebreak?: Database["public"]["Enums"]["tiebreak"]
           updated_at?: string
@@ -103,9 +107,11 @@ export type Database = {
           date?: string
           format?: number | null
           id?: string
+          let_resets_serve?: boolean
           notes?: string | null
           player1_id?: string
           player2_id?: string
+          serves_per_point?: number
           target_score?: number
           tiebreak?: Database["public"]["Enums"]["tiebreak"]
           updated_at?: string
