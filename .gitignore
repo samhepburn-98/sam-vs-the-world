@@ -16,3 +16,8 @@ todos.json
 .claude/
 .idea/
 !.env.example
+
+# playwright
+test-results/
+playwright-report/
+blob-report/
