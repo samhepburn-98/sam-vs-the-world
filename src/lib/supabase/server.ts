@@ -1,0 +1,25 @@
+import { createServerClient } from "@supabase/ssr"
+import { getCookies, setCookie } from "@tanstack/react-start/server"
+
+import { getSupabaseEnv } from "./env"
+
+// Per-request server client — call inside a server function, loader, or
+// request handler (the cookie helpers need an active request context).
+export function getSupabaseServerClient() {
+  const { url, key } = getSupabaseEnv()
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return Object.entries(getCookies()).map(([name, value]) => ({
+          name,
+          value: value ?? "",
+        }))
+      },
+      setAll(cookies) {
+        for (const cookie of cookies) {
+          setCookie(cookie.name, cookie.value, cookie.options)
+        }
+      },
+    },
+  })
+}

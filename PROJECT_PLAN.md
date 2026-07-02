@@ -977,8 +977,10 @@ instead of a framework layer).
 
 - `supabase gen types typescript` → `src/lib/database.types.ts`, regenerated after each migration;
   both Supabase clients and RPC calls are fully typed against it.
-- Env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (public-safe by design; RLS gates writes). No
-  service-role key in the app.
+- Env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (the modern `sb_publishable_…` key —
+  Supabase's replacement for the legacy anon JWT; public-safe by design, RLS gates writes). No
+  service-role key in the app. Note: the publishable key authenticates all real endpoints but not
+  the `/rest/v1/` OpenAPI root, which requires a JWT-based key.
 
 ### 8.7 Test strategy — risk-weighted
 
