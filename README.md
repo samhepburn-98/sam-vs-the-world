@@ -24,9 +24,9 @@ and roadmap — lives in [PROJECT_PLAN.md](PROJECT_PLAN.md). Work is organised a
 ## Development
 
 ```bash
-npm install
-npm run dev        # http://localhost:3000
-npm run typecheck
-npm test
-npm run build
+pnpm install
+pnpm dev           # http://localhost:3000
+pnpm typecheck
+pnpm test
+pnpm build
 ```
