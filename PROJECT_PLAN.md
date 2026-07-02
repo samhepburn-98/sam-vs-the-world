@@ -974,9 +974,16 @@ instead of a framework layer).
 - **Every RPC response is parsed with a zod schema** before it enters the app — the generated DB types
   (§8.6) type the *call*, zod validates the *data* at runtime. A malformed response fails loudly at
   the boundary, not as a rendering bug three components deep.
-- **Shared concepts share ONE schema.** If multiple RPCs return the same concept (a game result, a
-  match summary, a rally), each parses with the *same* schema from `lib/schemas/` — never per-RPC
-  duplicates. TS types are `z.infer` of these schemas, so schema, type, and validator can't drift.
+- **Shared concepts share ONE schema per level of detail.** If multiple RPCs return the same concept
+  (a game result, a match summary, a rally), each parses with the *same* schema from `lib/schemas/` —
+  never per-RPC duplicates. TS types are `z.infer` of these schemas, so schema, type, and validator
+  can't drift.
+- **Summary vs detail are distinct, related schemas.** A list RPC returns lean rows; a single-entity
+  RPC returns the rich shape — e.g. `GameSummary` (list of games) vs `GameDetail` (one game).
+  Convention: `XSummary` / `XDetail`, where **`XDetail` extends `XSummary`** (zod `.extend()`), so the
+  detail shape is always a superset and the two can't diverge structurally. Both live in the concept's
+  one `lib/schemas/` file. No third ad-hoc variants — if a surface needs less than Summary, it selects
+  fields from it in the component, not with a new schema.
 - **One request per hook file** in `lib/queries/`: e.g. `get-serve-stats.ts` exports the fetcher, its
   `queryOptions`, and the `useServeStats()` hook, colocated. Components consume hooks only — nothing
   outside `lib/queries/` calls `supabase` directly.
