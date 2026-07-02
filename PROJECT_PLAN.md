@@ -1044,7 +1044,8 @@ The history must read as incremental, deliberate work — never machine-paced du
   topic, grouped by a milestone per phase. Issues are drafted one phase ahead (just-in-time), and Sam
   chooses which issue to start and merges each PR.
 - **Branches:** short-lived branch per issue (`4-derived-views`) → PR (`Closes #4`, approach summary)
-  → **rebase-merge** for linear history.
+  → **squash-and-merge**. `main` gets one conventional commit per issue (the PR title, which must
+  therefore follow conventional-commit structure); the granular commit story lives in each PR.
 - Example grain — Phase 1 is ~4 issues / ~8 commits (enums/trigger · players+matches ·
   games+rallies+checks · scoring views · results views · RLS · fixture tests · typegen), not one dump.
 - Commits carry the `Co-Authored-By: Claude` trailer (decided 2026-07).
