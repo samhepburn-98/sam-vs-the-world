@@ -20,7 +20,9 @@ describe.skipIf(!hasEnv)("supabase connectivity", () => {
 
   it("round-trips through the supabase client", async () => {
     const supabase = getSupabaseBrowserClient()
-    const { error } = await supabase.rpc("health_check")
+    // deliberately nonexistent RPC (hence the cast past the typed client):
+    // the PGRST202 reply below can only come from the real database gateway
+    const { error } = await supabase.rpc("health_check" as never)
     // No schema exists yet: a PostgREST "function not found" error proves
     // the request reached the database gateway (a network/auth failure
     // would surface as a fetch error or 401 instead).

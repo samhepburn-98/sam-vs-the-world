@@ -4,12 +4,14 @@ import { getSupabaseEnv } from "./env"
 
 import type { SupabaseClient } from "@supabase/supabase-js"
 
-let client: SupabaseClient | undefined
+import type { Database } from "@/lib/database.types"
+
+let client: SupabaseClient<Database> | undefined
 
 export function getSupabaseBrowserClient() {
   if (!client) {
     const { url, key } = getSupabaseEnv()
-    client = createBrowserClient(url, key)
+    client = createBrowserClient<Database>(url, key)
   }
   return client
 }

@@ -1,0 +1,15 @@
+{
+  "name": "tied-undecided",
+  "description": "A game whose last rally leaves it tied has no winner and is flagged undecided.",
+  "targetScore": 11,
+  "tiebreak": "win_by_2",
+  "rallies": [
+    { "server": "p1", "side": "left", "serveNumber": 1, "winner": "p1", "endReason": "winner" },
+    { "server": "p1", "side": "right", "serveNumber": 1, "winner": "p2", "endReason": "error", "errorDetail": "out_back", "forced": false }
+  ],
+  "expected": {
+    "runningScores": [[1, 0], [1, 1]],
+    "result": { "scoreP1": 1, "scoreP2": 1, "winner": null, "undecided": true },
+    "errors": [{ "rallyNumber": 2, "maker": "p1", "endReason": "error" }]
+  }
+}
