@@ -27,6 +27,10 @@ and roadmap — lives in [PROJECT_PLAN.md](PROJECT_PLAN.md). Work is organised a
 pnpm install
 pnpm dev           # http://localhost:3000
 pnpm typecheck
-pnpm test
+pnpm test          # unit/component (vitest)
+pnpm test:e2e      # playwright (boots its own server on 3210)
 pnpm build
+pnpm run deploy    # build + wrangler deploy ("run" required — bare `pnpm deploy` is a reserved pnpm command)
 ```
+
+Deployed on Cloudflare Workers: https://sam-vs-the-world.samhepburn98.workers.dev
