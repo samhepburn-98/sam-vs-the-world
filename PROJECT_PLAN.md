@@ -901,7 +901,8 @@ confirm RLS (anon reads, only owner writes).
 - **Supabase** (Postgres + auth + client libs). **Cloud project from day one**; local Supabase copies
   (CLI/Docker) introduced later once real data exists and needs protecting.
 - **TanStack Query everywhere** — one data paradigm, client and server; **Recharts** via shadcn
-  `Chart`; **Vercel** hosting (Netlify equally supported — TanStack's official partner).
+  `Chart`; **Cloudflare Workers** hosting (free tier; official TanStack partner; SSR in workerd via
+  the Cloudflare Vite plugin).
 
 **Why Start (recorded rationale):** one mental model instead of Next's RSC/client split; explicit
 caching via Query (`staleTime`) instead of layered framework caches; **typed search params** (the
@@ -1000,10 +1001,12 @@ schema or an RPC changes.
 
 ### 8.8 Deployment
 
-- **Vercel** (auto-deploy from `main`; TanStack Start deploys via its Vercel preset — Netlify is the
-  equally-supported alternative) + **Supabase cloud** free tiers. Migrations applied via
-  `supabase db push` (or MCP `apply_migration`) against the cloud project. Preview deploys share the
-  same project until local stacks are introduced.
+- **Cloudflare Workers** (free tier) + **Supabase cloud** free tier. TanStack Start runs as a Worker
+  via the `@cloudflare/vite-plugin`; **Workers Builds** connects the GitHub repo for auto-deploy from
+  `main` and preview URLs per branch/PR. (Cloudflare Pages is deprecated for new full-stack apps —
+  Workers is the current official path.) Migrations applied via `supabase db push` (or MCP
+  `apply_migration`) against the cloud project. Preview deploys share the same project until local
+  stacks are introduced.
 
 ---
 
@@ -1013,7 +1016,7 @@ Guiding rule (from the original spec): **schema → logger → dogfood real data
 
 | Phase | Deliverable | Done when |
 |---|---|---|
-| **0 — Scaffold** | `shadcn create --template start` app (preset `b4aRKOtyXC`), repo layout per §8.2, Supabase clients + env, deploy pipeline to Vercel | app boots locally & on Vercel with themed shell + nav |
+| **0 — Scaffold** | `shadcn create --template start` app (preset `b4aRKOtyXC`), repo layout per §8.2, Supabase clients + env, deploy pipeline to Cloudflare Workers | app boots locally & on Cloudflare with themed shell + nav |
 | **1 — Schema** | Migrations 0001–0003 applied to cloud project; owner seeded; types generated; **SQL fixture tests written (§8.7 #1) + RLS check (#5)** | §7.6 verification + fixture tests pass; anon can read, only owner can write |
 | **2 — Logger** | `/login` + `/entry` complete per §5.3 (setup, big-button entry, chips, hotkeys, undo, optimistic sync, timeline, game/match end) + **tests §8.7 #2–4 (scoring parity, FIFO queue, state machine) and the Playwright golden path (#6)** | tests green; a full real match can be logged end-to-end, survives reload, lands correctly in the DB |
 | **3 — Dogfood** | Sam logs 1–2 real sessions | real data in prod; logger friction notes filed and fixed |
