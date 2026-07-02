@@ -1,0 +1,17 @@
+{
+  "name": "single-serve-fault",
+  "description": "Official single-serve rules (serves_per_point = 1): a fault on the first serve ends the point for the receiver and is attributed to the server. This data was unloggable before the house-rules migration.",
+  "targetScore": 11,
+  "tiebreak": "win_by_2",
+  "servesPerPoint": 1,
+  "rallies": [
+    { "server": "p1", "side": "left", "serveNumber": 1, "winner": "p2", "endReason": "serve_fault" },
+    { "server": "p2", "side": "left", "serveNumber": 1, "winner": "p2", "endReason": "ace", "shotCount": 1 },
+    { "server": "p2", "side": "right", "serveNumber": 1, "winner": "p1", "endReason": "winner", "shotCount": 6 }
+  ],
+  "expected": {
+    "runningScores": [[0, 1], [0, 2], [1, 2]],
+    "result": { "scoreP1": 1, "scoreP2": 2, "winner": "p2", "undecided": false },
+    "errors": [{ "rallyNumber": 1, "maker": "p1", "endReason": "serve_fault" }]
+  }
+}

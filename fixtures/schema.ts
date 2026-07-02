@@ -26,6 +26,8 @@ export const gameFixture = z.object({
   description: z.string(),
   targetScore: z.number().int().positive(),
   tiebreak: z.enum(["win_by_2", "sudden_death"]),
+  /** house rule (§7.7); omitted = 2, the default two-serve game */
+  servesPerPoint: z.union([z.literal(1), z.literal(2)]).optional(),
   rallies: z.array(fixtureRally).min(1),
   expected: z.object({
     /** [scoreP1, scoreP2] AFTER each rally, aligned with `rallies` */
