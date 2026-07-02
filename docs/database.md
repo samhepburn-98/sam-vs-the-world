@@ -114,8 +114,30 @@ raw tables:
 
 ## Migrations
 
+## Access model (RLS)
+
+**Public read, owner-only write** — enforced by the database, not the app:
+
+- Every table has `select` policies for `anon` + `authenticated` (`using (true)`) — the public
+  dashboard reads with the publishable key.
+- All writes (`insert`/`update`/`delete`) require `is_owner()`: the caller's `auth.uid()` must be in
+  the `app_admins` registry. `is_owner()` is `security definer` with an empty pinned `search_path`,
+  wrapped in `(select …)` inside policies so Postgres evaluates it once per statement.
+- This project auto-enables RLS on new `public` tables (Supabase's `rls_auto_enable` event trigger),
+  so tables are locked from birth; the policies are what *open* public reads and admit owner writes.
+- Views are `security_invoker`, so they inherit these policies rather than bypassing them.
+- One accepted advisor WARN: `is_owner()` stays executable by `authenticated` — required, since RLS
+  policies evaluate it as the querying role; it reveals only "am I the admin?".
+
+To grant the owner: create the auth user, then
+`insert into public.app_admins (user_id) values ('<auth-uid>');`
+
+## Migrations
+
 | version | contents |
 |---|---|
 | `20260702190340_enums_and_tables` | tables, enums, constraints, triggers |
 | `20260702212145_views` | the four derived views |
-| *(planned)* RLS policies · insight RPCs | see PROJECT_PLAN.md §7.3/§8.4 |
+| `20260702212656_rls_policies` | app_admins, is_owner(), public-read / owner-write policies |
+| `20260702212852_security_hardening` | pinned function search_paths, RPC exposure revokes (advisor lints) |
+| *(planned)* insight RPCs | see PROJECT_PLAN.md §8.4 |
