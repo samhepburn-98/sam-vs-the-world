@@ -100,16 +100,22 @@ The most likely data-entry bugs are *blocked by the database*, not policed by go
 - **First server is asked, never assumed** — match setup asks; each later game defaults to the
   previous game's winner as an editable suggestion.
 
-## What's derived (coming in the views migration)
+## The derivation layer (views)
 
-`rallies_scored` (running score per rally, lets carried), `game_results` (winner = whoever leads at
-the last rally actually played — deliberately rule-agnostic, so win-by-2 and sudden-death both just
-work), `match_results` (respects optional best-of format), `errors_attributed` (errors mapped to the
-player who made them). All `security_invoker`, all recomputed live from rallies.
+Four `security_invoker` views recompute everything live from rallies — the app reads these, not the
+raw tables:
+
+| view | what it computes | the trick |
+|---|---|---|
+| `rallies_scored` | every rally + the running score *after* it, plus derived `receiver_id` and page-level context (game_number, date, ball_type) | a windowed conditional `sum` per player: a **let contributes 0 to both**, so its row simply carries the prior score — no special-casing |
+| `game_results` | each game's final score + winner + `is_undecided` | **rule-agnostic**: winner = whoever leads at the last rally actually played. Win-by-2, sudden death, and casual play-on all just work, because the rules only decide *when you stop*, and that's encoded in which rallies exist |
+| `match_results` | games won per player + match winner | respects optional best-of `format` (clinch at `format/2 + 1`), plain majority for casual, NULL for ties/undecided; only decided games count |
+| `errors_attributed` | each `error`/`serve_fault` mapped to the player who made it | error-maker = the non-winner (the §Conventions rule, baked in so queries never re-derive it) |
 
 ## Migrations
 
 | version | contents |
 |---|---|
-| `20260702190340_enums_and_tables` | this document's schema |
-| *(planned)* views · RLS policies · insight RPCs | see PROJECT_PLAN.md §7.3/§8.4 |
+| `20260702190340_enums_and_tables` | tables, enums, constraints, triggers |
+| `20260702212145_views` | the four derived views |
+| *(planned)* RLS policies · insight RPCs | see PROJECT_PLAN.md §7.3/§8.4 |
