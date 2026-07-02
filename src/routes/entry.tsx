@@ -21,7 +21,7 @@ export const Route = createFileRoute("/entry")({
   component: EntryPage,
 })
 
-type Session = { matchId: string } | null
+type Session = { matchId: string; firstServerId?: string } | null
 
 function EntryPage() {
   const queryClient = useQueryClient()
@@ -59,6 +59,8 @@ function EntryPage() {
       <main className="container mx-auto max-w-2xl px-4 py-10">
         <LoggingShell
           matchId={session.matchId}
+          firstServerId={session.firstServerId}
+          queue={queue}
           players={players.data}
           onExit={() => {
             setSession(null)
@@ -87,7 +89,7 @@ function EntryPage() {
               return "Couldn't save the match — check your connection and try again."
             }
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
-            setSession({ matchId: plan.matchId })
+            setSession({ matchId: plan.matchId, firstServerId: input.firstServerId })
             return null
           }}
         />
