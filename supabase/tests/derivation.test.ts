@@ -40,11 +40,12 @@ let db: PGlite
 
 beforeAll(async () => {
   db = new PGlite()
-  // 0001 tables + 0002 views. RLS migrations (0003/0004) reference the auth
-  // schema and were verified against the live project in #8 — derivation
-  // correctness doesn't depend on them.
+  // 0001 tables + 0002 views + 0005 house rules. RLS migrations (0003/0004)
+  // reference the auth schema and were verified against the live project in
+  // #8 — derivation correctness doesn't depend on them.
   await db.exec(loadMigration("enums_and_tables"))
   await db.exec(loadMigration("views"))
+  await db.exec(loadMigration("house_rules"))
 })
 
 afterAll(async () => {
@@ -59,9 +60,9 @@ async function insertGame(f: GameFixture) {
   const [p1, p2] = players.rows.map((r) => r.id)
   const ids = { p1: p1, p2: p2 }
   const match = await db.query<{ id: string }>(
-    `insert into matches (player1_id, player2_id, target_score, tiebreak)
-     values ($1, $2, $3, $4) returning id`,
-    [ids.p1, ids.p2, f.targetScore, f.tiebreak],
+    `insert into matches (player1_id, player2_id, target_score, tiebreak, serves_per_point)
+     values ($1, $2, $3, $4, $5) returning id`,
+    [ids.p1, ids.p2, f.targetScore, f.tiebreak, f.servesPerPoint ?? 2],
   )
   const matchId = match.rows[0].id
   const game = await db.query<{ id: string }>(
