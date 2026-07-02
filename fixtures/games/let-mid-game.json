@@ -1,0 +1,16 @@
+{
+  "name": "let-mid-game",
+  "description": "A let occupies a rally slot but carries the prior score; the server keeps serving. Game left mid-play: winner = current leader, not undecided.",
+  "targetScore": 11,
+  "tiebreak": "win_by_2",
+  "rallies": [
+    { "server": "p1", "side": "left", "serveNumber": 1, "winner": "p1", "endReason": "winner", "shotCount": 4 },
+    { "server": "p1", "side": "right", "serveNumber": 1, "winner": null, "endReason": "let" },
+    { "server": "p1", "side": "right", "serveNumber": 1, "winner": "p2", "endReason": "stroke", "shotCount": 7 },
+    { "server": "p2", "side": "left", "serveNumber": 1, "winner": "p1", "endReason": "winner", "shotCount": 9 }
+  ],
+  "expected": {
+    "runningScores": [[1, 0], [1, 0], [1, 1], [2, 1]],
+    "result": { "scoreP1": 2, "scoreP2": 1, "winner": "p1", "undecided": false }
+  }
+}

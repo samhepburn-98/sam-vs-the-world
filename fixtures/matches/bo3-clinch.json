@@ -1,0 +1,7 @@
+{
+  "name": "bo3-clinch",
+  "description": "Best-of-3 clinches at 2 games; a third game never needs to exist.",
+  "format": 3,
+  "gameWinners": ["p1", "p1"],
+  "expected": { "gamesWonP1": 2, "gamesWonP2": 0, "matchWinner": "p1" }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "double-fault-and-errors",
+  "description": "A double fault (serve_fault on serve 2) gives the receiver the point and is attributed to the server. A point played on serve 2 that ends normally is NOT an error row (the first-serve fault is implicit). A tin is attributed to the non-winner with detail and forced intact.",
+  "targetScore": 11,
+  "tiebreak": "win_by_2",
+  "rallies": [
+    { "server": "p1", "side": "left", "serveNumber": 2, "winner": "p2", "endReason": "serve_fault" },
+    { "server": "p2", "side": "left", "serveNumber": 2, "winner": "p2", "endReason": "winner", "shotCount": 3 },
+    { "server": "p2", "side": "right", "serveNumber": 1, "winner": "p2", "endReason": "ace", "shotCount": 1 },
+    { "server": "p2", "side": "left", "serveNumber": 1, "winner": "p1", "endReason": "error", "errorDetail": "tin", "forced": true, "shotCount": 12 }
+  ],
+  "expected": {
+    "runningScores": [[0, 1], [0, 2], [0, 3], [1, 3]],
+    "result": { "scoreP1": 1, "scoreP2": 3, "winner": "p2", "undecided": false },
+    "errors": [
+      { "rallyNumber": 1, "maker": "p1", "endReason": "serve_fault" },
+      { "rallyNumber": 4, "maker": "p2", "endReason": "error" }
+    ]
+  }
+}
