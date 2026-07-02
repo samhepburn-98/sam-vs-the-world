@@ -4,10 +4,16 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import { PageStub } from "@/components/page-stub"
 import { SiteHeader } from "@/components/site-header"
+import { fetchUser } from "@/lib/auth/functions"
 
 import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
+  // Session context for the whole tree: header state + route guards (§8.5).
+  beforeLoad: async () => {
+    const user = await fetchUser()
+    return { user }
+  },
   head: () => ({
     meta: [
       {
@@ -37,6 +43,11 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+function Header() {
+  const { user } = Route.useRouteContext()
+  return <SiteHeader user={user} />
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -44,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <SiteHeader />
+        <Header />
         {children}
         <TanStackDevtools
           config={{

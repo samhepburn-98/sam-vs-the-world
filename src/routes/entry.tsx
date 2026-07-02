@@ -1,9 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
 import { PageStub } from "@/components/page-stub"
 
-// Auth guard (beforeLoad → /login) lands with #12 in phase 2.
 export const Route = createFileRoute("/entry")({
+  // UX gate only — RLS is the real lock (§8.5)
+  beforeLoad: ({ context }) => {
+    if (!context.user) throw redirect({ to: "/login" })
+  },
   component: EntryPage,
 })
 
