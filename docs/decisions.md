@@ -43,14 +43,16 @@ let-frequency countable and the rally numbering true to what happened. The let �
 biconditional, so the single most dangerous entry bug — a real rally saved without a winner, silently
 shifting every score after it — is impossible.
 
-## 7. Two-serve house rules are encoded as CHECKs
+## 7. Serve rules are per-match, enforced by a rule-aware trigger
 
-We play two serves. A point can therefore only *end* on a serve fault on the second serve
-(`serve_fault ⇒ serve_number = 2`), an ace is by definition won by the server, and a double fault by
-the receiver. These are single-row facts, so the DB enforces them; the logger auto-sets them so
-they're never manual. First-serve faults are never rows — they exist implicitly as points played on
-serve 2. **Lets don't reset serves** (house rule) — encoded only as the logger's default, so changing
-the rule later has zero schema or data impact.
+*(Amended by the house-rules migration — originally a two-serve CHECK.)* Serve rules are a match
+parameter (`serves_per_point`, default 2 — our game). In a two-serve match a point can only *end* on
+a second-serve fault; in an official single-serve match a first-serve fault ends the point. The
+enforcement lives in the rally-validation trigger, which reads the match's rules — the original CHECK
+made single-serve squash *unloggable*, which violated decision 13's principle. Ace ⇒ server wins and
+fault ⇒ receiver wins hold under any serve rule, so they remain plain CHECKs. First-serve faults in
+two-serve matches are never rows — they exist implicitly as points played on serve 2. Let/serve
+interaction (`let_resets_serve`, default false) is a logger default only, never data.
 
 ## 8. `shot_count` includes the serve; NULL means untagged
 
@@ -82,3 +84,15 @@ transaction.
 
 The dashboard is public by design; only the owner can log or edit. Row Level Security is the real
 lock — app-level auth guards are UX only. Lands in the RLS migration.
+
+## 13. House rules are match parameters, never baked-in assumptions
+
+The guiding test: **if a rule changes what data can exist, it must be a parameter now; if it only
+changes interpretation, it can be added later.** Rules live in three tiers — stored facts (rule-free),
+derivation (rule-agnostic where it counts), logger behaviour (parameterized) — and only the data tier
+is unrecoverable. Hence the per-match house-rule columns (format, target score, tiebreak, serves per
+point, let-resets-serve, ball), defaulted to our rules so the common case configures nothing.
+`serves_per_point` locks once games exist. Explicit non-goal: English hand-in/hand-out scoring
+changes score *derivation* itself and isn't supported by the views — but the server is stored on
+every rally, so a future view could derive it from the same data. Locked out of the views, not the
+data.

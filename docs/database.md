@@ -16,9 +16,12 @@ players ──< matches >── players        a match links two players
               └──< games ──< rallies   a match has games; a game has rallies
 ```
 
-- **match** — a session of games between two players on a date. A best-of format is *optional*
-  (`format` = 3/5, or NULL for a casual session). Carries the house-rule context: `target_score`
-  (default 11), `tiebreak` hint (`win_by_2`/`sudden_death`), `ball_type`, venue, notes.
+- **match** — a session of games between two players on a date. Carries the **house rules** — the
+  per-match rule parameters (nothing about how you play is baked into the app): `format` (NULL =
+  casual, or best-of any odd 1–9) · `target_score` (default 11) · `tiebreak` hint
+  (`win_by_2`/`sudden_death`) · `serves_per_point` (1 or 2, default 2) · `let_resets_serve`
+  (logger hint, default false) · `ball_type` — plus venue and notes. Defaults are Sam's rules, so
+  the common case configures nothing.
 - **game** — one race to the target. Just groups and orders rallies; its winner and final score are
   derived, not stored.
 - **rally** — one point. The atomic unit.
@@ -75,11 +78,11 @@ The most likely data-entry bugs are *blocked by the database*, not policed by go
 | guard | protects against |
 |---|---|
 | `let ⇔ winner IS NULL` (biconditional CHECK) | a non-let rally silently missing its winner — which would corrupt every running score |
-| `serve_fault ⇒ serve_number = 2` | recording a point as ending on a first-serve fault (impossible under two serves) |
-| `ace ⇒ winner = server` · `serve_fault ⇒ winner = receiver` | mis-tagged winners poisoning serve stats and error attribution |
+| **rule-aware serve validation** (trigger reads the match's `serves_per_point`): `serve_number ≤ serves_per_point`; two-serve matches require `serve_fault ⇒ serve_number = 2` | serve data that contradicts the match's own rules — while keeping official single-serve squash loggable |
+| `ace ⇒ winner = server` · `serve_fault ⇒ winner = receiver` | mis-tagged winners poisoning serve stats and error attribution (hold under any serve rule, so they stay CHECKs) |
 | `error_detail`/`forced`/`shot_type` scope CHECKs | detail fields on rally types they don't apply to |
 | trigger: rally's server & winner must be players of the match | orphaned stats from a stray UUID |
-| trigger: match players immutable once games exist | silently orphaning every rally's winner/server mapping |
+| trigger: match players **and `serves_per_point`** immutable once games exist | silently orphaning rally mappings / invalidating logged serve data |
 | `player1 ≠ player2` · `format ∈ {3,5}` · positive counters | nonsense rows |
 | `updated_at` triggers on all tables | edit auditability |
 
@@ -89,9 +92,9 @@ The most likely data-entry bugs are *blocked by the database*, not policed by go
   are not errors.
 - **Lets** occupy a `rally_number` (countable for let-frequency) but are excluded from score, serve
   and streak calculations.
-- **Lets don't reset serves** (house rule): the replayed point keeps its `serve_number`. This lives
-  only in the logger's suggested default — the DB stores what actually happened — so a future rule
-  change is a one-line default change with zero data impact.
+- **Let/serve interaction is per-match** (`let_resets_serve`, default false: the replayed point keeps
+  its `serve_number`). Lives only in the logger's suggested default — the DB stores what actually
+  happened — so it never touches data.
 - **Edits never cascade serve context.** The match already happened: editing a rally's winner
   corrects *what was recorded*, not what physically followed. Stored `server_id`/`serve_side` on
   later rallies stay as logged; only derived values recompute.
@@ -140,4 +143,5 @@ To grant the owner: create the auth user, then
 | `20260702212145_views` | the four derived views |
 | `20260702212656_rls_policies` | app_admins, is_owner(), public-read / owner-write policies |
 | `20260702212852_security_hardening` | pinned function search_paths, RPC exposure revokes (advisor lints) |
+| `20260702221549_house_rules` | serves_per_point + let_resets_serve, format odd 1–9, rule-aware serve trigger |
 | *(planned)* insight RPCs | see PROJECT_PLAN.md §8.4 |
