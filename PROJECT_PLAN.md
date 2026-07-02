@@ -153,7 +153,9 @@ drills to the underlying rally set → the match (L3) → the rally (L4).
 denominators exclude lets**, since a let + its replay would otherwise double-count one serve):
 - Serve win % = decided rallies won as server ÷ decided rallies served.
 - **First-serve-fault rate** = decided rallies with `serve_number = 2` ÷ decided rallies served
-  (first-serve faults are never rows — they exist implicitly as points played on serve 2).
+  (first-serve faults are never rows — they exist implicitly as points played on serve 2). **Only
+  meaningful for `serves_per_point = 2` matches — the RPC computes serve-number stats over those
+  matches only** (§7.7).
 - **Double faults** = `end_reason = 'serve_fault'` rows (always second serve, by CHECK).
 - Plus: aces, points won on serve vs return, 1st vs 2nd-serve win %, **win rate by serve side**
   (court visual). Optional trend over time.
@@ -393,8 +395,10 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
 
 **Phase A — match setup:**
 - **New match:** compact form — players (two `Combobox`es + inline "new player"), date (default
-  today), venue, format (casual/Bo3/Bo5), ball type, tiebreak, **who serves first**. Client-validated
-  (two *distinct* players required; the DB CHECK backstops). → Start logging.
+  today), venue, **who serves first**, and a grouped **"House rules" section** (§7.7: format · target
+  score · tiebreak · serves per point · let-resets-serve · ball type) whose defaults are Sam's rules —
+  zero extra taps for the common case. Client-validated (two *distinct* players required; the DB CHECK
+  backstops). → Start logging.
 - **Edit an existing match:** a recent-matches list; picking one reopens it in the logger to append
   games/rallies or fix entries. **There is no "in progress" state — every match is considered
   finished as logged**, and editing is always available. (Also reachable from `/matches/[id]` via an
@@ -434,9 +438,11 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
   winner/error/stroke/ace/fault · `t/o/i/b/n/x` = error details · `g` = forced toggle · `q` = toggle
   1st/2nd serve · `z` = toggle serve box · digits = shot count · `enter` = save · `u` or `cmd+z` =
   undo · `?` = hotkey cheat-sheet overlay.
-- **Serve-fault consistency:** selecting *serve fault* auto-sets serve number to 2 (under the two-serve
-  house rule a point can only *end* on a second-serve fault — a first-serve fault just means the point
-  is played on the second serve, toggled with `q`). The DB enforces the same rule (§7).
+- **Serve-fault consistency (rule-aware):** in a two-serve match, selecting *serve fault* auto-sets
+  serve number to 2 (a point can only *end* on a second-serve fault; a first-serve fault just means
+  the point is played on serve 2, toggled with `q`). In a single-serve match the `q` toggle is hidden
+  and a fault on serve 1 ends the point. The rally validation trigger enforces the same per-match
+  rules (§7.7).
 - **Centre rally timeline:** newest at top, two-sided (each rally on its winner's side), running score,
   end-reason icon, serve chips. Click any row → inline edit (fix mistakes before/after save). This is
   the same visual language as the match-detail timeline (§5.2).
@@ -555,9 +561,11 @@ FKs live on the child pointing up. Deleting a match cascades to its games and ra
 **players** — `id` uuid PK · `name` text · `handedness` enum(left/right) nullable · `created_at`/`updated_at`.
 
 **matches** — `id` · `date` · `player1_id`/`player2_id` (FK players, must differ) · `venue` nullable ·
-`format` smallint nullable (null=casual, 3/5=best-of) · `target_score` smallint default 11 ·
-`tiebreak` enum(win_by_2/sudden_death) default win_by_2 (form hint only) · `ball_type` enum nullable
-(blue/red/yellow/double_yellow) · `notes` nullable · timestamps.
+`format` smallint nullable (null=casual; any odd 1–9 = best-of) · `target_score` smallint default 11 ·
+`tiebreak` enum(win_by_2/sudden_death) default win_by_2 (form hint only) · `serves_per_point`
+smallint 1|2 default 2 · `let_resets_serve` bool default false (logger hint) · `ball_type` enum
+nullable (blue/red/yellow/double_yellow) · `notes` nullable · timestamps. The rule-bearing columns
+are collectively the match's **house rules** (§7.7).
 
 **games** — `id` · `match_id` (FK, cascade) · `game_number` smallint (unique within match) · timestamps.
 
@@ -581,11 +589,14 @@ FKs live on the child pointing up. Deleting a match cascades to its games and ra
 - Lets: `winner_id IS NULL`, no score change, but still get a `rally_number`; excluded from
   running-score & streak logic, still countable for let-frequency.
 - Ace explicit (`end_reason='ace'`, winner = server). Double fault = `serve_number=2 AND serve_fault`.
-- **A point can only end on a serve fault on the second serve** (two-serve house rule) — so
-  `serve_fault ⇒ serve_number = 2`, enforced by CHECK and auto-set in the logger.
-- **Lets don't reset serves** (house rule): the replayed point keeps the same `serve_number`. This rule
-  lives ONLY in the logger's suggested default — the DB just stores what happened — so if the house
-  rule ever changes, it's a one-line default change, no schema or data impact.
+- **Serve rules are per-match** (`serves_per_point`, §7.7): in a two-serve match a point can only end
+  on a serve fault on the second serve (`serve_fault ⇒ serve_number = 2`); in a single-serve match a
+  first-serve fault ends the point and `serve_number = 2` is invalid. Enforced by the rally validation
+  trigger (which reads the match's rules) and auto-set in the logger. Ace ⇒ server wins and
+  serve_fault ⇒ receiver wins stay as plain CHECKs — they hold under any serve rule.
+- **Let/serve interaction is per-match** (`let_resets_serve`, default false — Sam's rule: the replayed
+  point keeps its `serve_number`). Drives only the logger's suggested default — the DB stores what
+  happened — so changing it never touches schema or data.
 - `not_up` = hit it but didn't reach the front wall (short); `double_bounce` = didn't get to the ball.
 - **Edits never cascade serve context.** The match already happened; editing a rally's winner corrects
   *what was recorded*, not what physically followed — stored `server_id`/`serve_side` on later rallies
@@ -605,8 +616,12 @@ FKs live on the child pointing up. Deleting a match cascades to its games and ra
 
 ### 7.3 SQL — migration files
 
-Four migrations under `supabase/migrations/`: the three below (validated, production-correct Postgres,
-Supabase PG15+) plus `0004_insight_rpcs.sql` (specified in §8.4, written in Phase 5).
+The three foundation migrations below (validated, production-correct Postgres, applied — real files
+are timestamp-named). Shipped after them: a security-hardening migration (advisor lints: pinned
+function search_paths, RPC exposure revokes) and the **house-rules migration** (§7.7, which
+supersedes the `rallies_fault_second_serve` CHECK shown in 0001 with trigger-based per-match
+enforcement). Still to come: the insight RPCs (§8.4, Phase 5). The SQL blocks below are the plan of
+record as originally validated; `supabase/migrations/` is the shipped truth.
 
 #### `0001_enums_and_tables.sql`
 
@@ -891,6 +906,39 @@ fault = the `serve_fault` row); confirm all §7.2 CHECKs and both triggers rejec
 non-let, ace with non-server winner, player change on a match with games, out-of-match player);
 confirm RLS (anon reads, only owner writes).
 
+### 7.7 House rules — per-match parameters, not baked-in assumptions
+
+Rules live in three tiers, and only the bottom tier is unrecoverable:
+
+1. **Stored facts (rally rows)** — rule-free: server, serve number, side, winner, end reason record
+   *what happened*, never what the rules said should happen. Data survives any rule change.
+2. **Derivation (views)** — rule-agnostic where it counts (winner = leader at last rally).
+3. **Logger behaviour** — where rules act (suggestions, auto-sets, the game-over banner), always
+   parameterized by the match's house-rule columns.
+
+**Guiding principle:** *if a rule changes what data exists, it must be capturable now; if it only
+changes interpretation, it can be added later.* The one place the schema violated this was the
+two-serve assumption — a CHECK made official single-serve squash **unloggable** (a first-serve fault
+that ends the point would be rejected). Hence:
+
+**The house-rule columns on `matches`:** `format` (casual or best-of, odd 1–9) · `target_score` ·
+`tiebreak` (win_by_2 / sudden_death) · **`serves_per_point`** (1 | 2, default 2) ·
+**`let_resets_serve`** (default false) · `ball_type`. Setup (§5.3 Phase A) groups these as a "House
+rules" section whose defaults are Sam's rules — the common case costs zero extra taps.
+
+**Enforcement moves with the rules:** rule-dependent guards live in the rally validation trigger
+(which already joins the match): `serve_number ≤ serves_per_point`, and for two-serve matches
+`serve_fault ⇒ serve_number = 2`. Rule-independent guards (ace ⇒ server wins, fault ⇒ receiver wins,
+let ⇔ null winner) remain plain CHECKs. `serves_per_point` becomes immutable once the match has games
+(same guard family as player immutability — changing it could invalidate logged rallies).
+
+**Analysis honesty:** the "first-serve-fault rate" derivation (points played on serve 2) only means
+something when `serves_per_point = 2`; serve-stat RPCs segment by it (§8.4, #23).
+
+**Explicit non-goal:** old-school English scoring (hand-in/hand-out, only the server scores) changes
+*score derivation itself* and is not supported by the views. Not a data lock-in: the rally rows store
+the server for every point, so a future view could derive English scoring from the same data.
+
 ---
 
 ## 8. Tech architecture
@@ -1051,7 +1099,7 @@ Guiding rule (from the original spec): **schema → logger → dogfood real data
 |---|---|---|
 | **0 — Scaffold** | `shadcn create --template start` app (preset `b4aRKOtyXC`), repo layout per §8.2, Supabase clients + env, deploy pipeline to Cloudflare Workers | app boots locally & on Cloudflare with themed shell + nav |
 | **1 — Schema** | Migrations 0001–0003 applied to cloud project; owner seeded; types generated; **SQL fixture tests written (§8.7 #1) + RLS check (#5)** | §7.6 verification + fixture tests pass; anon can read, only owner can write |
-| **2 — Logger** | `/login` + `/entry` complete per §5.3 (setup, big-button entry, chips, hotkeys, undo, optimistic sync, timeline, game/match end) + **tests §8.7 #2–4 (scoring parity, FIFO queue, state machine) and the Playwright golden path (#6)** | tests green; a full real match can be logged end-to-end, survives reload, lands correctly in the DB |
+| **2 — Logger** | **House-rules migration first** (§7.7: serves_per_point, let_resets_serve, format relaxation, trigger-based serve rules), then `/login` + `/entry` complete per §5.3 (setup incl. house-rules section, big-button entry, chips, hotkeys, undo, optimistic sync, timeline, game/match end) + **tests §8.7 #2–4 (scoring parity, FIFO queue, state machine) and the Playwright golden path (#6)** | tests green; a full real match can be logged end-to-end, survives reload, lands correctly in the DB |
 | **3 — Dogfood** | Sam logs 1–2 real sessions | real data in prod; logger friction notes filed and fixed |
 | **4 — Manage** | `/manage` tables + owner editing per §5.4 | any record can be found, edited, deleted; derived stats recompute |
 | **5 — Insight RPCs** | Migration 0004: `player_headline(s)`, `serve_stats`, `error_profile`, `rally_lengths`, `momentum`, `h2h` + `*_rallies` companions (+ filters) | **SQL fixture tests extended to every RPC** (§8.7 #1, incl. filter params + denominators); numbers spot-checked against the real logged data |
