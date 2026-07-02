@@ -15,11 +15,14 @@ match winners, head-to-head records, serve stats, comebacks, streaks — is deri
 - [shadcn/ui](https://ui.shadcn.com) + Tailwind 4 — themed from a single preset
 - Recharts, TanStack Query, Vitest + Playwright, Cloudflare Workers
 
-## Project brief
+## Project brief & docs
 
 The full specification — data model, insight definitions, page specs, architecture, test strategy,
 and roadmap — lives in [PROJECT_PLAN.md](PROJECT_PLAN.md). Work is organised as
 [issues](../../issues) grouped by phase milestones; one issue = one PR.
+
+Standalone reference docs live in [docs/](docs/): [the database explained](docs/database.md) and
+[the decision log](docs/decisions.md).
 
 ## Development
 
