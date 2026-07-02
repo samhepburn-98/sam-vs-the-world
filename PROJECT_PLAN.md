@@ -276,7 +276,8 @@ Re-theming later is one command: `npx shadcn@latest apply <code> --only theme,fo
 ### 4.7 shadcn component map
 
 - Nav: `NavigationMenu` (top bar), `Breadcrumb`. Data: `Card`, `Table`, `Badge`, `Avatar`, `Chart`.
-- Entry form: `Field` / `FieldGroup`, **`ToggleGroup`** for outcome/side selectors, `Select`, `Input`.
+- Entry form: `Field` / `FieldGroup`, **`ToggleGroup`** for outcome/side selectors, `Select`, `Input` —
+  all forms wired through **React Hook Form + zodResolver** (schemas from `lib/schemas/`, §8.4).
 - Overlays: `Sheet` / `Drawer` for rally detail, `Dialog` for confirms, `Command` for quick nav.
 - Feedback: `Sonner` toast (optimistic-save confirmation), `Skeleton` (loading), `Empty`
   (not-enough-data states from §3.5).
@@ -903,6 +904,8 @@ confirm RLS (anon reads, only owner writes).
 - **TanStack Query everywhere** — one data paradigm, client and server; **Recharts** via shadcn
   `Chart`; **Cloudflare Workers** hosting (free tier; official TanStack partner; SSR in workerd via
   the Cloudflare Vite plugin).
+- **Zod** validates every data boundary at runtime (RPC responses, form submissions); **React Hook
+  Form** (+ `@hookform/resolvers/zod`) drives all forms.
 
 **Why Start (recorded rationale):** one mental model instead of Next's RSC/client split; explicit
 caching via Query (`staleTime`) instead of layered framework caches; **typed search params** (the
@@ -923,7 +926,10 @@ src/
     entry.tsx               the logger (beforeLoad auth guard)
   lib/
     supabase/               browser + server clients (@supabase/ssr, cookie sessions)
-    queries/                all reads: queryOptions per view/RPC, one place
+    schemas/                zod domain schemas — ONE file per concept (player, match, game, rally,
+                            serve-stats…); TS types come from z.infer, so schema = type = validator
+    queries/                one request per file (bulletproof-react style): fetcher + queryOptions +
+                            useXxx hook colocated; mutations same pattern (use-create-rally.ts)
     scoring/                logger-only live logic (score, server suggestion, game-over) — pure TS, unit-tested
   components/
     ui/ (shadcn) · charts/ · court/ · rally-timeline/ · logger/
@@ -961,6 +967,24 @@ instead of a framework layer).
   Front-end calls `supabase.rpc(...)` and renders the finished numbers. One source of truth; thin client.
 - RPCs are `security invoker`, read-only, `execute` granted to `anon`/`authenticated`, and return
   denominators alongside every rate (§3.5).
+
+**Client conventions — zod at the boundary, one request per hook file** (modelled on
+[bulletproof-react](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)):
+
+- **Every RPC response is parsed with a zod schema** before it enters the app — the generated DB types
+  (§8.6) type the *call*, zod validates the *data* at runtime. A malformed response fails loudly at
+  the boundary, not as a rendering bug three components deep.
+- **Shared concepts share ONE schema.** If multiple RPCs return the same concept (a game result, a
+  match summary, a rally), each parses with the *same* schema from `lib/schemas/` — never per-RPC
+  duplicates. TS types are `z.infer` of these schemas, so schema, type, and validator can't drift.
+- **One request per hook file** in `lib/queries/`: e.g. `get-serve-stats.ts` exports the fetcher, its
+  `queryOptions`, and the `useServeStats()` hook, colocated. Components consume hooks only — nothing
+  outside `lib/queries/` calls `supabase` directly.
+- **Mutations follow the same pattern** (`use-create-rally.ts` …), with inputs validated by the shared
+  schemas before submission.
+- **All forms use React Hook Form + `zodResolver`** with schemas from `lib/schemas/` — match setup
+  (§5.3 Phase A), login, and every manage edit sheet (§5.4) share one validation source with the API
+  layer.
 - **Sole exception:** the logger's live score / server-suggestion / game-over detection runs between
   keystrokes, so it lives in `lib/scoring/` TS (mirroring the SQL semantics; unit tests pin the two
   implementations together — same fixtures as §7.6).
