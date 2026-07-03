@@ -1,3 +1,5 @@
+import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -90,12 +92,21 @@ export function DataTable<T>({
                   {col.sortable ? (
                     <button
                       type="button"
-                      className="hover:text-foreground inline-flex cursor-pointer items-center gap-1"
+                      className="hover:text-foreground group inline-flex cursor-pointer items-center gap-1"
                       onClick={() => onSort(col.key)}
                     >
                       {col.label}
-                      {sort.column === col.key && (
-                        <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>
+                      {sort.column === col.key ? (
+                        sort.dir === "asc" ? (
+                          <ArrowUpIcon className="size-3" aria-hidden />
+                        ) : (
+                          <ArrowDownIcon className="size-3" aria-hidden />
+                        )
+                      ) : (
+                        <ChevronsUpDownIcon
+                          className="size-3 opacity-0 transition-opacity group-hover:opacity-40"
+                          aria-hidden
+                        />
                       )}
                     </button>
                   ) : (
