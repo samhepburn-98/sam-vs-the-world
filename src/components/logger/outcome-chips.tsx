@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -43,6 +45,25 @@ const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
   double_bounce: "Dbl bounce",
 }
 
+// one-line reminders (§2 definitions) — surfaced by the ? button and on hover
+const END_REASON_HELP: Record<EndReason, string> = {
+  winner: "clean winning shot the opponent couldn't return",
+  error: "the loser hit it down or out — pick the detail below",
+  stroke: "point awarded for interference; nobody hit an error",
+  let: "rally replayed — no point either way",
+  ace: "unreturnable serve; the server wins the point outright",
+  serve_fault: "the serve itself ended the point (2nd-serve fault = double fault)",
+}
+
+const ERROR_DETAIL_HELP: Record<ErrorDetail, string> = {
+  tin: "hit the tin",
+  out_top: "out above the front-wall line",
+  out_side: "out on a side wall",
+  out_back: "out at the back",
+  not_up: "reached it, but it never made the front wall",
+  double_bounce: "didn't get there — second bounce (or missed it)",
+}
+
 interface OutcomeChipsProps {
   draft: RallyDraft
   winnerName: string
@@ -66,6 +87,7 @@ export function OutcomeChips({
   onSave,
   onCancel,
 }: OutcomeChipsProps) {
+  const [glossaryOpen, setGlossaryOpen] = useState(false)
   return (
     <section
       aria-label="How the rally ended"
@@ -85,14 +107,48 @@ export function OutcomeChips({
         >
           {(["winner", "error", "stroke", "ace", "serve_fault"] as const).map(
             (r) => (
-              <ToggleGroupItem key={r} value={r}>
+              <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
                 <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
                 {END_REASON_LABELS[r]}
               </ToggleGroupItem>
             ),
           )}
         </ToggleGroup>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="What do these mean?"
+          aria-expanded={glossaryOpen}
+          className="text-muted-foreground ml-auto size-7 rounded-full p-0"
+          onClick={() => setGlossaryOpen((open) => !open)}
+        >
+          ?
+        </Button>
       </div>
+
+      {glossaryOpen && (
+        <dl className="text-muted-foreground grid gap-x-6 gap-y-1 rounded-md border border-dashed p-3 text-xs sm:grid-cols-2">
+          {(["winner", "error", "stroke", "ace", "serve_fault"] as const).map(
+            (r) => (
+              <div key={r} className="flex gap-1.5">
+                <dt className="text-foreground shrink-0 font-medium">
+                  {END_REASON_LABELS[r]}:
+                </dt>
+                <dd>{END_REASON_HELP[r]}</dd>
+              </div>
+            ),
+          )}
+          {Constants.public.Enums.error_detail.map((d) => (
+            <div key={d} className="flex gap-1.5">
+              <dt className="text-foreground shrink-0 font-medium">
+                {ERROR_DETAIL_LABELS[d]}:
+              </dt>
+              <dd>{ERROR_DETAIL_HELP[d]}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
 
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
@@ -107,7 +163,7 @@ export function OutcomeChips({
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
           >
             {Constants.public.Enums.error_detail.map((d) => (
-              <ToggleGroupItem key={d} value={d}>
+              <ToggleGroupItem key={d} value={d} title={ERROR_DETAIL_HELP[d]}>
                 <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
                 {ERROR_DETAIL_LABELS[d]}
               </ToggleGroupItem>
