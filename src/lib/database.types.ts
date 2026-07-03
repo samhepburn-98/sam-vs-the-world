@@ -438,6 +438,90 @@ export type Database = {
       }
     }
     Functions: {
+      filtered_games: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          match_id: string
+          game_id: string
+          game_number: number
+          date: string
+          created_at: string
+          opponent_id: string
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          player_score: number
+          opponent_score: number
+          is_undecided: boolean
+          won: boolean | null
+        }>
+      }
+      filtered_matches: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          match_id: string
+          date: string
+          created_at: string
+          opponent_id: string
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          player_games: number
+          opponent_games: number
+          winner_id: string | null
+          won: boolean | null
+        }>
+      }
+      filtered_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
+      h2h: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_player1_id: string
+          p_player2_id: string
+        }
+        Returns: Array<{
+          games_won_p1: number
+          games_won_p2: number
+          games_decided: number
+          matches_won_p1: number
+          matches_won_p2: number
+          matches_decided: number
+          match_history: Json
+        }>
+      }
+      h2h_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_player1_id: string
+          p_player2_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
       // Deviates from `supabase gen types`: the generator can't see that the
       // plpgsql params accept null — a let insert passes p_winner_id: null,
       // and RallyRow passes explicit nulls for the optional details. Keep
@@ -460,6 +544,38 @@ export type Database = {
         Returns: string
       }
       is_owner: { Args: never; Returns: boolean }
+      player_headline: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          player_id: string
+          games_won: number
+          games_decided: number
+          matches_won: number
+          matches_decided: number
+          signature_trait: string | null
+          recent_games: Json
+        }>
+      }
+      players_headline: {
+        Args: never
+        Returns: Array<{
+          player_id: string
+          name: string
+          handedness: Database["public"]["Enums"]["handedness"] | null
+          games_won: number
+          games_decided: number
+          matches_won: number
+          matches_decided: number
+          signature_trait: string | null
+          recent_games: Json
+        }>
+      }
     }
     Enums: {
       ball_type: "blue" | "red" | "yellow" | "double_yellow"

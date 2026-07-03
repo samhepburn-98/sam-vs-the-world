@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { endReason, errorDetail, serveSide, shotType } from "./enums"
+import { ballType, endReason, errorDetail, serveSide, shotType } from "./enums"
 
 /** A raw rally row as stored (summary level — §8.4 naming). */
 export const rallySummary = z.object({
@@ -47,3 +47,21 @@ export const rallyDbRowWithGame = rallyDbRow.extend({
 })
 
 export type RallyDbRowWithGame = z.infer<typeof rallyDbRowWithGame>
+
+/** A `rallies_scored` view row — the stored rally plus its derived running
+ *  score and match context. What every `*_rallies` drill-through companion
+ *  RPC returns (§8.4). */
+export const rallyScored = rallySummary.extend({
+  match_id: z.string().uuid(),
+  game_number: z.number().int(),
+  date: z.string(),
+  ball_type: ballType.nullable(),
+  player1_id: z.string().uuid(),
+  player2_id: z.string().uuid(),
+  receiver_id: z.string().uuid(),
+  is_let: z.boolean(),
+  score_p1: z.number().int(),
+  score_p2: z.number().int(),
+})
+
+export type RallyScored = z.infer<typeof rallyScored>
