@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouterState,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
@@ -60,6 +61,23 @@ function Header() {
   return <SiteHeader user={user} />
 }
 
+// Soft route transition (§4.8): a quiet fade-in on the incoming page, keyed by
+// path so it retriggers on every navigation. motion-safe only, so it degrades
+// to an instant swap under prefers-reduced-motion — and it's a plain CSS
+// animation, not the native view-transition API (which blanks Start's
+// full-document hydration on load).
+function RouteFade({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  return (
+    <div
+      key={pathname}
+      className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+    >
+      {children}
+    </div>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -68,7 +86,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Header />
-        {children}
+        <RouteFade>{children}</RouteFade>
         <TanStackDevtools
           config={{
             position: "bottom-right",

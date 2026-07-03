@@ -10,6 +10,7 @@ import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 import { CompareShowcase } from "@/features/dashboard/components/compare-showcase"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
+import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Badge } from "@/components/ui/badge"
 import {
   Empty,
@@ -145,6 +146,7 @@ function ComparePage() {
       {selected.length < 2 ? (
         <Empty>
           <EmptyHeader>
+            <CourtEmptyMedia />
             <EmptyTitle className="font-heading">
               Pick two players
             </EmptyTitle>

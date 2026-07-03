@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
 import { humanise } from "@/features/dashboard/lib/humanise"
+import { CourtEmptyMedia } from "@/components/court/court-empty"
 import {
   Empty,
   EmptyDescription,
@@ -37,6 +38,7 @@ export function RallyTable({
     return (
       <Empty>
         <EmptyHeader>
+          <CourtEmptyMedia />
           <EmptyTitle className="font-heading">No rallies yet</EmptyTitle>
           <EmptyDescription>
             Rallies behind this stat appear here once there are any to show.

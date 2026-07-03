@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
 
+import { CountUp } from "@/components/count-up"
 import { Button } from "@/components/ui/button"
 import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
 import { cn } from "@/lib/utils"
@@ -66,8 +67,11 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
         {enough ? (
           // the denominator is carried by the W–L record below, so the rate
           // stands alone here without repeating "of N"
-          <p className="text-3xl font-bold tabular-nums">
-            {Math.round((games_won / games_decided) * 100)}%
+          <p className="text-3xl font-bold">
+            <CountUp
+              value={Math.round((games_won / games_decided) * 100)}
+              suffix="%"
+            />
           </p>
         ) : (
           <p className="text-muted-foreground text-sm">
