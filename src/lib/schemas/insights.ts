@@ -132,6 +132,59 @@ export const errorProfile = z.object({
 
 export type ErrorProfile = z.infer<typeof errorProfile>
 
+/** `rally_lengths(...)` — average + longest over decided rallies with a
+ *  tagged length ≥ 1 (untagged and 0-shot double faults excluded), and the
+ *  three histogram buckets each with its win count. `avg_length` is null
+ *  when there are no counted rallies. */
+export const rallyLengths = z.object({
+  total_rallies: z.number().int(),
+  avg_length: z.number().nullable(),
+  longest: z.number().int(),
+  short_rallies: z.number().int(),
+  short_wins: z.number().int(),
+  medium_rallies: z.number().int(),
+  medium_wins: z.number().int(),
+  long_rallies: z.number().int(),
+  long_wins: z.number().int(),
+})
+
+export type RallyLengths = z.infer<typeof rallyLengths>
+
+/** The length bucket a drill-through targets — matches the RPC's p_bucket. */
+export const lengthBucket = z.enum(["short", "medium", "long"])
+export type LengthBucket = z.infer<typeof lengthBucket>
+
+/** One entry of `momentum.comeback_games`, date-ascending — a game the
+ *  player trailed by `max_deficit` and still won. */
+export const comebackGame = z.object({
+  game_id: z.string().uuid(),
+  match_id: z.string().uuid(),
+  date: z.string(),
+  max_deficit: z.number().int(),
+  player_score: z.number().int(),
+  opponent_score: z.number().int(),
+})
+
+export type ComebackGame = z.infer<typeof comebackGame>
+
+/** `momentum(...)` — comebacks, the longest within-game win streak, and the
+ *  phase win-share bands (each a wins/rallies pair). `longest_streak_game_id`
+ *  is null when no rally has been won yet. */
+export const momentum = z.object({
+  comebacks: z.number().int(),
+  longest_streak: z.number().int(),
+  longest_streak_game_id: z.string().uuid().nullable(),
+  early_rallies: z.number().int(),
+  early_wins: z.number().int(),
+  mid_rallies: z.number().int(),
+  mid_wins: z.number().int(),
+  close_rallies: z.number().int(),
+  close_wins: z.number().int(),
+  comeback_games: z.array(comebackGame),
+})
+
+export type Momentum = z.infer<typeof momentum>
+
 /** The cross-cutting filters every insight RPC takes (§3.6). */
 export const insightFilters = z.object({
   opponentId: z.string().uuid().nullish(),

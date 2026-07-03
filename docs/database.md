@@ -145,7 +145,7 @@ To grant the owner: create the auth user, then
 | `20260703143000_insert_rally_at` | transactional mid-game insert (see below) |
 | `20260703180000_insights_headline_h2h` | 0004a: shared filter helpers, player_headline(s), h2h (+ companion) — see below |
 | `20260703200000_serve_stats_error_profile` | 0004b: serve_stats + error_profile (+ companions) |
-| *(planned)* 0004c insight RPCs | rally_lengths, momentum — PROJECT_PLAN.md §8.4 |
+| `20260703220000_rally_lengths_momentum` | 0004c: rally_lengths + momentum (+ companions) |
 
 ### `insert_rally_at(...)` — the one write that needs a transaction
 
@@ -179,6 +179,10 @@ can never drift from the number above it.
 | `serve_rallies(player_id, …filters)` | the decided rallies the player served — serve_stats' outermost denominator |
 | `error_profile(player_id, …filters)` | error counts (error-maker = non-winner over `error` + `serve_fault`), detail split, forced / unforced / **untagged** three-way (over `error` rows only — a serve_fault can never carry a forced tag), per-match trend (jsonb) |
 | `error_rallies(player_id, …filters)` | the error rows behind those counts |
+| `rally_lengths(player_id, …filters)` | average + longest + the 1–3 / 4–8 / 9+ histogram buckets, each with a win count. Over decided rallies with `shot_count >= 1` — untagged (null) and 0-shot double faults excluded, so the buckets partition the average |
+| `rally_length_rallies(player_id, …filters, bucket)` | the rallies in one bucket (`short`/`medium`/`long`, null = all) |
+| `momentum(player_id, …filters, deficit)` | comeback count (trailed by ≥ `deficit`, default 4, then won), longest within-game win streak (+ its game, lets excluded), phase win-share bands (leading score after each rally, boundaries `round(4·target/11)` / `round(8·target/11)`), and the comeback list (jsonb) |
+| `comeback_rallies(player_id, …filters, deficit)` | every rally of the comeback games — one momentum chart each |
 
 The jsonb payloads are pinned by zod schemas in `src/lib/schemas/insights.ts`
 — the generated DB type says `Json`, the schema turns it into a real type at
