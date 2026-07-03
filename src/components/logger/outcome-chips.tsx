@@ -74,9 +74,21 @@ export function OutcomeChips({
       aria-label="How the rally ended"
       className="bg-card flex flex-col gap-3 rounded-lg border p-4"
     >
-      <p className="text-sm">
-        Point to <span className="font-bold">{winnerName}</span>
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm">
+          Point to <span className="font-bold">{winnerName}</span>
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="What do these mean?"
+          className="text-muted-foreground size-7 rounded-full p-0"
+          onClick={onOpenGlossary}
+        >
+          ?
+        </Button>
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground w-12 shrink-0 text-xs">how</span>
         <ToggleGroup
@@ -95,16 +107,6 @@ export function OutcomeChips({
             ),
           )}
         </ToggleGroup>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label="What do these mean?"
-          className="text-muted-foreground ml-auto size-7 rounded-full p-0"
-          onClick={onOpenGlossary}
-        >
-          ?
-        </Button>
       </div>
 
       {showsErrorDetail(draft.endReason) && (
