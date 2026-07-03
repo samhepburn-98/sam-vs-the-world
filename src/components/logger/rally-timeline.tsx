@@ -84,7 +84,7 @@ export function RallyTimeline({
 
   return (
     <ol aria-label="Rally timeline" className="flex flex-col gap-1">
-      {scored.toReversed().map(({ row, score }) => {
+      {scored.slice().reverse().map(({ row, score }) => {
         if (editingId === row.id && renderEditor) {
           return <li key={row.id}>{renderEditor(row)}</li>
         }

@@ -15,7 +15,11 @@ interface UpdateCapableClient {
  *  Identity/position (id, game_id, rally_number) is not editable. */
 export function updateRallyOp(
   row: RallyRow,
-  client: UpdateCapableClient = getSupabaseBrowserClient(),
+  // tsc trips TS2589 (excessively deep) checking the real update-builder type
+  // against this slice; eslint's checker resolves it and calls the cast
+  // unnecessary — narrow through unknown and keep both satisfied
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  client: UpdateCapableClient = getSupabaseBrowserClient() as unknown as UpdateCapableClient,
 ): WriteOp {
   const fields = {
     server_id: row.server_id,
