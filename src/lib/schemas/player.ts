@@ -18,6 +18,13 @@ export const playerRow = playerSummary.extend({
 
 export type PlayerRow = z.infer<typeof playerRow>
 
+export const playerEditSchema = z.object({
+  name: z.string().trim().min(1, "Give the player a name"),
+  handedness: handedness.nullable(),
+})
+
+export type PlayerEditInput = z.infer<typeof playerEditSchema>
+
 export const newPlayerSchema = z.object({
   name: z.string().trim().min(1, "Give the player a name"),
 })

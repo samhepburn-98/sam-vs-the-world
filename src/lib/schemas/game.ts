@@ -23,6 +23,12 @@ export const gameRowWithMatch = gameRow.extend({
 
 export type GameRowWithMatch = z.infer<typeof gameRowWithMatch>
 
+export const gameEditSchema = z.object({
+  gameNumber: z.number().int().min(1, "Game number must be positive"),
+})
+
+export type GameEditInput = z.infer<typeof gameEditSchema>
+
 /** One row of the game_results view — the derived score and winner. */
 export const gameResultRow = z.object({
   game_id: z.string().uuid(),

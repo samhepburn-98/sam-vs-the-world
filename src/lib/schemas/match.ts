@@ -43,6 +43,24 @@ export const matchSetupSchema = z
 export type HouseRulesInput = z.infer<typeof houseRulesSchema>
 export type MatchSetupInput = z.infer<typeof matchSetupSchema>
 
+/** The manage edit sheet (§5.4): everything stored is editable; the DB
+ *  trigger backstops player changes that would orphan rallies. */
+export const matchEditSchema = z
+  .object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date"),
+    player1Id: z.string().uuid("Pick a player"),
+    player2Id: z.string().uuid("Pick a player"),
+    venue: z.string().trim().max(120).optional(),
+    notes: z.string().trim().max(2000).optional(),
+    houseRules: houseRulesSchema,
+  })
+  .refine((v) => v.player1Id !== v.player2Id, {
+    message: "Pick two different players",
+    path: ["player2Id"],
+  })
+
+export type MatchEditInput = z.infer<typeof matchEditSchema>
+
 /** Summary shape for the recent-matches list (players resolved separately). */
 export const matchSummary = z.object({
   id: z.string().uuid(),

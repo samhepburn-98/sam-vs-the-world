@@ -1,3 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { GameRef } from "@/lib/logger/session"
@@ -33,4 +35,17 @@ export function deleteGameOp(
       if (error) throw error
     },
   }
+}
+
+/** The same delete as a manage mutation (§5.4) — cascades to the game's
+ *  rallies per the schema FKs. */
+export function useDeleteGame() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (game: GameRef) => deleteGameOp(game).run(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["manage"] })
+      void queryClient.invalidateQueries({ queryKey: ["matches"] })
+    },
+  })
 }
