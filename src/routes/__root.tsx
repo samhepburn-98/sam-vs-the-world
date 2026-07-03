@@ -1,4 +1,8 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
@@ -8,7 +12,15 @@ import { fetchUser } from "@/lib/auth/functions"
 
 import appCss from "../styles.css?url"
 
-export const Route = createRootRoute({
+import type { QueryClient } from "@tanstack/react-query"
+
+// The router supplies queryClient at creation (router.tsx); typing it here
+// lets route loaders reach it for SSR data prefetch (ensureQueryData).
+interface RouterContext {
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   // Session context for the whole tree: header state + route guards (§8.5).
   beforeLoad: async () => {
     const user = await fetchUser()
