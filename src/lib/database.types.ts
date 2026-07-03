@@ -544,6 +544,42 @@ export type Database = {
         Returns: string
       }
       is_owner: { Args: never; Returns: boolean }
+      error_profile: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          errors_total: number
+          forced_errors: number
+          unforced_errors: number
+          untagged_errors: number
+          tin: number
+          out_top: number
+          out_side: number
+          out_back: number
+          not_up: number
+          double_bounce: number
+          detail_untagged: number
+          games_played: number
+          trend: Json
+        }>
+      }
+      error_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
       player_headline: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
@@ -574,6 +610,45 @@ export type Database = {
           matches_decided: number
           signature_trait: string | null
           recent_games: Json
+        }>
+      }
+      serve_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
+      serve_stats: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          rallies_served: number
+          serve_wins: number
+          rallies_returned: number
+          return_wins: number
+          aces: number
+          double_faults: number
+          two_serve_rallies_served: number
+          first_serve_faults: number
+          serve1_served: number
+          serve1_wins: number
+          serve2_served: number
+          serve2_wins: number
+          left_served: number
+          left_wins: number
+          right_served: number
+          right_wins: number
         }>
       }
     }
