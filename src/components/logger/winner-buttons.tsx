@@ -49,7 +49,7 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
         <Button
           type="button"
           variant="outline"
-          className="h-16 px-3 text-xs"
+          className="aspect-square h-16 flex-col gap-1 text-xs"
           onClick={onLet}
         >
           <Kbd>{HOTKEY_HINTS.let}</Kbd>
