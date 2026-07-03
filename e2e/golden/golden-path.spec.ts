@@ -169,4 +169,48 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   await page.getByRole("button", { name: "Open", exact: true }).click() // reopen
   await expect(page.getByRole("status")).toContainText("Game 1 to Golden Sam")
   await expect(page.getByRole("status")).toContainText("3–1")
+
+  // ---- manage: owner editing through the raw browser (§5.4) -------------
+  await page.goto("/manage?tab=rallies")
+  await page.waitForLoadState("load")
+  await page.waitForTimeout(750)
+
+  // insert a missed let before rally #2 — insert_rally_at renumbers the rest
+  await page.getByRole("button", { name: "Insert a rally before #2" }).click()
+  await page.getByRole("button", { name: "Save changes" }).click()
+  await expect(page.getByRole("dialog")).toBeHidden()
+
+  const afterInsert = await db
+    .from("rallies")
+    .select("rally_number, end_reason")
+    .order("rally_number")
+  expect(afterInsert.data!.map((r) => r.end_reason)).toEqual([
+    "winner",
+    "let", // the insert, renumbered into place…
+    "let", // …the original #2, shifted to #3
+    "serve_fault",
+    "error",
+    "ace",
+  ])
+  // a let holds the score: the derived result is untouched
+  const afterInsertResult = await db
+    .from("game_results")
+    .select("score_p1, score_p2")
+  expect(afterInsertResult.data![0]).toMatchObject({ score_p1: 3, score_p2: 1 })
+
+  // edit rally #1: flip the winner — the derivation self-heals downstream
+  await page.getByRole("button", { name: "Edit rally #1" }).click()
+  await page.getByRole("radio", { name: "Golden Dave" }).click()
+  await page.getByRole("button", { name: "Save changes" }).click()
+  await expect(page.getByRole("dialog")).toBeHidden()
+
+  const afterEdit = await db
+    .from("game_results")
+    .select("score_p1, score_p2, winner_id, is_undecided")
+  expect(afterEdit.data![0]).toMatchObject({
+    score_p1: 2,
+    score_p2: 2,
+    winner_id: null,
+    is_undecided: true, // 2–2 at the last rally: no leader, honestly derived
+  })
 })

@@ -115,8 +115,6 @@ raw tables:
 | `match_results` | games won per player + match winner | respects optional best-of `format` (clinch at `format/2 + 1`), plain majority for casual, NULL for ties/undecided; only decided games count |
 | `errors_attributed` | each `error`/`serve_fault` mapped to the player who made it | error-maker = the non-winner (the §Conventions rule, baked in so queries never re-derive it) |
 
-## Migrations
-
 ## Access model (RLS)
 
 **Public read, owner-only write** — enforced by the database, not the app:
@@ -144,4 +142,16 @@ To grant the owner: create the auth user, then
 | `20260702212656_rls_policies` | app_admins, is_owner(), public-read / owner-write policies |
 | `20260702212852_security_hardening` | pinned function search_paths, RPC exposure revokes (advisor lints) |
 | `20260702221549_house_rules` | serves_per_point + let_resets_serve, format odd 1–9, rule-aware serve trigger |
+| `20260703143000_insert_rally_at` | transactional mid-game insert (see below) |
 | *(planned)* insight RPCs | see PROJECT_PLAN.md §8.4 |
+
+### `insert_rally_at(...)` — the one write that needs a transaction
+
+Inserting a missed rally at position *k* means shifting every later rally up
+by one **and** inserting, atomically — PostgREST can't span statements, so
+this lives as a database function. The unique constraint on
+`(game_id, rally_number)` is `DEFERRABLE` for exactly this: the function
+defers it, renumbers, inserts, and the constraint re-checks at commit.
+`SECURITY INVOKER`, so RLS decides who can write, same as any direct insert;
+`/rpc` exposure is owner-only per the hardening rules. A constraint violation
+anywhere aborts the whole thing — no half-applied renumber is possible.

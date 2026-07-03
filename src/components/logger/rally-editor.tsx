@@ -55,6 +55,8 @@ const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
 
 interface RallyEditorProps {
   row: RallyRow
+  /** defaults to "Editing rally #n" */
+  title?: string
   ctx: DraftContext
   p1Name: string
   p2Name: string
@@ -64,6 +66,7 @@ interface RallyEditorProps {
 
 export function RallyEditor({
   row,
+  title,
   ctx,
   p1Name,
   p2Name,
@@ -87,7 +90,7 @@ export function RallyEditor({
       aria-label={`Edit rally ${row.rally_number}`}
       className="border-primary/40 bg-card flex flex-col gap-3 rounded-lg border p-4"
     >
-      <p className="text-sm font-semibold">Editing rally #{row.rally_number}</p>
+      <p className="text-sm font-semibold">{title ?? `Editing rally #${row.rally_number}`}</p>
 
       {fieldRow(
         "Winner",
