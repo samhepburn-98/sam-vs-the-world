@@ -450,7 +450,7 @@ function MatchLogger({
             className="text-muted-foreground"
             onClick={() => setHelpOpen(true)}
           >
-            ? hotkeys
+            ? Hotkeys
           </Button>
           <Button type="button" variant="ghost" size="sm" onClick={onExit}>
             Pause & exit

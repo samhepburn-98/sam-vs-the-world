@@ -9,21 +9,21 @@ import type { EndReason, ErrorDetail } from "@/lib/schemas/enums"
 // records feed the chips' hover titles and the glossary dialog.
 
 export const END_REASON_HELP: Record<EndReason, string> = {
-  winner: "clean winning shot the opponent couldn't return",
-  error: "the loser hit it down or out — pick the detail below",
-  stroke: "point awarded for interference; nobody hit an error",
-  let: "rally replayed — no point either way",
-  ace: "unreturnable serve; the server wins the point outright",
-  serve_fault: "the serve itself ended the point (2nd-serve fault = double fault)",
+  winner: "Clean winning shot the opponent couldn't return.",
+  error: "The loser hit it down or out — pick the detail below.",
+  stroke: "Point awarded for interference; nobody hit an error.",
+  let: "Rally replayed — no point either way.",
+  ace: "Unreturnable serve; the server wins the point outright.",
+  serve_fault: "The serve itself ended the point (a 2nd-serve fault = double fault).",
 }
 
 export const ERROR_DETAIL_HELP: Record<ErrorDetail, string> = {
-  tin: "hit the tin",
-  out_top: "out above the front-wall line",
-  out_side: "out on a side wall",
-  out_back: "out at the back",
-  not_up: "reached it, but it never made the front wall",
-  double_bounce: "didn't get there — second bounce (or missed it)",
+  tin: "Hit the tin.",
+  out_top: "Out above the front-wall line.",
+  out_side: "Out on a side wall.",
+  out_back: "Out at the back.",
+  not_up: "Reached it, but it never made the front wall.",
+  double_bounce: "Didn't get there — second bounce (or missed it).",
 }
 
 const END_REASON_LABELS: Record<EndReason, string> = {

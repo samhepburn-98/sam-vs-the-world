@@ -38,7 +38,7 @@ export function GameOverBanner({
           </span>
         ) : (
           <span className="text-muted-foreground block text-xs">
-            played on? just keep logging rallies
+            Played on? Just keep logging rallies.
           </span>
         )}
       </p>

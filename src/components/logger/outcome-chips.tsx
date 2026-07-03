@@ -91,7 +91,7 @@ export function OutcomeChips({
         </Button>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">how</span>
+        <span className="text-muted-foreground w-12 shrink-0 text-xs">How</span>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -120,7 +120,7 @@ export function OutcomeChips({
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            detail
+            Detail
           </span>
           <ToggleGroup
             type="single"
@@ -142,7 +142,7 @@ export function OutcomeChips({
       {showsForced(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            forced?
+            Forced?
           </span>
           <ToggleGroup
             type="single"
@@ -163,7 +163,7 @@ export function OutcomeChips({
       {showsShotType(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            shot
+            Shot
           </span>
           <Select
             value={draft.shotType ?? "none"}
@@ -188,7 +188,7 @@ export function OutcomeChips({
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground w-12 shrink-0 text-xs">
-          shots
+          Shots
         </span>
         <Input
           type="number"
