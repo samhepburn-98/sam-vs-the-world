@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
+import { BallDots } from "@/components/ball-dots"
 import { PlayerSelect } from "@/components/logger/player-select"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,24 +42,6 @@ const BALL_LABELS = {
   yellow: "Yellow",
   double_yellow: "Dbl yellow",
 } as const
-
-// a squash ball is known by its dot(s) — show them on the chips
-const BALL_DOTS: Record<keyof typeof BALL_LABELS, Array<string>> = {
-  blue: ["bg-blue-500"],
-  red: ["bg-red-500"],
-  yellow: ["bg-yellow-400"],
-  double_yellow: ["bg-yellow-400", "bg-yellow-400"],
-}
-
-function BallDots({ ball }: { ball: keyof typeof BALL_LABELS }) {
-  return (
-    <span aria-hidden className="flex items-center gap-0.5">
-      {BALL_DOTS[ball].map((color, i) => (
-        <span key={i} className={`size-2 rounded-full ${color}`} />
-      ))}
-    </span>
-  )
-}
 
 export function MatchSetup({
   players,

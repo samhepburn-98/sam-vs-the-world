@@ -10,6 +10,14 @@ export const playerSummary = z.object({
 
 export type PlayerSummary = z.infer<typeof playerSummary>
 
+/** Every stored column — the /manage raw browser's row (§5.4). */
+export const playerRow = playerSummary.extend({
+  created_at: z.string(),
+  updated_at: z.string(),
+})
+
+export type PlayerRow = z.infer<typeof playerRow>
+
 export const newPlayerSchema = z.object({
   name: z.string().trim().min(1, "Give the player a name"),
 })

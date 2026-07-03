@@ -56,6 +56,19 @@ export const matchSummary = z.object({
 
 export type MatchSummary = z.infer<typeof matchSummary>
 
+/** Every stored column — the /manage raw browser's row (§5.4). */
+export const matchRow = matchSummary.extend({
+  target_score: z.number().int(),
+  tiebreak,
+  serves_per_point: z.number().int(),
+  let_resets_serve: z.boolean(),
+  ball_type: ballType.nullable(),
+  notes: z.string().nullable(),
+  updated_at: z.string(),
+})
+
+export type MatchRow = z.infer<typeof matchRow>
+
 export const gameWithRallies = z.object({
   id: z.string().uuid(),
   game_number: z.number().int(),
