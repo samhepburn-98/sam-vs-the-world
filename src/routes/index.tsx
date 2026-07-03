@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import { BallDots } from "@/components/ball-dots"
 import { CourtDiagram } from "@/components/court/court-diagram"
-import { PlayerCard } from "@/components/dashboard/player-card"
+import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -11,15 +11,15 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { homeCountsQueryOptions, useHomeCounts } from "@/lib/queries/get-home-counts"
+import { homeCountsQueryOptions, useHomeCounts } from "@/features/dashboard/api/get-home-counts"
 import {
   playersHeadlineOptions,
   usePlayersHeadline,
-} from "@/lib/queries/get-players-headline"
+} from "@/features/dashboard/api/get-players-headline"
 import {
   recentResultsQueryOptions,
   useRecentResults,
-} from "@/lib/queries/get-recent-results"
+} from "@/features/dashboard/api/get-recent-results"
 
 import type { MatchResultSummary } from "@/lib/schemas/match"
 
