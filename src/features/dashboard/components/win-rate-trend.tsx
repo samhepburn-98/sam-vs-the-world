@@ -32,9 +32,17 @@ const config = {
 
 export function WinRateTrend({ data }: { data: Array<TrendPoint> }) {
   const line = shouldPlotLine(data.length)
+  const latest = data.at(-1)?.winRate
 
   return (
-    <ChartContainer config={config} className="aspect-[3/1] w-full">
+    <ChartContainer
+      config={config}
+      className="aspect-[3/1] w-full"
+      role="img"
+      aria-label={`Win rate over ${data.length} matches${
+        latest === undefined ? "" : `, most recently ${latest}%`
+      }.`}
+    >
       <LineChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis

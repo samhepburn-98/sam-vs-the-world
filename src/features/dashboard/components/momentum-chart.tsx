@@ -69,9 +69,21 @@ export function MomentumChart({
  *  client-side) can draw it without a RallyScored shape. */
 export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
   const off = zeroOffset(data)
+  const endLead = data.at(-1)?.lead ?? 0
+  const ending =
+    endLead > 0
+      ? `ahead by ${endLead}`
+      : endLead < 0
+        ? `behind by ${Math.abs(endLead)}`
+        : "level"
 
   return (
-    <ChartContainer config={config} className="aspect-[3/1] w-full">
+    <ChartContainer
+      config={config}
+      className="aspect-[3/1] w-full"
+      role="img"
+      aria-label={`Momentum over ${data.length} rallies, ending ${ending}.`}
+    >
       <AreaChart data={data} margin={{ left: 4, right: 8, top: 8, bottom: 4 }}>
         <defs>
           <linearGradient id="momentum-fill" x1="0" y1="0" x2="0" y2="1">

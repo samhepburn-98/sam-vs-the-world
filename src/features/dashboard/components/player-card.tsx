@@ -82,14 +82,22 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
           </span>
           {form.length > 0 && (
             <span className="flex items-center gap-1.5">
-              <span className="text-muted-foreground text-xs">Form</span>
-              <span className="flex items-center gap-1" aria-label="Recent form">
+              <span className="text-muted-foreground text-xs" aria-hidden>
+                Form
+              </span>
+              <span
+                className="flex items-center gap-1"
+                role="img"
+                aria-label={`Recent form, oldest to newest: ${form
+                  .map((g) =>
+                    g.won === null ? "undecided" : g.won ? "won" : "lost",
+                  )
+                  .join(", ")}`}
+              >
                 {form.map((g, i) => (
                   <span
                     key={i}
-                    title={
-                      g.won === null ? "Undecided" : g.won ? "Won" : "Lost"
-                    }
+                    aria-hidden
                     className={cn(
                       "size-2 rounded-full",
                       g.won === null

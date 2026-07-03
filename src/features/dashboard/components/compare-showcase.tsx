@@ -24,8 +24,9 @@ export interface PlayerData {
   momentum?: Momentum
 }
 
-const P1_COLOR = "var(--primary)" // orange accent
-const P2_COLOR = "#3b82f6" // blue — matches the blue ball's data colour
+const P1_COLOR = "var(--primary)" // orange accent (5.2:1 as text — AA ok)
+const P2_COLOR = "#3b82f6" // blue — bars & rings (graphical, contrast-exempt)
+const P2_TEXT = "#2563eb" // deeper blue for small blue text (5.2:1 — AA ok)
 
 interface Cell {
   value: number | null // null → not enough data (no bar)
@@ -62,8 +63,8 @@ function Ring({
   const dash = (Math.max(0, Math.min(100, pct)) / 100) * C
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="relative size-24">
-        <svg viewBox="0 0 100 100" className="size-24 -rotate-90">
+      <div className="relative size-20 sm:size-24">
+        <svg viewBox="0 0 100 100" className="size-full -rotate-90">
           <circle cx={50} cy={50} r={R} fill="none" stroke="var(--muted)" strokeWidth={8} />
           {cell.value !== null && (
             <circle
@@ -140,7 +141,7 @@ function OpposedStat({
         </div>
         <span
           className={cn("w-16 text-sm tabular-nums", rightWins && "font-bold")}
-          style={rightWins ? { color: P2_COLOR } : undefined}
+          style={rightWins ? { color: P2_TEXT } : undefined}
         >
           {right.display}
         </span>
@@ -252,12 +253,12 @@ export function CompareShowcase({
       </div>
 
       {/* rings */}
-      <div className="flex items-start justify-center gap-4 sm:gap-10">
-        <div className="flex gap-4">
+      <div className="flex items-start justify-center gap-3 sm:gap-10">
+        <div className="flex gap-2 sm:gap-4">
           <Ring cell={winRate(d1)} label="Win rate" color={P1_COLOR} />
           <Ring cell={serveRate(d1)} label="Serve" color={P1_COLOR} />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-2 sm:gap-4">
           <Ring cell={serveRate(d2)} label="Serve" color={P2_COLOR} />
           <Ring cell={winRate(d2)} label="Win rate" color={P2_COLOR} />
         </div>
