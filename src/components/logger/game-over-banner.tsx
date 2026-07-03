@@ -38,7 +38,7 @@ export function GameOverBanner({
           </span>
         ) : (
           <span className="text-muted-foreground block text-xs">
-            or keep logging — the score is derived, not enforced
+            played on? just keep logging rallies
           </span>
         )}
       </p>
