@@ -49,7 +49,8 @@ export function createDraft(suggestion: Suggestion): RallyDraft {
     errorDetail: null,
     forced: null,
     shotType: null,
-    shotCount: null,
+    // every rally has at least the serve; clearable to null (= not counted)
+    shotCount: 1,
   }
 }
 

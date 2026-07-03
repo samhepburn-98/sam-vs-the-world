@@ -128,6 +128,10 @@ describe("saving", () => {
     ).toThrow(/incomplete/)
   })
 
+  it("a fresh draft defaults shot count to 1 (the serve), clearable to null", () => {
+    expect(createDraft(suggestion).shotCount).toBe(1)
+  })
+
   it("builds the full rally row with nullables intact", () => {
     let draft = selectEndReason(draftWithWinner("dave"), "error", ctx)
     draft = { ...draft, errorDetail: "tin", forced: false, shotCount: 12 }
