@@ -10,6 +10,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { PageStub } from "@/components/page-stub"
 import { SiteHeader } from "@/components/layouts/site-header"
 import { fetchUser } from "@/lib/auth/functions"
+import { NO_FLASH_SCRIPT } from "@/lib/theme"
 
 import appCss from "../styles.css?url"
 
@@ -80,8 +81,12 @@ function RouteFade({ children }: { children: React.ReactNode }) {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // the no-flash script (below) sets the theme class on <html> before paint;
+    // suppressHydrationWarning stops React from reverting it during hydration
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* runs synchronously before first paint — no flash of the wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
         <HeadContent />
       </head>
       <body>

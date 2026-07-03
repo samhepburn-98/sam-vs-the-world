@@ -24,9 +24,9 @@ export interface PlayerData {
   momentum?: Momentum
 }
 
-const P1_COLOR = "var(--primary)" // orange accent (5.2:1 as text — AA ok)
-const P2_COLOR = "#3b82f6" // blue — bars & rings (graphical, contrast-exempt)
-const P2_TEXT = "#2563eb" // deeper blue for small blue text (5.2:1 — AA ok)
+const P1_COLOR = "var(--primary)" // orange accent — themed, AA in both modes
+const P2_COLOR = "var(--p2)" // blue fill for bars & rings (graphical)
+const P2_TEXT = "var(--p2-strong)" // blue for small text — AA-tuned per theme
 
 interface Cell {
   value: number | null // null → not enough data (no bar)

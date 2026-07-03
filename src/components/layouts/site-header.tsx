@@ -4,6 +4,7 @@ import { MenuIcon } from "lucide-react"
 import { useState } from "react"
 
 import { CourtDiagram } from "@/components/court/court-diagram"
+import { ThemeToggle } from "@/components/layouts/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -93,6 +94,7 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
               Log in
             </Link>
           )}
+          <ThemeToggle />
         </div>
 
         {/* mobile: everything behind one button */}
@@ -175,6 +177,11 @@ function MobileMenu({
               </Link>
             </SheetClose>
           )}
+          <div className="my-2 border-t" />
+          <div className="flex items-center justify-between px-2 py-1">
+            <span className="text-muted-foreground text-base">Theme</span>
+            <ThemeToggle />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

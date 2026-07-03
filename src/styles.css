@@ -15,6 +15,10 @@
     --popover-foreground: oklch(0.153 0.006 107.1);
     --primary: oklch(0.553 0.195 38.402);
     --primary-foreground: oklch(0.98 0.016 73.684);
+    /* player-two accent (compare): --p2 for graphical fills, --p2-strong for
+       text — the deeper tone that clears AA on the surface behind it */
+    --p2: #3b82f6;
+    --p2-strong: #2563eb;
     --secondary: oklch(0.967 0.001 286.375);
     --secondary-foreground: oklch(0.21 0.006 285.885);
     --muted: oklch(0.966 0.005 106.5);
@@ -49,8 +53,13 @@
     --card-foreground: oklch(0.988 0.003 106.5);
     --popover: oklch(0.228 0.013 107.4);
     --popover-foreground: oklch(0.988 0.003 106.5);
-    --primary: oklch(0.47 0.157 37.304);
-    --primary-foreground: oklch(0.98 0.016 73.684);
+    /* brighter orange so it reads as an accent on dark (AA as text), with a
+       dark foreground for legible text on primary-filled buttons */
+    --primary: oklch(0.68 0.17 42);
+    --primary-foreground: oklch(0.2 0.03 40);
+    /* lighter blue for text on dark; the graphical fill can stay saturated */
+    --p2: #3b82f6;
+    --p2-strong: #60a5fa;
     --secondary: oklch(0.274 0.006 286.033);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.286 0.016 107.4);
