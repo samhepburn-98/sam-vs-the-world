@@ -9,6 +9,7 @@ import {
   selectEndReason,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   showsShotType,
   tapWinner,
   toggleServeNumber,
@@ -74,6 +75,14 @@ describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
     expect(draft.winnerId).toBe("sam")
     expect(draft.endReason).toBeNull()
     expect(canSave(draft)).toBe(false) // needs an end reason again
+  })
+
+  it("serve fault is only offered when the winner is NOT the shown server", () => {
+    // suggestion: sam serves. sam tapped as winner → a serve fault can't
+    // have won sam the point; fix the server chip first if it's wrong
+    expect(showsServeFault(draftWithWinner("sam"))).toBe(false)
+    expect(showsServeFault(draftWithWinner("dave"))).toBe(true)
+    expect(showsServeFault(createDraft(suggestion))).toBe(false) // no winner yet
   })
 
   it("serve fault corrects the server to the NON-winner and forces serve 2", () => {

@@ -19,6 +19,7 @@ import {
   selectEndReason,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   showsShotType,
   tapWinner,
   toggleServeNumber,
@@ -115,11 +116,13 @@ export function RallyEditor({
             if (v) setDraft((d) => selectEndReason(d, v as EndReason, ctx))
           }}
         >
-          {Constants.public.Enums.end_reason.map((r) => (
-            <ToggleGroupItem key={r} value={r}>
-              {END_REASON_LABELS[r]}
-            </ToggleGroupItem>
-          ))}
+          {Constants.public.Enums.end_reason
+            .filter((r) => r !== "serve_fault" || showsServeFault(draft))
+            .map((r) => (
+              <ToggleGroupItem key={r} value={r}>
+                {END_REASON_LABELS[r]}
+              </ToggleGroupItem>
+            ))}
         </ToggleGroup>,
       )}
 

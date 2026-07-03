@@ -118,6 +118,12 @@ export function showsShotType(endReason: EndReason | null): boolean {
   return endReason === "winner" || endReason === "ace"
 }
 
+/** a point-ending serve fault is lost by the server — if the tapped winner
+ *  IS the shown server, it isn't an option (fix the server chip first) */
+export function showsServeFault(draft: RallyDraft): boolean {
+  return draft.winnerId !== null && draft.winnerId !== draft.serverId
+}
+
 export function toggleServeNumber(
   draft: RallyDraft,
   ctx: DraftContext,

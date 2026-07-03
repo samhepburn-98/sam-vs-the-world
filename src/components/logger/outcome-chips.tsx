@@ -16,6 +16,7 @@ import {
   canSave,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   showsShotType,
 } from "@/lib/logger/rally-draft"
 import { Constants } from "@/lib/database.types"
@@ -98,13 +99,20 @@ export function OutcomeChips({
           value={draft.endReason ?? ""}
           onValueChange={(v) => v && onEndReason(v as EndReason)}
         >
-          {(["winner", "error", "stroke", "ace", "serve_fault"] as const).map(
-            (r) => (
-              <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
-                <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
-                {END_REASON_LABELS[r]}
-              </ToggleGroupItem>
-            ),
+          {(["winner", "error", "stroke", "ace"] as const).map((r) => (
+            <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
+              <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
+              {END_REASON_LABELS[r]}
+            </ToggleGroupItem>
+          ))}
+          {showsServeFault(draft) && (
+            <ToggleGroupItem
+              value="serve_fault"
+              title={END_REASON_HELP.serve_fault}
+            >
+              <Kbd>{HOTKEY_HINTS.endReason.serve_fault}</Kbd>
+              {END_REASON_LABELS.serve_fault}
+            </ToggleGroupItem>
           )}
         </ToggleGroup>
       </div>

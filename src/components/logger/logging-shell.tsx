@@ -24,6 +24,7 @@ import {
   selectEndReason,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   tapWinner,
   toggleServeNumber,
   toggleServeSide,
@@ -319,6 +320,9 @@ function MatchLogger({
         return
       case "endReason":
         if (chipsOpen) {
+          // f is inert when the tapped winner is the shown server — a serve
+          // fault can't win the server the point
+          if (action.reason === "serve_fault" && !showsServeFault(draft)) return
           digitTyped.current = false
           setDraftState(selectEndReason(draft, action.reason, draftCtx))
         }
