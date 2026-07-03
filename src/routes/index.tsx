@@ -142,7 +142,9 @@ function HomePage() {
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold">Recent matches</h2>
             <Button asChild variant="ghost" size="sm">
-              <Link to="/matches">View all</Link>
+              <Link to="/matches" search={{ page: 1 }}>
+                View all
+              </Link>
             </Button>
           </div>
           <ul className="flex flex-col divide-y">

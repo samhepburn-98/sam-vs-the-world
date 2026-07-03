@@ -89,6 +89,16 @@ export const matchResultSummary = z.object({
 
 export type MatchResultSummary = z.infer<typeof matchResultSummary>
 
+/** The match history row (§5.2): the derived result plus the badges the list
+ *  shows. From `match_results`; names resolved separately. */
+export const matchListRow = matchResultSummary.extend({
+  venue: z.string().nullable(),
+  format: z.number().nullable(),
+  target_score: z.number().int(),
+})
+
+export type MatchListRow = z.infer<typeof matchListRow>
+
 /** Every stored column — the /manage raw browser's row (§5.4). */
 export const matchRow = matchSummary.extend({
   target_score: z.number().int(),

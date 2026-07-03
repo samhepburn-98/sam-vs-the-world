@@ -61,7 +61,13 @@ export function MomentumChart({
   rallies: Array<RallyScored>
   playerId: string
 }) {
-  const data = computeLeadSeries(rallies, playerId)
+  return <MomentumArea data={computeLeadSeries(rallies, playerId)} />
+}
+
+/** The presentational diverging area, given a precomputed lead series — so a
+ *  caller that already has the lead (e.g. match detail, folding rallies
+ *  client-side) can draw it without a RallyScored shape. */
+export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
   const off = zeroOffset(data)
 
   return (

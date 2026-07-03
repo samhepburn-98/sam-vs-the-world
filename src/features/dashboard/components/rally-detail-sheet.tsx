@@ -22,6 +22,8 @@ import type { RallyScored } from "@/lib/schemas/rally"
 interface RallyDetailSheetProps {
   rally: RallyScored | null
   playerId?: string
+  /** Hidden on the match page itself, where "open in match" is a no-op. */
+  showMatchLink?: boolean
   onClose: () => void
   onPrev: () => void
   onNext: () => void
@@ -41,6 +43,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function RallyDetailSheet({
   rally,
   playerId,
+  showMatchLink = true,
   onClose,
   onPrev,
   onNext,
@@ -95,12 +98,12 @@ export function RallyDetailSheet({
             </dl>
 
             <SheetFooter className="mt-auto">
-              {rally.match_id && (
+              {showMatchLink && rally.match_id && rally.id && (
                 <Button asChild variant="outline">
                   <Link
                     to="/matches/$matchId"
                     params={{ matchId: rally.match_id }}
-                    search={{ rally: rally.rally_number }}
+                    search={{ rally: rally.id }}
                   >
                     Open in match
                   </Link>
