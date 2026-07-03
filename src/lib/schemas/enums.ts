@@ -19,6 +19,7 @@ export const tiebreak = z.enum(E.tiebreak)
 export type BallType = z.infer<typeof ballType>
 export type EndReason = z.infer<typeof endReason>
 export type ErrorDetail = z.infer<typeof errorDetail>
+export type Handedness = z.infer<typeof handedness>
 export type ServeSide = z.infer<typeof serveSide>
 export type ShotType = z.infer<typeof shotType>
 export type Tiebreak = z.infer<typeof tiebreak>
