@@ -47,9 +47,22 @@ const config = {
 
 export function RallyLengthHisto({ lengths }: { lengths: RallyLengths }) {
   const data = toHistoBuckets(lengths)
+  const summary = data
+    .map(
+      (b) =>
+        `${b.label} shots: ${b.rallies} rallies${
+          b.winRate === null ? "" : `, ${b.winRate}% won`
+        }`,
+    )
+    .join("; ")
 
   return (
-    <ChartContainer config={config} className="aspect-[3/1] w-full">
+    <ChartContainer
+      config={config}
+      className="aspect-[3/1] w-full"
+      role="img"
+      aria-label={`Rally length distribution. ${summary}.`}
+    >
       <BarChart data={data} margin={{ top: 20 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />

@@ -96,6 +96,7 @@ export function OutcomeChips({
           type="single"
           variant="outline"
           size="sm"
+          className="flex-wrap"
           value={draft.endReason ?? ""}
           onValueChange={(v) => v && onEndReason(v as EndReason)}
         >
@@ -126,6 +127,7 @@ export function OutcomeChips({
             type="single"
             variant="outline"
             size="sm"
+            className="flex-wrap"
             value={draft.errorDetail ?? ""}
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
           >
@@ -148,6 +150,7 @@ export function OutcomeChips({
             type="single"
             variant="outline"
             size="sm"
+            className="flex-wrap"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
           >

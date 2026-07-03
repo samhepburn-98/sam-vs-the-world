@@ -27,7 +27,7 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
         variant={selected === null || selected === side ? "default" : "outline"}
         aria-pressed={selected === side}
         className={cn(
-          "h-16 text-base font-bold tracking-wide uppercase",
+          "h-16 min-w-0 px-2 text-sm leading-tight tracking-wide whitespace-normal uppercase sm:px-6 sm:text-base",
           selected === side && "ring-primary/50 ring-2 ring-offset-2",
           selected !== null && selected !== side && "opacity-60",
         )}

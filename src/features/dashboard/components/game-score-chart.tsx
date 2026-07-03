@@ -30,6 +30,8 @@ export function GameScoreChart({
     p1: r.score_p1,
     p2: r.score_p2,
   }))
+  const finalP1 = data.at(-1)?.p1 ?? 0
+  const finalP2 = data.at(-1)?.p2 ?? 0
 
   // orange accent vs neutral ink — different hues, so the two lines separate
   // clearly (the chart ramp is all reds, which read as one colour). Both
@@ -40,7 +42,12 @@ export function GameScoreChart({
   } satisfies ChartConfig
 
   return (
-    <ChartContainer config={config} className="aspect-[3/1] w-full">
+    <ChartContainer
+      config={config}
+      className="aspect-[3/1] w-full"
+      role="img"
+      aria-label={`Score race over ${data.length} rallies. ${p1Name} versus ${p2Name}, final score ${finalP1}–${finalP2}.`}
+    >
       <LineChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis

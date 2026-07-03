@@ -63,13 +63,20 @@ export function toErrorCauseData(profile: ErrorProfile) {
 function StackedRow<TConfig extends ChartConfig>({
   config,
   data,
+  ariaLabel,
 }: {
   config: TConfig
   data: Array<Record<string, number | string>>
+  ariaLabel: string
 }) {
   const keys = Object.keys(config)
   return (
-    <ChartContainer config={config} className="aspect-[5/1] w-full">
+    <ChartContainer
+      config={config}
+      className="aspect-[5/1] w-full"
+      role="img"
+      aria-label={ariaLabel}
+    >
       <BarChart data={data} layout="vertical" margin={{ left: 0, right: 0 }}>
         <XAxis type="number" hide />
         <YAxis type="category" dataKey="row" hide />
@@ -95,16 +102,39 @@ function StackedRow<TConfig extends ChartConfig>({
   )
 }
 
+/** Render a stacked-row's segments as a screen-reader sentence: "Tin 4,
+ *  Out (top) 2, …" — only the segments that actually have a count. */
+function summarise<TConfig extends ChartConfig>(
+  config: TConfig,
+  row: Record<string, number | string>,
+): string {
+  return Object.keys(config)
+    .map((key) => ({ label: config[key].label, n: row[key] }))
+    .filter((s) => typeof s.n === "number" && s.n > 0)
+    .map((s) => `${String(s.label)} ${String(s.n)}`)
+    .join(", ")
+}
+
 export function ErrorBreakdown({ profile }: { profile: ErrorProfile }) {
+  const typeData = toErrorTypeData(profile)
+  const causeData = toErrorCauseData(profile)
   return (
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-muted-foreground mb-2 text-sm font-medium">By type</p>
-        <StackedRow config={TYPE_CONFIG} data={toErrorTypeData(profile)} />
+        <StackedRow
+          config={TYPE_CONFIG}
+          data={typeData}
+          ariaLabel={`Errors by type: ${summarise(TYPE_CONFIG, typeData[0])}.`}
+        />
       </div>
       <div>
         <p className="text-muted-foreground mb-2 text-sm font-medium">By cause</p>
-        <StackedRow config={CAUSE_CONFIG} data={toErrorCauseData(profile)} />
+        <StackedRow
+          config={CAUSE_CONFIG}
+          data={causeData}
+          ariaLabel={`Errors by cause: ${summarise(CAUSE_CONFIG, causeData[0])}.`}
+        />
       </div>
     </div>
   )
