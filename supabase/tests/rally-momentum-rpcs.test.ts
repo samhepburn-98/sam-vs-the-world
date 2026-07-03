@@ -243,7 +243,9 @@ describe("momentum — phase bands", () => {
     expect(m.close_rallies).toBe(6)
     expect(m.early_rallies).toBe(8) // leadings 1–4
     expect(m.mid_rallies).toBe(8) //   leadings 5–8
-    expect(m.early_rallies + m.mid_rallies + m.close_rallies).toBe(22)
+    expect(
+      Number(m.early_rallies) + Number(m.mid_rallies) + Number(m.close_rallies),
+    ).toBe(22)
   })
 })
 

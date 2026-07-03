@@ -438,6 +438,19 @@ export type Database = {
       }
     }
     Functions: {
+      comeback_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_deficit?: number
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
       filtered_games: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
@@ -580,6 +593,28 @@ export type Database = {
           Database["public"]["Views"]["rallies_scored"]["Row"]
         >
       }
+      momentum: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_deficit?: number
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          comebacks: number
+          longest_streak: number
+          longest_streak_game_id: string | null
+          early_rallies: number
+          early_wins: number
+          mid_rallies: number
+          mid_wins: number
+          close_rallies: number
+          close_wins: number
+          comeback_games: Json
+        }>
+      }
       player_headline: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
@@ -610,6 +645,39 @@ export type Database = {
           matches_decided: number
           signature_trait: string | null
           recent_games: Json
+        }>
+      }
+      rally_length_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_bucket?: string | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<
+          Database["public"]["Views"]["rallies_scored"]["Row"]
+        >
+      }
+      rally_lengths: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date_from?: string | null
+          p_date_to?: string | null
+          p_opponent_id?: string | null
+          p_player_id: string
+        }
+        Returns: Array<{
+          total_rallies: number
+          avg_length: number | null
+          longest: number
+          short_rallies: number
+          short_wins: number
+          medium_rallies: number
+          medium_wins: number
+          long_rallies: number
+          long_wins: number
         }>
       }
       serve_rallies: {
