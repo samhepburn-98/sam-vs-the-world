@@ -23,7 +23,7 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
   const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
   const losses = games_decided - games_won
   // recent_games is newest-first; a form line reads left-to-right, oldest-first
-  const form = player.recent_games.slice(0, 7).reverse()
+  const form = player.recent_games.slice(0, 5).reverse()
 
   return (
     <div
@@ -64,14 +64,11 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
         </div>
 
         {enough ? (
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-bold tabular-nums">
-              {Math.round((games_won / games_decided) * 100)}%
-            </span>
-            <span className="text-muted-foreground text-sm tabular-nums">
-              · {games_won} of {games_decided}
-            </span>
-          </div>
+          // the denominator is carried by the W–L record below, so the rate
+          // stands alone here without repeating "of N"
+          <p className="text-3xl font-bold tabular-nums">
+            {Math.round((games_won / games_decided) * 100)}%
+          </p>
         ) : (
           <p className="text-muted-foreground text-sm">
             Not enough data yet{" "}
@@ -81,30 +78,29 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
 
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground text-sm tabular-nums">
-            {games_won}–{losses} games
+            {games_won} W · {losses} L
           </span>
           {form.length > 0 && (
-            <span className="flex items-center gap-1" aria-label="Recent form">
-              {form.map((g, i) => (
-                <span
-                  key={i}
-                  title={
-                    g.won === null
-                      ? "Undecided"
-                      : g.won
-                        ? "Won"
-                        : "Lost"
-                  }
-                  className={cn(
-                    "size-2 rounded-full",
-                    g.won === null
-                      ? "ring-1 ring-border"
-                      : g.won
-                        ? "bg-primary"
-                        : "bg-muted-foreground/40",
-                  )}
-                />
-              ))}
+            <span className="flex items-center gap-1.5">
+              <span className="text-muted-foreground text-xs">Form</span>
+              <span className="flex items-center gap-1" aria-label="Recent form">
+                {form.map((g, i) => (
+                  <span
+                    key={i}
+                    title={
+                      g.won === null ? "Undecided" : g.won ? "Won" : "Lost"
+                    }
+                    className={cn(
+                      "size-2 rounded-full",
+                      g.won === null
+                        ? "bg-muted-foreground/40"
+                        : g.won
+                          ? "bg-emerald-500"
+                          : "bg-red-500",
+                    )}
+                  />
+                ))}
+              </span>
             </span>
           )}
         </div>
