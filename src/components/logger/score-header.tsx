@@ -39,13 +39,14 @@ export function ScoreHeader({
   const p1Serving = draft.serverId === p1Id
 
   const chips = (
-    <span className="mt-1.5 flex justify-center gap-1.5">
+    <span className="mt-1 flex justify-center gap-1.5">
       <button
         type="button"
         onClick={onToggleSide}
         className="border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors"
       >
-        {draft.serveSide} box <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
+        {draft.serveSide === "left" ? "Left" : "Right"} box{" "}
+        <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
       </button>
       {servesPerPoint === 2 && (
         <button
@@ -82,9 +83,16 @@ export function ScoreHeader({
       >
         {points}
       </p>
-      {serving ? chips : (
+      {serving ? (
+        <>
+          <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
+            Serving
+          </span>
+          {chips}
+        </>
+      ) : (
         <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
-          receiving
+          Receiving
         </span>
       )}
     </div>

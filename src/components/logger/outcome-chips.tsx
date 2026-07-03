@@ -1,3 +1,4 @@
+import { END_REASON_HELP, ERROR_DETAIL_HELP } from "@/components/logger/glossary"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,6 +16,7 @@ import {
   canSave,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   showsShotType,
 } from "@/lib/logger/rally-draft"
 import { Constants } from "@/lib/database.types"
@@ -53,6 +55,7 @@ interface OutcomeChipsProps {
   onShotCount: (count: number | null) => void
   onSave: () => void
   onCancel: () => void
+  onOpenGlossary: () => void
 }
 
 export function OutcomeChips({
@@ -65,21 +68,30 @@ export function OutcomeChips({
   onShotCount,
   onSave,
   onCancel,
+  onOpenGlossary,
 }: OutcomeChipsProps) {
   return (
     <section
       aria-label="How the rally ended"
       className="bg-card flex flex-col gap-3 rounded-lg border p-4"
     >
-      <p className="text-sm">
-        Point to <span className="font-bold">{winnerName}</span>
-        <span className="text-muted-foreground">
-          {" "}
-          — tap the other name above if that's wrong
-        </span>
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm">
+          Point to <span className="font-bold">{winnerName}</span>
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="What do these mean?"
+          className="text-muted-foreground size-7 rounded-full p-0"
+          onClick={onOpenGlossary}
+        >
+          ?
+        </Button>
+      </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">how</span>
+        <span className="text-muted-foreground w-12 shrink-0 text-xs">How</span>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -87,13 +99,20 @@ export function OutcomeChips({
           value={draft.endReason ?? ""}
           onValueChange={(v) => v && onEndReason(v as EndReason)}
         >
-          {(["winner", "error", "stroke", "ace", "serve_fault"] as const).map(
-            (r) => (
-              <ToggleGroupItem key={r} value={r}>
-                <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
-                {END_REASON_LABELS[r]}
-              </ToggleGroupItem>
-            ),
+          {(["winner", "error", "stroke", "ace"] as const).map((r) => (
+            <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
+              <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
+              {END_REASON_LABELS[r]}
+            </ToggleGroupItem>
+          ))}
+          {showsServeFault(draft) && (
+            <ToggleGroupItem
+              value="serve_fault"
+              title={END_REASON_HELP.serve_fault}
+            >
+              <Kbd>{HOTKEY_HINTS.endReason.serve_fault}</Kbd>
+              {END_REASON_LABELS.serve_fault}
+            </ToggleGroupItem>
           )}
         </ToggleGroup>
       </div>
@@ -101,7 +120,7 @@ export function OutcomeChips({
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            detail
+            Detail
           </span>
           <ToggleGroup
             type="single"
@@ -111,7 +130,7 @@ export function OutcomeChips({
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
           >
             {Constants.public.Enums.error_detail.map((d) => (
-              <ToggleGroupItem key={d} value={d}>
+              <ToggleGroupItem key={d} value={d} title={ERROR_DETAIL_HELP[d]}>
                 <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
                 {ERROR_DETAIL_LABELS[d]}
               </ToggleGroupItem>
@@ -123,7 +142,7 @@ export function OutcomeChips({
       {showsForced(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            forced?
+            Forced?
           </span>
           <ToggleGroup
             type="single"
@@ -141,33 +160,36 @@ export function OutcomeChips({
         </div>
       )}
 
+      {showsShotType(draft.endReason) && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground w-12 shrink-0 text-xs">
+            Shot
+          </span>
+          <Select
+            value={draft.shotType ?? "none"}
+            onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
+          >
+            <SelectTrigger size="sm" className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="none">—</SelectItem>
+                {Constants.public.Enums.shot_type.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
-        {showsShotType(draft.endReason) && (
-          <>
-            <span className="text-muted-foreground w-12 shrink-0 text-xs">
-              shot
-            </span>
-            <Select
-              value={draft.shotType ?? "none"}
-              onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
-            >
-              <SelectTrigger size="sm" className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="none">—</SelectItem>
-                  {Constants.public.Enums.shot_type.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </>
-        )}
-        <span className="text-muted-foreground shrink-0 text-xs">shots</span>
+        <span className="text-muted-foreground w-12 shrink-0 text-xs">
+          Shots
+        </span>
         <Input
           type="number"
           min={0}
@@ -178,22 +200,23 @@ export function OutcomeChips({
             onShotCount(e.target.value === "" ? null : Number(e.target.value))
           }
         />
-        <div className="ml-auto flex gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={!canSave(draft)}
-            onClick={onSave}
-          >
-            <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-              {HOTKEY_HINTS.save}
-            </Kbd>
-            Save — {winnerName}
-          </Button>
-        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          disabled={!canSave(draft)}
+          onClick={onSave}
+        >
+          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+            {HOTKEY_HINTS.save}
+          </Kbd>
+          Save
+        </Button>
       </div>
     </section>
   )

@@ -42,6 +42,24 @@ const BALL_LABELS = {
   double_yellow: "Dbl yellow",
 } as const
 
+// a squash ball is known by its dot(s) — show them on the chips
+const BALL_DOTS: Record<keyof typeof BALL_LABELS, Array<string>> = {
+  blue: ["bg-blue-500"],
+  red: ["bg-red-500"],
+  yellow: ["bg-yellow-400"],
+  double_yellow: ["bg-yellow-400", "bg-yellow-400"],
+}
+
+function BallDots({ ball }: { ball: keyof typeof BALL_LABELS }) {
+  return (
+    <span aria-hidden className="flex items-center gap-0.5">
+      {BALL_DOTS[ball].map((color, i) => (
+        <span key={i} className={`size-2 rounded-full ${color}`} />
+      ))}
+    </span>
+  )
+}
+
 export function MatchSetup({
   players,
   onCreatePlayer,
@@ -127,19 +145,24 @@ export function MatchSetup({
           render={({ field }) => (
             <Field data-invalid={errors.firstServerId ? true : undefined}>
               <FieldLabel>Who serves first?</FieldLabel>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                value={field.value}
-                onValueChange={(v) => v && field.onChange(v)}
-                disabled={selectedPlayers.length < 2}
-              >
-                {selectedPlayers.map((p) => (
-                  <ToggleGroupItem key={p.id} value={p.id}>
-                    {p.name}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+              {selectedPlayers.length < 2 ? (
+                <p className="text-muted-foreground text-sm">
+                  Pick both players first.
+                </p>
+              ) : (
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  value={field.value}
+                  onValueChange={(v) => v && field.onChange(v)}
+                >
+                  {selectedPlayers.map((p) => (
+                    <ToggleGroupItem key={p.id} value={p.id}>
+                      {p.name}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              )}
               {errors.firstServerId && (
                 <FieldError>{errors.firstServerId.message}</FieldError>
               )}
@@ -290,6 +313,7 @@ export function MatchSetup({
                         >
                       ).map((b) => (
                         <ToggleGroupItem key={b} value={b}>
+                          <BallDots ball={b} />
                           {BALL_LABELS[b]}
                         </ToggleGroupItem>
                       ))}

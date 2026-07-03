@@ -107,6 +107,20 @@ describe("keyboard-first logging (§5.3)", () => {
     expect(screen.queryByText(/error · tin/)).toBeNull()
   })
 
+  it("serve fault is hidden (and f inert) when the winner is the shown server", () => {
+    renderShell()
+    press("s") // Sam won — and Sam is the suggested server
+    expect(screen.queryByRole("radio", { name: /serve fault/i })).toBeNull()
+    press("f") // inert — nothing selected, save stays disabled
+    expect(screen.getByRole("button", { name: /save/i })).toHaveProperty(
+      "disabled",
+      true,
+    )
+
+    press("d") // switch to Dave — now a fault by server Sam fits
+    expect(screen.getByRole("radio", { name: /serve fault/i })).toBeDefined()
+  })
+
   it("cmd+z undoes; l saves a let immediately", () => {
     renderShell()
     press("l")
@@ -150,8 +164,8 @@ describe("keyboard-first logging (§5.3)", () => {
     renderShell()
     press("?")
     expect(screen.getByRole("dialog", { name: "Hotkeys" })).toBeDefined()
-    expect(screen.getByText("left player won")).toBeDefined()
-    expect(screen.getByText("double bounce")).toBeDefined()
+    expect(screen.getByText("Left player won")).toBeDefined()
+    expect(screen.getByText("Double bounce")).toBeDefined()
     // while open, logging keys are swallowed
     press("l")
     expect(screen.queryByText(/let \(replayed\)/)).toBeNull()

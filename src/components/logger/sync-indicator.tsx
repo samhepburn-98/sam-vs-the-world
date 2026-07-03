@@ -39,7 +39,7 @@ export function SyncIndicator({ queue }: { queue: WriteQueue }) {
 
   return (
     <p className="text-muted-foreground text-right text-xs" aria-live="polite">
-      {state.pending > 0 ? `syncing ${state.pending}…` : "synced ✓"}
+      {state.pending > 0 ? `Syncing ${state.pending}…` : "Synced ✓"}
     </p>
   )
 }

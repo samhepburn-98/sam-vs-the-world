@@ -19,6 +19,7 @@ import {
   selectEndReason,
   showsErrorDetail,
   showsForced,
+  showsServeFault,
   showsShotType,
   tapWinner,
   toggleServeNumber,
@@ -89,7 +90,7 @@ export function RallyEditor({
       <p className="text-sm font-semibold">Editing rally #{row.rally_number}</p>
 
       {fieldRow(
-        "winner",
+        "Winner",
         <ToggleGroup
           type="single"
           variant="outline"
@@ -105,7 +106,7 @@ export function RallyEditor({
       )}
 
       {fieldRow(
-        "how",
+        "How",
         <ToggleGroup
           type="single"
           variant="outline"
@@ -115,16 +116,18 @@ export function RallyEditor({
             if (v) setDraft((d) => selectEndReason(d, v as EndReason, ctx))
           }}
         >
-          {Constants.public.Enums.end_reason.map((r) => (
-            <ToggleGroupItem key={r} value={r}>
-              {END_REASON_LABELS[r]}
-            </ToggleGroupItem>
-          ))}
+          {Constants.public.Enums.end_reason
+            .filter((r) => r !== "serve_fault" || showsServeFault(draft))
+            .map((r) => (
+              <ToggleGroupItem key={r} value={r}>
+                {END_REASON_LABELS[r]}
+              </ToggleGroupItem>
+            ))}
         </ToggleGroup>,
       )}
 
       {fieldRow(
-        "serve",
+        "Serve",
         <>
           <Button
             type="button"
@@ -140,7 +143,7 @@ export function RallyEditor({
             size="sm"
             onClick={() => setDraft((d) => toggleServeSide(d))}
           >
-            {draft.serveSide} box
+            {draft.serveSide === "left" ? "Left" : "Right"} box
           </Button>
           {ctx.rules.servesPerPoint === 2 && (
             <Button
@@ -157,7 +160,7 @@ export function RallyEditor({
 
       {showsErrorDetail(draft.endReason) &&
         fieldRow(
-          "detail",
+          "Detail",
           <ToggleGroup
             type="single"
             variant="outline"
@@ -180,7 +183,7 @@ export function RallyEditor({
 
       {showsForced(draft.endReason) &&
         fieldRow(
-          "forced?",
+          "Forced?",
           <ToggleGroup
             type="single"
             variant="outline"
@@ -202,7 +205,7 @@ export function RallyEditor({
         {showsShotType(draft.endReason) && (
           <>
             <span className="text-muted-foreground w-12 shrink-0 text-xs">
-              shot
+              Shot
             </span>
             <Select
               value={draft.shotType ?? "none"}
@@ -232,7 +235,7 @@ export function RallyEditor({
         {draft.endReason !== "let" && (
           <>
             <span className="text-muted-foreground shrink-0 text-xs">
-              shots
+              Shots
             </span>
             <Input
               type="number"

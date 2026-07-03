@@ -59,7 +59,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   await expect(page.getByRole("status")).toContainText("3–1")
 
   // every queued write confirmed before we look at the DB
-  await expect(page.getByText("synced ✓")).toBeVisible()
+  await expect(page.getByText("Synced ✓")).toBeVisible()
 
   // ---- finish → derived summary ----------------------------------------
   await page.getByRole("button", { name: "Finish match" }).click()

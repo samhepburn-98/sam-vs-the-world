@@ -107,14 +107,14 @@ export function RallyTimeline({
               onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {isLet ? (
-                <>
-                  <span aria-hidden className="border-t border-dashed" />
-                  <span className="text-muted-foreground text-center text-[11px]">
+                <span className="col-span-3 flex items-center gap-3">
+                  <span aria-hidden className="flex-1 border-t border-dashed" />
+                  <span className="text-muted-foreground shrink-0 text-center text-[11px]">
                     #{row.rally_number} · let (replayed)
                     <span className="block">{serveLine(row)}</span>
                   </span>
-                  <span aria-hidden className="border-t border-dashed" />
-                </>
+                  <span aria-hidden className="flex-1 border-t border-dashed" />
+                </span>
               ) : (
                 <>
                   <span className="text-right">{p1Won && cell}</span>
