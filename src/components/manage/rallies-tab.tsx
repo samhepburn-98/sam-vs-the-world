@@ -193,7 +193,7 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
       <ConfirmDelete
         open={deleting !== null}
         title={`Delete rally #${deleting?.rally_number ?? ""}?`}
-        description="Later rallies keep their numbers — order is what drives the derivation, so a gap is harmless."
+        description="The score recalculates on its own — a gap in the rally numbers is fine."
         pending={del.isPending}
         error={del.isError ? friendlyWriteError(del.error) : null}
         onCancel={() => {

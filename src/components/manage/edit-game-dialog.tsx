@@ -38,7 +38,7 @@ export function EditGameDialog({ game, onClose }: EditGameDialogProps) {
     <EditDialog
       open
       title={`Edit game ${game.game_number}`}
-      description="Only the game number is stored — everything else derives from its rallies."
+      description="Only the game number can change here — the score comes from the rallies themselves."
       onClose={onClose}
     >
       <form onSubmit={(e) => void submit(e)} noValidate>

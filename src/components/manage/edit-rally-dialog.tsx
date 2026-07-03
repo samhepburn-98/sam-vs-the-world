@@ -76,8 +76,8 @@ export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) 
       }
       description={
         mode === "edit"
-          ? `${gameLabel} — the derived score recomputes everywhere.`
-          : `${gameLabel} — rallies from #${rally.rally_number} shift up by one, in one transaction.`
+          ? `${gameLabel} — the score updates everywhere on its own.`
+          : `${gameLabel} — later rallies shift up by one to make room.`
       }
       onClose={onClose}
     >
