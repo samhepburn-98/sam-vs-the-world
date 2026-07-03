@@ -1,3 +1,4 @@
+import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -25,6 +26,7 @@ export function RecentMatches({ matches, players, onOpen }: RecentMatchesProps) 
     return (
       <Empty>
         <EmptyHeader>
+          <CourtEmptyMedia />
           <EmptyTitle className="font-heading">No matches yet</EmptyTitle>
           <EmptyDescription>
             Set up the first match above and start logging.

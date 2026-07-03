@@ -7,6 +7,7 @@ import {
   useMatches,
 } from "@/features/dashboard/api/get-matches"
 import { BallDots } from "@/components/ball-dots"
+import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -153,6 +154,7 @@ function MatchesPage() {
       {rows.length === 0 ? (
         <Empty>
           <EmptyHeader>
+            <CourtEmptyMedia />
             <EmptyTitle className="font-heading">No matches found</EmptyTitle>
             <EmptyDescription>
               Nothing matches these filters yet.

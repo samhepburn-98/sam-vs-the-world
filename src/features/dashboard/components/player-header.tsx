@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/count-up"
 import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
 
 import type {
@@ -70,8 +71,11 @@ export function PlayerHeader({
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         {enough ? (
           <p className="flex items-baseline gap-2">
-            <span className="text-5xl font-bold tabular-nums">
-              {Math.round((games_won / games_decided) * 100)}%
+            <span className="text-5xl font-bold">
+              <CountUp
+                value={Math.round((games_won / games_decided) * 100)}
+                suffix="%"
+              />
             </span>
             <span className="text-muted-foreground text-sm">
               win rate ·{" "}

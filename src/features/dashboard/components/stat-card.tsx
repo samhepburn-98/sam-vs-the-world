@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 
+import { CountUp } from "@/components/count-up"
 import { Card } from "@/components/ui/card"
 import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
 import { cn } from "@/lib/utils"
@@ -71,8 +72,8 @@ export function StatCard({
           <p className="flex items-baseline gap-1.5">
             {rate ? (
               <>
-                <span className="text-3xl font-bold tabular-nums">
-                  {pct(rate)}%
+                <span className="text-3xl font-bold">
+                  <CountUp value={pct(rate)} suffix="%" />
                 </span>
                 <span className="text-muted-foreground text-sm tabular-nums">
                   · {rate.won} of {rate.of}
@@ -80,7 +81,16 @@ export function StatCard({
               </>
             ) : (
               <>
-                <span className="text-3xl font-bold tabular-nums">{value}</span>
+                <span className="text-3xl font-bold tabular-nums">
+                  {typeof value === "number" ? (
+                    <CountUp
+                      value={value}
+                      decimals={value.toString().split(".")[1]?.length ?? 0}
+                    />
+                  ) : (
+                    value
+                  )}
+                </span>
                 {unit && (
                   <span className="text-muted-foreground text-sm">{unit}</span>
                 )}

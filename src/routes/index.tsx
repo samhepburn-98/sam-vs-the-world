@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { BallDots } from "@/components/ball-dots"
+import { CountUp } from "@/components/count-up"
 import { CourtDiagram } from "@/components/court/court-diagram"
+import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -75,9 +77,8 @@ function HomePage() {
           <p className="text-muted-foreground mt-2 text-sm text-balance">
             {counts.data && counts.data.matches > 0 ? (
               <>
-                <span className="tabular-nums">{counts.data.rallies}</span>{" "}
-                rallies logged across{" "}
-                <span className="tabular-nums">{counts.data.matches}</span>{" "}
+                <CountUp value={counts.data.rallies} /> rallies logged across{" "}
+                <CountUp value={counts.data.matches} />{" "}
                 {counts.data.matches === 1 ? "match" : "matches"}.
               </>
             ) : (
@@ -109,6 +110,7 @@ function HomePage() {
         {players.length === 0 ? (
           <Empty>
             <EmptyHeader>
+              <CourtEmptyMedia />
               <EmptyTitle className="font-heading">No players yet</EmptyTitle>
               <EmptyDescription>
                 {owner
