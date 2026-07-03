@@ -47,7 +47,7 @@ export interface Transition {
   writes: Array<WriteIntent>
 }
 
-function currentGame(state: SessionState): GameState {
+export function currentGame(state: SessionState): GameState {
   const game = state.games.at(-1)
   if (!game) throw new Error("session has no games")
   return game
