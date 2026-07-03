@@ -40,6 +40,7 @@ import {
 } from "@/features/logger/logic/session"
 import { useMatchDetail } from "@/lib/api/get-match-detail"
 import { intentToOp } from "@/lib/api/session-ops"
+import { useMediaQuery } from "@/lib/use-media-query"
 import {
   gameOver,
   gameResult,
@@ -192,6 +193,9 @@ function MatchLogger({
       typeof window === "undefined" ||
       window.localStorage.getItem(HINTS_PREF_KEY) !== "0",
   )
+  // hotkeys need a physical keyboard, so the keycap hints are dead weight on a
+  // phone — hide them below tablet width, whatever the stored preference (§10)
+  const hintsWide = useMediaQuery("(min-width: 768px)", true)
   const winnerRef = useRef<HTMLDivElement>(null)
   // digits replace the suggested shot count first, then append (1 → "12" ✓)
   const digitTyped = useRef(false)
@@ -435,7 +439,7 @@ function MatchLogger({
   }
 
   return (
-    <KbdHintsContext.Provider value={showHints}>
+    <KbdHintsContext.Provider value={showHints && hintsWide}>
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
