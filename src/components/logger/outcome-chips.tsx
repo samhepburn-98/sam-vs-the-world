@@ -18,7 +18,6 @@ import {
   showsShotType,
 } from "@/lib/logger/rally-draft"
 import { Constants } from "@/lib/database.types"
-import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/logger/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -138,40 +137,34 @@ export function OutcomeChips({
         </div>
       )}
 
+      {showsShotType(draft.endReason) && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground w-12 shrink-0 text-xs">
+            shot
+          </span>
+          <Select
+            value={draft.shotType ?? "none"}
+            onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
+          >
+            <SelectTrigger size="sm" className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="none">—</SelectItem>
+                {Constants.public.Enums.shot_type.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
-        {showsShotType(draft.endReason) && (
-          <>
-            <span className="text-muted-foreground w-12 shrink-0 text-xs">
-              shot
-            </span>
-            <Select
-              value={draft.shotType ?? "none"}
-              onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
-            >
-              <SelectTrigger size="sm" className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="none">—</SelectItem>
-                  {Constants.public.Enums.shot_type.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </>
-        )}
-        <span
-          className={cn(
-            "text-muted-foreground shrink-0 text-xs",
-            // row-leading when the shot-type select is hidden (e.g. serve
-            // fault) — line up with the other rows' label column
-            !showsShotType(draft.endReason) && "w-12",
-          )}
-        >
+        <span className="text-muted-foreground w-12 shrink-0 text-xs">
           shots
         </span>
         <Input
@@ -184,22 +177,23 @@ export function OutcomeChips({
             onShotCount(e.target.value === "" ? null : Number(e.target.value))
           }
         />
-        <div className="ml-auto flex gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={!canSave(draft)}
-            onClick={onSave}
-          >
-            <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-              {HOTKEY_HINTS.save}
-            </Kbd>
-            Save
-          </Button>
-        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          disabled={!canSave(draft)}
+          onClick={onSave}
+        >
+          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+            {HOTKEY_HINTS.save}
+          </Kbd>
+          Save
+        </Button>
       </div>
     </section>
   )
