@@ -36,4 +36,16 @@ pnpm build
 pnpm run deploy    # build + wrangler deploy ("run" required — bare `pnpm deploy` is a reserved pnpm command)
 ```
 
+### Golden path (full pipeline e2e)
+
+The golden path logs a real match through the UI — login, players, setup,
+hotkey rally entry, finish — and asserts the DB rows, the derived views, and
+the re-rendered score. It runs **only against the local Supabase stack**
+(never the cloud project) and needs Docker running:
+
+```bash
+supabase start     # local stack on 54321; applies all migrations
+pnpm test:golden   # boots its own app server on 3211
+```
+
 Deployed on Cloudflare Workers: https://sam-vs-the-world.samhepburn98.workers.dev

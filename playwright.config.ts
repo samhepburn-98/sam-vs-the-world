@@ -6,6 +6,8 @@ const PORT = 3210
 
 export default defineConfig({
   testDir: "./e2e",
+  // the golden path has its own config (local Supabase stack required)
+  testIgnore: "**/golden/**",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

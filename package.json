@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "deploy": "pnpm build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "test:golden": "playwright test --config playwright.golden.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/merriweather": "^5.2.6",
