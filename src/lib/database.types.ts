@@ -438,24 +438,28 @@ export type Database = {
       }
     }
     Functions: {
-      is_owner: { Args: never; Returns: boolean }
+      // Deviates from `supabase gen types`: the generator can't see that the
+      // plpgsql params accept null — a let insert passes p_winner_id: null,
+      // and RallyRow passes explicit nulls for the optional details. Keep
+      // the `| null`s when regenerating.
       insert_rally_at: {
         Args: {
-          p_id: string
-          p_game_id: string
-          p_rally_number: number
-          p_server_id: string
-          p_serve_side: Database["public"]["Enums"]["serve_side"]
-          p_serve_number: number
-          p_winner_id: string | null
           p_end_reason: Database["public"]["Enums"]["end_reason"]
           p_error_detail?: Database["public"]["Enums"]["error_detail"] | null
           p_forced?: boolean | null
-          p_shot_type?: Database["public"]["Enums"]["shot_type"] | null
+          p_game_id: string
+          p_id: string
+          p_rally_number: number
+          p_serve_number: number
+          p_serve_side: Database["public"]["Enums"]["serve_side"]
+          p_server_id: string
           p_shot_count?: number | null
+          p_shot_type?: Database["public"]["Enums"]["shot_type"] | null
+          p_winner_id: string | null
         }
         Returns: string
       }
+      is_owner: { Args: never; Returns: boolean }
     }
     Enums: {
       ball_type: "blue" | "red" | "yellow" | "double_yellow"
