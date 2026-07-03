@@ -8,8 +8,8 @@ import type { WriteOp } from "@/lib/queue/write-queue"
 // the logger can transition immediately and retries stay idempotent.
 
 interface InsertCapableClient {
-  from(table: "matches" | "games"): {
-    insert(values: Record<string, unknown>): PromiseLike<{ error: unknown }>
+  from: (table: "matches" | "games") => {
+    insert: (values: Record<string, unknown>) => PromiseLike<{ error: unknown }>
   }
 }
 
