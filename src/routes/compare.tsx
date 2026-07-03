@@ -8,6 +8,7 @@ import { momentumOptions } from "@/features/dashboard/api/get-momentum"
 import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
 import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
+import { CompareShowcase } from "@/features/dashboard/components/compare-showcase"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
 import {
   MIN_GAMES_FOR_WIN_RATE,
@@ -37,6 +38,7 @@ import {
 } from "@/components/ui/table"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
+import type { PlayerData } from "@/features/dashboard/components/compare-showcase"
 import type {
   ErrorProfile,
   Momentum,
@@ -63,14 +65,6 @@ export const Route = createFileRoute("/compare")({
 })
 
 const MAX_PLAYERS = 4
-
-interface PlayerData {
-  headline?: PlayerHeadline
-  serve?: ServeStats
-  error?: ErrorProfile
-  rally?: RallyLengths
-  momentum?: Momentum
-}
 
 function pct(n: number, d: number) {
   return Math.round((n / d) * 100)
@@ -243,46 +237,52 @@ function ComparePage() {
               Pick players to compare
             </EmptyTitle>
             <EmptyDescription>
-              Add at least two players above to see their profiles side by side.
+              Add at least two players above to see them go head to head.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
-      ) : (
+      ) : selected.length === 2 ? (
+        // two players: the head-to-head showcase
         <>
-          <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-40">Metric</TableHead>
-                  {selected.map((id) => (
-                    <TableHead key={id}>{nameOf(id)}</TableHead>
+          <CompareShowcase
+            name1={nameOf(selected[0])}
+            name2={nameOf(selected[1])}
+            d1={data[0]}
+            d2={data[1]}
+          />
+          <H2hPanel
+            player1Id={selected[0]}
+            player2Id={selected[1]}
+            name1={nameOf(selected[0])}
+            name2={nameOf(selected[1])}
+          />
+        </>
+      ) : (
+        // three or more: opposed bars don't map, so fall back to aligned columns
+        <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-40">Metric</TableHead>
+                {selected.map((id) => (
+                  <TableHead key={id}>{nameOf(id)}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ROWS.map((row) => (
+                <TableRow key={row.label}>
+                  <TableCell className="text-muted-foreground">
+                    {row.label}
+                  </TableCell>
+                  {data.map((d, i) => (
+                    <TableCell key={selected[i]}>{row.cell(d)}</TableCell>
                   ))}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ROWS.map((row) => (
-                  <TableRow key={row.label}>
-                    <TableCell className="text-muted-foreground">
-                      {row.label}
-                    </TableCell>
-                    {data.map((d, i) => (
-                      <TableCell key={selected[i]}>{row.cell(d)}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {selected.length === 2 && (
-            <H2hPanel
-              player1Id={selected[0]}
-              player2Id={selected[1]}
-              name1={nameOf(selected[0])}
-              name2={nameOf(selected[1])}
-            />
-          )}
-        </>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </main>
   )
