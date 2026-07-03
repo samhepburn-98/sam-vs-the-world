@@ -187,7 +187,7 @@ export function OutcomeChips({
             <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
               {HOTKEY_HINTS.save}
             </Kbd>
-            Save — {winnerName}
+            Save
           </Button>
         </div>
       </div>
