@@ -69,6 +69,13 @@ export function OutcomeChips({
       aria-label="How the rally ended"
       className="bg-card flex flex-col gap-3 rounded-lg border p-4"
     >
+      <p className="text-sm">
+        Point to <span className="font-bold">{winnerName}</span>
+        <span className="text-muted-foreground">
+          {" "}
+          — tap the other name above if that's wrong
+        </span>
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground w-12 shrink-0 text-xs">how</span>
         <ToggleGroup

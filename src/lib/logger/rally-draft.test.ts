@@ -35,7 +35,7 @@ const suggestion = {
 } as const
 
 function draftWithWinner(winnerId: string) {
-  return tapWinner(createDraft(suggestion), winnerId)
+  return tapWinner(createDraft(suggestion), winnerId, ctx)
 }
 
 describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
@@ -45,6 +45,20 @@ describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
     const draft = selectEndReason(draftWithWinner("dave"), "ace", ctx)
     expect(draft.winnerId).toBe("dave")
     expect(draft.serverId).toBe("dave")
+  })
+
+  it("switching the winner after picking an end reason re-applies its corrections", () => {
+    // misclicked "dave won", picked ace (server → dave), then fixed the
+    // winner to sam: the server correction must follow the new winner
+    let draft = selectEndReason(draftWithWinner("dave"), "ace", ctx)
+    draft = tapWinner(draft, "sam", ctx)
+    expect(draft.winnerId).toBe("sam")
+    expect(draft.serverId).toBe("sam")
+
+    let fault = selectEndReason(draftWithWinner("sam"), "serve_fault", ctx)
+    fault = tapWinner(fault, "dave", ctx)
+    expect(fault.winnerId).toBe("dave")
+    expect(fault.serverId).toBe("sam")
   })
 
   it("serve fault corrects the server to the NON-winner and forces serve 2", () => {

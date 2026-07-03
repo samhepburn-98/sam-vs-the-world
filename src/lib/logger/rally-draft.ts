@@ -54,8 +54,16 @@ export function createDraft(suggestion: Suggestion): RallyDraft {
   }
 }
 
-export function tapWinner(draft: RallyDraft, winnerId: string): RallyDraft {
-  return applyAutoRules({ ...draft, winnerId })
+export function tapWinner(
+  draft: RallyDraft,
+  winnerId: string,
+  ctx: DraftContext,
+): RallyDraft {
+  const next = { ...draft, winnerId }
+  // a re-tap is a misclick correction: re-apply the chosen end reason so its
+  // server corrections (ace/serve_fault) track the new winner
+  if (next.endReason) return selectEndReason(next, next.endReason, ctx)
+  return applyAutoRules(next)
 }
 
 export function selectEndReason(

@@ -227,11 +227,19 @@ function ActiveGameLogger({
         ref={winnerRef}
         p1Name={nameOf(match.player1_id)}
         p2Name={nameOf(match.player2_id)}
+        selected={
+          draft.winnerId === null
+            ? null
+            : draft.winnerId === match.player1_id
+              ? "p1"
+              : "p2"
+        }
         onWinner={(side) =>
           setDraft((d) =>
             tapWinner(
               d,
               side === "p1" ? match.player1_id : match.player2_id,
+              draftCtx,
             ),
           )
         }
