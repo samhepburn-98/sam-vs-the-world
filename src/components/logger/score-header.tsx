@@ -39,7 +39,7 @@ export function ScoreHeader({
   const p1Serving = draft.serverId === p1Id
 
   const chips = (
-    <span className="mt-1.5 flex justify-center gap-1.5">
+    <span className="mt-1 flex justify-center gap-1.5">
       <button
         type="button"
         onClick={onToggleSide}
@@ -82,9 +82,16 @@ export function ScoreHeader({
       >
         {points}
       </p>
-      {serving ? chips : (
+      {serving ? (
+        <>
+          <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
+            Serving
+          </span>
+          {chips}
+        </>
+      ) : (
         <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
-          receiving
+          Receiving
         </span>
       )}
     </div>
