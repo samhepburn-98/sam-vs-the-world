@@ -1,10 +1,13 @@
 import { useRef, useState } from "react"
 
+import { GameOverBanner } from "@/components/logger/game-over-banner"
+import { MatchSummary } from "@/components/logger/match-summary"
 import { OutcomeChips } from "@/components/logger/outcome-chips"
 import { RallyEditor } from "@/components/logger/rally-editor"
 import { RallyTimeline } from "@/components/logger/rally-timeline"
 import { ScoreHeader } from "@/components/logger/score-header"
 import { SyncIndicator } from "@/components/logger/sync-indicator"
+import { UndoBar } from "@/components/logger/undo-bar"
 import { WinnerButtons } from "@/components/logger/winner-buttons"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -19,20 +22,36 @@ import {
   toggleServeSide,
   toggleServer,
 } from "@/lib/logger/rally-draft"
-import { insertRallyOp } from "@/lib/queries/create-rally"
+import {
+  currentGame,
+  editRally,
+  redo,
+  saveRally,
+  startGame,
+  undo,
+} from "@/lib/logger/session"
 import { useMatchDetail } from "@/lib/queries/get-match-detail"
-import { updateRallyOp } from "@/lib/queries/update-rally"
-import { gameResult, scoreAfter, suggestNext } from "@/lib/scoring"
+import { intentToOp } from "@/lib/queries/session-ops"
+import {
+  gameOver,
+  gameResult,
+  suggestNext,
+  suggestNextGameFirstServer,
+  tallyMatch,
+} from "@/lib/scoring"
 
 import type { DraftContext, RallyRow } from "@/lib/logger/rally-draft"
+import type { SessionState, Transition } from "@/lib/logger/session"
 import type { MatchDetail } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 import type { WriteQueue } from "@/lib/queue/write-queue"
 import type { GameContext, HouseRules } from "@/lib/scoring"
 
-// Phase B (§5.3): score header, winner buttons, outcome chips. The rally
-// timeline (#15), undo (#16), game-over banner (#16), and hotkeys (#17)
-// layer onto this surface.
+// The logging surface (§5.3): score header, winner buttons, outcome chips,
+// editable timeline, one-action undo, game/match end flow. Hotkeys (#17)
+// layer onto this surface. All session mutations run through the pure
+// planner in lib/logger/session — this component maps its write intents
+// onto the FIFO queue and renders the result.
 
 interface LoggingShellProps {
   matchId: string
@@ -76,9 +95,7 @@ export function LoggingShell({
     )
   }
 
-  const match = detail.data
-  const currentGame = match.games.at(-1)
-  if (!currentGame) {
+  if (detail.data.games.length === 0) {
     return (
       <p className="text-destructive py-16 text-center text-sm">
         This match has no games — reopen it after checking /manage.
@@ -87,12 +104,9 @@ export function LoggingShell({
   }
 
   return (
-    <ActiveGameLogger
-      key={currentGame.id}
-      match={match}
-      gameId={currentGame.id}
-      gameNumber={currentGame.game_number}
-      initialRows={currentGame.rallies.map(normalizeRow)}
+    <MatchLogger
+      key={matchId}
+      match={detail.data}
       players={players}
       queue={queue}
       firstServerId={firstServerId}
@@ -127,36 +141,69 @@ function rulesOf(match: MatchDetail): HouseRules {
   }
 }
 
-interface ActiveGameLoggerProps {
+interface MatchLoggerProps {
   match: MatchDetail
-  gameId: string
-  gameNumber: number
-  initialRows: Array<RallyRow>
   players: Array<PlayerSummary>
   queue: WriteQueue
   firstServerId?: string
   onExit: () => void
 }
 
-function ActiveGameLogger({
+function MatchLogger({
   match,
-  gameId,
-  gameNumber,
-  initialRows,
   players,
   queue,
   firstServerId,
   onExit,
-}: ActiveGameLoggerProps) {
+}: MatchLoggerProps) {
   const rules = rulesOf(match)
-  const gameCtx: GameContext = {
+
+  const [session, setSession] = useState<SessionState>(() => ({
+    matchId: match.id,
+    games: match.games.map((g) => ({
+      id: g.id,
+      gameNumber: g.game_number,
+      rows: g.rallies.map(normalizeRow),
+    })),
+    undoable: null,
+    redoable: null,
+  }))
+  // null = "follow the engine's suggestion"; transitions reset by nulling
+  const [draftState, setDraftState] = useState<ReturnType<
+    typeof createDraft
+  > | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [finished, setFinished] = useState(false)
+  const winnerRef = useRef<HTMLDivElement>(null)
+
+  const game = currentGame(session)
+  const nameOf = (id: string | null) =>
+    players.find((p) => p.id === id)?.name ?? "—"
+
+  // who serves this game's first rally: the stored fact (rally 1), else the
+  // setup choice for game 1, else the previous game's winner (§7.2)
+  const matchFirstServer =
+    session.games[0].rows.at(0)?.server_id ?? firstServerId ?? match.player1_id
+  const baseCtx: GameContext = {
     player1Id: match.player1_id,
     player2Id: match.player2_id,
-    // durable record is rally 1's server; fall back to the setup choice,
-    // then player 1 (tappable chip corrects it either way)
-    firstServerId:
-      initialRows.at(0)?.server_id ?? firstServerId ?? match.player1_id,
+    firstServerId: matchFirstServer,
     rules,
+  }
+  const priorGames = session.games.slice(0, -1).map((g) => ({
+    n: g.gameNumber,
+    r: gameResult(g.rows.map(rowToRallyInput), baseCtx),
+  }))
+  const gameCtx: GameContext = {
+    ...baseCtx,
+    firstServerId:
+      game.rows.at(0)?.server_id ??
+      (game.gameNumber === 1
+        ? matchFirstServer
+        : suggestNextGameFirstServer(
+            priorGames.at(-1)?.r.winnerId ?? null,
+            baseCtx,
+          )),
   }
   const draftCtx: DraftContext = {
     player1Id: match.player1_id,
@@ -164,37 +211,56 @@ function ActiveGameLogger({
     rules,
   }
 
-  const [rows, setRows] = useState(initialRows)
-  const [draft, setDraft] = useState(() =>
-    createDraft(suggestNext(initialRows.map(rowToRallyInput), gameCtx)),
-  )
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const winnerRef = useRef<HTMLDivElement>(null)
+  const inputs = game.rows.map(rowToRallyInput)
+  const result = gameResult(inputs, gameCtx)
+  const score = result.score
+  const draft = draftState ?? createDraft(suggestNext(inputs, gameCtx))
 
-  const inputs = rows.map(rowToRallyInput)
-  const score = scoreAfter(inputs, gameCtx)
-  const nameOf = (id: string | null) =>
-    players.find((p) => p.id === id)?.name ?? "—"
+  const over = gameOver(score, rules)
+  const tally = tallyMatch(
+    [...priorGames.map((g) => g.r), result],
+    { player1Id: match.player1_id, player2Id: match.player2_id, format: match.format },
+  )
+  const matchWinnerName =
+    match.format !== null && tally.matchWinnerId !== null
+      ? nameOf(tally.matchWinnerId)
+      : undefined
+
+  function apply(t: Transition) {
+    setSession(t.state)
+    for (const intent of t.writes) queue.enqueue(intentToOp(intent))
+    setDraftState(null)
+    setEditingId(null)
+  }
 
   function commitRow(row: RallyRow) {
-    const nextRows = [...rows, row]
-    setRows(nextRows)
-    queue.enqueue(insertRallyOp(row))
-    setDraft(createDraft(suggestNext(nextRows.map(rowToRallyInput), gameCtx)))
+    apply(saveRally(session, row))
     winnerRef.current?.focus()
   }
 
   function commitEdit(edited: RallyRow) {
-    const nextRows = rows.map((r) => (r.id === edited.id ? edited : r))
-    setRows(nextRows)
-    queue.enqueue(updateRallyOp(edited))
+    const midEntry = draft.winnerId !== null || draft.endReason !== null
+    const t = editRally(session, edited)
+    setSession(t.state)
+    for (const intent of t.writes) queue.enqueue(intentToOp(intent))
     setEditingId(null)
     // an edit can change who serves next — refresh an untouched draft only,
     // never clobber a rally mid-entry
-    if (draft.winnerId === null && draft.endReason === null) {
-      setDraft(createDraft(suggestNext(nextRows.map(rowToRallyInput), gameCtx)))
-    }
+    if (!midEntry) setDraftState(null)
   }
+
+  const undoLabel =
+    session.undoable === null
+      ? null
+      : session.undoable.kind === "rally"
+        ? `Undo rally ${session.undoable.row.rally_number}`
+        : `Undo game ${session.undoable.game.gameNumber}`
+  const redoLabel =
+    session.redoable === null
+      ? null
+      : session.redoable.kind === "rally"
+        ? `Redo rally ${session.redoable.row.rally_number}`
+        : `Redo game ${session.redoable.game.gameNumber}`
 
   const rulesLine = [
     match.format ? `best of ${match.format}` : "casual",
@@ -202,12 +268,31 @@ function ActiveGameLogger({
     rules.servesPerPoint === 2 ? "two serves" : "single serve",
   ].join(" · ")
 
-  const priorGames = match.games
-    .filter((g) => g.id !== gameId)
-    .map((g) => ({
-      n: g.game_number,
-      r: gameResult(g.rallies.map(normalizeRow).map(rowToRallyInput), gameCtx),
-    }))
+  if (finished) {
+    const decided = [...priorGames, { n: game.gameNumber, r: result }].filter(
+      ({ r }) => r.score.p1 > 0 || r.score.p2 > 0,
+    )
+    return (
+      <div className="flex flex-col gap-4">
+        <MatchSummary
+          matchId={match.id}
+          headline={
+            tally.matchWinnerId
+              ? `${nameOf(tally.matchWinnerId)} wins ${tally.gamesWonP1}–${tally.gamesWonP2}`
+              : `Session logged — games ${tally.gamesWonP1}–${tally.gamesWonP2}`
+          }
+          subline={`${nameOf(match.player1_id)} vs ${nameOf(match.player2_id)} · ${match.date} · ${rulesLine}`}
+          games={decided.map(({ n, r }) => ({
+            gameNumber: n,
+            scoreline: `${r.score.p1}–${r.score.p2}`,
+            winnerName: r.winnerId ? nameOf(r.winnerId) : null,
+          }))}
+          onDone={onExit}
+        />
+        <SyncIndicator queue={queue} />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -226,16 +311,31 @@ function ActiveGameLogger({
         p2Name={nameOf(match.player2_id)}
         p1Id={match.player1_id}
         score={score}
-        gameNumber={gameNumber}
+        gameNumber={game.gameNumber}
         rulesLine={rulesLine}
         draft={draft}
         servesPerPoint={rules.servesPerPoint}
-        onToggleServer={() => setDraft((d) => toggleServer(d, draftCtx))}
-        onToggleSide={() => setDraft((d) => toggleServeSide(d))}
+        onToggleServer={() => setDraftState(toggleServer(draft, draftCtx))}
+        onToggleSide={() => setDraftState(toggleServeSide(draft))}
         onToggleServeNumber={() =>
-          setDraft((d) => toggleServeNumber(d, draftCtx))
+          setDraftState(toggleServeNumber(draft, draftCtx))
         }
       />
+
+      {over.over && (
+        <GameOverBanner
+          gameNumber={game.gameNumber}
+          gameWinnerName={nameOf(
+            over.leader === "p1" ? match.player1_id : match.player2_id,
+          )}
+          scoreline={`${score.p1}–${score.p2}`}
+          matchWinnerName={matchWinnerName}
+          onStartNextGame={() =>
+            apply(startGame(session, crypto.randomUUID()))
+          }
+          onFinishMatch={() => setFinished(true)}
+        />
+      )}
 
       <WinnerButtons
         ref={winnerRef}
@@ -249,9 +349,9 @@ function ActiveGameLogger({
               : "p2"
         }
         onWinner={(side) =>
-          setDraft((d) =>
+          setDraftState(
             tapWinner(
-              d,
+              draft,
               side === "p1" ? match.player1_id : match.player2_id,
               draftCtx,
             ),
@@ -261,8 +361,8 @@ function ActiveGameLogger({
           commitRow(
             buildLetRow(draft, {
               id: crypto.randomUUID(),
-              gameId,
-              rallyNumber: rows.length + 1,
+              gameId: game.id,
+              rallyNumber: game.rows.length + 1,
             }),
           )
         }}
@@ -272,28 +372,33 @@ function ActiveGameLogger({
         <OutcomeChips
           draft={draft}
           winnerName={nameOf(draft.winnerId)}
-          onEndReason={(r) => setDraft((d) => selectEndReason(d, r, draftCtx))}
-          onErrorDetail={(v) => setDraft((d) => ({ ...d, errorDetail: v }))}
-          onForced={(v) => setDraft((d) => ({ ...d, forced: v }))}
-          onShotType={(v) => setDraft((d) => ({ ...d, shotType: v }))}
-          onShotCount={(v) => setDraft((d) => ({ ...d, shotCount: v }))}
+          onEndReason={(r) => setDraftState(selectEndReason(draft, r, draftCtx))}
+          onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
+          onForced={(v) => setDraftState({ ...draft, forced: v })}
+          onShotType={(v) => setDraftState({ ...draft, shotType: v })}
+          onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
           onSave={() => {
             commitRow(
               buildRallyRow(draft, {
                 id: crypto.randomUUID(),
-                gameId,
-                rallyNumber: rows.length + 1,
+                gameId: game.id,
+                rallyNumber: game.rows.length + 1,
               }),
             )
           }}
-          onCancel={() =>
-            setDraft(createDraft(suggestNext(inputs, gameCtx)))
-          }
+          onCancel={() => setDraftState(null)}
         />
       )}
 
+      <UndoBar
+        undoLabel={undoLabel}
+        redoLabel={redoLabel}
+        onUndo={() => apply(undo(session))}
+        onRedo={() => apply(redo(session, crypto.randomUUID()))}
+      />
+
       <RallyTimeline
-        rows={rows}
+        rows={game.rows}
         p1Id={match.player1_id}
         p1Name={nameOf(match.player1_id)}
         p2Name={nameOf(match.player2_id)}
