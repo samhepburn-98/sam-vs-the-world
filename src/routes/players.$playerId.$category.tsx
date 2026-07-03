@@ -61,7 +61,7 @@ function CategoryDetailPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/players/$playerId" params={{ playerId }} search={search}>
+              <Link to="/players/$playerId" params={{ playerId }}>
                 {player.name}
               </Link>
             </BreadcrumbLink>
