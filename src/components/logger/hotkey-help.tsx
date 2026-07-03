@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { LoggerDialog } from "@/components/logger/logger-dialog"
 import { Kbd, KbdHintsContext } from "@/components/ui/kbd"
 import { Toggle } from "@/components/ui/toggle"
 import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
@@ -64,23 +64,11 @@ export function HotkeyHelp({
   hintsVisible,
   onToggleHints,
 }: HotkeyHelpProps) {
-  if (!open) return null
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Hotkeys"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
+    <LoggerDialog open={open} title="Hotkeys" onClose={onClose}>
       {/* the sheet's own keys are content, not hints — always visible */}
       <KbdHintsContext.Provider value={true}>
-      <div
-        className="bg-card w-full max-w-2xl rounded-lg border p-6 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className="font-heading flex-1 text-lg font-bold">Hotkeys</h2>
+        <div className="mb-4 flex justify-end">
           <Toggle
             variant="outline"
             size="sm"
@@ -89,9 +77,6 @@ export function HotkeyHelp({
           >
             {hintsVisible ? "Key hints shown" : "Key hints hidden"}
           </Toggle>
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Close
-          </Button>
         </div>
         <div className="grid gap-6 sm:grid-cols-2">
           {GROUPS.map((group) => (
@@ -114,8 +99,7 @@ export function HotkeyHelp({
           Keys are inert while a text field is focused. Buttons always work —
           hotkeys are the fast path, not the only path.
         </p>
-      </div>
       </KbdHintsContext.Provider>
-    </div>
+    </LoggerDialog>
   )
 }

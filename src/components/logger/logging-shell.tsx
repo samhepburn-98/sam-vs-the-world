@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import { GameOverBanner } from "@/components/logger/game-over-banner"
+import { Glossary } from "@/components/logger/glossary"
 import { HotkeyHelp } from "@/components/logger/hotkey-help"
 import { MatchSummary } from "@/components/logger/match-summary"
 import { OutcomeChips } from "@/components/logger/outcome-chips"
@@ -184,6 +185,7 @@ function MatchLogger({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [finished, setFinished] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [glossaryOpen, setGlossaryOpen] = useState(false)
   const [showHints, setShowHints] = useState(
     () =>
       typeof window === "undefined" ||
@@ -366,13 +368,15 @@ function MatchLogger({
     function onKeyDown(e: KeyboardEvent) {
       if (finished || isEditableTarget(e.target)) return
       if (e.key === "Escape") {
-        if (helpOpen) setHelpOpen(false)
+        if (glossaryOpen) setGlossaryOpen(false)
+        else if (helpOpen) setHelpOpen(false)
         else if (editingId !== null) setEditingId(null)
         return
       }
       if (editingId !== null) return // inline editor owns the keyboard
       const action = hotkeyAction(e)
       if (!action) return
+      if (glossaryOpen) return // reading, not logging
       if (helpOpen && action.type !== "help") return
       e.preventDefault()
       dispatchHotkey(action)
@@ -456,6 +460,7 @@ function MatchLogger({
         hintsVisible={showHints}
         onToggleHints={toggleHints}
       />
+      <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
 
       <ScoreHeader
         p1Name={nameOf(match.player1_id)}
@@ -514,6 +519,7 @@ function MatchLogger({
           onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
           onSave={saveDraftRally}
           onCancel={() => setDraftState(null)}
+          onOpenGlossary={() => setGlossaryOpen(true)}
         />
       )}
 
