@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
+import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
 
 // One-action undo with a redo grace (§5.3): visible only while there is
 // something to reverse; any new save or edit clears both.
@@ -16,6 +18,7 @@ export function UndoBar({ undoLabel, redoLabel, onUndo, onRedo }: UndoBarProps) 
     <div className="flex justify-end gap-2">
       {undoLabel && (
         <Button type="button" variant="outline" size="sm" onClick={onUndo}>
+          <Kbd>{HOTKEY_HINTS.undo}</Kbd>
           {undoLabel}
         </Button>
       )}

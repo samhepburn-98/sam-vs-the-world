@@ -1,6 +1,7 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { GameOverBanner } from "@/components/logger/game-over-banner"
+import { HotkeyHelp } from "@/components/logger/hotkey-help"
 import { MatchSummary } from "@/components/logger/match-summary"
 import { OutcomeChips } from "@/components/logger/outcome-chips"
 import { RallyEditor } from "@/components/logger/rally-editor"
@@ -10,13 +11,18 @@ import { SyncIndicator } from "@/components/logger/sync-indicator"
 import { UndoBar } from "@/components/logger/undo-bar"
 import { WinnerButtons } from "@/components/logger/winner-buttons"
 import { Button } from "@/components/ui/button"
+import { KbdHintsContext } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
+import { hotkeyAction, isEditableTarget } from "@/lib/logger/hotkeys"
 import {
   buildLetRow,
   buildRallyRow,
+  canSave,
   createDraft,
   rowToRallyInput,
   selectEndReason,
+  showsErrorDetail,
+  showsForced,
   tapWinner,
   toggleServeNumber,
   toggleServeSide,
@@ -40,6 +46,7 @@ import {
   tallyMatch,
 } from "@/lib/scoring"
 
+import type { HotkeyAction } from "@/lib/logger/hotkeys"
 import type { DraftContext, RallyRow } from "@/lib/logger/rally-draft"
 import type { SessionState, Transition } from "@/lib/logger/session"
 import type { MatchDetail } from "@/lib/schemas/match"
@@ -132,6 +139,8 @@ function normalizeRow(r: {
   return { ...r, serve_number: r.serve_number === 2 ? 2 : 1 }
 }
 
+const HINTS_PREF_KEY = "svw:show-key-hints"
+
 function rulesOf(match: MatchDetail): HouseRules {
   return {
     targetScore: match.target_score,
@@ -174,7 +183,15 @@ function MatchLogger({
   > | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [finished, setFinished] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [showHints, setShowHints] = useState(
+    () =>
+      typeof window === "undefined" ||
+      window.localStorage.getItem(HINTS_PREF_KEY) !== "0",
+  )
   const winnerRef = useRef<HTMLDivElement>(null)
+  // digits replace the suggested shot count first, then append (1 → "12" ✓)
+  const digitTyped = useRef(false)
 
   const game = currentGame(session)
   const nameOf = (id: string | null) =>
@@ -231,6 +248,7 @@ function MatchLogger({
     for (const intent of t.writes) queue.enqueue(intentToOp(intent))
     setDraftState(null)
     setEditingId(null)
+    digitTyped.current = false
   }
 
   function commitRow(row: RallyRow) {
@@ -248,6 +266,120 @@ function MatchLogger({
     // never clobber a rally mid-entry
     if (!midEntry) setDraftState(null)
   }
+
+  function toggleHints(visible: boolean) {
+    setShowHints(visible)
+    window.localStorage.setItem(HINTS_PREF_KEY, visible ? "1" : "0")
+  }
+
+  function pickWinner(side: "p1" | "p2") {
+    digitTyped.current = false
+    setDraftState(
+      tapWinner(
+        draft,
+        side === "p1" ? match.player1_id : match.player2_id,
+        draftCtx,
+      ),
+    )
+  }
+
+  function saveDraftRally() {
+    commitRow(
+      buildRallyRow(draft, {
+        id: crypto.randomUUID(),
+        gameId: game.id,
+        rallyNumber: game.rows.length + 1,
+      }),
+    )
+  }
+
+  function saveLet() {
+    commitRow(
+      buildLetRow(draft, {
+        id: crypto.randomUUID(),
+        gameId: game.id,
+        rallyNumber: game.rows.length + 1,
+      }),
+    )
+  }
+
+  function dispatchHotkey(action: HotkeyAction) {
+    const chipsOpen = draft.winnerId !== null
+    switch (action.type) {
+      case "help":
+        setHelpOpen((open) => !open)
+        return
+      case "winner":
+        pickWinner(action.side)
+        return
+      case "let":
+        saveLet()
+        return
+      case "endReason":
+        if (chipsOpen) {
+          digitTyped.current = false
+          setDraftState(selectEndReason(draft, action.reason, draftCtx))
+        }
+        return
+      case "errorDetail":
+        if (chipsOpen && showsErrorDetail(draft.endReason)) {
+          setDraftState({
+            ...draft,
+            errorDetail:
+              draft.errorDetail === action.detail ? null : action.detail,
+          })
+        }
+        return
+      case "toggleForced":
+        if (chipsOpen && showsForced(draft.endReason)) {
+          setDraftState({ ...draft, forced: draft.forced !== true })
+        }
+        return
+      case "toggleServeNumber":
+        setDraftState(toggleServeNumber(draft, draftCtx))
+        return
+      case "toggleServeSide":
+        setDraftState(toggleServeSide(draft))
+        return
+      case "digit":
+        if (chipsOpen) {
+          const appended = (draft.shotCount ?? 0) * 10 + action.digit
+          setDraftState({
+            ...draft,
+            shotCount: digitTyped.current ? Math.min(appended, 999) : action.digit,
+          })
+          digitTyped.current = true
+        }
+        return
+      case "save":
+        if (chipsOpen && canSave(draft)) saveDraftRally()
+        return
+      case "undo":
+        apply(undo(session))
+        return
+    }
+  }
+
+  // window-level so no control needs focus; re-bound each render to see
+  // fresh state (§5.3 keyboard-first)
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (finished || isEditableTarget(e.target)) return
+      if (e.key === "Escape") {
+        if (helpOpen) setHelpOpen(false)
+        else if (editingId !== null) setEditingId(null)
+        return
+      }
+      if (editingId !== null) return // inline editor owns the keyboard
+      const action = hotkeyAction(e)
+      if (!action) return
+      if (helpOpen && action.type !== "help") return
+      e.preventDefault()
+      dispatchHotkey(action)
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  })
 
   const undoLabel =
     session.undoable === null
@@ -295,16 +427,35 @@ function MatchLogger({
   }
 
   return (
+    <KbdHintsContext.Provider value={showHints}>
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
           {nameOf(match.player1_id)} vs {nameOf(match.player2_id)} ·{" "}
           {match.date}
         </p>
-        <Button type="button" variant="ghost" size="sm" onClick={onExit}>
-          Pause & exit
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={() => setHelpOpen(true)}
+          >
+            ? hotkeys
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onExit}>
+            Pause & exit
+          </Button>
+        </div>
       </header>
+
+      <HotkeyHelp
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        hintsVisible={showHints}
+        onToggleHints={toggleHints}
+      />
 
       <ScoreHeader
         p1Name={nameOf(match.player1_id)}
@@ -348,24 +499,8 @@ function MatchLogger({
               ? "p1"
               : "p2"
         }
-        onWinner={(side) =>
-          setDraftState(
-            tapWinner(
-              draft,
-              side === "p1" ? match.player1_id : match.player2_id,
-              draftCtx,
-            ),
-          )
-        }
-        onLet={() => {
-          commitRow(
-            buildLetRow(draft, {
-              id: crypto.randomUUID(),
-              gameId: game.id,
-              rallyNumber: game.rows.length + 1,
-            }),
-          )
-        }}
+        onWinner={pickWinner}
+        onLet={saveLet}
       />
 
       {draft.winnerId !== null && (
@@ -377,15 +512,7 @@ function MatchLogger({
           onForced={(v) => setDraftState({ ...draft, forced: v })}
           onShotType={(v) => setDraftState({ ...draft, shotType: v })}
           onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
-          onSave={() => {
-            commitRow(
-              buildRallyRow(draft, {
-                id: crypto.randomUUID(),
-                gameId: game.id,
-                rallyNumber: game.rows.length + 1,
-              }),
-            )
-          }}
+          onSave={saveDraftRally}
           onCancel={() => setDraftState(null)}
         />
       )}
@@ -431,5 +558,6 @@ function MatchLogger({
         <SyncIndicator queue={queue} />
       </footer>
     </div>
+    </KbdHintsContext.Provider>
   )
 }

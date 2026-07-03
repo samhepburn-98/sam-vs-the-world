@@ -1,6 +1,8 @@
 import { forwardRef } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
+import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
 import { cn } from "@/lib/utils"
 
 // The primary action (§5.3): two big buttons — who won the rally — with the
@@ -31,6 +33,7 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
         )}
         onClick={() => onWinner(side)}
       >
+        <Kbd>{side === "p1" ? HOTKEY_HINTS.winnerP1 : HOTKEY_HINTS.winnerP2}</Kbd>
         {name} won
         {selected === side && <span aria-hidden>✓</span>}
       </Button>
@@ -49,6 +52,7 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
           className="h-16 px-3 text-xs"
           onClick={onLet}
         >
+          <Kbd>{HOTKEY_HINTS.let}</Kbd>
           Let
         </Button>
         {winnerButton("p2", p2Name)}
