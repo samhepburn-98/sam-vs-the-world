@@ -74,6 +74,21 @@ export const matchSummary = z.object({
 
 export type MatchSummary = z.infer<typeof matchSummary>
 
+/** The recent-matches list on the home hub (§5.1): the derived result of a
+ *  match, names resolved separately from the roster. From `match_results`. */
+export const matchResultSummary = z.object({
+  match_id: z.string().uuid(),
+  date: z.string(),
+  player1_id: z.string().uuid(),
+  player2_id: z.string().uuid(),
+  games_won_p1: z.number().int().nullable(),
+  games_won_p2: z.number().int().nullable(),
+  match_winner_id: z.string().uuid().nullable(),
+  ball_type: ballType.nullable(),
+})
+
+export type MatchResultSummary = z.infer<typeof matchResultSummary>
+
 /** Every stored column — the /manage raw browser's row (§5.4). */
 export const matchRow = matchSummary.extend({
   target_score: z.number().int(),
