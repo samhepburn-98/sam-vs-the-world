@@ -1,6 +1,8 @@
 import { useRef, useState } from "react"
 
 import { OutcomeChips } from "@/components/logger/outcome-chips"
+import { RallyEditor } from "@/components/logger/rally-editor"
+import { RallyTimeline } from "@/components/logger/rally-timeline"
 import { ScoreHeader } from "@/components/logger/score-header"
 import { SyncIndicator } from "@/components/logger/sync-indicator"
 import { WinnerButtons } from "@/components/logger/winner-buttons"
@@ -19,6 +21,7 @@ import {
 } from "@/lib/logger/rally-draft"
 import { insertRallyOp } from "@/lib/queries/create-rally"
 import { useMatchDetail } from "@/lib/queries/get-match-detail"
+import { updateRallyOp } from "@/lib/queries/update-rally"
 import { gameResult, scoreAfter, suggestNext } from "@/lib/scoring"
 
 import type { DraftContext, RallyRow } from "@/lib/logger/rally-draft"
@@ -165,6 +168,7 @@ function ActiveGameLogger({
   const [draft, setDraft] = useState(() =>
     createDraft(suggestNext(initialRows.map(rowToRallyInput), gameCtx)),
   )
+  const [editingId, setEditingId] = useState<string | null>(null)
   const winnerRef = useRef<HTMLDivElement>(null)
 
   const inputs = rows.map(rowToRallyInput)
@@ -180,6 +184,18 @@ function ActiveGameLogger({
     winnerRef.current?.focus()
   }
 
+  function commitEdit(edited: RallyRow) {
+    const nextRows = rows.map((r) => (r.id === edited.id ? edited : r))
+    setRows(nextRows)
+    queue.enqueue(updateRallyOp(edited))
+    setEditingId(null)
+    // an edit can change who serves next — refresh an untouched draft only,
+    // never clobber a rally mid-entry
+    if (draft.winnerId === null && draft.endReason === null) {
+      setDraft(createDraft(suggestNext(nextRows.map(rowToRallyInput), gameCtx)))
+    }
+  }
+
   const rulesLine = [
     match.format ? `best of ${match.format}` : "casual",
     `to ${match.target_score}`,
@@ -192,8 +208,6 @@ function ActiveGameLogger({
       n: g.game_number,
       r: gameResult(g.rallies.map(normalizeRow).map(rowToRallyInput), gameCtx),
     }))
-
-  const lastRow = rows.at(-1)
 
   return (
     <div className="flex flex-col gap-6">
@@ -278,18 +292,28 @@ function ActiveGameLogger({
         />
       )}
 
-      <footer className="flex flex-col gap-2">
-        {lastRow && (
-          <p className="text-muted-foreground text-center text-xs">
-            Last: {lastRow.rally_number}.{" "}
-            {lastRow.end_reason === "let"
-              ? "let (replayed)"
-              : `${nameOf(lastRow.winner_id)} — ${lastRow.end_reason.replace("_", " ")}`}
-            {lastRow.error_detail ? ` (${lastRow.error_detail.replace("_", " ")})` : ""}
-            {" · "}
-            {rows.length} rall{rows.length === 1 ? "y" : "ies"} this game
-          </p>
+      <RallyTimeline
+        rows={rows}
+        p1Id={match.player1_id}
+        p1Name={nameOf(match.player1_id)}
+        p2Name={nameOf(match.player2_id)}
+        servesPerPoint={rules.servesPerPoint}
+        editable
+        editingId={editingId}
+        onRowClick={(row) => setEditingId(row.id)}
+        renderEditor={(row) => (
+          <RallyEditor
+            row={row}
+            ctx={draftCtx}
+            p1Name={nameOf(match.player1_id)}
+            p2Name={nameOf(match.player2_id)}
+            onSave={commitEdit}
+            onCancel={() => setEditingId(null)}
+          />
         )}
+      />
+
+      <footer className="flex flex-col gap-2">
         {priorGames.length > 0 && (
           <ul className="text-muted-foreground flex justify-center gap-3 text-xs tabular-nums">
             {priorGames.map(({ n, r }) => (
