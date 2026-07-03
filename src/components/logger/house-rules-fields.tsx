@@ -113,6 +113,7 @@ export function HouseRulesFields({
                 <ToggleGroup
                   type="single"
                   variant="outline"
+                  className="flex-wrap"
                   value={field.value}
                   onValueChange={(v) => v && field.onChange(v)}
                 >
@@ -133,6 +134,7 @@ export function HouseRulesFields({
                 <ToggleGroup
                   type="single"
                   variant="outline"
+                  className="flex-wrap"
                   value={String(field.value)}
                   onValueChange={(v) => v && field.onChange(Number(v))}
                 >
@@ -154,6 +156,7 @@ export function HouseRulesFields({
                 <ToggleGroup
                   type="single"
                   variant="outline"
+                  className="flex-wrap"
                   value={field.value ? "reset" : "keep"}
                   onValueChange={(v) => v && field.onChange(v === "reset")}
                 >
@@ -174,6 +177,7 @@ export function HouseRulesFields({
                 <ToggleGroup
                   type="single"
                   variant="outline"
+                  className="flex-wrap"
                   value={field.value ?? ""}
                   onValueChange={(v) => field.onChange(v === "" ? null : v)}
                 >
