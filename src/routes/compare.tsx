@@ -10,10 +10,6 @@ import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 import { CompareShowcase } from "@/features/dashboard/components/compare-showcase"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
-import {
-  MIN_GAMES_FOR_WIN_RATE,
-  MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
 import { Badge } from "@/components/ui/badge"
 import {
   Empty,
@@ -28,32 +24,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 import type { PlayerData } from "@/features/dashboard/components/compare-showcase"
 import type {
   ErrorProfile,
+  InsightFilters,
   Momentum,
   PlayerHeadline,
   RallyLengths,
   ServeStats,
 } from "@/features/dashboard/schemas/insights"
-import type { ReactNode } from "react"
 
-// Compare (§5.1, §2.3): selected players' profiles side by side, aligned row
-// by row, plus head-to-head when exactly two who've played are chosen.
-// Selection lives in the URL (?players=id,id) so a comparison is shareable.
+// Compare (§5.1, §2.3): two players go head to head. The mode toggle scopes
+// the stats — "all games" is each player's overall form, "head to head" runs
+// every stat through the opponent filter (§3.6), so both sides show only
+// their shared games. Selection + mode live in the URL, so it's shareable.
 
 const compareSearch = z.object({
   players: z.string().optional().catch(undefined),
+  mode: z.enum(["all", "h2h"]).catch("all"),
 })
 
 export const Route = createFileRoute("/compare")({
@@ -64,95 +55,6 @@ export const Route = createFileRoute("/compare")({
   component: ComparePage,
 })
 
-const MAX_PLAYERS = 4
-
-function pct(n: number, d: number) {
-  return Math.round((n / d) * 100)
-}
-
-function rateCell(won: number, of: number, min: number): ReactNode {
-  if (of < min)
-    return (
-      <span className="text-muted-foreground tabular-nums">n={of}</span>
-    )
-  return (
-    <span className="tabular-nums">
-      {pct(won, of)}%{" "}
-      <span className="text-muted-foreground">
-        · {won}/{of}
-      </span>
-    </span>
-  )
-}
-
-const ROWS: Array<{ label: string; cell: (d: PlayerData) => ReactNode }> = [
-  {
-    label: "Win rate",
-    cell: (d) =>
-      d.headline
-        ? rateCell(d.headline.games_won, d.headline.games_decided, MIN_GAMES_FOR_WIN_RATE)
-        : "—",
-  },
-  {
-    label: "Games record",
-    cell: (d) =>
-      d.headline ? (
-        <span className="tabular-nums">
-          {d.headline.games_won}–
-          {d.headline.games_decided - d.headline.games_won}
-        </span>
-      ) : (
-        "—"
-      ),
-  },
-  {
-    label: "Serve win rate",
-    cell: (d) =>
-      d.serve
-        ? rateCell(d.serve.serve_wins, d.serve.rallies_served, MIN_RALLIES_FOR_RATE)
-        : "—",
-  },
-  {
-    label: "Unforced / game",
-    cell: (d) =>
-      !d.error ? (
-        "—"
-      ) : d.error.games_played < MIN_GAMES_FOR_WIN_RATE ? (
-        <span className="text-muted-foreground tabular-nums">
-          n={d.error.games_played}
-        </span>
-      ) : (
-        <span className="tabular-nums">
-          {(d.error.unforced_errors / d.error.games_played).toFixed(1)}
-        </span>
-      ),
-  },
-  {
-    label: "Avg rally length",
-    cell: (d) =>
-      !d.rally ? (
-        "—"
-      ) : d.rally.total_rallies < MIN_RALLIES_FOR_RATE ? (
-        <span className="text-muted-foreground tabular-nums">
-          n={d.rally.total_rallies}
-        </span>
-      ) : (
-        <span className="tabular-nums">
-          {d.rally.avg_length?.toFixed(1) ?? "—"}
-        </span>
-      ),
-  },
-  {
-    label: "Comebacks",
-    cell: (d) =>
-      d.momentum ? (
-        <span className="tabular-nums">{d.momentum.comebacks}</span>
-      ) : (
-        "—"
-      ),
-  },
-]
-
 function ComparePage() {
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -161,22 +63,32 @@ function ComparePage() {
 
   const selected = (search.players?.split(",") ?? [])
     .filter((id) => roster.some((p) => p.id === id))
-    .slice(0, MAX_PLAYERS)
+    .slice(0, 2)
 
   const setSelected = (next: Array<string>) =>
     void navigate({
-      search: { players: next.length > 0 ? next.join(",") : undefined },
+      search: (prev) => ({
+        ...prev,
+        players: next.length > 0 ? next.join(",") : undefined,
+      }),
     })
 
-  // 5 aggregates per player, in one stable hook regardless of how many
+  const h2h = selected.length === 2 && search.mode === "h2h"
+  // in head-to-head, each player's stats are filtered to games against the other
+  const filtersFor = (i: number): InsightFilters =>
+    h2h ? { opponentId: selected[i === 0 ? 1 : 0] } : {}
+
   const results = useQueries({
-    queries: selected.flatMap((id) => [
-      playerHeadlineOptions(id),
-      serveStatsOptions(id),
-      errorProfileOptions(id),
-      rallyLengthsOptions(id),
-      momentumOptions(id),
-    ]),
+    queries: selected.flatMap((id, i) => {
+      const f = filtersFor(i)
+      return [
+        playerHeadlineOptions(id, f),
+        serveStatsOptions(id, f),
+        errorProfileOptions(id, f),
+        rallyLengthsOptions(id, f),
+        momentumOptions(id, f),
+      ]
+    }),
   })
   const data: Array<PlayerData> = selected.map((_, i) => ({
     headline: results[i * 5]?.data as PlayerHeadline | undefined,
@@ -190,13 +102,13 @@ function ComparePage() {
   const addable = roster.filter((p) => !selected.includes(p.id))
 
   return (
-    <main className="container mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10">
+    <main className="container mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10">
       <header>
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           Compare players
         </h1>
         <p className="text-muted-foreground text-sm">
-          Pick two or more players to line their games up side by side.
+          Pick two players to see them go head to head.
         </p>
       </header>
 
@@ -214,7 +126,7 @@ function ComparePage() {
             </button>
           </Badge>
         ))}
-        {addable.length > 0 && selected.length < MAX_PLAYERS && (
+        {addable.length > 0 && selected.length < 2 && (
           <Select value="" onValueChange={(v) => setSelected([...selected, v])}>
             <SelectTrigger className="w-40" aria-label="Add player">
               <SelectValue placeholder="Add player…" />
@@ -234,16 +146,32 @@ function ComparePage() {
         <Empty>
           <EmptyHeader>
             <EmptyTitle className="font-heading">
-              Pick players to compare
+              Pick two players
             </EmptyTitle>
             <EmptyDescription>
-              Add at least two players above to see them go head to head.
+              Add two players above to see them go head to head.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
-      ) : selected.length === 2 ? (
-        // two players: the head-to-head showcase
+      ) : (
         <>
+          <div className="flex justify-center">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={search.mode}
+              onValueChange={(v) =>
+                v &&
+                void navigate({
+                  search: (prev) => ({ ...prev, mode: v as "all" | "h2h" }),
+                })
+              }
+            >
+              <ToggleGroupItem value="all">All games</ToggleGroupItem>
+              <ToggleGroupItem value="h2h">Head to head</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
           <CompareShowcase
             name1={nameOf(selected[0])}
             name2={nameOf(selected[1])}
@@ -257,32 +185,6 @@ function ComparePage() {
             name2={nameOf(selected[1])}
           />
         </>
-      ) : (
-        // three or more: opposed bars don't map, so fall back to aligned columns
-        <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-40">Metric</TableHead>
-                {selected.map((id) => (
-                  <TableHead key={id}>{nameOf(id)}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {ROWS.map((row) => (
-                <TableRow key={row.label}>
-                  <TableCell className="text-muted-foreground">
-                    {row.label}
-                  </TableCell>
-                  {data.map((d, i) => (
-                    <TableCell key={selected[i]}>{row.cell(d)}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
       )}
     </main>
   )

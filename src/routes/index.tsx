@@ -97,7 +97,7 @@ function HomePage() {
               onClick={() =>
                 void navigate({
                   to: "/compare",
-                  search: { players: selected.join(",") },
+                  search: { players: selected.join(","), mode: "all" },
                 })
               }
             >
