@@ -1,3 +1,5 @@
+import { Kbd } from "@/components/ui/kbd"
+import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
 import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/logger/rally-draft"
@@ -43,7 +45,7 @@ export function ScoreHeader({
         onClick={onToggleSide}
         className="border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors"
       >
-        {draft.serveSide} box
+        {draft.serveSide} box <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
       </button>
       {servesPerPoint === 2 && (
         <button
@@ -51,7 +53,8 @@ export function ScoreHeader({
           onClick={onToggleServeNumber}
           className="text-muted-foreground hover:text-foreground cursor-pointer rounded-full border px-2 py-0.5 text-[11px] transition-colors"
         >
-          {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}
+          {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}{" "}
+          <Kbd>{HOTKEY_HINTS.serveNumber}</Kbd>
         </button>
       )}
     </span>

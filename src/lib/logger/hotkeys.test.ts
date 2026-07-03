@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest"
 
 import { hotkeyAction, isEditableTarget } from "./hotkeys"
 
-const key = (key: string, mods: Partial<KeyboardEvent> = {}) => ({
-  key,
+const key = (pressed: string, mods: Partial<KeyboardEvent> = {}) => ({
+  key: pressed,
   metaKey: false,
   ctrlKey: false,
   altKey: false,

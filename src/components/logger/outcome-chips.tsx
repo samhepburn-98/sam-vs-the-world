@@ -8,7 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Kbd } from "@/components/ui/kbd"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
 import {
   canSave,
   showsErrorDetail,
@@ -88,6 +90,7 @@ export function OutcomeChips({
           {(["winner", "error", "stroke", "ace", "serve_fault"] as const).map(
             (r) => (
               <ToggleGroupItem key={r} value={r}>
+                <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
                 {END_REASON_LABELS[r]}
               </ToggleGroupItem>
             ),
@@ -109,6 +112,7 @@ export function OutcomeChips({
           >
             {Constants.public.Enums.error_detail.map((d) => (
               <ToggleGroupItem key={d} value={d}>
+                <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
                 {ERROR_DETAIL_LABELS[d]}
               </ToggleGroupItem>
             ))}
@@ -129,7 +133,10 @@ export function OutcomeChips({
             onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
           >
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
-            <ToggleGroupItem value="yes">Forced</ToggleGroupItem>
+            <ToggleGroupItem value="yes">
+              <Kbd>{HOTKEY_HINTS.forced}</Kbd>
+              Forced
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
       )}
@@ -181,6 +188,9 @@ export function OutcomeChips({
             disabled={!canSave(draft)}
             onClick={onSave}
           >
+            <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+              {HOTKEY_HINTS.save}
+            </Kbd>
             Save — {winnerName}
           </Button>
         </div>
