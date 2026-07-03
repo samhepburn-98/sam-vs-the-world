@@ -140,7 +140,7 @@ export function RallyEditor({
             size="sm"
             onClick={() => setDraft((d) => toggleServeSide(d))}
           >
-            {draft.serveSide} box
+            {draft.serveSide === "left" ? "Left" : "Right"} box
           </Button>
           {ctx.rules.servesPerPoint === 2 && (
             <Button
