@@ -1,0 +1,124 @@
+import {
+  BoolCell,
+  IdCell,
+  NullCell,
+  RelCell,
+  TsCell,
+} from "@/components/manage/cells"
+import { DataTable } from "@/components/manage/data-table"
+import { useManageMatches } from "@/lib/queries/get-manage-matches"
+import { usePlayers } from "@/lib/queries/get-players"
+
+import type { ManageColumn } from "@/components/manage/data-table"
+import type { ListParams } from "@/lib/queries/manage-list"
+import type { MatchRow } from "@/lib/schemas/match"
+
+interface TabProps {
+  params: ListParams
+  onSort: (column: string) => void
+  onPage: (page: number) => void
+}
+
+export function MatchesTab({ params, onSort, onPage }: TabProps) {
+  const matches = useManageMatches(params)
+  const players = usePlayers()
+  const nameOf = (id: string) =>
+    players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
+
+  const columns: Array<ManageColumn<MatchRow>> = [
+    { key: "id", label: "id", render: (m) => <IdCell id={m.id} /> },
+    { key: "date", label: "date", sortable: true, render: (m) => m.date },
+    {
+      key: "player1_id",
+      label: "player 1",
+      render: (m) => (
+        <RelCell tab="players" id={m.player1_id} label={nameOf(m.player1_id)} />
+      ),
+    },
+    {
+      key: "player2_id",
+      label: "player 2",
+      render: (m) => (
+        <RelCell tab="players" id={m.player2_id} label={nameOf(m.player2_id)} />
+      ),
+    },
+    {
+      key: "venue",
+      label: "venue",
+      sortable: true,
+      render: (m) => m.venue ?? <NullCell />,
+    },
+    {
+      key: "format",
+      label: "format",
+      sortable: true,
+      render: (m) => (m.format === null ? <NullCell /> : `best of ${m.format}`),
+    },
+    {
+      key: "target_score",
+      label: "target",
+      sortable: true,
+      render: (m) => m.target_score,
+    },
+    { key: "tiebreak", label: "tiebreak", render: (m) => m.tiebreak },
+    {
+      key: "serves_per_point",
+      label: "serves",
+      render: (m) => m.serves_per_point,
+    },
+    {
+      key: "let_resets_serve",
+      label: "let resets",
+      render: (m) => <BoolCell value={m.let_resets_serve} />,
+    },
+    {
+      key: "ball_type",
+      label: "ball",
+      render: (m) => m.ball_type ?? <NullCell />,
+    },
+    {
+      key: "notes",
+      label: "notes",
+      render: (m) =>
+        m.notes ? (
+          <span className="block max-w-48 truncate" title={m.notes}>
+            {m.notes}
+          </span>
+        ) : (
+          <NullCell />
+        ),
+    },
+    {
+      key: "created_at",
+      label: "created",
+      sortable: true,
+      render: (m) => <TsCell iso={m.created_at} />,
+    },
+    {
+      key: "updated_at",
+      label: "updated",
+      sortable: true,
+      render: (m) => <TsCell iso={m.updated_at} />,
+    },
+    {
+      key: "rel",
+      label: "",
+      render: (m) => <RelCell tab="games" id={m.id} label="games" />,
+    },
+  ]
+
+  return (
+    <DataTable
+      columns={columns}
+      result={matches.data}
+      isPending={matches.isPending || matches.isFetching}
+      isError={matches.isError}
+      onRetry={() => void matches.refetch()}
+      pageNumber={params.page}
+      sort={params.sort}
+      onSort={onSort}
+      onPage={onPage}
+      rowKey={(m) => m.id}
+    />
+  )
+}
