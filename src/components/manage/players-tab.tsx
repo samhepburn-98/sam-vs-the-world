@@ -4,7 +4,7 @@ import { useState } from "react"
 import { EnumCell, NullCell, TsCell } from "@/components/manage/cells"
 import { ConfirmDelete } from "@/components/manage/confirm-delete"
 import { DataTable } from "@/components/manage/data-table"
-import { EditPlayerSheet } from "@/components/manage/edit-player-sheet"
+import { EditPlayerDialog } from "@/components/manage/edit-player-dialog"
 import { Button } from "@/components/ui/button"
 import { useDeletePlayer } from "@/lib/queries/delete-player"
 import { friendlyWriteError } from "@/lib/queries/friendly-errors"
@@ -95,7 +95,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(p) => p.id}
       />
       {editing && (
-        <EditPlayerSheet player={editing} onClose={() => setEditing(null)} />
+        <EditPlayerDialog player={editing} onClose={() => setEditing(null)} />
       )}
       <ConfirmDelete
         open={deleting !== null}

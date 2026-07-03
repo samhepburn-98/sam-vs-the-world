@@ -11,7 +11,7 @@ import {
 } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { ConfirmDelete } from "@/components/manage/confirm-delete"
-import { EditMatchSheet } from "@/components/manage/edit-match-sheet"
+import { EditMatchDialog } from "@/components/manage/edit-match-dialog"
 import { Button } from "@/components/ui/button"
 import { useDeleteMatch } from "@/lib/queries/delete-match"
 import { friendlyWriteError } from "@/lib/queries/friendly-errors"
@@ -174,7 +174,7 @@ export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(m) => m.id}
       />
       {editing && (
-        <EditMatchSheet
+        <EditMatchDialog
           match={editing}
           players={players.data ?? []}
           onClose={() => setEditing(null)}

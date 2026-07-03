@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
-import { EditSheet } from "@/components/manage/edit-sheet"
+import { EditDialog } from "@/components/manage/edit-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -17,12 +17,12 @@ import { gameEditSchema } from "@/lib/schemas/game"
 
 import type { GameBrowserRow, GameEditInput } from "@/lib/schemas/game"
 
-interface EditGameSheetProps {
+interface EditGameDialogProps {
   game: GameBrowserRow
   onClose: () => void
 }
 
-export function EditGameSheet({ game, onClose }: EditGameSheetProps) {
+export function EditGameDialog({ game, onClose }: EditGameDialogProps) {
   const update = useUpdateGame()
   const form = useForm<GameEditInput>({
     resolver: zodResolver(gameEditSchema),
@@ -35,7 +35,7 @@ export function EditGameSheet({ game, onClose }: EditGameSheetProps) {
   })
 
   return (
-    <EditSheet
+    <EditDialog
       open
       title={`Edit game ${game.game_number}`}
       description="Only the game number is stored — everything else derives from its rallies."
@@ -71,6 +71,6 @@ export function EditGameSheet({ game, onClose }: EditGameSheetProps) {
           </div>
         </FieldGroup>
       </form>
-    </EditSheet>
+    </EditDialog>
   )
 }

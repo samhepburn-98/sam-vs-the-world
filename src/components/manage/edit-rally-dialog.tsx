@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { RallyEditor } from "@/components/logger/rally-editor"
-import { EditSheet } from "@/components/manage/edit-sheet"
+import { EditDialog } from "@/components/manage/edit-dialog"
 import { friendlyWriteError } from "@/lib/queries/friendly-errors"
 import { useInsertRallyAt } from "@/lib/queries/insert-rally-at"
 import { useUpdateRally } from "@/lib/queries/update-rally"
@@ -15,14 +15,14 @@ import type { RallyDbRowWithGame } from "@/lib/schemas/rally"
 // too. Insert mode targets a position: insert_rally_at renumbers the later
 // rallies in one transaction (§5.4).
 
-interface EditRallySheetProps {
+interface EditRallyDialogProps {
   rally: RallyDbRowWithGame
   /** "edit" changes the row in place; "insert" adds a new rally before it */
   mode: "edit" | "insert"
   onClose: () => void
 }
 
-export function EditRallySheet({ rally, mode, onClose }: EditRallySheetProps) {
+export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) {
   const players = usePlayers()
   const update = useUpdateRally()
   const insertAt = useInsertRallyAt()
@@ -44,7 +44,7 @@ export function EditRallySheet({ rally, mode, onClose }: EditRallySheetProps) {
 
   // insert mode starts from a synthetic let at the target position — the
   // most common missed rally — with the row's serve context as the guess.
-  // useState pins the client id for the sheet's lifetime (idempotent retry).
+  // useState pins the client id for the dialog's lifetime (idempotent retry).
   const [row] = useState<RallyRow>(() =>
     mode === "edit"
       ? { ...rally, serve_number: rally.serve_number === 2 ? 2 : 1 }
@@ -67,7 +67,7 @@ export function EditRallySheet({ rally, mode, onClose }: EditRallySheetProps) {
   const gameLabel = `G${rally.games.game_number} · ${nameOf(match.player1_id)} vs ${nameOf(match.player2_id)}`
 
   return (
-    <EditSheet
+    <EditDialog
       open
       title={
         mode === "edit"
@@ -99,6 +99,6 @@ export function EditRallySheet({ rally, mode, onClose }: EditRallySheetProps) {
           </p>
         )}
       </div>
-    </EditSheet>
+    </EditDialog>
   )
 }

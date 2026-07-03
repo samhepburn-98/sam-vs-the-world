@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
 import { HouseRulesFields } from "@/components/logger/house-rules-fields"
-import { EditSheet } from "@/components/manage/edit-sheet"
+import { EditDialog } from "@/components/manage/edit-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -30,17 +30,17 @@ import type { MatchEditInput, MatchRow } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 import type { Control } from "react-hook-form"
 
-interface EditMatchSheetProps {
+interface EditMatchDialogProps {
   match: MatchRow
   players: Array<PlayerSummary>
   onClose: () => void
 }
 
-export function EditMatchSheet({
+export function EditMatchDialog({
   match,
   players,
   onClose,
-}: EditMatchSheetProps) {
+}: EditMatchDialogProps) {
   const update = useUpdateMatch()
   const form = useForm<MatchEditInput>({
     resolver: zodResolver(matchEditSchema),
@@ -97,7 +97,7 @@ export function EditMatchSheet({
   )
 
   return (
-    <EditSheet
+    <EditDialog
       open
       title="Edit match"
       description="Players can only change while no logged rally references them — the database enforces it."
@@ -147,6 +147,6 @@ export function EditMatchSheet({
           </div>
         </FieldGroup>
       </form>
-    </EditSheet>
+    </EditDialog>
   )
 }

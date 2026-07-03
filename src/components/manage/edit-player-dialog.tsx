@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
-import { EditSheet } from "@/components/manage/edit-sheet"
+import { EditDialog } from "@/components/manage/edit-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -18,12 +18,12 @@ import { playerEditSchema } from "@/lib/schemas/player"
 
 import type { PlayerEditInput, PlayerRow } from "@/lib/schemas/player"
 
-interface EditPlayerSheetProps {
+interface EditPlayerDialogProps {
   player: PlayerRow
   onClose: () => void
 }
 
-export function EditPlayerSheet({ player, onClose }: EditPlayerSheetProps) {
+export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
   const update = useUpdatePlayer()
   const form = useForm<PlayerEditInput>({
     resolver: zodResolver(playerEditSchema),
@@ -39,7 +39,7 @@ export function EditPlayerSheet({ player, onClose }: EditPlayerSheetProps) {
   })
 
   return (
-    <EditSheet
+    <EditDialog
       open
       title={`Edit ${player.name}`}
       description="Changes apply everywhere this player appears."
@@ -86,6 +86,6 @@ export function EditPlayerSheet({ player, onClose }: EditPlayerSheetProps) {
           </div>
         </FieldGroup>
       </form>
-    </EditSheet>
+    </EditDialog>
   )
 }

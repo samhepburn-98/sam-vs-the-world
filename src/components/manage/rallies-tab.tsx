@@ -10,7 +10,7 @@ import {
 } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { ConfirmDelete } from "@/components/manage/confirm-delete"
-import { EditRallySheet } from "@/components/manage/edit-rally-sheet"
+import { EditRallyDialog } from "@/components/manage/edit-rally-dialog"
 import { Button } from "@/components/ui/button"
 import { useDeleteRally } from "@/lib/queries/delete-rally"
 import { friendlyWriteError } from "@/lib/queries/friendly-errors"
@@ -184,7 +184,7 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(r) => r.id}
       />
       {sheet && (
-        <EditRallySheet
+        <EditRallyDialog
           rally={sheet.rally}
           mode={sheet.mode}
           onClose={() => setSheet(null)}

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { NullCell, RelCell, TsCell } from "@/components/manage/cells"
 import { ConfirmDelete } from "@/components/manage/confirm-delete"
 import { DataTable } from "@/components/manage/data-table"
-import { EditGameSheet } from "@/components/manage/edit-game-sheet"
+import { EditGameDialog } from "@/components/manage/edit-game-dialog"
 import { Button } from "@/components/ui/button"
 import { useDeleteGame } from "@/lib/queries/delete-game"
 import { friendlyWriteError } from "@/lib/queries/friendly-errors"
@@ -141,7 +141,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(g) => g.id}
       />
       {editing && (
-        <EditGameSheet game={editing} onClose={() => setEditing(null)} />
+        <EditGameDialog game={editing} onClose={() => setEditing(null)} />
       )}
       <ConfirmDelete
         open={deleting !== null}
