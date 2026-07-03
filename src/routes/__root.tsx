@@ -7,7 +7,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import { PageStub } from "@/components/page-stub"
-import { SiteHeader } from "@/components/site-header"
+import { SiteHeader } from "@/components/layouts/site-header"
 import { fetchUser } from "@/lib/auth/functions"
 
 import appCss from "../styles.css?url"

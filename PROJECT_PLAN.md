@@ -962,27 +962,34 @@ TanStack Query fluency; low exit cost (≈ a Vite SPA if we ever drop SSR).
 
 ### 8.2 App structure
 
+**Feature-based, per [bulletproof-react](https://github.com/alan2207/bulletproof-react/tree/master/apps/react-vite)** (#61). Dependencies flow one way only — **shared → features → routes** — and it's enforced, not just convention: an `import/no-restricted-paths` ESLint rule fails CI on a feature importing a sibling feature, shared code importing a feature, or anything outside `routes/` importing a route. Cross-feature composition happens only in the route layer.
+
 ```
 src/
-  routes/
-    __root.tsx              shell: top bar, providers
-    index.tsx               home hub
-    players.$playerId.tsx   player overview
-    players.$playerId.$category.tsx
-    compare.tsx · matches.index.tsx · matches.$matchId.tsx · manage.tsx
-    login.tsx
-    entry.tsx               the logger (beforeLoad auth guard)
-  lib/
+  routes/                   the app layer — thin; compose features (TanStack Start file routing)
+    __root.tsx · index.tsx · players.$playerId.index.tsx · players.$playerId.$category.tsx
+    compare.tsx · matches.index.tsx · matches.$matchId.tsx · manage.tsx · login.tsx · entry.tsx
+  features/
+    auth/       components (login form)
+    logger/     components (score header, winner buttons, timeline…) · logic (session planner, hotkeys)
+    manage/     api (paginated list reads) · components (data table, tabs, edit dialogs)
+    dashboard/  api (insight RPC hooks) · components (stat card, filter bar, charts) · schemas · utils
+                each feature: api/ (one request per file — fetcher + queryOptions + useXxx) ·
+                components/ · schemas/ · utils/
+  components/               SHARED UI: ui/ (shadcn) · layouts/ · court/ · rally/ (editor, house rules) · ball-dots
+  lib/                      SHARED non-UI:
     supabase/               browser + server clients (@supabase/ssr, cookie sessions)
-    schemas/                zod domain schemas — ONE file per concept (player, match, game, rally,
-                            serve-stats…); TS types come from z.infer, so schema = type = validator
-    queries/                one request per file (bulletproof-react style): fetcher + queryOptions +
-                            useXxx hook colocated; mutations same pattern (use-create-rally.ts)
-    scoring/                logger-only live logic (score, server suggestion, game-over) — pure TS, unit-tested
-  components/
-    ui/ (shadcn) · charts/ · court/ · rally-timeline/ · logger/
+    schemas/                zod domain schemas — ONE file per concept (player, match, game, rally, auth)
+    api/                    entity data-access used across features — CRUD + the FIFO write queue
+    rally/                  the rally-entry engine — draft state machine + write-intent contract
+    scoring/                pure live logic (score, server suggestion, game-over) — unit-tested
+    auth/                   session primitives (fetch user, sign out) — app-wide
 supabase/migrations/        0001 tables · 0002 views · 0003 RLS · 0004 insight RPCs
 ```
+
+The rally-entry engine (draft machine, editor, house-rules form, scoring) and the entity data-access
+layer are **shared**, not logger-owned: the logger and manage's edit dialogs both build on them, so by
+the one-way rule they can't live inside either feature.
 
 URL paths are unchanged from §2.1 (`/players/[id]` etc. — `$param` is just Start's file convention).
 

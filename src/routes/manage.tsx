@@ -2,14 +2,14 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { z } from "zod"
 
-import { GamesTab } from "@/components/manage/games-tab"
-import { MatchesTab } from "@/components/manage/matches-tab"
-import { PlayersTab } from "@/components/manage/players-tab"
-import { RalliesTab } from "@/components/manage/rallies-tab"
+import { GamesTab } from "@/features/manage/components/games-tab"
+import { MatchesTab } from "@/features/manage/components/matches-tab"
+import { PlayersTab } from "@/features/manage/components/players-tab"
+import { RalliesTab } from "@/features/manage/components/rallies-tab"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import type { ListParams } from "@/lib/queries/manage-list"
+import type { ListParams } from "@/features/manage/api/manage-list"
 
 // The raw data browser (§5.4): public read, orthogonal to the drill chain.
 // All state — tab, search, page, sort — lives in the URL, so relation links

@@ -1,9 +1,20 @@
 //  @ts-check
 
 import { tanstackConfig } from "@tanstack/eslint-config"
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript"
 
 export default [
   ...tanstackConfig,
+  {
+    // Resolve the `@/` alias (tsconfig paths) so import/no-restricted-paths
+    // can map aliased imports to files and enforce the feature boundaries.
+    // eslint-plugin-import-x reads the new-style resolver-next key.
+    settings: {
+      "import-x/resolver-next": [
+        createTypeScriptImportResolver({ project: "./tsconfig.json" }),
+      ],
+    },
+  },
   {
     rules: {
       "import/no-cycle": "off",
@@ -12,6 +23,27 @@ export default [
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/require-await": "off",
       "pnpm/json-enforce-catalog": "off",
+      // Bulletproof-react boundaries (#61): dependencies flow one way only —
+      // shared → features → routes. A feature can't reach into a sibling
+      // feature; shared code (components, lib) can't import a feature; and
+      // nothing outside routes/ may import a route. Cross-feature composition
+      // happens only in the route layer.
+      "import/no-restricted-paths": [
+        "error",
+        {
+          zones: [
+            { target: "./src/features/auth", from: "./src/features", except: ["./auth"] },
+            { target: "./src/features/logger", from: "./src/features", except: ["./logger"] },
+            { target: "./src/features/manage", from: "./src/features", except: ["./manage"] },
+            { target: "./src/features/dashboard", from: "./src/features", except: ["./dashboard"] },
+            { target: ["./src/components", "./src/lib"], from: "./src/features" },
+            {
+              target: ["./src/components", "./src/lib", "./src/features"],
+              from: "./src/routes",
+            },
+          ],
+        },
+      ],
     },
   },
   {

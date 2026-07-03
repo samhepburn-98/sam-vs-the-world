@@ -2,7 +2,7 @@ import { createFileRoute, redirect, useRouter } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 
 import { CourtDiagram } from "@/components/court/court-diagram"
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/features/auth/components/login-form"
 import {
   Card,
   CardContent,
