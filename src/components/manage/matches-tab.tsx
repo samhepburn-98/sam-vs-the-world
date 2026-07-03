@@ -1,6 +1,7 @@
 import { BallDots } from "@/components/ball-dots"
 import {
   BoolCell,
+  EnumCell,
   NullCell,
   RelCell,
   TsCell,
@@ -56,7 +57,7 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
       key: "format",
       label: "Format",
       sortable: true,
-      render: (m) => (m.format === null ? <NullCell /> : `best of ${m.format}`),
+      render: (m) => (m.format === null ? "Casual" : `Best of ${m.format}`),
     },
     {
       key: "target_score",
@@ -64,7 +65,11 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
       sortable: true,
       render: (m) => m.target_score,
     },
-    { key: "tiebreak", label: "Tiebreak", render: (m) => m.tiebreak },
+    {
+      key: "tiebreak",
+      label: "Tiebreak",
+      render: (m) => <EnumCell value={m.tiebreak} />,
+    },
     {
       key: "serves_per_point",
       label: "Serves",

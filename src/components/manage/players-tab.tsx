@@ -1,4 +1,4 @@
-import { NullCell, TsCell } from "@/components/manage/cells"
+import { EnumCell, NullCell, TsCell } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { useManagePlayers } from "@/lib/queries/get-manage-players"
 
@@ -18,7 +18,8 @@ const columns: Array<ManageColumn<PlayerRow>> = [
     key: "handedness",
     label: "Handedness",
     sortable: true,
-    render: (p) => p.handedness ?? <NullCell />,
+    render: (p) =>
+      p.handedness ? <EnumCell value={p.handedness} /> : <NullCell />,
   },
   {
     key: "created_at",

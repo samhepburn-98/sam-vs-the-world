@@ -1,5 +1,6 @@
 import {
   BoolCell,
+  EnumCell,
   NullCell,
   RelCell,
   TsCell,
@@ -49,7 +50,11 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
         <RelCell tab="players" id={r.server_id} label={nameOf(r.server_id)} />
       ),
     },
-    { key: "serve_side", label: "Box", render: (r) => r.serve_side },
+    {
+      key: "serve_side",
+      label: "Box",
+      render: (r) => <EnumCell value={r.serve_side} />,
+    },
     {
       key: "serve_number",
       label: "Serve",
@@ -70,12 +75,13 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
       key: "end_reason",
       label: "End reason",
       sortable: true,
-      render: (r) => r.end_reason.replace("_", " "),
+      render: (r) => <EnumCell value={r.end_reason} />,
     },
     {
       key: "error_detail",
       label: "Detail",
-      render: (r) => r.error_detail?.replace("_", " ") ?? <NullCell />,
+      render: (r) =>
+        r.error_detail ? <EnumCell value={r.error_detail} /> : <NullCell />,
     },
     {
       key: "forced",
@@ -85,7 +91,8 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
     {
       key: "shot_type",
       label: "Shot",
-      render: (r) => r.shot_type ?? <NullCell />,
+      render: (r) =>
+        r.shot_type ? <EnumCell value={r.shot_type} /> : <NullCell />,
     },
     {
       key: "shot_count",

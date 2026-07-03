@@ -28,6 +28,11 @@ export function RelCell({
   )
 }
 
+/** A stored enum value, humanised: win_by_2 → "Win by 2". */
+export function EnumCell({ value }: { value: string }) {
+  return <>{value.charAt(0).toUpperCase() + value.slice(1).replaceAll("_", " ")}</>
+}
+
 export function BoolCell({ value }: { value: boolean | null }) {
   if (value === null) return <NullCell />
   return <span aria-label={String(value)}>{value ? "✓" : "✗"}</span>
