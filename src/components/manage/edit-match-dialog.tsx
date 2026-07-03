@@ -100,7 +100,7 @@ export function EditMatchDialog({
     <EditDialog
       open
       title="Edit match"
-      description="Players can only change while no logged rally references them — the database enforces it."
+      description="Once rallies are logged, the players can't be swapped out."
       onClose={onClose}
     >
       <form onSubmit={(e) => void submit(e)} noValidate>
