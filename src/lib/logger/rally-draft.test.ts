@@ -61,6 +61,21 @@ describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
     expect(fault.serverId).toBe("sam")
   })
 
+  it("let ⇔ null winner survives edits in both directions (editor path)", () => {
+    // decided rally converted to a let: the winner is cleared
+    let draft = selectEndReason(draftWithWinner("dave"), "let", ctx)
+    expect(draft.winnerId).toBeNull()
+    expect(canSave(draft)).toBe(true)
+    const row = buildRallyRow(draft, { id: "r", gameId: "g", rallyNumber: 4 })
+    expect(row).toMatchObject({ end_reason: "let", winner_id: null })
+
+    // let converted back to a decided rally: the let is cleared
+    draft = tapWinner(draft, "sam", ctx)
+    expect(draft.winnerId).toBe("sam")
+    expect(draft.endReason).toBeNull()
+    expect(canSave(draft)).toBe(false) // needs an end reason again
+  })
+
   it("serve fault corrects the server to the NON-winner and forces serve 2", () => {
     const draft = selectEndReason(draftWithWinner("sam"), "serve_fault", ctx)
     expect(draft.winnerId).toBe("sam")

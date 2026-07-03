@@ -59,7 +59,12 @@ export function tapWinner(
   winnerId: string,
   ctx: DraftContext,
 ): RallyDraft {
-  const next = { ...draft, winnerId }
+  // a winner contradicts a let (DB: let ⇔ null winner) — the newer tap wins
+  const next: RallyDraft = {
+    ...draft,
+    winnerId,
+    endReason: draft.endReason === "let" ? null : draft.endReason,
+  }
   // a re-tap is a misclick correction: re-apply the chosen end reason so its
   // server corrections (ace/serve_fault) track the new winner
   if (next.endReason) return selectEndReason(next, next.endReason, ctx)
@@ -73,6 +78,11 @@ export function selectEndReason(
 ): RallyDraft {
   let next: RallyDraft = { ...draft, endReason }
 
+  if (endReason === "let") {
+    // a let has no winner (DB: let ⇔ null winner) — used by the rally editor
+    // to convert a mis-logged decided rally back into a let
+    next = { ...next, winnerId: null }
+  }
   if (endReason === "ace" && next.winnerId) {
     // an ace is by definition served by the winner
     next = { ...next, serverId: next.winnerId }
@@ -124,8 +134,9 @@ export function toggleServer(draft: RallyDraft, ctx: DraftContext): RallyDraft {
   return { ...draft, serverId: otherPlayer(ctx, draft.serverId) }
 }
 
-/** a decided rally needs winner + end reason; everything else is optional */
+/** a decided rally needs winner + end reason; a let needs neither */
 export function canSave(draft: RallyDraft): boolean {
+  if (draft.endReason === "let") return draft.winnerId === null
   return draft.winnerId !== null && draft.endReason !== null
 }
 
@@ -162,6 +173,7 @@ export function buildRallyRow(
   if (!canSave(draft)) {
     throw new Error("rally draft is incomplete (winner + end reason required)")
   }
+  if (draft.endReason === "let") return buildLetRow(draft, meta)
   return {
     id: meta.id,
     game_id: meta.gameId,
@@ -195,6 +207,21 @@ export function buildLetRow(
     forced: null,
     shot_type: null,
     shot_count: null,
+  }
+}
+
+/** reopen a saved row as a draft — the rally editor's starting state */
+export function rowToDraft(row: RallyRow): RallyDraft {
+  return {
+    serverId: row.server_id,
+    serveSide: row.serve_side,
+    serveNumber: row.serve_number,
+    winnerId: row.winner_id,
+    endReason: row.end_reason,
+    errorDetail: row.error_detail,
+    forced: row.forced,
+    shotType: row.shot_type,
+    shotCount: row.shot_count,
   }
 }
 
