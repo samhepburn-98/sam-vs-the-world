@@ -1,4 +1,4 @@
-import { IdCell, NullCell, TsCell } from "@/components/manage/cells"
+import { NullCell, TsCell } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { useManagePlayers } from "@/lib/queries/get-manage-players"
 
@@ -13,7 +13,6 @@ interface TabProps {
 }
 
 const columns: Array<ManageColumn<PlayerRow>> = [
-  { key: "id", label: "ID", render: (p) => <IdCell id={p.id} /> },
   { key: "name", label: "Name", sortable: true, render: (p) => p.name },
   {
     key: "handedness",

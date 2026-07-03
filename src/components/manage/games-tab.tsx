@@ -1,4 +1,4 @@
-import { IdCell, RelCell, TsCell } from "@/components/manage/cells"
+import { RelCell, TsCell } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { useManageGames } from "@/lib/queries/get-manage-games"
 
@@ -13,7 +13,6 @@ interface TabProps {
 }
 
 const columns: Array<ManageColumn<GameRow>> = [
-  { key: "id", label: "ID", render: (g) => <IdCell id={g.id} /> },
   {
     key: "match_id",
     label: "Match",

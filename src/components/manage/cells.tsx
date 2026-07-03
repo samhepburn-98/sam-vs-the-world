@@ -6,14 +6,6 @@ import { Link } from "@tanstack/react-router"
 
 export type ManageTab = "matches" | "games" | "rallies" | "players"
 
-export function IdCell({ id }: { id: string }) {
-  return (
-    <span className="text-muted-foreground font-mono text-[11px]" title={id}>
-      {id.slice(0, 8)}
-    </span>
-  )
-}
-
 /** A clickable relation: opens the target tab filtered to the given id. */
 export function RelCell({
   tab,

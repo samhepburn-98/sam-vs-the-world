@@ -1,6 +1,5 @@
 import {
   BoolCell,
-  IdCell,
   NullCell,
   RelCell,
   TsCell,
@@ -26,7 +25,6 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
   const columns: Array<ManageColumn<RallyDbRow>> = [
-    { key: "id", label: "ID", render: (r) => <IdCell id={r.id} /> },
     {
       key: "game_id",
       label: "Game",

@@ -1,6 +1,6 @@
+import { BallDots } from "@/components/ball-dots"
 import {
   BoolCell,
-  IdCell,
   NullCell,
   RelCell,
   TsCell,
@@ -26,7 +26,6 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
   const columns: Array<ManageColumn<MatchRow>> = [
-    { key: "id", label: "ID", render: (m) => <IdCell id={m.id} /> },
     { key: "date", label: "Date", sortable: true, render: (m) => m.date },
     {
       key: "player1_id",
@@ -74,7 +73,8 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
     {
       key: "ball_type",
       label: "Ball",
-      render: (m) => m.ball_type ?? <NullCell />,
+      render: (m) =>
+        m.ball_type ? <BallDots ball={m.ball_type} /> : <NullCell />,
     },
     {
       key: "notes",
