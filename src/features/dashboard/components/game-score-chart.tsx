@@ -31,9 +31,12 @@ export function GameScoreChart({
     p2: r.score_p2,
   }))
 
+  // orange accent vs neutral ink — different hues, so the two lines separate
+  // clearly (the chart ramp is all reds, which read as one colour). Both
+  // adapt to light/dark via theme tokens.
   const config = {
     p1: { label: p1Name, color: "var(--primary)" },
-    p2: { label: p2Name, color: "var(--chart-4)" },
+    p2: { label: p2Name, color: "var(--foreground)" },
   } satisfies ChartConfig
 
   return (
