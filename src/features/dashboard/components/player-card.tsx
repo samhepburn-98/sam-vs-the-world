@@ -81,30 +81,29 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
 
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground text-sm tabular-nums">
-            {games_won}–{losses} games
+            {games_won} W · {losses} L
           </span>
           {form.length > 0 && (
-            <span className="flex items-center gap-1" aria-label="Recent form">
-              {form.map((g, i) => (
-                <span
-                  key={i}
-                  title={
-                    g.won === null
-                      ? "Undecided"
-                      : g.won
-                        ? "Won"
-                        : "Lost"
-                  }
-                  className={cn(
-                    "size-2 rounded-full",
-                    g.won === null
-                      ? "ring-1 ring-border"
-                      : g.won
-                        ? "bg-primary"
-                        : "bg-muted-foreground/40",
-                  )}
-                />
-              ))}
+            <span className="flex items-center gap-1.5">
+              <span className="text-muted-foreground text-xs">Form</span>
+              <span className="flex items-center gap-1" aria-label="Recent form">
+                {form.map((g, i) => (
+                  <span
+                    key={i}
+                    title={
+                      g.won === null ? "Undecided" : g.won ? "Won" : "Lost"
+                    }
+                    className={cn(
+                      "size-2 rounded-full",
+                      g.won === null
+                        ? "bg-muted-foreground/40"
+                        : g.won
+                          ? "bg-emerald-500"
+                          : "bg-red-500",
+                    )}
+                  />
+                ))}
+              </span>
             </span>
           )}
         </div>
