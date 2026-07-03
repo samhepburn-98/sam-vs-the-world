@@ -37,6 +37,11 @@ export const rallyDbRowWithGame = rallyDbRow.extend({
       date: z.string(),
       player1_id: z.string().uuid(),
       player2_id: z.string().uuid(),
+      // the rally editor needs the match's rules (§7.7)
+      target_score: z.number().int(),
+      tiebreak: z.enum(["win_by_2", "sudden_death"]),
+      serves_per_point: z.number().int(),
+      let_resets_serve: z.boolean(),
     }),
   }),
 })

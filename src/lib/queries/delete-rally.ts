@@ -1,3 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { RallyRow } from "@/lib/logger/rally-draft"
@@ -32,4 +34,16 @@ export function deleteRallyOp(
       if (error) throw error
     },
   }
+}
+
+/** The same delete as a manage mutation (§5.4). */
+export function useDeleteRally() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (row: RallyRow) => deleteRallyOp(row).run(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["manage"] })
+      void queryClient.invalidateQueries({ queryKey: ["matches"] })
+    },
+  })
 }

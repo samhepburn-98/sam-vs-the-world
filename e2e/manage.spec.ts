@@ -23,4 +23,9 @@ test("all four manage tabs are browsable logged-out", async ({ page }) => {
 
   // tab choice lands in the URL (shareable, back-button friendly)
   await expect(page).toHaveURL(/tab=matches/)
+
+  // write affordances are owner-only — logged out there are none (§5.4)
+  await expect(
+    page.getByRole("button", { name: /^(Edit|Delete|Insert) / }),
+  ).toHaveCount(0)
 })

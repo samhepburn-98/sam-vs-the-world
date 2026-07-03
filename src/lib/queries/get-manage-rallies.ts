@@ -28,7 +28,7 @@ export async function fetchManageRallies(
   params: ListParams,
 ): Promise<ListPage<RallyDbRowWithGame>> {
   const supabase = getSupabaseBrowserClient()
-  let query = supabase.from("rallies").select("*, games(game_number, matches(date, player1_id, player2_id))", { count: "exact" })
+  let query = supabase.from("rallies").select("*, games(game_number, matches(date, player1_id, player2_id, target_score, tiebreak, serves_per_point, let_resets_serve))", { count: "exact" })
 
   const search = classifyQuery(params.q)
   if (search.kind === "uuid") {

@@ -1,3 +1,6 @@
+import { BetweenHorizontalStartIcon, PencilIcon, Trash2Icon } from "lucide-react"
+import { useState } from "react"
+
 import {
   BoolCell,
   EnumCell,
@@ -6,6 +9,11 @@ import {
   TsCell,
 } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
+import { ConfirmDelete } from "@/components/manage/confirm-delete"
+import { EditRallyDialog } from "@/components/manage/edit-rally-dialog"
+import { Button } from "@/components/ui/button"
+import { useDeleteRally } from "@/lib/queries/delete-rally"
+import { friendlyWriteError } from "@/lib/queries/friendly-errors"
 import { useManageRallies } from "@/lib/queries/get-manage-rallies"
 import { usePlayers } from "@/lib/queries/get-players"
 
@@ -15,12 +23,19 @@ import type { RallyDbRowWithGame } from "@/lib/schemas/rally"
 
 interface TabProps {
   params: ListParams
+  owner: boolean
   onSort: (column: string) => void
   onPage: (page: number) => void
 }
 
-export function RalliesTab({ params, onSort, onPage }: TabProps) {
+export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
   const rallies = useManageRallies(params)
+  const del = useDeleteRally()
+  const [sheet, setSheet] = useState<{
+    rally: RallyDbRowWithGame
+    mode: "edit" | "insert"
+  } | null>(null)
+  const [deleting, setDeleting] = useState<RallyDbRowWithGame | null>(null)
   const players = usePlayers()
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
@@ -112,20 +127,87 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
       sortable: true,
       render: (r) => <TsCell iso={r.updated_at} />,
     },
+    ...(owner
+      ? [
+          {
+            key: "actions",
+            label: "",
+            render: (r: RallyDbRowWithGame) => (
+              <span className="flex justify-end gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Insert a rally before #${r.rally_number}`}
+                  title="Insert a missed rally before this one"
+                  onClick={() => setSheet({ rally: r, mode: "insert" })}
+                >
+                  <BetweenHorizontalStartIcon />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Edit rally #${r.rally_number}`}
+                  onClick={() => setSheet({ rally: r, mode: "edit" })}
+                >
+                  <PencilIcon />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Delete rally #${r.rally_number}`}
+                  onClick={() => setDeleting(r)}
+                >
+                  <Trash2Icon />
+                </Button>
+              </span>
+            ),
+          },
+        ]
+      : []),
   ]
 
   return (
-    <DataTable
-      columns={columns}
-      result={rallies.data}
-      isPending={rallies.isPending || rallies.isFetching}
-      isError={rallies.isError}
-      onRetry={() => void rallies.refetch()}
-      pageNumber={params.page}
-      sort={params.sort}
-      onSort={onSort}
-      onPage={onPage}
-      rowKey={(r) => r.id}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        result={rallies.data}
+        isPending={rallies.isPending || rallies.isFetching}
+        isError={rallies.isError}
+        onRetry={() => void rallies.refetch()}
+        pageNumber={params.page}
+        sort={params.sort}
+        onSort={onSort}
+        onPage={onPage}
+        rowKey={(r) => r.id}
+      />
+      {sheet && (
+        <EditRallyDialog
+          rally={sheet.rally}
+          mode={sheet.mode}
+          onClose={() => setSheet(null)}
+        />
+      )}
+      <ConfirmDelete
+        open={deleting !== null}
+        title={`Delete rally #${deleting?.rally_number ?? ""}?`}
+        description="The score recalculates on its own — a gap in the rally numbers is fine."
+        pending={del.isPending}
+        error={del.isError ? friendlyWriteError(del.error) : null}
+        onCancel={() => {
+          setDeleting(null)
+          del.reset()
+        }}
+        onConfirm={() => {
+          if (!deleting) return
+          del.mutate(
+            { ...deleting, serve_number: deleting.serve_number === 2 ? 2 : 1 },
+            { onSuccess: () => setDeleting(null) },
+          )
+        }}
+      />
+    </>
   )
 }

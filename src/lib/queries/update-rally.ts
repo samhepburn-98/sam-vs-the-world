@@ -1,3 +1,5 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { RallyRow } from "@/lib/logger/rally-draft"
@@ -43,4 +45,17 @@ export function updateRallyOp(
       if (error) throw error
     },
   }
+}
+
+/** The same update as a manage mutation (§5.4) — the logger uses the queue
+ *  op above; manage edits are direct and invalidate the browsers. */
+export function useUpdateRally() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (row: RallyRow) => updateRallyOp(row).run(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["manage"] })
+      void queryClient.invalidateQueries({ queryKey: ["matches"] })
+    },
+  })
 }

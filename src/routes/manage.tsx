@@ -38,6 +38,9 @@ const SEARCH_PLACEHOLDER: Record<string, string> = {
 function ManagePage() {
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
+  // write affordances are owner-only in the UI; RLS enforces regardless (§8.5)
+  const { user } = Route.useRouteContext()
+  const owner = user !== null
 
   const params: ListParams = {
     page: search.page,
@@ -58,7 +61,7 @@ function ManagePage() {
   const onPage = (page: number) =>
     void navigate({ search: (prev) => ({ ...prev, page }) })
 
-  const tabProps = { params, onSort, onPage }
+  const tabProps = { params, owner, onSort, onPage }
 
   return (
     <main className="container mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10">
