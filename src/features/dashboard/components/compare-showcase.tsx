@@ -169,20 +169,37 @@ export function CompareShowcase({
       ? rate(d.serve.serve_wins, d.serve.rallies_served, MIN_RALLIES_FOR_RATE)
       : { value: null, display: "—" }
 
+  const returnRate = (d: PlayerData) =>
+    d.serve
+      ? rate(d.serve.return_wins, d.serve.rallies_returned, MIN_RALLIES_FOR_RATE)
+      : { value: null, display: "—" }
+
+  // the rings already carry win rate and serve win rate — the bars cover
+  // everything else so nothing is shown twice
   const rows: Array<{
     label: string
     left: Cell
     right: Cell
     betterWhen: "higher" | "lower" | "neither"
   }> = [
-    { label: "Win rate", left: winRate(d1), right: winRate(d2), betterWhen: "higher" },
     {
       label: "Games won",
       left: count(d1.headline?.games_won ?? 0),
       right: count(d2.headline?.games_won ?? 0),
       betterWhen: "higher",
     },
-    { label: "Serve win rate", left: serveRate(d1), right: serveRate(d2), betterWhen: "higher" },
+    {
+      label: "Matches won",
+      left: count(d1.headline?.matches_won ?? 0),
+      right: count(d2.headline?.matches_won ?? 0),
+      betterWhen: "higher",
+    },
+    {
+      label: "Return win rate",
+      left: returnRate(d1),
+      right: returnRate(d2),
+      betterWhen: "higher",
+    },
     {
       label: "Aces",
       left: count(d1.serve?.aces ?? 0),
