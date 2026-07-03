@@ -68,16 +68,6 @@ export function HotkeyHelp({
     <LoggerDialog open={open} title="Hotkeys" onClose={onClose}>
       {/* the sheet's own keys are content, not hints — always visible */}
       <KbdHintsContext.Provider value={true}>
-        <div className="mb-4 flex justify-end">
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={hintsVisible}
-            onPressedChange={onToggleHints}
-          >
-            {hintsVisible ? "Key hints shown" : "Key hints hidden"}
-          </Toggle>
-        </div>
         <div className="grid gap-6 sm:grid-cols-2">
           {GROUPS.map((group) => (
             <section key={group.title}>
@@ -95,10 +85,21 @@ export function HotkeyHelp({
             </section>
           ))}
         </div>
-        <p className="text-muted-foreground mt-4 text-xs">
-          Keys are inert while a text field is focused. Buttons always work —
-          hotkeys are the fast path, not the only path.
-        </p>
+        <footer className="mt-4 flex items-center justify-between gap-4">
+          <p className="text-muted-foreground text-xs">
+            Keys are inert while a text field is focused. Buttons always work —
+            hotkeys are the fast path, not the only path.
+          </p>
+          <Toggle
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            pressed={hintsVisible}
+            onPressedChange={onToggleHints}
+          >
+            {hintsVisible ? "Key hints shown" : "Key hints hidden"}
+          </Toggle>
+        </footer>
       </KbdHintsContext.Provider>
     </LoggerDialog>
   )
