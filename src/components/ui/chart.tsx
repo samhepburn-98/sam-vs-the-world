@@ -154,7 +154,11 @@ function ChartTooltipContent({
     const itemConfig = getPayloadConfigFromPayload(config, item, key)
     const value =
       !labelKey && typeof label === "string"
-        ? (config[label].label ?? label)
+        ? // config[label] is undefined when the tooltip label is an axis
+          // value (a date, a bucket name) rather than a config key — the
+          // optional chain is load-bearing at runtime despite the lint hint.
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          (config[label]?.label ?? label)
         : itemConfig?.label
 
     if (labelFormatter) {
