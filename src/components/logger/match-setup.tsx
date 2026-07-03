@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 
-import { BallDots } from "@/components/ball-dots"
+import { HouseRulesFields } from "@/components/logger/house-rules-fields"
 import { PlayerSelect } from "@/components/logger/player-select"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,24 +9,16 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { matchSetupSchema } from "@/lib/schemas/match"
 import { DEFAULT_HOUSE_RULES } from "@/lib/scoring"
 
+import type { HouseRulesForm } from "@/components/logger/house-rules-fields"
 import type { PlayerSummary } from "@/lib/schemas/player"
+import type { Control } from "react-hook-form"
 import type { MatchSetupInput } from "@/lib/schemas/match"
 
 interface MatchSetupProps {
@@ -35,13 +27,6 @@ interface MatchSetupProps {
   /** returns a friendly error, or null on success */
   onStart: (input: MatchSetupInput) => Promise<string | null>
 }
-
-const BALL_LABELS = {
-  blue: "Blue",
-  red: "Red",
-  yellow: "Yellow",
-  double_yellow: "Dbl yellow",
-} as const
 
 export function MatchSetup({
   players,
@@ -164,149 +149,11 @@ export function MatchSetup({
           </Field>
         </div>
 
-        <FieldSet>
-          <FieldLegend>House rules</FieldLegend>
-          <FieldGroup>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Controller
-                control={form.control}
-                name="houseRules.format"
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel htmlFor="format">Format</FieldLabel>
-                    <Select
-                      value={field.value === null ? "casual" : String(field.value)}
-                      onValueChange={(v) =>
-                        field.onChange(v === "casual" ? null : Number(v))
-                      }
-                    >
-                      <SelectTrigger id="format" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="casual">
-                            Casual — just play games
-                          </SelectItem>
-                          {[1, 3, 5, 7, 9].map((n) => (
-                            <SelectItem key={n} value={String(n)}>
-                              Best of {n}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
-              />
-              <Field data-invalid={errors.houseRules?.targetScore ? true : undefined}>
-                <FieldLabel htmlFor="target">Points per game</FieldLabel>
-                <Input
-                  id="target"
-                  type="number"
-                  min={1}
-                  max={99}
-                  {...form.register("houseRules.targetScore", {
-                    valueAsNumber: true,
-                  })}
-                />
-                {errors.houseRules?.targetScore && (
-                  <FieldError>{errors.houseRules.targetScore.message}</FieldError>
-                )}
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Controller
-                control={form.control}
-                name="houseRules.tiebreak"
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>At 10–10</FieldLabel>
-                    <ToggleGroup
-                      type="single"
-                      variant="outline"
-                      value={field.value}
-                      onValueChange={(v) => v && field.onChange(v)}
-                    >
-                      <ToggleGroupItem value="win_by_2">Win by 2</ToggleGroupItem>
-                      <ToggleGroupItem value="sudden_death">
-                        Sudden death
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </Field>
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="houseRules.servesPerPoint"
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>Serves per point</FieldLabel>
-                    <ToggleGroup
-                      type="single"
-                      variant="outline"
-                      value={String(field.value)}
-                      onValueChange={(v) => v && field.onChange(Number(v))}
-                    >
-                      <ToggleGroupItem value="2">Two serves</ToggleGroupItem>
-                      <ToggleGroupItem value="1">Single serve</ToggleGroupItem>
-                    </ToggleGroup>
-                  </Field>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Controller
-                control={form.control}
-                name="houseRules.letResetsServe"
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>After a let</FieldLabel>
-                    <ToggleGroup
-                      type="single"
-                      variant="outline"
-                      value={field.value ? "reset" : "keep"}
-                      onValueChange={(v) => v && field.onChange(v === "reset")}
-                    >
-                      <ToggleGroupItem value="keep">Keep serve no.</ToggleGroupItem>
-                      <ToggleGroupItem value="reset">
-                        Reset to 1st serve
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </Field>
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="houseRules.ballType"
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>Ball</FieldLabel>
-                    <ToggleGroup
-                      type="single"
-                      variant="outline"
-                      value={field.value ?? ""}
-                      onValueChange={(v) => field.onChange(v === "" ? null : v)}
-                    >
-                      {(
-                        Object.keys(BALL_LABELS) as Array<
-                          keyof typeof BALL_LABELS
-                        >
-                      ).map((b) => (
-                        <ToggleGroupItem key={b} value={b}>
-                          <BallDots ball={b} />
-                          {BALL_LABELS[b]}
-                        </ToggleGroupItem>
-                      ))}
-                    </ToggleGroup>
-                  </Field>
-                )}
-              />
-            </div>
-          </FieldGroup>
-        </FieldSet>
+        <HouseRulesFields
+          control={form.control as unknown as Control<HouseRulesForm>}
+          register={form.register}
+          errors={errors}
+        />
 
         {rootError && (
           <p role="alert" className="text-destructive text-sm">
