@@ -1,11 +1,11 @@
-import { RelCell, TsCell } from "@/components/manage/cells"
+import { NullCell, RelCell, TsCell } from "@/components/manage/cells"
 import { DataTable } from "@/components/manage/data-table"
 import { useManageGames } from "@/lib/queries/get-manage-games"
 import { usePlayers } from "@/lib/queries/get-players"
 
 import type { ManageColumn } from "@/components/manage/data-table"
 import type { ListParams } from "@/lib/queries/manage-list"
-import type { GameRowWithMatch } from "@/lib/schemas/game"
+import type { GameBrowserRow } from "@/lib/schemas/game"
 
 interface TabProps {
   params: ListParams
@@ -19,7 +19,7 @@ export function GamesTab({ params, onSort, onPage }: TabProps) {
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
-  const columns: Array<ManageColumn<GameRowWithMatch>> = [
+  const columns: Array<ManageColumn<GameBrowserRow>> = [
     {
       key: "match_id",
       label: "Match",
@@ -36,6 +36,34 @@ export function GamesTab({ params, onSort, onPage }: TabProps) {
       label: "Game #",
       sortable: true,
       render: (g) => g.game_number,
+    },
+    {
+      key: "score",
+      label: "Score",
+      render: (g) =>
+        g.result ? (
+          <span className="font-semibold tabular-nums">
+            {g.result.score_p1}–{g.result.score_p2}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">no rallies yet</span>
+        ),
+    },
+    {
+      key: "winner",
+      label: "Winner",
+      render: (g) =>
+        g.result?.winner_id ? (
+          <RelCell
+            tab="players"
+            id={g.result.winner_id}
+            label={nameOf(g.result.winner_id)}
+          />
+        ) : g.result?.is_undecided ? (
+          <span className="text-muted-foreground">tied</span>
+        ) : (
+          <NullCell />
+        ),
     },
     {
       key: "created_at",
