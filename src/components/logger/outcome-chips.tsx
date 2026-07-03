@@ -18,6 +18,7 @@ import {
   showsShotType,
 } from "@/lib/logger/rally-draft"
 import { Constants } from "@/lib/database.types"
+import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/logger/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -163,7 +164,16 @@ export function OutcomeChips({
             </Select>
           </>
         )}
-        <span className="text-muted-foreground shrink-0 text-xs">shots</span>
+        <span
+          className={cn(
+            "text-muted-foreground shrink-0 text-xs",
+            // row-leading when the shot-type select is hidden (e.g. serve
+            // fault) — line up with the other rows' label column
+            !showsShotType(draft.endReason) && "w-12",
+          )}
+        >
+          shots
+        </span>
         <Input
           type="number"
           min={0}
