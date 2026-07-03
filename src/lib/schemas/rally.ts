@@ -19,3 +19,11 @@ export const rallySummary = z.object({
 })
 
 export type RallySummary = z.infer<typeof rallySummary>
+
+/** Every stored column — the /manage raw browser's row (§5.4). */
+export const rallyDbRow = rallySummary.extend({
+  created_at: z.string(),
+  updated_at: z.string(),
+})
+
+export type RallyDbRow = z.infer<typeof rallyDbRow>
