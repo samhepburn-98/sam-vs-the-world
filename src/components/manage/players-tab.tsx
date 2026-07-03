@@ -13,23 +13,23 @@ interface TabProps {
 }
 
 const columns: Array<ManageColumn<PlayerRow>> = [
-  { key: "id", label: "id", render: (p) => <IdCell id={p.id} /> },
-  { key: "name", label: "name", sortable: true, render: (p) => p.name },
+  { key: "id", label: "ID", render: (p) => <IdCell id={p.id} /> },
+  { key: "name", label: "Name", sortable: true, render: (p) => p.name },
   {
     key: "handedness",
-    label: "handedness",
+    label: "Handedness",
     sortable: true,
     render: (p) => p.handedness ?? <NullCell />,
   },
   {
     key: "created_at",
-    label: "created",
+    label: "Created",
     sortable: true,
     render: (p) => <TsCell iso={p.created_at} />,
   },
   {
     key: "updated_at",
-    label: "updated",
+    label: "Updated",
     sortable: true,
     render: (p) => <TsCell iso={p.updated_at} />,
   },

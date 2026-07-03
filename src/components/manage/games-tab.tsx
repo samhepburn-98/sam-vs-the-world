@@ -13,36 +13,36 @@ interface TabProps {
 }
 
 const columns: Array<ManageColumn<GameRow>> = [
-  { key: "id", label: "id", render: (g) => <IdCell id={g.id} /> },
+  { key: "id", label: "ID", render: (g) => <IdCell id={g.id} /> },
   {
     key: "match_id",
-    label: "match",
+    label: "Match",
     render: (g) => (
       <RelCell tab="matches" id={g.match_id} label={g.match_id.slice(0, 8)} />
     ),
   },
   {
     key: "game_number",
-    label: "game #",
+    label: "Game #",
     sortable: true,
     render: (g) => g.game_number,
   },
   {
     key: "created_at",
-    label: "created",
+    label: "Created",
     sortable: true,
     render: (g) => <TsCell iso={g.created_at} />,
   },
   {
     key: "updated_at",
-    label: "updated",
+    label: "Updated",
     sortable: true,
     render: (g) => <TsCell iso={g.updated_at} />,
   },
   {
     key: "rel",
     label: "",
-    render: (g) => <RelCell tab="rallies" id={g.id} label="rallies" />,
+    render: (g) => <RelCell tab="rallies" id={g.id} label="Rallies" />,
   },
 ]
 

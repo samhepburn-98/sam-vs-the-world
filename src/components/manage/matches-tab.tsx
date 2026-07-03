@@ -26,59 +26,59 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
   const columns: Array<ManageColumn<MatchRow>> = [
-    { key: "id", label: "id", render: (m) => <IdCell id={m.id} /> },
-    { key: "date", label: "date", sortable: true, render: (m) => m.date },
+    { key: "id", label: "ID", render: (m) => <IdCell id={m.id} /> },
+    { key: "date", label: "Date", sortable: true, render: (m) => m.date },
     {
       key: "player1_id",
-      label: "player 1",
+      label: "Player 1",
       render: (m) => (
         <RelCell tab="players" id={m.player1_id} label={nameOf(m.player1_id)} />
       ),
     },
     {
       key: "player2_id",
-      label: "player 2",
+      label: "Player 2",
       render: (m) => (
         <RelCell tab="players" id={m.player2_id} label={nameOf(m.player2_id)} />
       ),
     },
     {
       key: "venue",
-      label: "venue",
+      label: "Venue",
       sortable: true,
       render: (m) => m.venue ?? <NullCell />,
     },
     {
       key: "format",
-      label: "format",
+      label: "Format",
       sortable: true,
       render: (m) => (m.format === null ? <NullCell /> : `best of ${m.format}`),
     },
     {
       key: "target_score",
-      label: "target",
+      label: "Target",
       sortable: true,
       render: (m) => m.target_score,
     },
-    { key: "tiebreak", label: "tiebreak", render: (m) => m.tiebreak },
+    { key: "tiebreak", label: "Tiebreak", render: (m) => m.tiebreak },
     {
       key: "serves_per_point",
-      label: "serves",
+      label: "Serves",
       render: (m) => m.serves_per_point,
     },
     {
       key: "let_resets_serve",
-      label: "let resets",
+      label: "Let resets",
       render: (m) => <BoolCell value={m.let_resets_serve} />,
     },
     {
       key: "ball_type",
-      label: "ball",
+      label: "Ball",
       render: (m) => m.ball_type ?? <NullCell />,
     },
     {
       key: "notes",
-      label: "notes",
+      label: "Notes",
       render: (m) =>
         m.notes ? (
           <span className="block max-w-48 truncate" title={m.notes}>
@@ -90,20 +90,20 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
     },
     {
       key: "created_at",
-      label: "created",
+      label: "Created",
       sortable: true,
       render: (m) => <TsCell iso={m.created_at} />,
     },
     {
       key: "updated_at",
-      label: "updated",
+      label: "Updated",
       sortable: true,
       render: (m) => <TsCell iso={m.updated_at} />,
     },
     {
       key: "rel",
       label: "",
-      render: (m) => <RelCell tab="games" id={m.id} label="games" />,
+      render: (m) => <RelCell tab="games" id={m.id} label="Games" />,
     },
   ]
 

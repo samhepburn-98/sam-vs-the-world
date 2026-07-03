@@ -26,37 +26,37 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
   const columns: Array<ManageColumn<RallyDbRow>> = [
-    { key: "id", label: "id", render: (r) => <IdCell id={r.id} /> },
+    { key: "id", label: "ID", render: (r) => <IdCell id={r.id} /> },
     {
       key: "game_id",
-      label: "game",
+      label: "Game",
       render: (r) => (
         <RelCell tab="games" id={r.game_id} label={r.game_id.slice(0, 8)} />
       ),
     },
     {
       key: "rally_number",
-      label: "rally #",
+      label: "Rally #",
       sortable: true,
       render: (r) => r.rally_number,
     },
     {
       key: "server_id",
-      label: "server",
+      label: "Server",
       render: (r) => (
         <RelCell tab="players" id={r.server_id} label={nameOf(r.server_id)} />
       ),
     },
-    { key: "serve_side", label: "box", render: (r) => r.serve_side },
+    { key: "serve_side", label: "Box", render: (r) => r.serve_side },
     {
       key: "serve_number",
-      label: "serve",
+      label: "Serve",
       sortable: true,
       render: (r) => r.serve_number,
     },
     {
       key: "winner_id",
-      label: "winner",
+      label: "Winner",
       render: (r) =>
         r.winner_id ? (
           <RelCell tab="players" id={r.winner_id} label={nameOf(r.winner_id)} />
@@ -66,40 +66,40 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
     },
     {
       key: "end_reason",
-      label: "end reason",
+      label: "End reason",
       sortable: true,
       render: (r) => r.end_reason.replace("_", " "),
     },
     {
       key: "error_detail",
-      label: "detail",
+      label: "Detail",
       render: (r) => r.error_detail?.replace("_", " ") ?? <NullCell />,
     },
     {
       key: "forced",
-      label: "forced",
+      label: "Forced",
       render: (r) => <BoolCell value={r.forced} />,
     },
     {
       key: "shot_type",
-      label: "shot",
+      label: "Shot",
       render: (r) => r.shot_type ?? <NullCell />,
     },
     {
       key: "shot_count",
-      label: "shots",
+      label: "Shots",
       sortable: true,
       render: (r) => r.shot_count ?? <NullCell />,
     },
     {
       key: "created_at",
-      label: "created",
+      label: "Created",
       sortable: true,
       render: (r) => <TsCell iso={r.created_at} />,
     },
     {
       key: "updated_at",
-      label: "updated",
+      label: "Updated",
       sortable: true,
       render: (r) => <TsCell iso={r.updated_at} />,
     },
