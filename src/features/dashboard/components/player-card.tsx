@@ -23,7 +23,7 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
   const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
   const losses = games_decided - games_won
   // recent_games is newest-first; a form line reads left-to-right, oldest-first
-  const form = player.recent_games.slice(0, 7).reverse()
+  const form = player.recent_games.slice(0, 5).reverse()
 
   return (
     <div
