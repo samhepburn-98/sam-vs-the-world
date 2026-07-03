@@ -1,24 +1,269 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 import { z } from "zod"
 
-import { PageStub } from "@/components/page-stub"
+import {
+  matchDetailQueryOptions,
+  useMatchDetail,
+} from "@/lib/api/get-match-detail"
+import {
+  computeLeadSeries,
+  MomentumArea,
+} from "@/features/dashboard/components/momentum-chart"
+import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
+import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
+import { humanise } from "@/features/dashboard/lib/humanise"
+import { RallyTimeline } from "@/features/logger/components/rally-timeline"
+import { BallDots } from "@/components/ball-dots"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-// The full page lands in #29; the `rally` deep-link param is validated here
-// now so category-page drills (#28) compile and land on the right match.
+import type { RallyRow } from "@/lib/rally/rally-draft"
+import type { RallyScored } from "@/lib/schemas/rally"
+
+// Match detail (§5.2): the deep-drill target — one match told in full. The
+// rallies are folded into the scored shape client-side (§8.4 exception), so
+// the two-sided timeline, the momentum strip, and the rally sheet all read
+// one consistent structure. `?rally=<id>` opens and scrolls to a rally.
+
 const matchSearch = z.object({
-  rally: z.number().int().optional().catch(undefined),
+  rally: z.string().optional().catch(undefined),
 })
 
 export const Route = createFileRoute("/matches/$matchId")({
   validateSearch: (search) => matchSearch.parse(search),
+  loader: async ({ context, params }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(
+        matchDetailQueryOptions(params.matchId),
+      ),
+      context.queryClient.ensureQueryData(playersQueryOptions()),
+    ])
+  },
   component: MatchDetailPage,
 })
 
+function toRallyRow(r: RallyScored): RallyRow {
+  return {
+    id: r.id,
+    game_id: r.game_id,
+    rally_number: r.rally_number,
+    server_id: r.server_id,
+    serve_side: r.serve_side,
+    serve_number: r.serve_number === 2 ? 2 : 1,
+    winner_id: r.winner_id,
+    end_reason: r.end_reason,
+    error_detail: r.error_detail,
+    forced: r.forced,
+    shot_type: r.shot_type,
+    shot_count: r.shot_count,
+  }
+}
+
+function formatBadge(format: number | null) {
+  return format === null ? "Casual" : `Best of ${format}`
+}
+
 function MatchDetailPage() {
+  const { matchId } = Route.useParams()
+  const search = Route.useSearch()
+  const { user } = Route.useRouteContext()
+  const match = useMatchDetail(matchId)
+  const players = usePlayers()
+
+  const [selected, setSelected] = useState<number | null>(null)
+  const gameRefs = useRef<Record<string, HTMLElement | null>>({})
+
+  const folded = match.data ? foldMatchToScored(match.data) : []
+  const allRows = folded.flatMap((g) => g.rows)
+
+  // deep link: open + scroll to the target rally once the data is in. Recompute
+  // the rows inside so the effect depends only on the param and the fetch, not
+  // on a fresh array each render (which would re-open the sheet endlessly).
+  const matchData = match.data
+  useEffect(() => {
+    if (!search.rally || !matchData) return
+    const rows = foldMatchToScored(matchData).flatMap((g) => g.rows)
+    const idx = rows.findIndex((r) => r.id === search.rally)
+    if (idx < 0) return
+    setSelected(idx)
+    gameRefs.current[rows[idx].game_id]?.scrollIntoView({ block: "center" })
+  }, [search.rally, matchData])
+
+  if (!match.data || !players.data) {
+    return (
+      <main className="container mx-auto max-w-4xl px-4 py-10">
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </main>
+    )
+  }
+
+  const m = match.data
+  const nameOf = (id: string) =>
+    players.data.find((p) => p.id === id)?.name ?? "Unknown"
+  const p1Name = nameOf(m.player1_id)
+  const p2Name = nameOf(m.player2_id)
+
+  const results = folded.map((g) => {
+    const last = g.rows.at(-1)
+    const scoreP1 = last?.score_p1 ?? 0
+    const scoreP2 = last?.score_p2 ?? 0
+    const winner =
+      scoreP1 > scoreP2
+        ? m.player1_id
+        : scoreP2 > scoreP1
+          ? m.player2_id
+          : null
+    return { ...g, scoreP1, scoreP2, winner }
+  })
+  const gamesWonP1 = results.filter((r) => r.winner === m.player1_id).length
+  const gamesWonP2 = results.filter((r) => r.winner === m.player2_id).length
+  const matchWinner =
+    gamesWonP1 > gamesWonP2
+      ? m.player1_id
+      : gamesWonP2 > gamesWonP1
+        ? m.player2_id
+        : null
+
   return (
-    <PageStub
-      title="Match detail"
-      description="Game strip, rally timeline, and momentum land in phase 6."
-    />
+    <main className="container mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/matches" search={{ page: 1 }}>
+                Matches
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>
+              {p1Name} vs {p2Name}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* header */}
+      <header className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground text-sm tabular-nums">
+            {m.date}
+          </span>
+          {m.venue && (
+            <span className="text-muted-foreground text-sm">· {m.venue}</span>
+          )}
+          <Badge variant="outline">{formatBadge(m.format)}</Badge>
+          {m.ball_type && (
+            <span className="flex items-center gap-1.5 text-sm">
+              <BallDots ball={m.ball_type} />
+              {humanise(m.ball_type)}
+            </span>
+          )}
+        </div>
+        <h1 className="font-heading flex items-baseline gap-3 text-3xl font-bold tracking-tight">
+          <span className={cn(matchWinner === m.player1_id && "text-primary")}>
+            {p1Name}
+          </span>
+          <span className="tabular-nums">
+            {gamesWonP1}–{gamesWonP2}
+          </span>
+          <span className={cn(matchWinner === m.player2_id && "text-primary")}>
+            {p2Name}
+          </span>
+        </h1>
+        {matchWinner === null && (
+          <p className="text-muted-foreground text-sm">Casual session.</p>
+        )}
+        {user && (
+          <div className="pt-1">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/manage" search={{ tab: "rallies", q: matchId, page: 1, sort: "", dir: "desc" }}>
+                Edit in manage
+              </Link>
+            </Button>
+          </div>
+        )}
+      </header>
+
+      {/* game strip */}
+      <div className="flex flex-wrap gap-2">
+        {results.map((g) => (
+          <button
+            key={g.gameId}
+            type="button"
+            onClick={() =>
+              gameRefs.current[g.gameId]?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              })
+            }
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium tabular-nums ring-1 ring-foreground/10 transition-colors hover:bg-muted/60",
+              g.winner === m.player1_id && "bg-primary/10",
+              g.winner === m.player2_id && "bg-primary/10",
+            )}
+          >
+            <span className="text-muted-foreground mr-2 text-xs">
+              G{g.gameNumber}
+            </span>
+            {g.scoreP1}–{g.scoreP2}
+          </button>
+        ))}
+      </div>
+
+      {/* per-game timeline + momentum */}
+      {folded.map((g, gi) => (
+        <section
+          key={g.gameId}
+          ref={(el) => {
+            gameRefs.current[g.gameId] = el
+          }}
+          className="flex flex-col gap-3 scroll-mt-4"
+        >
+          <h2 className="font-heading text-lg font-bold">Game {g.gameNumber}</h2>
+          <MomentumArea data={computeLeadSeries(g.rows, m.player1_id)} />
+          <RallyTimeline
+            rows={g.rows.map(toRallyRow)}
+            p1Id={m.player1_id}
+            p1Name={p1Name}
+            p2Name={p2Name}
+            servesPerPoint={m.serves_per_point}
+            editable
+            onRowClick={(row) => {
+              const idx = allRows.findIndex((r) => r.id === row.id)
+              if (idx >= 0) setSelected(idx)
+            }}
+          />
+          {gi < folded.length - 1 && <div className="border-b" />}
+        </section>
+      ))}
+
+      <RallyDetailSheet
+        rally={selected === null ? null : allRows[selected]}
+        showMatchLink={false}
+        onClose={() => setSelected(null)}
+        onPrev={() => setSelected((i) => (i === null ? i : Math.max(0, i - 1)))}
+        onNext={() =>
+          setSelected((i) =>
+            i === null ? i : Math.min(allRows.length - 1, i + 1),
+          )
+        }
+        hasPrev={selected !== null && selected > 0}
+        hasNext={selected !== null && selected < allRows.length - 1}
+      />
+    </main>
   )
 }
