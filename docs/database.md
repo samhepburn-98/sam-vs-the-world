@@ -143,7 +143,8 @@ To grant the owner: create the auth user, then
 | `20260702212852_security_hardening` | pinned function search_paths, RPC exposure revokes (advisor lints) |
 | `20260702221549_house_rules` | serves_per_point + let_resets_serve, format odd 1–9, rule-aware serve trigger |
 | `20260703143000_insert_rally_at` | transactional mid-game insert (see below) |
-| *(planned)* insight RPCs | see PROJECT_PLAN.md §8.4 |
+| `20260703180000_insights_headline_h2h` | 0004a: shared filter helpers, player_headline(s), h2h (+ companion) — see below |
+| *(planned)* 0004b/0004c insight RPCs | serve_stats, error_profile, rally_lengths, momentum — PROJECT_PLAN.md §8.4 |
 
 ### `insert_rally_at(...)` — the one write that needs a transaction
 
@@ -155,3 +156,25 @@ defers it, renumbers, inserts, and the constraint re-checks at commit.
 `SECURITY INVOKER`, so RLS decides who can write, same as any direct insert;
 `/rpc` exposure is owner-only per the hardening rules. A constraint violation
 anywhere aborts the whole thing — no half-applied renumber is possible.
+
+### The insight RPCs (migration 0004a onward)
+
+Every analytical stat is computed in Postgres — one function per insight,
+all `SECURITY INVOKER`, read-only, and executable by `anon` (public read,
+same reach as the views). They share three **set-returning filter helpers**
+(`filtered_matches`, `filtered_games`, `filtered_rallies`) that apply the
+cross-cutting filters — `opponent_id`, `ball_type`, `date_from/to` — from one
+player's perspective. An aggregate RPC and its `*_rallies` drill-through
+companion both read from the *same* helper, so the rally table under a number
+can never drift from the number above it.
+
+| function | returns |
+|---|---|
+| `player_headline(player_id, …filters)` | win rate inputs over **decided** games (`games_won` / `games_decided`), match record, last-10 game results (jsonb, newest first), signature trait (`grinder` / `shotmaker` / `balanced`, null under §3.2's ≥30-per-bucket threshold) |
+| `players_headline()` | the batch variant — every player's headline in one call for the home roster |
+| `h2h(p1, p2, …filters)` | the pair's game & match record from `p1`'s perspective + date-ascending match history (jsonb) |
+| `h2h_rallies(p1, p2, …filters)` | the rally rows behind those numbers (`rallies_scored` shape) |
+
+The jsonb payloads are pinned by zod schemas in `src/lib/schemas/insights.ts`
+— the generated DB type says `Json`, the schema turns it into a real type at
+the query boundary or fails loudly.
