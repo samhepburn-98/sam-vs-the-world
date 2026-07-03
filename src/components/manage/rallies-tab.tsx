@@ -10,7 +10,7 @@ import { usePlayers } from "@/lib/queries/get-players"
 
 import type { ManageColumn } from "@/components/manage/data-table"
 import type { ListParams } from "@/lib/queries/manage-list"
-import type { RallyDbRow } from "@/lib/schemas/rally"
+import type { RallyDbRowWithGame } from "@/lib/schemas/rally"
 
 interface TabProps {
   params: ListParams
@@ -24,12 +24,16 @@ export function RalliesTab({ params, onSort, onPage }: TabProps) {
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
-  const columns: Array<ManageColumn<RallyDbRow>> = [
+  const columns: Array<ManageColumn<RallyDbRowWithGame>> = [
     {
       key: "game_id",
       label: "Game",
       render: (r) => (
-        <RelCell tab="games" id={r.game_id} label={r.game_id.slice(0, 8)} />
+        <RelCell
+          tab="games"
+          id={r.game_id}
+          label={`G${r.games.game_number} · ${nameOf(r.games.matches.player1_id)} vs ${nameOf(r.games.matches.player2_id)} · ${r.games.matches.date}`}
+        />
       ),
     },
     {

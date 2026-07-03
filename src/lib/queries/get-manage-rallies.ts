@@ -7,11 +7,11 @@ import {
   MANAGE_PAGE_SIZE,
   sanitizeSort,
 } from "@/lib/queries/manage-list"
-import { rallyDbRow } from "@/lib/schemas/rally"
+import { rallyDbRowWithGame } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { ListPage, ListParams } from "@/lib/queries/manage-list"
-import type { RallyDbRow } from "@/lib/schemas/rally"
+import type { RallyDbRowWithGame } from "@/lib/schemas/rally"
 
 const SORTABLE = new Set([
   "rally_number",
@@ -26,9 +26,9 @@ const END_REASONS = new Set<string>(Constants.public.Enums.end_reason)
 
 export async function fetchManageRallies(
   params: ListParams,
-): Promise<ListPage<RallyDbRow>> {
+): Promise<ListPage<RallyDbRowWithGame>> {
   const supabase = getSupabaseBrowserClient()
-  let query = supabase.from("rallies").select("*", { count: "exact" })
+  let query = supabase.from("rallies").select("*, games(game_number, matches(date, player1_id, player2_id))", { count: "exact" })
 
   const search = classifyQuery(params.q)
   if (search.kind === "uuid") {
@@ -54,7 +54,7 @@ export async function fetchManageRallies(
     .order("id", { ascending: true }) // stable pagination tiebreak
     .range(from, from + MANAGE_PAGE_SIZE - 1)
   if (error) throw error
-  return { rows: z.array(rallyDbRow).parse(data), total: count ?? 0 }
+  return { rows: z.array(rallyDbRowWithGame).parse(data), total: count ?? 0 }
 }
 
 export function useManageRallies(params: ListParams) {

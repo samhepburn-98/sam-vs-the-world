@@ -6,19 +6,19 @@ import {
   MANAGE_PAGE_SIZE,
   sanitizeSort,
 } from "@/lib/queries/manage-list"
-import { gameRow } from "@/lib/schemas/game"
+import { gameRowWithMatch } from "@/lib/schemas/game"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { ListPage, ListParams } from "@/lib/queries/manage-list"
-import type { GameRow } from "@/lib/schemas/game"
+import type { GameRowWithMatch } from "@/lib/schemas/game"
 
 const SORTABLE = new Set(["game_number", "created_at", "updated_at"])
 
 export async function fetchManageGames(
   params: ListParams,
-): Promise<ListPage<GameRow>> {
+): Promise<ListPage<GameRowWithMatch>> {
   const supabase = getSupabaseBrowserClient()
-  let query = supabase.from("games").select("*", { count: "exact" })
+  let query = supabase.from("games").select("*, matches(date, player1_id, player2_id)", { count: "exact" })
 
   const search = classifyQuery(params.q)
   if (search.kind === "uuid") {
@@ -37,7 +37,7 @@ export async function fetchManageGames(
     .order("id", { ascending: true }) // stable pagination tiebreak
     .range(from, from + MANAGE_PAGE_SIZE - 1)
   if (error) throw error
-  return { rows: z.array(gameRow).parse(data), total: count ?? 0 }
+  return { rows: z.array(gameRowWithMatch).parse(data), total: count ?? 0 }
 }
 
 export function useManageGames(params: ListParams) {

@@ -27,3 +27,18 @@ export const rallyDbRow = rallySummary.extend({
 })
 
 export type RallyDbRow = z.infer<typeof rallyDbRow>
+
+/** Browser row with the parent game (and its match) embedded — the
+ *  human-readable label ("G2 · Sam vs Dave") instead of a uuid (§5.4). */
+export const rallyDbRowWithGame = rallyDbRow.extend({
+  games: z.object({
+    game_number: z.number().int(),
+    matches: z.object({
+      date: z.string(),
+      player1_id: z.string().uuid(),
+      player2_id: z.string().uuid(),
+    }),
+  }),
+})
+
+export type RallyDbRowWithGame = z.infer<typeof rallyDbRowWithGame>
