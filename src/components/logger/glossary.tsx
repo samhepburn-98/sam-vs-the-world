@@ -1,3 +1,5 @@
+import { Fragment } from "react"
+
 import { LoggerDialog } from "@/components/logger/logger-dialog"
 import { Constants } from "@/lib/database.types"
 
@@ -55,12 +57,12 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
             How the rally ended
           </h3>
-          <dl className="flex flex-col gap-1.5 text-sm">
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {Constants.public.Enums.end_reason.map((r) => (
-              <div key={r} className="flex gap-1.5">
-                <dt className="shrink-0 font-medium">{END_REASON_LABELS[r]}:</dt>
+              <Fragment key={r}>
+                <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
                 <dd className="text-muted-foreground">{END_REASON_HELP[r]}</dd>
-              </div>
+              </Fragment>
             ))}
           </dl>
         </section>
@@ -68,14 +70,12 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
             Error detail
           </h3>
-          <dl className="flex flex-col gap-1.5 text-sm">
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {Constants.public.Enums.error_detail.map((d) => (
-              <div key={d} className="flex gap-1.5">
-                <dt className="shrink-0 font-medium">
-                  {ERROR_DETAIL_LABELS[d]}:
-                </dt>
+              <Fragment key={d}>
+                <dt className="font-medium">{ERROR_DETAIL_LABELS[d]}</dt>
                 <dd className="text-muted-foreground">{ERROR_DETAIL_HELP[d]}</dd>
-              </div>
+              </Fragment>
             ))}
           </dl>
         </section>
