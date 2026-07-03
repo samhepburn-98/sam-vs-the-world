@@ -26,21 +26,26 @@ export function MatchesTab({ params, onSort, onPage }: TabProps) {
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
 
   const columns: Array<ManageColumn<MatchRow>> = [
+    {
+      key: "match",
+      label: "Match",
+      render: (m) => (
+        <span className="font-medium">
+          <RelCell
+            tab="players"
+            id={m.player1_id}
+            label={nameOf(m.player1_id)}
+          />{" "}
+          vs{" "}
+          <RelCell
+            tab="players"
+            id={m.player2_id}
+            label={nameOf(m.player2_id)}
+          />
+        </span>
+      ),
+    },
     { key: "date", label: "Date", sortable: true, render: (m) => m.date },
-    {
-      key: "player1_id",
-      label: "Player 1",
-      render: (m) => (
-        <RelCell tab="players" id={m.player1_id} label={nameOf(m.player1_id)} />
-      ),
-    },
-    {
-      key: "player2_id",
-      label: "Player 2",
-      render: (m) => (
-        <RelCell tab="players" id={m.player2_id} label={nameOf(m.player2_id)} />
-      ),
-    },
     {
       key: "venue",
       label: "Venue",
