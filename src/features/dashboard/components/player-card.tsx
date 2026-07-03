@@ -64,14 +64,11 @@ export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps
         </div>
 
         {enough ? (
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-bold tabular-nums">
-              {Math.round((games_won / games_decided) * 100)}%
-            </span>
-            <span className="text-muted-foreground text-sm tabular-nums">
-              · {games_won} of {games_decided}
-            </span>
-          </div>
+          // the denominator is carried by the W–L record below, so the rate
+          // stands alone here without repeating "of N"
+          <p className="text-3xl font-bold tabular-nums">
+            {Math.round((games_won / games_decided) * 100)}%
+          </p>
         ) : (
           <p className="text-muted-foreground text-sm">
             Not enough data yet{" "}
