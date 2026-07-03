@@ -6,10 +6,7 @@ import {
   matchDetailQueryOptions,
   useMatchDetail,
 } from "@/lib/api/get-match-detail"
-import {
-  computeLeadSeries,
-  MomentumArea,
-} from "@/features/dashboard/components/momentum-chart"
+import { GameScoreChart } from "@/features/dashboard/components/game-score-chart"
 import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
@@ -234,7 +231,7 @@ function MatchDetailPage() {
           className="flex flex-col gap-3 scroll-mt-4"
         >
           <h2 className="font-heading text-lg font-bold">Game {g.gameNumber}</h2>
-          <MomentumArea data={computeLeadSeries(g.rows, m.player1_id)} />
+          <GameScoreChart rows={g.rows} p1Name={p1Name} p2Name={p2Name} />
           <RallyTimeline
             rows={g.rows.map(toRallyRow)}
             p1Id={m.player1_id}
