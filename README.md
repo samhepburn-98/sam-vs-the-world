@@ -21,8 +21,9 @@ The full specification — data model, insight definitions, page specs, architec
 and roadmap — lives in [PROJECT_PLAN.md](PROJECT_PLAN.md). Work is organised as
 [issues](../../issues) grouped by phase milestones; one issue = one PR.
 
-Standalone reference docs live in [docs/](docs/): [the database explained](docs/database.md) and
-[the decision log](docs/decisions.md).
+Standalone reference docs live in [docs/](docs/): [the architecture](docs/architecture.md) (how the
+code is organised and the enforced module boundaries), [the database explained](docs/database.md),
+and [the decision log](docs/decisions.md).
 
 ## Development
 

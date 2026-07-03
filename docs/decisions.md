@@ -1,7 +1,8 @@
-# Decision log — database
+# Decision log
 
-The judgment calls behind the schema, and what each one buys or costs. Reference doc; the plan of
-record is [PROJECT_PLAN.md](../PROJECT_PLAN.md).
+The judgment calls behind the schema and the app structure, and what each one buys or costs.
+Reference doc; the plan of record is [PROJECT_PLAN.md](../PROJECT_PLAN.md). Decisions 1–13 are the
+database; 14 onward, the frontend.
 
 ## 1. Log at the rally level, one row per point
 
@@ -96,3 +97,18 @@ point, let-resets-serve, ball), defaulted to our rules so the common case config
 changes score *derivation* itself and isn't supported by the views — but the server is stored on
 every rally, so a future view could derive it from the same data. Locked out of the views, not the
 data.
+
+## 14. Feature-based architecture with enforced boundaries
+
+The frontend is organised by feature ([bulletproof-react](https://github.com/alan2207/bulletproof-react)),
+not by file type, and the dependency direction (`shared → features → routes`) is enforced by an ESLint
+rule rather than left to discipline. **What it buys:** each feature is a self-contained unit you can
+read, change, or delete without hunting through `components/` and `lib/queries/` for its scattered
+parts; the enforced boundary means the structure can't quietly erode as the app grows. **What it
+costs:** anything two features share must move to `lib/`/`components/` rather than living with whoever
+built it, which took a second pass to get right — the rally-entry engine and entity data-access turned
+out to be shared, not logger-owned. Turning enforcement on is what surfaced that: it flagged the real
+shared kernel instead of letting it hide as a cross-feature import. The one carve-out is `routes/`,
+which stays put because TanStack Start generates its route tree from that path; route files are the
+composition layer where features are allowed to meet. Full guide in
+[architecture.md](architecture.md); lands in the restructure PR (#61).
