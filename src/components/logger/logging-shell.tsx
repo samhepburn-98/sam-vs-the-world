@@ -11,6 +11,7 @@ import { SyncIndicator } from "@/components/logger/sync-indicator"
 import { UndoBar } from "@/components/logger/undo-bar"
 import { WinnerButtons } from "@/components/logger/winner-buttons"
 import { Button } from "@/components/ui/button"
+import { KbdHintsContext } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
 import { hotkeyAction, isEditableTarget } from "@/lib/logger/hotkeys"
 import {
@@ -138,6 +139,8 @@ function normalizeRow(r: {
   return { ...r, serve_number: r.serve_number === 2 ? 2 : 1 }
 }
 
+const HINTS_PREF_KEY = "svw:show-key-hints"
+
 function rulesOf(match: MatchDetail): HouseRules {
   return {
     targetScore: match.target_score,
@@ -181,6 +184,11 @@ function MatchLogger({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [finished, setFinished] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [showHints, setShowHints] = useState(
+    () =>
+      typeof window === "undefined" ||
+      window.localStorage.getItem(HINTS_PREF_KEY) !== "0",
+  )
   const winnerRef = useRef<HTMLDivElement>(null)
   // digits replace the suggested shot count first, then append (1 → "12" ✓)
   const digitTyped = useRef(false)
@@ -257,6 +265,11 @@ function MatchLogger({
     // an edit can change who serves next — refresh an untouched draft only,
     // never clobber a rally mid-entry
     if (!midEntry) setDraftState(null)
+  }
+
+  function toggleHints(visible: boolean) {
+    setShowHints(visible)
+    window.localStorage.setItem(HINTS_PREF_KEY, visible ? "1" : "0")
   }
 
   function pickWinner(side: "p1" | "p2") {
@@ -414,6 +427,7 @@ function MatchLogger({
   }
 
   return (
+    <KbdHintsContext.Provider value={showHints}>
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
@@ -436,7 +450,12 @@ function MatchLogger({
         </div>
       </header>
 
-      <HotkeyHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <HotkeyHelp
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        hintsVisible={showHints}
+        onToggleHints={toggleHints}
+      />
 
       <ScoreHeader
         p1Name={nameOf(match.player1_id)}
@@ -539,5 +558,6 @@ function MatchLogger({
         <SyncIndicator queue={queue} />
       </footer>
     </div>
+    </KbdHintsContext.Provider>
   )
 }

@@ -9,7 +9,10 @@ import { LoggingShell } from "./logging-shell"
 import type { MatchDetail } from "@/lib/schemas/match"
 
 // RTL auto-cleanup needs vitest globals, which we don't enable — clean manually.
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.localStorage.clear()
+})
 
 const SAM = "11111111-1111-4111-8111-111111111111"
 const DAVE = "22222222-2222-4222-8222-222222222222"
@@ -119,6 +122,28 @@ describe("keyboard-first logging (§5.3)", () => {
     input.focus()
     fireEvent.keyDown(input, { key: "l" }) // would save a let if live
     expect(screen.queryByText(/let \(replayed\)/)).toBeNull()
+  })
+
+  it("the sheet's toggle hides control hints (sheet keeps its own) and persists", () => {
+    renderShell()
+    expect(document.querySelectorAll("kbd").length).toBeGreaterThan(0)
+
+    press("?")
+    fireEvent.click(screen.getByRole("button", { name: "Key hints shown" }))
+    // the open sheet still shows its keys — they're content, not hints
+    expect(
+      screen.getByRole("dialog", { name: "Hotkeys" }).querySelectorAll("kbd")
+        .length,
+    ).toBeGreaterThan(0)
+    press("Escape")
+
+    expect(document.querySelectorAll("kbd")).toHaveLength(0)
+    expect(window.localStorage.getItem("svw:show-key-hints")).toBe("0")
+
+    // the preference survives a remount (fresh session)
+    cleanup()
+    renderShell()
+    expect(document.querySelectorAll("kbd")).toHaveLength(0)
   })
 
   it("? opens the accurate cheat sheet; Escape closes it", () => {

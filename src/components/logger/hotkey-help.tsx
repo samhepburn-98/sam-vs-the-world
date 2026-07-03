@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { Kbd } from "@/components/ui/kbd"
+import { Kbd, KbdHintsContext } from "@/components/ui/kbd"
+import { Toggle } from "@/components/ui/toggle"
 import { HOTKEY_HINTS } from "@/lib/logger/hotkeys"
 
 // The `?` cheat-sheet overlay (§5.3). Rows are built from HOTKEY_HINTS — the
@@ -52,9 +53,17 @@ const GROUPS: Array<{ title: string; rows: Array<[string, string]> }> = [
 interface HotkeyHelpProps {
   open: boolean
   onClose: () => void
+  /** whether key hints render on the logger's controls */
+  hintsVisible: boolean
+  onToggleHints: (visible: boolean) => void
 }
 
-export function HotkeyHelp({ open, onClose }: HotkeyHelpProps) {
+export function HotkeyHelp({
+  open,
+  onClose,
+  hintsVisible,
+  onToggleHints,
+}: HotkeyHelpProps) {
   if (!open) return null
   return (
     <div
@@ -64,12 +73,22 @@ export function HotkeyHelp({ open, onClose }: HotkeyHelpProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={onClose}
     >
+      {/* the sheet's own keys are content, not hints — always visible */}
+      <KbdHintsContext.Provider value={true}>
       <div
         className="bg-card w-full max-w-2xl rounded-lg border p-6 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">Hotkeys</h2>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h2 className="font-heading flex-1 text-lg font-bold">Hotkeys</h2>
+          <Toggle
+            variant="outline"
+            size="sm"
+            pressed={hintsVisible}
+            onPressedChange={onToggleHints}
+          >
+            {hintsVisible ? "Key hints shown" : "Key hints hidden"}
+          </Toggle>
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Close
           </Button>
@@ -96,6 +115,7 @@ export function HotkeyHelp({ open, onClose }: HotkeyHelpProps) {
           hotkeys are the fast path, not the only path.
         </p>
       </div>
+      </KbdHintsContext.Provider>
     </div>
   )
 }
