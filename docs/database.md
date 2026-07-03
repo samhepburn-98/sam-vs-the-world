@@ -144,7 +144,8 @@ To grant the owner: create the auth user, then
 | `20260702221549_house_rules` | serves_per_point + let_resets_serve, format odd 1–9, rule-aware serve trigger |
 | `20260703143000_insert_rally_at` | transactional mid-game insert (see below) |
 | `20260703180000_insights_headline_h2h` | 0004a: shared filter helpers, player_headline(s), h2h (+ companion) — see below |
-| *(planned)* 0004b/0004c insight RPCs | serve_stats, error_profile, rally_lengths, momentum — PROJECT_PLAN.md §8.4 |
+| `20260703200000_serve_stats_error_profile` | 0004b: serve_stats + error_profile (+ companions) |
+| *(planned)* 0004c insight RPCs | rally_lengths, momentum — PROJECT_PLAN.md §8.4 |
 
 ### `insert_rally_at(...)` — the one write that needs a transaction
 
@@ -174,6 +175,10 @@ can never drift from the number above it.
 | `players_headline()` | the batch variant — every player's headline in one call for the home roster |
 | `h2h(p1, p2, …filters)` | the pair's game & match record from `p1`'s perspective + date-ascending match history (jsonb) |
 | `h2h_rallies(p1, p2, …filters)` | the rally rows behind those numbers (`rallies_scored` shape) |
+| `serve_stats(player_id, …filters)` | every §3.3.2 pinned serve derivation as numerator/denominator counts. Lets excluded from every denominator; serve-number stats computed over `serves_per_point = 2` matches only |
+| `serve_rallies(player_id, …filters)` | the decided rallies the player served — serve_stats' outermost denominator |
+| `error_profile(player_id, …filters)` | error counts (error-maker = non-winner over `error` + `serve_fault`), detail split, forced / unforced / **untagged** three-way (over `error` rows only — a serve_fault can never carry a forced tag), per-match trend (jsonb) |
+| `error_rallies(player_id, …filters)` | the error rows behind those counts |
 
 The jsonb payloads are pinned by zod schemas in `src/lib/schemas/insights.ts`
 — the generated DB type says `Json`, the schema turns it into a real type at
