@@ -21,6 +21,7 @@ import {
 } from "@/lib/rally/rally-draft"
 import { Constants } from "@/lib/database.types"
 import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -28,16 +29,66 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // The secondary chips (§5.3): appear after the winner tap; only the fields
 // valid for the chosen end reason exist — the state machine clears the rest.
 
-// Logging labels are framed by the one thing you can see on the clip: did the
-// opponent get a racket on the ball? (§2). "No touch" stores a winner, "Hit,
-// no return" an error — the analytics still call them winners and errors.
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "No touch",
-  error: "Hit, no return",
+  winner: "Winner",
+  error: "Error",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",
   serve_fault: "Serve fault",
+}
+
+// The one-line rule under each primary outcome (§2), so the winner/error call
+// is settled at a glance by the one thing on the clip: did the opponent get a
+// racket on the ball?
+const OUTCOME_RULE: Record<"winner" | "error", string> = {
+  winner: "they didn't touch it",
+  error: "they hit it, no return",
+}
+
+/** One end-reason choice. `rule` present → a prominent two-line button (winner
+ *  / error); absent → a compact chip (stroke / ace / serve fault). */
+function OutcomeButton({
+  reason,
+  label,
+  hint,
+  rule,
+  selected,
+  onSelect,
+}: {
+  reason: EndReason
+  label: string
+  hint: string
+  rule?: string
+  selected: boolean
+  onSelect: () => void
+}) {
+  return (
+    <Button
+      type="button"
+      size={rule ? "default" : "sm"}
+      variant={selected ? "default" : "outline"}
+      aria-pressed={selected}
+      title={END_REASON_HELP[reason]}
+      onClick={onSelect}
+      className={cn(rule && "h-auto flex-col items-start gap-0.5 py-2")}
+    >
+      <span className="flex items-center gap-1.5 font-medium">
+        <Kbd>{hint}</Kbd>
+        {label}
+      </span>
+      {rule && (
+        <span
+          className={cn(
+            "text-xs font-normal",
+            selected ? "text-primary-foreground/85" : "text-muted-foreground",
+          )}
+        >
+          {rule}
+        </span>
+      )}
+    </Button>
+  )
 }
 
 const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
@@ -94,32 +145,53 @@ export function OutcomeChips({
           ?
         </Button>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">How</span>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
-          className="flex-wrap"
-          value={draft.endReason ?? ""}
-          onValueChange={(v) => v && onEndReason(v as EndReason)}
-        >
-          {(["winner", "error", "stroke", "ace"] as const).map((r) => (
-            <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
-              <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
-              {END_REASON_LABELS[r]}
-            </ToggleGroupItem>
-          ))}
+      <div className="flex flex-col gap-2">
+        <p className="text-muted-foreground text-xs">How did the rally end?</p>
+        {/* the everyday call sits up front as two clear buttons; the rare
+            situational reasons stay small underneath */}
+        <div className="grid grid-cols-2 gap-2">
+          <OutcomeButton
+            reason="winner"
+            label={END_REASON_LABELS.winner}
+            hint={HOTKEY_HINTS.endReason.winner}
+            rule={OUTCOME_RULE.winner}
+            selected={draft.endReason === "winner"}
+            onSelect={() => onEndReason("winner")}
+          />
+          <OutcomeButton
+            reason="error"
+            label={END_REASON_LABELS.error}
+            hint={HOTKEY_HINTS.endReason.error}
+            rule={OUTCOME_RULE.error}
+            selected={draft.endReason === "error"}
+            onSelect={() => onEndReason("error")}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <OutcomeButton
+            reason="stroke"
+            label={END_REASON_LABELS.stroke}
+            hint={HOTKEY_HINTS.endReason.stroke}
+            selected={draft.endReason === "stroke"}
+            onSelect={() => onEndReason("stroke")}
+          />
+          <OutcomeButton
+            reason="ace"
+            label={END_REASON_LABELS.ace}
+            hint={HOTKEY_HINTS.endReason.ace}
+            selected={draft.endReason === "ace"}
+            onSelect={() => onEndReason("ace")}
+          />
           {showsServeFault(draft) && (
-            <ToggleGroupItem
-              value="serve_fault"
-              title={END_REASON_HELP.serve_fault}
-            >
-              <Kbd>{HOTKEY_HINTS.endReason.serve_fault}</Kbd>
-              {END_REASON_LABELS.serve_fault}
-            </ToggleGroupItem>
+            <OutcomeButton
+              reason="serve_fault"
+              label={END_REASON_LABELS.serve_fault}
+              hint={HOTKEY_HINTS.endReason.serve_fault}
+              selected={draft.endReason === "serve_fault"}
+              onSelect={() => onEndReason("serve_fault")}
+            />
           )}
-        </ToggleGroup>
+        </div>
       </div>
 
       {showsErrorDetail(draft.endReason) && (

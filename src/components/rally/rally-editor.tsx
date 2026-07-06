@@ -36,10 +36,9 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // including converting a mis-logged rally to a let and back. Unlike entry,
 // every field is on show: winner, server, box, serve number, outcome.
 
-// Match the logger's framing: chosen by whether the opponent touched the ball.
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "No touch",
-  error: "Hit, no return",
+  winner: "Winner",
+  error: "Error",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",

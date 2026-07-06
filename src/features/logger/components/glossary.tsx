@@ -27,11 +27,9 @@ export const ERROR_DETAIL_HELP: Record<ErrorDetail, string> = {
   double_bounce: "Didn't get there — second bounce (or missed it).",
 }
 
-// The logging labels match the buttons: framed by whether the opponent touched
-// the ball. Analytics still speak of "winners" and "errors".
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "No touch",
-  error: "Hit, no return",
+  winner: "Winner",
+  error: "Error",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",
