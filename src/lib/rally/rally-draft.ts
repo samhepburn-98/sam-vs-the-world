@@ -10,12 +10,12 @@ import type { HouseRules, RallyInput, Suggestion } from "@/lib/scoring"
 // a draft object — the components are a thin skin. Auto-rules mirror the DB
 // constraints so invalid combinations are unrepresentable in the UI:
 //
-//   ace         ⇒ the winner served        (server chip corrected to winner)
 //   serve_fault ⇒ the receiver won         (server corrected to non-winner)
 //                 and, in two-serve matches, it happened on serve 2
 //
 // The user's winner tap is their primary assertion — when an end reason
 // implies who served, we correct the *server suggestion*, never the winner.
+// (An ace isn't a distinct reason — it's a 1-shot winner, derived in stats.)
 
 export interface RallyDraft {
   serverId: string
@@ -66,7 +66,7 @@ export function tapWinner(
     endReason: draft.endReason === "let" ? null : draft.endReason,
   }
   // a re-tap is a misclick correction: re-apply the chosen end reason so its
-  // server corrections (ace/serve_fault) track the new winner
+  // server correction (serve_fault) tracks the new winner
   if (next.endReason) return selectEndReason(next, next.endReason, ctx)
   return applyAutoRules(next)
 }
@@ -82,10 +82,6 @@ export function selectEndReason(
     // a let has no winner (DB: let ⇔ null winner) — used by the rally editor
     // to convert a mis-logged decided rally back into a let
     next = { ...next, winnerId: null }
-  }
-  if (endReason === "ace" && next.winnerId) {
-    // an ace is by definition served by the winner
-    next = { ...next, serverId: next.winnerId }
   }
   if (endReason === "serve_fault" && next.winnerId) {
     // a point-ending fault is by definition lost by the server
@@ -115,7 +111,7 @@ export function showsForced(endReason: EndReason | null): boolean {
 }
 
 export function showsShotType(endReason: EndReason | null): boolean {
-  return endReason === "winner" || endReason === "ace"
+  return endReason === "winner"
 }
 
 /** a point-ending serve fault is lost by the server — if the tapped winner
@@ -140,10 +136,14 @@ export function toggleServer(draft: RallyDraft, ctx: DraftContext): RallyDraft {
   return { ...draft, serverId: otherPlayer(ctx, draft.serverId) }
 }
 
-/** a decided rally needs winner + end reason; a let needs neither */
+/** a decided rally needs winner + end reason; a let needs neither. A winner
+ *  also needs its shot count — a 1-shot winner IS an ace, so the serve stats
+ *  can't derive aces if it's left blank (§3.3.2). */
 export function canSave(draft: RallyDraft): boolean {
   if (draft.endReason === "let") return draft.winnerId === null
-  return draft.winnerId !== null && draft.endReason !== null
+  if (draft.winnerId === null || draft.endReason === null) return false
+  if (draft.endReason === "winner" && draft.shotCount === null) return false
+  return true
 }
 
 /** the let path bypasses the chips: no winner, current serve context (§5.3) */

@@ -89,28 +89,4 @@ describe("RallyEditor", () => {
     )
   })
 
-  it("switching the winner on an ace drags the server along (auto-rule)", () => {
-    const onSave = vi.fn()
-    render(
-      <RallyEditor
-        row={{ ...saved, end_reason: "ace" }}
-        ctx={ctx}
-        p1Name="Sam"
-        p2Name="Dave"
-        onSave={onSave}
-        onCancel={() => undefined}
-      />,
-    )
-
-    fireEvent.click(screen.getByRole("radio", { name: "Dave" }))
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }))
-
-    expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({
-        winner_id: DAVE,
-        server_id: DAVE,
-        end_reason: "ace",
-      }),
-    )
-  })
 })

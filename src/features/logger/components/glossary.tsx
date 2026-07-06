@@ -59,12 +59,14 @@ export function Glossary({ open, onClose }: GlossaryProps) {
             How the rally ended
           </h3>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
-            {Constants.public.Enums.end_reason.map((r) => (
-              <Fragment key={r}>
-                <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
-                <dd className="text-muted-foreground">{END_REASON_HELP[r]}</dd>
-              </Fragment>
-            ))}
+            {Constants.public.Enums.end_reason
+              .filter((r) => r !== "ace")
+              .map((r) => (
+                <Fragment key={r}>
+                  <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
+                  <dd className="text-muted-foreground">{END_REASON_HELP[r]}</dd>
+                </Fragment>
+              ))}
           </dl>
         </section>
         <section>
@@ -99,6 +101,11 @@ export function Glossary({ open, onClose }: GlossaryProps) {
             The rally length. Count every shot a racket touched, including the
             last one that ended the rally — so a serve plus a failed return is
             two.
+          </dd>
+          <dt className="mt-2 font-medium sm:mt-0">Ace</dt>
+          <dd className="text-muted-foreground">
+            Just log it as a Winner with one shot — an unreturned serve is a
+            1-shot winner. Aces are counted for you in the serve stats.
           </dd>
         </dl>
       </section>

@@ -40,22 +40,9 @@ function draftWithWinner(winnerId: string) {
 }
 
 describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
-  it("ace corrects the SERVER to the winner, never the winner", () => {
-    // Dave tapped as winner while the suggestion says Sam serves: if it was
-    // an ace, Dave must have served — the suggestion gets corrected.
-    const draft = selectEndReason(draftWithWinner("dave"), "ace", ctx)
-    expect(draft.winnerId).toBe("dave")
-    expect(draft.serverId).toBe("dave")
-  })
-
   it("switching the winner after picking an end reason re-applies its corrections", () => {
-    // misclicked "dave won", picked ace (server → dave), then fixed the
-    // winner to sam: the server correction must follow the new winner
-    let draft = selectEndReason(draftWithWinner("dave"), "ace", ctx)
-    draft = tapWinner(draft, "sam", ctx)
-    expect(draft.winnerId).toBe("sam")
-    expect(draft.serverId).toBe("sam")
-
+    // a serve fault is lost by the server: picked serve_fault (server → the
+    // non-winner), then fixed the winner — the correction follows the new winner
     let fault = selectEndReason(draftWithWinner("sam"), "serve_fault", ctx)
     fault = tapWinner(fault, "dave", ctx)
     expect(fault.winnerId).toBe("dave")
@@ -122,7 +109,6 @@ describe("field visibility per end reason", () => {
     ["winner", false, false, true],
     ["error", true, true, false],
     ["stroke", false, false, false],
-    ["ace", false, false, true],
     ["serve_fault", true, false, false],
   ] as const)("%s → detail %s, forced %s, shotType %s", (reason, d, f, s) => {
     expect(showsErrorDetail(reason)).toBe(d)

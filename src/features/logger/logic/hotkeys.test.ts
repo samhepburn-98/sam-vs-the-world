@@ -17,12 +17,12 @@ describe("hotkeyAction — the §5.3 map, exactly", () => {
     expect(hotkeyAction(key("d"))).toEqual({ type: "winner", side: "p2" })
   })
 
-  it("l = let, w/e/k/a/f = end reasons", () => {
+  it("l = let, w/e/k/f = end reasons (a/ace retired)", () => {
     expect(hotkeyAction(key("l"))).toEqual({ type: "let" })
     expect(hotkeyAction(key("w"))).toEqual({ type: "endReason", reason: "winner" })
     expect(hotkeyAction(key("e"))).toEqual({ type: "endReason", reason: "error" })
     expect(hotkeyAction(key("k"))).toEqual({ type: "endReason", reason: "stroke" })
-    expect(hotkeyAction(key("a"))).toEqual({ type: "endReason", reason: "ace" })
+    expect(hotkeyAction(key("a"))).toBeNull()
     expect(hotkeyAction(key("f"))).toEqual({
       type: "endReason",
       reason: "serve_fault",

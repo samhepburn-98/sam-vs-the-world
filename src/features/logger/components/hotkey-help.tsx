@@ -23,7 +23,6 @@ const GROUPS: Array<{ title: string; rows: Array<[string, string]> }> = [
       [HOTKEY_HINTS.endReason.winner, "Winner"],
       [HOTKEY_HINTS.endReason.error, "Error"],
       [HOTKEY_HINTS.endReason.stroke, "Stroke"],
-      [HOTKEY_HINTS.endReason.ace, "Ace"],
       [HOTKEY_HINTS.endReason.serve_fault, "Serve fault"],
     ],
   },

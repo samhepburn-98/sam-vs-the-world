@@ -175,13 +175,6 @@ export function OutcomeChips({
             selected={draft.endReason === "stroke"}
             onSelect={() => onEndReason("stroke")}
           />
-          <OutcomeButton
-            reason="ace"
-            label={END_REASON_LABELS.ace}
-            hint={HOTKEY_HINTS.endReason.ace}
-            selected={draft.endReason === "ace"}
-            onSelect={() => onEndReason("ace")}
-          />
           {showsServeFault(draft) && (
             <OutcomeButton
               reason="serve_fault"

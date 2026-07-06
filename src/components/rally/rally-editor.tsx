@@ -121,6 +121,7 @@ export function RallyEditor({
           }}
         >
           {Constants.public.Enums.end_reason
+            .filter((r) => r !== "ace")
             .filter((r) => r !== "serve_fault" || showsServeFault(draft))
             .map((r) => (
               <ToggleGroupItem key={r} value={r}>
