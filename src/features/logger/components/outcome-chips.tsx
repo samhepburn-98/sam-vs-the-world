@@ -1,6 +1,6 @@
 import { END_REASON_HELP, ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { NumberStepper } from "@/components/ui/number-stepper"
 import {
   Select,
   SelectContent,
@@ -262,15 +262,11 @@ export function OutcomeChips({
         <span className="text-muted-foreground w-12 shrink-0 text-xs">
           Shots
         </span>
-        <Input
-          type="number"
-          min={0}
-          inputMode="numeric"
-          className="w-20"
-          value={draft.shotCount ?? ""}
-          onChange={(e) =>
-            onShotCount(e.target.value === "" ? null : Number(e.target.value))
-          }
+        <NumberStepper
+          value={draft.shotCount}
+          onChange={onShotCount}
+          min={1}
+          ariaLabel="shot count"
         />
         <span className="text-muted-foreground text-xs">
           every racket touch counts, including the last

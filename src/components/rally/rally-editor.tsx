@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { NumberStepper } from "@/components/ui/number-stepper"
 import {
   Select,
   SelectContent,
@@ -242,19 +242,11 @@ export function RallyEditor({
             <span className="text-muted-foreground shrink-0 text-xs">
               Shots
             </span>
-            <Input
-              type="number"
-              min={0}
-              inputMode="numeric"
-              className="w-20"
-              value={draft.shotCount ?? ""}
-              onChange={(e) =>
-                setDraft((d) => ({
-                  ...d,
-                  shotCount:
-                    e.target.value === "" ? null : Number(e.target.value),
-                }))
-              }
+            <NumberStepper
+              value={draft.shotCount}
+              min={1}
+              ariaLabel="shot count"
+              onChange={(shotCount) => setDraft((d) => ({ ...d, shotCount }))}
             />
           </>
         )}
