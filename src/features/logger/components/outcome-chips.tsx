@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Kbd } from "@/components/ui/kbd"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
 import {
   canSave,
@@ -46,20 +45,22 @@ const OUTCOME_RULE: Record<"winner" | "error", string> = {
   error: "they hit it, no return",
 }
 
-/** One end-reason choice. `rule` present → a prominent two-line button (winner
- *  / error); absent → a compact chip (stroke / ace / serve fault). */
-function OutcomeButton({
-  reason,
+/** The one selectable chip used for every choice in this form — outcomes,
+ *  error detail, forced — so they all read as one family (selected = primary).
+ *  `rule` present → a prominent two-line chip (winner / error); absent → a
+ *  compact one. */
+function Chip({
   label,
   hint,
   rule,
+  title,
   selected,
   onSelect,
 }: {
-  reason: EndReason
   label: string
-  hint: string
+  hint?: string
   rule?: string
+  title?: string
   selected: boolean
   onSelect: () => void
 }) {
@@ -69,12 +70,12 @@ function OutcomeButton({
       size={rule ? "default" : "sm"}
       variant={selected ? "default" : "outline"}
       aria-pressed={selected}
-      title={END_REASON_HELP[reason]}
+      title={title}
       onClick={onSelect}
       className={cn(rule && "h-auto flex-col items-start gap-0.5 py-2")}
     >
       <span className="flex items-center gap-1.5 font-medium">
-        <Kbd>{hint}</Kbd>
+        {hint && <Kbd>{hint}</Kbd>}
         {label}
       </span>
       {rule && (
@@ -150,36 +151,36 @@ export function OutcomeChips({
         {/* the everyday call sits up front as two clear buttons; the rare
             situational reasons stay small underneath */}
         <div className="grid grid-cols-2 gap-2">
-          <OutcomeButton
-            reason="winner"
+          <Chip
             label={END_REASON_LABELS.winner}
             hint={HOTKEY_HINTS.endReason.winner}
             rule={OUTCOME_RULE.winner}
+            title={END_REASON_HELP.winner}
             selected={draft.endReason === "winner"}
             onSelect={() => onEndReason("winner")}
           />
-          <OutcomeButton
-            reason="error"
+          <Chip
             label={END_REASON_LABELS.error}
             hint={HOTKEY_HINTS.endReason.error}
             rule={OUTCOME_RULE.error}
+            title={END_REASON_HELP.error}
             selected={draft.endReason === "error"}
             onSelect={() => onEndReason("error")}
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <OutcomeButton
-            reason="stroke"
+          <Chip
             label={END_REASON_LABELS.stroke}
             hint={HOTKEY_HINTS.endReason.stroke}
+            title={END_REASON_HELP.stroke}
             selected={draft.endReason === "stroke"}
             onSelect={() => onEndReason("stroke")}
           />
           {showsServeFault(draft) && (
-            <OutcomeButton
-              reason="serve_fault"
+            <Chip
               label={END_REASON_LABELS.serve_fault}
               hint={HOTKEY_HINTS.endReason.serve_fault}
+              title={END_REASON_HELP.serve_fault}
               selected={draft.endReason === "serve_fault"}
               onSelect={() => onEndReason("serve_fault")}
             />
@@ -192,21 +193,18 @@ export function OutcomeChips({
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Detail
           </span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            className="flex-wrap"
-            value={draft.errorDetail ?? ""}
-            onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
-          >
-            {LOGGABLE_ERROR_DETAILS.map((d) => (
-              <ToggleGroupItem key={d} value={d} title={ERROR_DETAIL_HELP[d]}>
-                <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
-                {ERROR_DETAIL_LABELS[d]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          {LOGGABLE_ERROR_DETAILS.map((d) => (
+            <Chip
+              key={d}
+              label={ERROR_DETAIL_LABELS[d]}
+              hint={HOTKEY_HINTS.errorDetail[d]}
+              title={ERROR_DETAIL_HELP[d]}
+              selected={draft.errorDetail === d}
+              onSelect={() =>
+                onErrorDetail(draft.errorDetail === d ? null : d)
+              }
+            />
+          ))}
         </div>
       )}
 
@@ -215,20 +213,17 @@ export function OutcomeChips({
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Forced?
           </span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            className="flex-wrap"
-            value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
-            onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
-          >
-            <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
-            <ToggleGroupItem value="yes">
-              <Kbd>{HOTKEY_HINTS.forced}</Kbd>
-              Forced
-            </ToggleGroupItem>
-          </ToggleGroup>
+          <Chip
+            label="Unforced"
+            selected={draft.forced === false}
+            onSelect={() => onForced(draft.forced === false ? null : false)}
+          />
+          <Chip
+            label="Forced"
+            hint={HOTKEY_HINTS.forced}
+            selected={draft.forced === true}
+            onSelect={() => onForced(draft.forced === true ? null : true)}
+          />
         </div>
       )}
 
