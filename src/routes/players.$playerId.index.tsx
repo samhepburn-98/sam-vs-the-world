@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { CATEGORIES } from "@/features/dashboard/categories"
+import { matchesQueryOptions } from "@/features/dashboard/api/get-matches"
 import {
   errorProfileOptions,
   useErrorProfile,
@@ -21,16 +21,17 @@ import {
   serveStatsOptions,
   useServeStats,
 } from "@/features/dashboard/api/get-serve-stats"
+import { InsightCard } from "@/features/dashboard/components/insight-card"
 import {
-  CardStat,
-  CategoryCard,
-} from "@/features/dashboard/components/category-card"
-import { FilterBar } from "@/features/dashboard/components/filter-bar"
+  ErrorSplitPreview,
+  FormDotsPreview,
+  MomentumPhasePreview,
+  RallyBucketsPreview,
+  ServeSidePreview,
+} from "@/features/dashboard/components/insight-previews"
 import { PlayerHeader } from "@/features/dashboard/components/player-header"
-import {
-  insightSearch,
-  searchToFilters,
-} from "@/features/dashboard/utils/insight-filters"
+import { PlayerRecentMatches } from "@/features/dashboard/components/player-recent-matches"
+import { ProfileStatStrip } from "@/features/dashboard/components/profile-stat-strip"
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
@@ -38,24 +39,25 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { ReactNode } from "react"
+import type { RallyLengths } from "@/features/dashboard/schemas/insights"
 
-// Player overview (§5.1): the gateway to the category pages. Loader-prefetched
-// so the header and cards are server-rendered; the filter bar drives the URL,
-// and those filters ride the card links down into the category detail pages.
+// Player profile (§5.1): a profile, not a menu. It leads with the win-rate
+// hero and an at-a-glance stat strip, then the five insight cards preview
+// their deep pages, then the player's own recent matches. All-time — filtering
+// lives on the category pages this links into.
 
 export const Route = createFileRoute("/players/$playerId/")({
-  validateSearch: (search) => insightSearch.parse(search),
-  loaderDeps: ({ search }) => search,
-  loader: async ({ context, params, deps }) => {
+  loader: async ({ context, params }) => {
     const id = params.playerId
-    const filters = searchToFilters(deps)
     await Promise.all([
-      context.queryClient.ensureQueryData(playerHeadlineOptions(id, filters)),
-      context.queryClient.ensureQueryData(serveStatsOptions(id, filters)),
-      context.queryClient.ensureQueryData(errorProfileOptions(id, filters)),
-      context.queryClient.ensureQueryData(rallyLengthsOptions(id, filters)),
-      context.queryClient.ensureQueryData(momentumOptions(id, filters)),
+      context.queryClient.ensureQueryData(playerHeadlineOptions(id, {})),
+      context.queryClient.ensureQueryData(serveStatsOptions(id, {})),
+      context.queryClient.ensureQueryData(errorProfileOptions(id, {})),
+      context.queryClient.ensureQueryData(rallyLengthsOptions(id, {})),
+      context.queryClient.ensureQueryData(momentumOptions(id, {})),
+      context.queryClient.ensureQueryData(
+        matchesQueryOptions({ player: id, page: 1 }),
+      ),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
   },
@@ -66,17 +68,25 @@ function pct(n: number, d: number) {
   return Math.round((n / d) * 100)
 }
 
+function strongestBucket(lengths: RallyLengths): string | null {
+  const buckets = [
+    { label: "1–3 shots", w: lengths.short_wins, n: lengths.short_rallies },
+    { label: "4–8 shots", w: lengths.medium_wins, n: lengths.medium_rallies },
+    { label: "9+ shots", w: lengths.long_wins, n: lengths.long_rallies },
+  ].filter((b) => b.n > 0)
+  if (buckets.length === 0) return null
+  const best = buckets.reduce((a, b) => (b.w / b.n > a.w / a.n ? b : a))
+  return best.label
+}
+
 function PlayerOverviewPage() {
   const { playerId } = Route.useParams()
-  const search = Route.useSearch()
-  const navigate = Route.useNavigate()
-  const filters = searchToFilters(search)
 
-  const headline = usePlayerHeadline(playerId, filters)
-  const serve = useServeStats(playerId, filters)
-  const errors = useErrorProfile(playerId, filters)
-  const lengths = useRallyLengths(playerId, filters)
-  const momentum = useMomentum(playerId, filters)
+  const headline = usePlayerHeadline(playerId, {})
+  const serve = useServeStats(playerId, {})
+  const errors = useErrorProfile(playerId, {})
+  const lengths = useRallyLengths(playerId, {})
+  const momentum = useMomentum(playerId, {})
   const players = usePlayers()
   const player = players.data?.find((p) => p.id === playerId)
 
@@ -95,80 +105,90 @@ function PlayerOverviewPage() {
     )
   }
 
-  const cardBody: Record<string, ReactNode> = {
-    "head-to-head": (
-      <CardStat
-        belowSample={headline.data.games_decided < MIN_GAMES_FOR_WIN_RATE}
-        sample={headline.data.games_decided}
-        value={`${pct(headline.data.games_won, headline.data.games_decided)}%`}
-        hint={`${headline.data.games_won} of ${headline.data.games_decided} games`}
-      />
-    ),
-    serve: (
-      <CardStat
-        belowSample={serve.data.rallies_served < MIN_RALLIES_FOR_RATE}
-        sample={serve.data.rallies_served}
-        value={`${pct(serve.data.serve_wins, serve.data.rallies_served)}%`}
-        hint="points won on serve"
-      />
-    ),
-    errors: (
-      <CardStat
-        belowSample={errors.data.games_played < MIN_GAMES_FOR_WIN_RATE}
-        sample={errors.data.games_played}
-        value={(
-          errors.data.unforced_errors / errors.data.games_played
-        ).toFixed(1)}
-        hint="unforced per game"
-      />
-    ),
-    rallies: (
-      <CardStat
-        belowSample={lengths.data.total_rallies < MIN_RALLIES_FOR_RATE}
-        sample={lengths.data.total_rallies}
-        value={lengths.data.avg_length?.toFixed(1) ?? "—"}
-        hint="shots per rally"
-      />
-    ),
-    momentum: (
-      <CardStat
-        belowSample={false}
-        sample={0}
-        value={momentum.data.comebacks}
-        hint={momentum.data.comebacks === 1 ? "comeback" : "comebacks"}
-      />
-    ),
-  }
+  const h = headline.data
+  const s = serve.data
+  const e = errors.data
+  const l = lengths.data
+  const m = momentum.data
+
+  const serveEnough = s.rallies_served >= MIN_RALLIES_FOR_RATE
+  const errorsEnough = e.games_played >= MIN_GAMES_FOR_WIN_RATE
+  const strongest = strongestBucket(l)
 
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
       <PlayerHeader
         name={player.name}
         handedness={player.handedness}
-        headline={headline.data}
-        lengths={lengths.data}
+        headline={h}
+        lengths={l}
       />
 
-      <FilterBar
-        value={search}
-        onChange={(next) => void navigate({ search: next })}
-        excludePlayerId={playerId}
-      />
+      <ProfileStatStrip serve={s} errors={e} lengths={l} momentum={m} />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {CATEGORIES.map((c) => (
-          <CategoryCard
-            key={c.key}
+      <section aria-label="Explore" className="flex flex-col gap-3">
+        <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+          Explore
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <InsightCard
             playerId={playerId}
-            category={c.key}
-            label={c.label}
-            blurb={c.blurb}
-            search={search}
-          >
-            {cardBody[c.key]}
-          </CategoryCard>
-        ))}
+            category="head-to-head"
+            label="Results & form"
+            preview={<FormDotsPreview games={h.recent_games} />}
+            stat={
+              <>
+                {h.matches_won}–{h.matches_decided - h.matches_won} matches ·{" "}
+                {h.games_won} of {h.games_decided} games
+              </>
+            }
+          />
+          <InsightCard
+            playerId={playerId}
+            category="serve"
+            label="Serve"
+            preview={<ServeSidePreview serve={s} />}
+            stat={
+              serveEnough
+                ? `${pct(s.serve_wins, s.rallies_served)}% won on serve · ${s.aces} aces`
+                : `${s.aces} aces · ${s.double_faults} double faults`
+            }
+          />
+          <InsightCard
+            playerId={playerId}
+            category="errors"
+            label="Errors"
+            preview={<ErrorSplitPreview errors={e} />}
+            stat={
+              errorsEnough
+                ? `${(e.unforced_errors / e.games_played).toFixed(1)} unforced per game`
+                : `${e.errors_total} errors logged`
+            }
+          />
+          <InsightCard
+            playerId={playerId}
+            category="rallies"
+            label="Rallies"
+            preview={<RallyBucketsPreview lengths={l} />}
+            stat={
+              l.avg_length === null
+                ? "Not enough rallies yet"
+                : `${l.avg_length.toFixed(1)} shots on average${
+                    strongest ? ` · strongest at ${strongest}` : ""
+                  }`
+            }
+          />
+          <InsightCard
+            playerId={playerId}
+            category="momentum"
+            label="Momentum"
+            preview={<MomentumPhasePreview momentum={m} />}
+            stat={`${m.comebacks} ${m.comebacks === 1 ? "comeback" : "comebacks"} · longest streak ${m.longest_streak}`}
+          />
+        </div>
       </section>
+
+      <PlayerRecentMatches playerId={playerId} />
     </main>
   )
 }
