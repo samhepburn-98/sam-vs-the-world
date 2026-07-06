@@ -2,6 +2,7 @@ import { Fragment } from "react"
 
 import { LoggerDialog } from "@/features/logger/components/logger-dialog"
 import { Constants } from "@/lib/database.types"
+import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
 
 import type { EndReason, ErrorDetail } from "@/lib/schemas/enums"
 
@@ -9,8 +10,8 @@ import type { EndReason, ErrorDetail } from "@/lib/schemas/enums"
 // records feed the chips' hover titles and the glossary dialog.
 
 export const END_REASON_HELP: Record<EndReason, string> = {
-  winner: "Clean winning shot the opponent couldn't return.",
-  error: "The loser hit it down or out — pick the detail below.",
+  winner: "Opponent didn't get a racket on it — a clean winner.",
+  error: "Opponent hit it but didn't return it to the front wall.",
   stroke: "Point awarded for interference; nobody hit an error.",
   let: "Rally replayed — no point either way.",
   ace: "Unreturnable serve; the server wins the point outright.",
@@ -26,9 +27,11 @@ export const ERROR_DETAIL_HELP: Record<ErrorDetail, string> = {
   double_bounce: "Didn't get there — second bounce (or missed it).",
 }
 
+// The logging labels match the buttons: framed by whether the opponent touched
+// the ball. Analytics still speak of "winners" and "errors".
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "Winner",
-  error: "Error",
+  winner: "No touch",
+  error: "Hit, no return",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",
@@ -71,7 +74,7 @@ export function Glossary({ open, onClose }: GlossaryProps) {
             Error detail
           </h3>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
-            {Constants.public.Enums.error_detail.map((d) => (
+            {LOGGABLE_ERROR_DETAILS.map((d) => (
               <Fragment key={d}>
                 <dt className="font-medium">{ERROR_DETAIL_LABELS[d]}</dt>
                 <dd className="text-muted-foreground">{ERROR_DETAIL_HELP[d]}</dd>
@@ -80,6 +83,27 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           </dl>
         </section>
       </div>
+
+      <section className="mt-6 border-t pt-4">
+        <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
+          Good to know
+        </h3>
+        <dl className="grid gap-x-3 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
+          <dt className="font-medium">Forced / unforced</dt>
+          <dd className="text-muted-foreground">
+            Only on errors, and optional — leave it blank when unsure. Ask: would
+            they make that shot nine times out of ten with no pressure? If yes,
+            it&rsquo;s unforced; if the opponent&rsquo;s shot forced the miss,
+            it&rsquo;s forced.
+          </dd>
+          <dt className="mt-2 font-medium sm:mt-0">Shots</dt>
+          <dd className="text-muted-foreground">
+            The rally length. Count every shot a racket touched, including the
+            last one that ended the rally — so a serve plus a failed return is
+            two.
+          </dd>
+        </dl>
+      </section>
     </LoggerDialog>
   )
 }

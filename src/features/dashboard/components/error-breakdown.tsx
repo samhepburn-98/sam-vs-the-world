@@ -22,7 +22,6 @@ const TYPE_CONFIG = {
   not_up: { label: "Not up", color: "var(--chart-3)" },
   out_side: { label: "Out (side)", color: "var(--chart-2)" },
   out_back: { label: "Out (back)", color: "var(--chart-1)" },
-  double_bounce: { label: "Double bounce", color: "var(--muted-foreground)" },
   detail_untagged: { label: "Untagged", color: "var(--muted)" },
 } satisfies ChartConfig
 
@@ -42,7 +41,6 @@ export function toErrorTypeData(profile: ErrorProfile) {
       not_up: profile.not_up,
       out_side: profile.out_side,
       out_back: profile.out_back,
-      double_bounce: profile.double_bounce,
       detail_untagged: profile.detail_untagged,
     },
   ]

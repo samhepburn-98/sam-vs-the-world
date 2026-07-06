@@ -20,8 +20,8 @@ const GROUPS: Array<{ title: string; rows: Array<[string, string]> }> = [
   {
     title: "How it ended",
     rows: [
-      [HOTKEY_HINTS.endReason.winner, "Winner"],
-      [HOTKEY_HINTS.endReason.error, "Error"],
+      [HOTKEY_HINTS.endReason.winner, "No touch (winner)"],
+      [HOTKEY_HINTS.endReason.error, "Hit, no return (error)"],
       [HOTKEY_HINTS.endReason.stroke, "Stroke"],
       [HOTKEY_HINTS.endReason.ace, "Ace"],
       [HOTKEY_HINTS.endReason.serve_fault, "Serve fault"],
@@ -35,7 +35,6 @@ const GROUPS: Array<{ title: string; rows: Array<[string, string]> }> = [
       [HOTKEY_HINTS.errorDetail.out_side, "Out side"],
       [HOTKEY_HINTS.errorDetail.out_back, "Out back"],
       [HOTKEY_HINTS.errorDetail.not_up, "Not up"],
-      [HOTKEY_HINTS.errorDetail.double_bounce, "Double bounce"],
     ],
   },
   {

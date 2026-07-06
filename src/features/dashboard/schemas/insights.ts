@@ -124,7 +124,6 @@ export const errorProfile = z.object({
   out_side: z.number().int(),
   out_back: z.number().int(),
   not_up: z.number().int(),
-  double_bounce: z.number().int(),
   detail_untagged: z.number().int(),
   games_played: z.number().int(),
   trend: z.array(errorTrendPoint),

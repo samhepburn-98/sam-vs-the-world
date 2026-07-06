@@ -11,6 +11,13 @@ const E = Constants.public.Enums
 export const ballType = z.enum(E.ball_type)
 export const endReason = z.enum(E.end_reason)
 export const errorDetail = z.enum(E.error_detail)
+
+/** The error details the logger offers. `double_bounce` is retired — a ball the
+ *  opponent never reached is a winner, not the loser's error — but the value
+ *  stays in the DB enum so legacy rows still read. */
+export const LOGGABLE_ERROR_DETAILS = E.error_detail.filter(
+  (d): d is Exclude<ErrorDetail, "double_bounce"> => d !== "double_bounce",
+)
 export const handedness = z.enum(E.handedness)
 export const serveSide = z.enum(E.serve_side)
 export const shotType = z.enum(E.shot_type)
