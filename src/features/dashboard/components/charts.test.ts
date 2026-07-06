@@ -83,7 +83,6 @@ describe("toErrorTypeData", () => {
       not_up: 2,
       out_side: 0,
       out_back: 0,
-      double_bounce: 1,
       detail_untagged: 4,
     } as ErrorProfile
     expect(toErrorTypeData(profile)[0]).toMatchObject({

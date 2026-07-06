@@ -165,7 +165,7 @@ describe("keyboard-first logging (§5.3)", () => {
     press("?")
     expect(screen.getByRole("dialog", { name: "Hotkeys" })).toBeDefined()
     expect(screen.getByText("Left player won")).toBeDefined()
-    expect(screen.getByText("Double bounce")).toBeDefined()
+    expect(screen.getByText("Not up")).toBeDefined()
     // while open, logging keys are swallowed
     press("l")
     expect(screen.queryByText(/let \(replayed\)/)).toBeNull()

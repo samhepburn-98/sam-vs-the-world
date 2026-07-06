@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
+import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
 import {
   buildRallyRow,
   canSave,
@@ -35,9 +36,10 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // including converting a mis-logged rally to a let and back. Unlike entry,
 // every field is on show: winner, server, box, serve number, outcome.
 
+// Match the logger's framing: chosen by whether the opponent touched the ball.
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "Winner",
-  error: "Error",
+  winner: "No touch",
+  error: "Hit, no return",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",
@@ -176,7 +178,7 @@ export function RallyEditor({
               }))
             }
           >
-            {Constants.public.Enums.error_detail.map((d) => (
+            {LOGGABLE_ERROR_DETAILS.map((d) => (
               <ToggleGroupItem key={d} value={d}>
                 {ERROR_DETAIL_LABELS[d]}
               </ToggleGroupItem>

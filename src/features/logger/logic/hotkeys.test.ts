@@ -29,16 +29,13 @@ describe("hotkeyAction — the §5.3 map, exactly", () => {
     })
   })
 
-  it("t/o/i/b/n/x = error details", () => {
+  it("t/o/i/b/n = error details (x/double-bounce retired)", () => {
     expect(hotkeyAction(key("t"))).toEqual({ type: "errorDetail", detail: "tin" })
     expect(hotkeyAction(key("o"))).toEqual({ type: "errorDetail", detail: "out_top" })
     expect(hotkeyAction(key("i"))).toEqual({ type: "errorDetail", detail: "out_side" })
     expect(hotkeyAction(key("b"))).toEqual({ type: "errorDetail", detail: "out_back" })
     expect(hotkeyAction(key("n"))).toEqual({ type: "errorDetail", detail: "not_up" })
-    expect(hotkeyAction(key("x"))).toEqual({
-      type: "errorDetail",
-      detail: "double_bounce",
-    })
+    expect(hotkeyAction(key("x"))).toBeNull()
   })
 
   it("g forced · q serve number · z serve box · digits · enter · u/cmd+z · ?", () => {

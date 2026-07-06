@@ -32,7 +32,6 @@ const ERROR_DETAIL_KEYS: Record<string, ErrorDetail> = {
   i: "out_side",
   b: "out_back",
   n: "not_up",
-  x: "double_bounce",
 }
 
 /** true when the event target is something the user types into */
@@ -88,7 +87,6 @@ export const HOTKEY_HINTS = {
     out_side: "i",
     out_back: "b",
     not_up: "n",
-    double_bounce: "x",
   },
   forced: "g",
   serveNumber: "q",

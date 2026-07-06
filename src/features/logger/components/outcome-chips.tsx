@@ -20,6 +20,7 @@ import {
   showsShotType,
 } from "@/lib/rally/rally-draft"
 import { Constants } from "@/lib/database.types"
+import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -27,9 +28,12 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // The secondary chips (§5.3): appear after the winner tap; only the fields
 // valid for the chosen end reason exist — the state machine clears the rest.
 
+// Logging labels are framed by the one thing you can see on the clip: did the
+// opponent get a racket on the ball? (§2). "No touch" stores a winner, "Hit,
+// no return" an error — the analytics still call them winners and errors.
 const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "Winner",
-  error: "Error",
+  winner: "No touch",
+  error: "Hit, no return",
   stroke: "Stroke",
   let: "Let",
   ace: "Ace",
@@ -131,7 +135,7 @@ export function OutcomeChips({
             value={draft.errorDetail ?? ""}
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
           >
-            {Constants.public.Enums.error_detail.map((d) => (
+            {LOGGABLE_ERROR_DETAILS.map((d) => (
               <ToggleGroupItem key={d} value={d} title={ERROR_DETAIL_HELP[d]}>
                 <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
                 {ERROR_DETAIL_LABELS[d]}
@@ -203,6 +207,9 @@ export function OutcomeChips({
             onShotCount(e.target.value === "" ? null : Number(e.target.value))
           }
         />
+        <span className="text-muted-foreground text-xs">
+          every racket touch counts, including the last
+        </span>
       </div>
 
       <div className="flex justify-end gap-2">
