@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { RallyTimeline } from "./rally-timeline"
@@ -12,7 +18,9 @@ afterEach(cleanup)
 const SAM = "11111111-1111-4111-8111-111111111111"
 const DAVE = "22222222-2222-4222-8222-222222222222"
 
-function row(overrides: Partial<RallyRow> & { rally_number: number }): RallyRow {
+function row(
+  overrides: Partial<RallyRow> & { rally_number: number }
+): RallyRow {
   return {
     id: `id-${overrides.rally_number}`,
     game_id: "g1",
@@ -51,7 +59,7 @@ function renderTimeline(extra?: Partial<Parameters<typeof RallyTimeline>[0]>) {
       p2Name="Dave"
       servesPerPoint={2}
       {...extra}
-    />,
+    />
   )
 }
 
@@ -63,14 +71,26 @@ describe("RallyTimeline", () => {
 
     // newest first: dave's tin at 1–1, then the let, then sam's winner at 1–0
     expect(within(items[0]).getByText("1–1")).toBeDefined()
-    expect(within(items[1]).getByText(/let \(replayed\)/)).toBeDefined()
+    expect(within(items[1]).getByText(/Let \(replayed\)/)).toBeDefined()
     expect(within(items[2]).getByText("1–0")).toBeDefined()
   })
 
-  it("full outcome + serve context on each decided rally", () => {
+  it("outcomes read as human phrases, plus serve context", () => {
     renderTimeline()
-    expect(screen.getByText("error · tin · unforced")).toBeDefined()
-    expect(screen.getByText(/#3 · Sam served · left box · 1st serve/)).toBeDefined()
+    expect(screen.getByText("Unforced error · tin")).toBeDefined()
+    expect(
+      screen.getByText(/#3 · Sam served · left box · 1st serve/)
+    ).toBeDefined()
+  })
+
+  it("shows the sticky who's-who header only when asked", () => {
+    renderTimeline()
+    expect(screen.queryByText("Sam")).toBeNull()
+    cleanup()
+
+    renderTimeline({ showNames: true })
+    expect(screen.getByText("Sam")).toBeDefined()
+    expect(screen.getByText("Dave")).toBeDefined()
   })
 
   it("read-only by default; editable rows are buttons that surface the row", () => {
@@ -82,7 +102,7 @@ describe("RallyTimeline", () => {
     renderTimeline({ editable: true, onRowClick })
     fireEvent.click(screen.getAllByRole("button")[0])
     expect(onRowClick).toHaveBeenCalledWith(
-      expect.objectContaining({ rally_number: 3 }),
+      expect.objectContaining({ rally_number: 3 })
     )
   })
 
@@ -93,7 +113,7 @@ describe("RallyTimeline", () => {
       renderEditor: (r) => <p>editing rally {r.rally_number}</p>,
     })
     expect(screen.getByText("editing rally 3")).toBeDefined()
-    expect(screen.queryByText("error · tin · unforced")).toBeNull()
+    expect(screen.queryByText("Unforced error · tin")).toBeNull()
   })
 
   it("single-serve match hides the serve-number chip", () => {

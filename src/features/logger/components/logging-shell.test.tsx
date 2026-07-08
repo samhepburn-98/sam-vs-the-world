@@ -101,10 +101,10 @@ describe("keyboard-first logging (§5.3)", () => {
     press("2") // 12 shots (replace then append)
     press("Enter")
 
-    expect(screen.getByText("error · tin · forced · 12 shots")).toBeDefined()
+    expect(screen.getByText("Forced error · tin · 12 shots")).toBeDefined()
 
     press("u") // undo pops it
-    expect(screen.queryByText(/error · tin/)).toBeNull()
+    expect(screen.queryByText(/Forced error · tin/)).toBeNull()
   })
 
   it("serve fault is hidden (and f inert) when the winner is the shown server", () => {
@@ -124,9 +124,9 @@ describe("keyboard-first logging (§5.3)", () => {
   it("cmd+z undoes; l saves a let immediately", () => {
     renderShell()
     press("l")
-    expect(screen.getByText(/let \(replayed\)/)).toBeDefined()
+    expect(screen.getByText(/Let \(replayed\)/)).toBeDefined()
     press("z", { metaKey: true })
-    expect(screen.queryByText(/let \(replayed\)/)).toBeNull()
+    expect(screen.queryByText(/Let \(replayed\)/)).toBeNull()
   })
 
   it("keys are inert while a text input is focused", () => {
@@ -135,7 +135,7 @@ describe("keyboard-first logging (§5.3)", () => {
     const input = screen.getByRole("spinbutton")
     input.focus()
     fireEvent.keyDown(input, { key: "l" }) // would save a let if live
-    expect(screen.queryByText(/let \(replayed\)/)).toBeNull()
+    expect(screen.queryByText(/Let \(replayed\)/)).toBeNull()
   })
 
   it("the sheet's toggle hides control hints (sheet keeps its own) and persists", () => {
@@ -168,7 +168,7 @@ describe("keyboard-first logging (§5.3)", () => {
     expect(screen.getByText("Not up")).toBeDefined()
     // while open, logging keys are swallowed
     press("l")
-    expect(screen.queryByText(/let \(replayed\)/)).toBeNull()
+    expect(screen.queryByText(/Let \(replayed\)/)).toBeNull()
     press("Escape")
     expect(screen.queryByRole("dialog")).toBeNull()
   })

@@ -10,13 +10,38 @@ import type { ReactNode } from "react"
 // (read-only). Scores are derived from the rows on every render — an edited
 // row recomputes everything downstream, exactly like the DB views.
 
-const END_REASON_LABELS: Record<RallyRow["end_reason"], string> = {
-  winner: "winner",
-  error: "error",
-  stroke: "stroke",
-  let: "let",
-  ace: "ace",
-  serve_fault: "serve fault",
+/** The rally's outcome as a human phrase — "Unforced error · tin", not a
+ *  column dump of raw enum values. */
+export function outcomeLine(row: RallyRow): string {
+  const detail = row.error_detail?.replace("_", " ")
+  const shots =
+    row.shot_count === null
+      ? null
+      : `${row.shot_count} shot${row.shot_count === 1 ? "" : "s"}`
+  switch (row.end_reason) {
+    case "winner":
+    case "ace": {
+      const head = row.end_reason === "ace" ? "Ace" : "Winner"
+      return [head, row.shot_type, shots].filter(Boolean).join(" · ")
+    }
+    case "error": {
+      const head =
+        row.forced === null
+          ? "Error"
+          : row.forced
+            ? "Forced error"
+            : "Unforced error"
+      return [head, detail, shots].filter(Boolean).join(" · ")
+    }
+    case "stroke":
+      return ["Stroke", shots].filter(Boolean).join(" · ")
+    case "serve_fault":
+      return [row.serve_number === 2 ? "Double fault" : "Serve fault", detail]
+        .filter(Boolean)
+        .join(" · ")
+    case "let":
+      return "Let"
+  }
 }
 
 interface RallyTimelineProps {
@@ -30,6 +55,8 @@ interface RallyTimelineProps {
   editingId?: string | null
   /** row to mark out visually — a deep link's landing spot (§5.2) */
   highlightId?: string | null
+  /** sticky who's-who header — for long lists far from any scoreboard */
+  showNames?: boolean
   onRowClick?: (row: RallyRow) => void
   renderEditor?: (row: RallyRow) => ReactNode
 }
@@ -43,6 +70,7 @@ export function RallyTimeline({
   editable = false,
   editingId = null,
   highlightId = null,
+  showNames = false,
   onRowClick,
   renderEditor,
 }: RallyTimelineProps) {
@@ -74,80 +102,84 @@ export function RallyTimeline({
     return parts.join(" · ")
   }
 
-  const outcomeLine = (row: RallyRow) => {
-    const parts = [END_REASON_LABELS[row.end_reason]]
-    if (row.error_detail) parts.push(row.error_detail.replace("_", " "))
-    if (row.forced !== null) parts.push(row.forced ? "forced" : "unforced")
-    if (row.shot_type) parts.push(row.shot_type)
-    if (row.shot_count !== null) {
-      parts.push(`${row.shot_count} shot${row.shot_count === 1 ? "" : "s"}`)
-    }
-    return parts.join(" · ")
-  }
-
   return (
-    <ol aria-label="Rally timeline" className="flex flex-col gap-1">
-      {scored
-        .slice()
-        .reverse()
-        .map(({ row, score }) => {
-          if (editingId === row.id && renderEditor) {
-            return <li key={row.id}>{renderEditor(row)}</li>
-          }
+    <div className="flex flex-col gap-1">
+      {showNames && (
+        <div className="sticky top-0 z-10 grid grid-cols-[1fr_3.5rem_1fr] items-center gap-2 bg-background/95 px-2 py-1.5 text-xs font-medium text-muted-foreground">
+          <span className="flex items-center justify-end gap-1.5">
+            <span aria-hidden className="size-1.5 rounded-full bg-primary" />
+            {p1Name}
+          </span>
+          <span aria-hidden />
+          <span className="flex items-center gap-1.5">
+            <span aria-hidden className="size-1.5 rounded-full bg-foreground" />
+            {p2Name}
+          </span>
+        </div>
+      )}
+      <ol aria-label="Rally timeline" className="flex flex-col gap-1">
+        {scored
+          .slice()
+          .reverse()
+          .map(({ row, score }) => {
+            if (editingId === row.id && renderEditor) {
+              return <li key={row.id}>{renderEditor(row)}</li>
+            }
 
-          const isLet = row.end_reason === "let"
-          const p1Won = row.winner_id === p1Id
-          const cell = (
-            <>
-              <span className="font-medium">{outcomeLine(row)}</span>
-              <span className="block text-[11px] text-muted-foreground">
-                #{row.rally_number} · {serveLine(row)}
-              </span>
-            </>
-          )
+            const isLet = row.end_reason === "let"
+            const p1Won = row.winner_id === p1Id
+            const cell = (
+              <>
+                <span className="font-medium">{outcomeLine(row)}</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  #{row.rally_number} · {serveLine(row)}
+                </span>
+              </>
+            )
 
-          return (
-            <li
-              key={row.id}
-              id={`rally-${row.id}`}
-              className={cn(
-                "scroll-mt-16 rounded-md",
-                highlightId === row.id && "ring-2 ring-primary/50"
-              )}
-            >
-              <RowShell
-                editable={editable}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-              >
-                {isLet ? (
-                  <span className="col-span-3 flex items-center gap-3">
-                    <span
-                      aria-hidden
-                      className="flex-1 border-t border-dashed"
-                    />
-                    <span className="shrink-0 text-center text-[11px] text-muted-foreground">
-                      #{row.rally_number} · let (replayed)
-                      <span className="block">{serveLine(row)}</span>
-                    </span>
-                    <span
-                      aria-hidden
-                      className="flex-1 border-t border-dashed"
-                    />
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-right">{p1Won && cell}</span>
-                    <span className="self-center text-center text-xs font-semibold text-muted-foreground tabular-nums">
-                      {score.p1}–{score.p2}
-                    </span>
-                    <span>{!p1Won && cell}</span>
-                  </>
+            return (
+              <li
+                key={row.id}
+                id={`rally-${row.id}`}
+                className={cn(
+                  "scroll-mt-16 rounded-md",
+                  highlightId === row.id && "ring-2 ring-primary/50"
                 )}
-              </RowShell>
-            </li>
-          )
-        })}
-    </ol>
+              >
+                <RowShell
+                  editable={editable}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                >
+                  {isLet ? (
+                    <span className="col-span-3 flex items-center gap-3">
+                      <span
+                        aria-hidden
+                        className="flex-1 border-t border-dashed"
+                      />
+                      <span className="shrink-0 text-center text-[11px] text-muted-foreground">
+                        #{row.rally_number} · Let (replayed)
+                        <span className="block">{serveLine(row)}</span>
+                      </span>
+                      <span
+                        aria-hidden
+                        className="flex-1 border-t border-dashed"
+                      />
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-right">{p1Won && cell}</span>
+                      <span className="self-center text-center text-xs font-semibold text-muted-foreground tabular-nums">
+                        {score.p1}–{score.p2}
+                      </span>
+                      <span>{!p1Won && cell}</span>
+                    </>
+                  )}
+                </RowShell>
+              </li>
+            )
+          })}
+      </ol>
+    </div>
   )
 }
 

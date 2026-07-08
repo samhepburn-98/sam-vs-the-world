@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ChevronDownIcon, ListIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { z } from "zod"
 
@@ -41,10 +40,11 @@ import type { RallyRow } from "@/lib/rally/rally-draft"
 import type { RallyScored } from "@/lib/schemas/rally"
 
 // Match detail (§5.2): one match told summary-first — who won, then the shape
-// of it (games strip), then the story (momentum), then the why (head-to-head)
-// — with the rally-level receipts collapsed at the bottom. The games strip is
-// also the lens: tap a game and the momentum and head-to-head rescope to it.
-// `?rally=<id>` still deep-links — it expands the log and opens the sheet.
+// of it (games strip), then the story (momentum), then the why (head-to-head),
+// then the receipts (rallies). The games strip is the lens: tap a game and
+// momentum, head-to-head, AND the rally list rescope to it — rallies show one
+// game at a time, the point-by-point pattern. `?rally=<id>` deep-links by
+// focusing the lens on that game and highlighting the row in place.
 
 const matchSearch = z.object({
   rally: z.string().optional().catch(undefined),
@@ -101,28 +101,27 @@ function MatchDetailPage() {
   const players = usePlayers()
 
   const [lens, setLens] = useState("match")
-  const [logOpen, setLogOpen] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
 
   const folded = match.data ? foldMatchToScored(match.data) : []
   const allRows = folded.flatMap((g) => g.rows)
 
-  // deep link: expand the log and mark the rally out in place — the row
-  // already tells the whole story, so there's no sheet to open. The scroll
-  // waits for the expanded log to render (second effect) so the row exists
-  // before we jump to it.
+  // deep link: focus the lens on the rally's game and mark the row out in
+  // place — the row already tells the whole story, so there's no sheet to
+  // open. The scroll waits for the lensed timeline to render (second effect)
+  // so the row exists before we jump to it.
   const matchData = match.data
   useEffect(() => {
     if (!search.rally || !matchData) return
-    const exists = matchData.games.some((g) =>
+    const game = matchData.games.find((g) =>
       g.rallies.some((r) => r.id === search.rally)
     )
-    if (!exists) return
-    setLogOpen(true)
+    if (!game) return
+    setLens(game.id)
     setHighlightId(search.rally)
   }, [search.rally, matchData])
   useEffect(() => {
-    if (!logOpen || !highlightId) return
+    if (!highlightId) return
     // defer past the router's own scroll-to-top on navigation, which would
     // otherwise land after ours and win
     const timer = setTimeout(() => {
@@ -131,7 +130,7 @@ function MatchDetailPage() {
         ?.scrollIntoView({ block: "center" })
     }, 150)
     return () => clearTimeout(timer)
-  }, [logOpen, highlightId])
+  }, [highlightId, lens])
 
   if (!match.data || !players.data) {
     return (
@@ -378,44 +377,30 @@ function MatchDetailPage() {
             </div>
           </section>
 
-          {/* the receipts, demoted */}
-          <section className="flex flex-col gap-4">
-            <button
-              type="button"
-              aria-expanded={logOpen}
-              onClick={() => setLogOpen((o) => !o)}
-              className="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-sm ring-1 ring-foreground/10 transition-colors hover:bg-muted/60"
-            >
-              <ListIcon aria-hidden className="size-4 text-muted-foreground" />
-              <span className="font-medium">Rally log</span>
-              <span className="ml-auto text-muted-foreground tabular-nums">
-                {allRows.length}
-              </span>
-              <ChevronDownIcon
-                aria-hidden
-                className={cn(
-                  "size-4 text-muted-foreground transition-transform",
-                  logOpen && "rotate-180"
-                )}
-              />
-            </button>
-            {logOpen &&
-              folded.map((g, gi) => (
-                <section key={g.gameId} className="flex flex-col gap-3">
-                  <h3 className="font-heading text-base font-bold">
-                    Game {g.gameNumber}
-                  </h3>
-                  <RallyTimeline
-                    rows={g.rows.map(toRallyRow)}
-                    p1Id={m.player1_id}
-                    p1Name={p1Name}
-                    p2Name={p2Name}
-                    servesPerPoint={m.serves_per_point}
-                    highlightId={highlightId}
-                  />
-                  {gi < folded.length - 1 && <div className="border-b" />}
-                </section>
-              ))}
+          {/* the receipts — one game at a time, owned by the lens (the
+              point-by-point pattern: pick a game, step through it) */}
+          <section className="flex flex-col gap-1">
+            <h2 className="font-heading text-lg font-bold">Rallies</h2>
+            {lens === "match" || scopedGames.length !== 1 ? (
+              <p className="text-sm text-muted-foreground">
+                Pick a game above to step through its rallies.
+              </p>
+            ) : (
+              <>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {lensLabel}, newest rally first.
+                </p>
+                <RallyTimeline
+                  rows={scopedGames[0].rows.map(toRallyRow)}
+                  p1Id={m.player1_id}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                  servesPerPoint={m.serves_per_point}
+                  highlightId={highlightId}
+                  showNames
+                />
+              </>
+            )}
           </section>
         </>
       )}
