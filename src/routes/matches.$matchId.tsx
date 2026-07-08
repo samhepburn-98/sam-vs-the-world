@@ -24,7 +24,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -75,7 +74,7 @@ function toRallyRow(r: RallyScored): RallyRow {
   }
 }
 
-function formatBadge(format: number | null) {
+function formatLabel(format: number | null) {
   return format === null ? "Casual" : `Best of ${format}`
 }
 
@@ -242,10 +241,10 @@ function MatchDetailPage() {
         <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
           <span className="tabular-nums">{m.date}</span>
           {m.venue && <span>· {m.venue}</span>}
-          <Badge variant="outline">{formatBadge(m.format)}</Badge>
+          <span>· {formatLabel(m.format)}</span>
           {m.ball_type && (
             <span className="flex items-center gap-1.5">
-              <BallDots ball={m.ball_type} />
+              · <BallDots ball={m.ball_type} />
               {humanise(m.ball_type)}
             </span>
           )}
