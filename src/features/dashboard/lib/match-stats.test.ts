@@ -29,9 +29,19 @@ describe("computeMatchStats", () => {
       // a rally-ending winner by P1
       rally({ end_reason: "winner", winner_id: P1, shot_count: 5 }),
       // an untouched serve: P1's winner off their own serve in one shot
-      rally({ end_reason: "winner", winner_id: P1, server_id: P1, shot_count: 1 }),
+      rally({
+        end_reason: "winner",
+        winner_id: P1,
+        server_id: P1,
+        shot_count: 1,
+      }),
       // one shot but NOT off their own serve — a winner, not an ace
-      rally({ end_reason: "winner", winner_id: P1, server_id: P2, shot_count: 1 }),
+      rally({
+        end_reason: "winner",
+        winner_id: P1,
+        server_id: P2,
+        shot_count: 1,
+      }),
       // P2 errors: the point goes to P1, the error belongs to P2
       rally({ end_reason: "error", winner_id: P1 }),
       // P1 serve-faults: point to P2, error to P1
@@ -43,15 +53,38 @@ describe("computeMatchStats", () => {
     ]
     const s = computeMatchStats(rows, P1)
     expect(s.rallies).toBe(7)
+    expect(s.points).toEqual({ p1: 4, p2: 2 })
     expect(s.winners).toEqual({ p1: 3, p2: 0 })
     expect(s.aces).toEqual({ p1: 1, p2: 0 })
     expect(s.errors).toEqual({ p1: 1, p2: 1 })
+    expect(s.strokes).toEqual({ p1: 0, p2: 1 })
+  })
+
+  it("tracks the longest run of consecutive points, skipping lets", () => {
+    const rows = [
+      rally({ winner_id: P1 }),
+      rally({ winner_id: P1 }),
+      // a let interrupts nothing — the run continues through it
+      rally({ end_reason: "let", winner_id: null }),
+      rally({ winner_id: P1 }),
+      rally({ winner_id: P2, end_reason: "stroke" }),
+      rally({ winner_id: P1 }),
+    ]
+    const s = computeMatchStats(rows, P1)
+    expect(s.bestRun).toEqual({ p1: 3, p2: 1 })
   })
 
   it("counts a legacy explicit ace as both winner and ace", () => {
     const s = computeMatchStats(
-      [rally({ end_reason: "ace", winner_id: P2, server_id: P2, shot_count: null })],
-      P1,
+      [
+        rally({
+          end_reason: "ace",
+          winner_id: P2,
+          server_id: P2,
+          shot_count: null,
+        }),
+      ],
+      P1
     )
     expect(s.winners).toEqual({ p1: 0, p2: 1 })
     expect(s.aces).toEqual({ p1: 0, p2: 1 })
@@ -73,24 +106,30 @@ describe("computeMatchStats", () => {
 describe("buildMatchLeadSeries", () => {
   const game = (
     gameNumber: number,
-    leads: Array<[p1: number, p2: number]>,
+    leads: Array<[p1: number, p2: number]>
   ): FoldedGame => ({
     gameId: `g${gameNumber}`,
     gameNumber,
     rows: leads.map(([p1, p2], i) =>
-      rally({ rally_number: i + 1, score_p1: p1, score_p2: p2 }),
+      rally({ rally_number: i + 1, score_p1: p1, score_p2: p2 })
     ),
   })
 
   it("lays games on one axis with a level start and a null gap between", () => {
     const series = buildMatchLeadSeries([
-      game(1, [[1, 0], [1, 1]]),
+      game(1, [
+        [1, 0],
+        [1, 1],
+      ]),
       game(2, [[0, 1]]),
     ])
     expect(series.points.map((p) => p.lead)).toEqual([
-      0, 1, 0, // game 1 from level
+      0,
+      1,
+      0, // game 1 from level
       null, // the gap — recharts breaks the line here
-      0, -1, // game 2 restarts from level
+      0,
+      -1, // game 2 restarts from level
     ])
     expect(series.points.map((p) => p.x)).toEqual([0, 1, 2, 3, 4, 5])
     expect(series.boundaries).toEqual([3])

@@ -3,8 +3,8 @@ import { TrophyIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // The match page's headline (§5.2): who won, answered before anything else.
-// The winner is marked three ways — trophy icon, the word "Winner", and name
-// weight — so the call never rests on colour alone.
+// The winner carries three cues that survive colour-blindness — the trophy,
+// full-ink weight against the loser's muted name, and the heavier score digit.
 
 interface MatchScoreboardProps {
   p1Name: string
@@ -23,15 +23,27 @@ export function MatchScoreboard({
   winner,
 }: MatchScoreboardProps) {
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
       <PlayerSide side="p1" name={p1Name} won={winner === "p1"} />
       <p
         aria-hidden
-        className="font-heading text-5xl font-bold tracking-tight tabular-nums"
+        className="font-heading text-5xl tracking-tight tabular-nums"
       >
-        {gamesWonP1}
-        <span className="text-muted-foreground mx-2">–</span>
-        {gamesWonP2}
+        <span
+          className={cn(
+            winner === "p2" ? "font-medium text-muted-foreground" : "font-bold"
+          )}
+        >
+          {gamesWonP1}
+        </span>
+        <span className="mx-2 font-medium text-muted-foreground">–</span>
+        <span
+          className={cn(
+            winner === "p1" ? "font-medium text-muted-foreground" : "font-bold"
+          )}
+        >
+          {gamesWonP2}
+        </span>
       </p>
       <PlayerSide side="p2" name={p2Name} won={winner === "p2"} />
     </div>
@@ -48,34 +60,33 @@ function PlayerSide({
   won: boolean
 }) {
   return (
-    <div
+    <span
       className={cn(
-        "flex flex-col items-start gap-1.5 pt-2",
-        side === "p2" && "items-end text-right",
+        "flex items-center gap-2.5",
+        side === "p2" && "flex-row-reverse text-right"
       )}
     >
       <span
+        aria-hidden
         className={cn(
-          "flex items-center gap-2 text-sm",
-          side === "p2" && "flex-row-reverse",
-          won ? "font-semibold" : "text-muted-foreground",
+          "size-2.5 shrink-0 rounded-full",
+          side === "p1" ? "bg-primary" : "bg-foreground"
+        )}
+      />
+      <span
+        className={cn(
+          "font-heading text-xl font-bold tracking-tight sm:text-2xl",
+          !won && "text-muted-foreground"
         )}
       >
-        <span
-          aria-hidden
-          className={cn(
-            "size-2 shrink-0 rounded-full",
-            side === "p1" ? "bg-primary" : "bg-foreground",
-          )}
-        />
         {name}
       </span>
       {won && (
-        <span className="text-muted-foreground ring-foreground/10 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs ring-1">
-          <TrophyIcon aria-hidden className="size-3" />
-          Winner
-        </span>
+        <>
+          <TrophyIcon aria-hidden className="size-4 shrink-0 text-primary" />
+          <span className="sr-only">Winner</span>
+        </>
       )}
-    </div>
+    </span>
   )
 }

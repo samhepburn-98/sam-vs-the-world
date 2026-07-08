@@ -14,10 +14,15 @@ export interface MatchStats {
   /** every logged rally, lets included */
   rallies: number
   winners: PairCount
+  /** decided rallies won, however they ended */
+  points: PairCount
   /** errors + serve faults, attributed to the error-maker (the non-winner) */
   errors: PairCount
   /** untouched serves: a winner off your own serve in one shot (§derive-aces) */
   aces: PairCount
+  strokes: PairCount
+  /** most consecutive points, streaks running across game boundaries */
+  bestRun: PairCount
   /** points won on your own serve / your serves that decided a point */
   serveWon: PairCount
   serveTotal: PairCount
@@ -27,22 +32,35 @@ const zero = (): PairCount => ({ p1: 0, p2: 0 })
 
 export function computeMatchStats(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): MatchStats {
   const stats: MatchStats = {
     rallies: rows.length,
     winners: zero(),
+    points: zero(),
     errors: zero(),
     aces: zero(),
+    strokes: zero(),
+    bestRun: zero(),
     serveWon: zero(),
     serveTotal: zero(),
   }
+  let runSide: keyof PairCount | null = null
+  let runLength = 0
 
   for (const r of rows) {
     if (r.winner_id === null) continue // lets decide nothing
     const winner: keyof PairCount = r.winner_id === p1Id ? "p1" : "p2"
     const loser: keyof PairCount = winner === "p1" ? "p2" : "p1"
     const server: keyof PairCount = r.server_id === p1Id ? "p1" : "p2"
+
+    stats.points[winner] += 1
+    if (runSide === winner) runLength += 1
+    else {
+      runSide = winner
+      runLength = 1
+    }
+    stats.bestRun[winner] = Math.max(stats.bestRun[winner], runLength)
 
     // "ace" is the pre-derivation enum value — count it as the winner it now is
     const isWinner = r.end_reason === "winner" || r.end_reason === "ace"
@@ -54,6 +72,7 @@ export function computeMatchStats(
       stats.aces[winner] += 1
     if (r.end_reason === "error" || r.end_reason === "serve_fault")
       stats.errors[loser] += 1
+    if (r.end_reason === "stroke") stats.strokes[winner] += 1
 
     stats.serveTotal[server] += 1
     if (winner === server) stats.serveWon[server] += 1
@@ -85,7 +104,7 @@ export interface MatchLeadSeries {
 }
 
 export function buildMatchLeadSeries(
-  games: Array<FoldedGame>,
+  games: Array<FoldedGame>
 ): MatchLeadSeries {
   const points: Array<MatchLeadPoint> = []
   const boundaries: Array<number> = []

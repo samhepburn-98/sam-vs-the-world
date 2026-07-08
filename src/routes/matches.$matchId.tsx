@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ChevronDownIcon, ListIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { z } from "zod"
 
 import {
@@ -10,7 +10,6 @@ import {
 import { H2hBars } from "@/features/dashboard/components/h2h-bars"
 import { MatchMomentum } from "@/features/dashboard/components/match-momentum"
 import { MatchScoreboard } from "@/features/dashboard/components/match-scoreboard"
-import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
 import { computeMatchStats } from "@/features/dashboard/lib/match-stats"
@@ -103,33 +102,36 @@ function MatchDetailPage() {
 
   const [lens, setLens] = useState("match")
   const [logOpen, setLogOpen] = useState(false)
-  const [selected, setSelected] = useState<number | null>(null)
-  const gameRefs = useRef<Record<string, HTMLElement | null>>({})
-  const pendingScrollGame = useRef<string | null>(null)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
 
   const folded = match.data ? foldMatchToScored(match.data) : []
   const allRows = folded.flatMap((g) => g.rows)
 
-  // deep link: expand the log, open the sheet, and scroll once the data is
-  // in. The scroll waits for the expanded log to render (second effect) so
-  // the game section's ref exists before we jump to it.
+  // deep link: expand the log and mark the rally out in place — the row
+  // already tells the whole story, so there's no sheet to open. The scroll
+  // waits for the expanded log to render (second effect) so the row exists
+  // before we jump to it.
   const matchData = match.data
   useEffect(() => {
     if (!search.rally || !matchData) return
-    const rows = foldMatchToScored(matchData).flatMap((g) => g.rows)
-    const idx = rows.findIndex((r) => r.id === search.rally)
-    if (idx < 0) return
-    setSelected(idx)
+    const exists = matchData.games.some((g) =>
+      g.rallies.some((r) => r.id === search.rally)
+    )
+    if (!exists) return
     setLogOpen(true)
-    pendingScrollGame.current = rows[idx].game_id
+    setHighlightId(search.rally)
   }, [search.rally, matchData])
   useEffect(() => {
-    if (!logOpen || !pendingScrollGame.current) return
-    gameRefs.current[pendingScrollGame.current]?.scrollIntoView({
-      block: "center",
-    })
-    pendingScrollGame.current = null
-  }, [logOpen, search.rally])
+    if (!logOpen || !highlightId) return
+    // defer past the router's own scroll-to-top on navigation, which would
+    // otherwise land after ours and win
+    const timer = setTimeout(() => {
+      document
+        .getElementById(`rally-${highlightId}`)
+        ?.scrollIntoView({ block: "center" })
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [logOpen, highlightId])
 
   if (!match.data || !players.data) {
     return (
@@ -175,6 +177,7 @@ function MatchDetailPage() {
   const pct = (won: number, total: number) =>
     total === 0 ? "—" : `${Math.round((won / total) * 100)}%`
   const statRows: Array<H2hBarRow> = [
+    { label: "Points won", v1: stats.points.p1, v2: stats.points.p2 },
     { label: "Winners", v1: stats.winners.p1, v2: stats.winners.p2 },
     {
       label: "Errors",
@@ -183,6 +186,8 @@ function MatchDetailPage() {
       betterIsLower: true,
     },
     { label: "Aces", v1: stats.aces.p1, v2: stats.aces.p2 },
+    { label: "Strokes", v1: stats.strokes.p1, v2: stats.strokes.p2 },
+    { label: "Longest run", v1: stats.bestRun.p1, v2: stats.bestRun.p2 },
     {
       label: "Points won on serve",
       v1:
@@ -193,9 +198,9 @@ function MatchDetailPage() {
         pct(stats.serveWon.p1, stats.serveTotal.p1),
         pct(stats.serveWon.p2, stats.serveTotal.p2),
       ],
-      detail: [
-        `${stats.serveWon.p1}/${stats.serveTotal.p1}`,
-        `${stats.serveWon.p2}/${stats.serveTotal.p2}`,
+      sr: [
+        `${stats.serveWon.p1} of ${stats.serveTotal.p1} serves`,
+        `${stats.serveWon.p2} of ${stats.serveTotal.p2} serves`,
       ],
     },
   ]
@@ -256,18 +261,23 @@ function MatchDetailPage() {
                 : "p2"
           }
         />
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-          <span>{humanDate(m.date)}</span>
-          {m.venue && <span>· {m.venue}</span>}
-          <span>· {formatLabel(m.format)}</span>
-          {m.ball_type && (
-            <span className="flex items-center gap-1.5">
-              · <BallDots ball={m.ball_type} />
-              {humanise(m.ball_type)}
+        {/* two lines, grouped by kind: when-and-where, then what-was-played */}
+        <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
+          <span>
+            {humanDate(m.date)}
+            {m.venue && ` · ${m.venue}`}
+          </span>
+          <span className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+            <span>{formatLabel(m.format)}</span>
+            {m.ball_type && (
+              <span className="flex items-center gap-1.5">
+                · <BallDots ball={m.ball_type} />
+                {humanise(m.ball_type)} ball
+              </span>
+            )}
+            <span className="tabular-nums">
+              · {allRows.length} {allRows.length === 1 ? "rally" : "rallies"}
             </span>
-          )}
-          <span className="tabular-nums">
-            · {allRows.length} {allRows.length === 1 ? "rally" : "rallies"}
           </span>
         </div>
         {matchWinner === null && allRows.length > 0 && (
@@ -361,9 +371,9 @@ function MatchDetailPage() {
           <section className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
             <p className="mb-2 text-sm text-muted-foreground">
-              {lensLabel} totals · bold marks the better number.
+              {lensLabel} totals.
             </p>
-            <div className="mx-auto w-full max-w-2xl">
+            <div className="mx-auto w-full max-w-3xl">
               <H2hBars rows={statRows} />
             </div>
           </section>
@@ -391,13 +401,7 @@ function MatchDetailPage() {
             </button>
             {logOpen &&
               folded.map((g, gi) => (
-                <section
-                  key={g.gameId}
-                  ref={(el) => {
-                    gameRefs.current[g.gameId] = el
-                  }}
-                  className="flex scroll-mt-4 flex-col gap-3"
-                >
+                <section key={g.gameId} className="flex flex-col gap-3">
                   <h3 className="font-heading text-base font-bold">
                     Game {g.gameNumber}
                   </h3>
@@ -407,11 +411,7 @@ function MatchDetailPage() {
                     p1Name={p1Name}
                     p2Name={p2Name}
                     servesPerPoint={m.serves_per_point}
-                    editable
-                    onRowClick={(row) => {
-                      const idx = allRows.findIndex((r) => r.id === row.id)
-                      if (idx >= 0) setSelected(idx)
-                    }}
+                    highlightId={highlightId}
                   />
                   {gi < folded.length - 1 && <div className="border-b" />}
                 </section>
@@ -419,20 +419,6 @@ function MatchDetailPage() {
           </section>
         </>
       )}
-
-      <RallyDetailSheet
-        rally={selected === null ? null : allRows[selected]}
-        showMatchLink={false}
-        onClose={() => setSelected(null)}
-        onPrev={() => setSelected((i) => (i === null ? i : Math.max(0, i - 1)))}
-        onNext={() =>
-          setSelected((i) =>
-            i === null ? i : Math.min(allRows.length - 1, i + 1)
-          )
-        }
-        hasPrev={selected !== null && selected > 0}
-        hasNext={selected !== null && selected < allRows.length - 1}
-      />
     </main>
   )
 }
