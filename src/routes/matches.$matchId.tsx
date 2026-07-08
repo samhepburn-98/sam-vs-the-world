@@ -121,7 +121,7 @@ function InsightSection({
   return (
     <section className="flex flex-col">
       <h2 className="font-heading text-lg font-bold">{title}</h2>
-      <p className="mt-1 mb-4 text-sm text-muted-foreground">{sub}</p>
+      <p className="mt-1 mb-5 text-sm text-muted-foreground">{sub}</p>
       {children}
     </section>
   )
@@ -250,7 +250,7 @@ function MatchDetailPage() {
   ]
 
   return (
-    <main className="container mx-auto flex max-w-4xl flex-col gap-10 px-4 py-10">
+    <main className="container mx-auto flex max-w-4xl flex-col gap-14 px-4 py-12">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Breadcrumb>
           <BreadcrumbList>
@@ -404,7 +404,7 @@ function MatchDetailPage() {
           {/* the story of the flow */}
           <section className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-bold">Momentum</h2>
-            <p className="mb-2 text-sm text-muted-foreground">
+            <p className="mb-5 text-sm text-muted-foreground">
               Who was ahead, rally by rally.
             </p>
             <MatchMomentum
@@ -418,7 +418,7 @@ function MatchDetailPage() {
               insights: this is the first thing to read after the score */}
           <section className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
-            <p className="mb-2 text-sm text-muted-foreground">
+            <p className="mb-5 text-sm text-muted-foreground">
               {lensLabel} totals.
             </p>
             <H2hBars rows={statRows} />
@@ -428,7 +428,7 @@ function MatchDetailPage() {
               beside points won, style beside tactics. One column on a phone;
               two side by side on desktop, where each module is happiest at
               half width. */}
-          <div className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-2">
+          <div className="grid items-start gap-x-12 gap-y-14 lg:grid-cols-2">
             {decidedPoints > 0 && (
               <InsightSection
                 title="How the points were won"
@@ -502,7 +502,7 @@ function MatchDetailPage() {
               <h2 className="font-heading text-lg font-bold">
                 {lensLabel} rallies
               </h2>
-              <p className="mb-2 text-sm text-muted-foreground">
+              <p className="mb-5 text-sm text-muted-foreground">
                 Newest first — the L or R by the score is the serving box, on
                 the server&rsquo;s side.
               </p>

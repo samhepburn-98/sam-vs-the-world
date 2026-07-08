@@ -21,7 +21,7 @@ export interface H2hBarRow {
 
 export function H2hBars({ rows }: { rows: Array<H2hBarRow> }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {rows.map((row) => (
         <Row key={row.label} {...row} />
       ))}
