@@ -102,7 +102,7 @@ describe("keyboard-first logging (§5.3)", () => {
     press("Enter")
 
     expect(screen.getByText("Forced error").parentElement?.textContent).toBe(
-      "Forced error · tin · 12 shots"
+      "Forced error · Tin · 12 shots"
     )
 
     press("u") // undo pops it

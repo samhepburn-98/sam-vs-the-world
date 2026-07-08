@@ -57,7 +57,6 @@ function renderTimeline(extra?: Partial<Parameters<typeof RallyTimeline>[0]>) {
       p1Id={SAM}
       p1Name="Sam"
       p2Name="Dave"
-      servesPerPoint={2}
       {...extra}
     />
   )
@@ -75,33 +74,31 @@ describe("RallyTimeline", () => {
     expect(within(items[2]).getByText("1–0")).toBeDefined()
   })
 
-  it("rows read at two altitudes: bold head, muted detail, tiny receipts", () => {
+  it("outcome heads a bold phrase, qualifiers continue muted and capitalised", () => {
     renderTimeline()
     const items = screen.getAllByRole("listitem")
-    // dave's point: headline phrase + qualifier, receipts without the
-    // server's name (the dot carries it) or the default "1st serve"
+    // dave's point: headline phrase + a properly-cased detail label, no raw
+    // "tin", no server name repeated on the row
     expect(within(items[0]).getByText("Unforced error")).toBeDefined()
-    expect(items[0].textContent).toContain("Unforced error · tin")
-    expect(within(items[0]).getByText("#3 · left box")).toBeDefined()
+    expect(items[0].textContent).toContain("Unforced error · Tin")
+    expect(items[0].textContent).not.toContain("· tin")
     expect(items[0].textContent).not.toContain("served ·")
   })
 
-  it("the serve dot names the server for screen readers", () => {
+  it("the serve marker names the server and box for screen readers", () => {
     renderTimeline()
-    // Sam served both decided rallies; the let row draws no spine
-    expect(screen.getAllByText("Sam served")).toHaveLength(2)
+    // Sam served both decided rallies from the left box; the let draws no spine
+    expect(screen.getAllByText("Sam served from the left box")).toHaveLength(2)
   })
 
-  it("a second serve is called out; a first serve goes unsaid", () => {
-    renderTimeline({
-      rows: [row({ rally_number: 1, serve_number: 2 })],
-    })
-    expect(screen.getByText(/2nd serve/)).toBeDefined()
-    cleanup()
-
-    renderTimeline({ rows: [row({ rally_number: 1, serve_number: 1 })] })
-    expect(screen.queryByText(/2nd serve/)).toBeNull()
-    expect(screen.getByText("#1 · left box")).toBeDefined()
+  it("the serve box shows as an L or R by the score, not as row text", () => {
+    renderTimeline({ rows: [row({ rally_number: 1, serve_side: "right" })] })
+    // the letter marks the box (the visible + invisible twin keep it centred);
+    // "right box" survives only in the screen-reader text
+    const item = screen.getByRole("listitem")
+    expect(within(item).getAllByText("R").length).toBeGreaterThan(0)
+    expect(item.textContent).not.toContain("· right box")
+    expect(within(item).getByText(/served from the right box/)).toBeDefined()
   })
 
   it("shows the sticky who's-who header only when asked", () => {
@@ -135,13 +132,5 @@ describe("RallyTimeline", () => {
     })
     expect(screen.getByText("editing rally 3")).toBeDefined()
     expect(screen.queryByText("Unforced error")).toBeNull()
-  })
-
-  it("single-serve matches never mention serve number", () => {
-    renderTimeline({
-      servesPerPoint: 1,
-      rows: [row({ rally_number: 1, serve_number: 2 })],
-    })
-    expect(screen.queryByText(/2nd serve/)).toBeNull()
   })
 })

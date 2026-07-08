@@ -377,32 +377,27 @@ function MatchDetailPage() {
             </div>
           </section>
 
-          {/* the receipts — one game at a time, owned by the lens (the
-              point-by-point pattern: pick a game, step through it) */}
-          <section className="flex flex-col gap-1">
-            <h2 className="font-heading text-lg font-bold">Rallies</h2>
-            {lens === "match" || scopedGames.length !== 1 ? (
-              <p className="text-sm text-muted-foreground">
-                Pick a game above to step through its rallies.
+          {/* the receipts — appear only once a game is picked (the
+              point-by-point pattern: choose a game, step through it) */}
+          {lens !== "match" && scopedGames.length === 1 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">
+                {lensLabel} rallies
+              </h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Newest first — the L or R by the score is the serving box, on
+                the server&rsquo;s side.
               </p>
-            ) : (
-              <>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  {lensLabel}, newest rally first — the dot beside the score
-                  marks the server.
-                </p>
-                <RallyTimeline
-                  rows={scopedGames[0].rows.map(toRallyRow)}
-                  p1Id={m.player1_id}
-                  p1Name={p1Name}
-                  p2Name={p2Name}
-                  servesPerPoint={m.serves_per_point}
-                  highlightId={highlightId}
-                  showNames
-                />
-              </>
-            )}
-          </section>
+              <RallyTimeline
+                rows={scopedGames[0].rows.map(toRallyRow)}
+                p1Id={m.player1_id}
+                p1Name={p1Name}
+                p2Name={p2Name}
+                highlightId={highlightId}
+                showNames
+              />
+            </section>
+          )}
         </>
       )}
     </main>

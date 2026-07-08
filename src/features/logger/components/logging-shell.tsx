@@ -543,7 +543,6 @@ function MatchLogger({
         p1Id={match.player1_id}
         p1Name={nameOf(match.player1_id)}
         p2Name={nameOf(match.player2_id)}
-        servesPerPoint={rules.servesPerPoint}
         editable
         editingId={editingId}
         onRowClick={(row) => setEditingId(row.id)}
