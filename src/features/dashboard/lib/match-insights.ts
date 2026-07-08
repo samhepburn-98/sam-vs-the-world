@@ -17,7 +17,7 @@ const other = (s: Side): Side => (s === "p1" ? "p2" : "p1")
 /** A decided rally: someone won it. Lets carry no insight. */
 const decided = (rows: Array<RallyScored>) =>
   rows.filter(
-    (r): r is RallyScored & { winner_id: string } => r.winner_id !== null,
+    (r): r is RallyScored & { winner_id: string } => r.winner_id !== null
   )
 
 // ---------------------------------------------------------------- sources
@@ -39,7 +39,7 @@ export interface PointSources {
 
 export function computePointSources(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): Record<Side, PointSources> {
   const empty = (): PointSources => ({
     ownWinner: 0,
@@ -100,7 +100,7 @@ export interface RallyLengthSplit {
 
 export function computeRallyLengthSplit(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): RallyLengthSplit {
   const buckets: Array<LengthBucket> = [
     { min: 1, max: 4, won: { p1: 0, p2: 0 } },
@@ -109,12 +109,13 @@ export function computeRallyLengthSplit(
   ]
   let untagged = 0
   for (const r of decided(rows)) {
-    if (r.shot_count === null) {
+    const shots = r.shot_count
+    if (shots === null) {
       untagged += 1
       continue
     }
     const bucket = buckets.find(
-      (b) => r.shot_count >= b.min && (b.max === null || r.shot_count <= b.max),
+      (b) => shots >= b.min && (b.max === null || shots <= b.max)
     )
     if (bucket) bucket.won[sideOf(r.winner_id, p1Id)] += 1
   }
@@ -140,7 +141,7 @@ export interface ServeInsight {
 
 export function computeServeInsights(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): Record<Side, ServeInsight> {
   const empty = (): ServeInsight => ({
     serve: { won: 0, total: 0 },
@@ -189,7 +190,7 @@ export interface ErrorBreakdown {
 
 export function computeErrorBreakdown(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): Record<Side, ErrorBreakdown> {
   const empty = (): ErrorBreakdown => ({
     tin: 0,
@@ -237,7 +238,7 @@ export interface WinningShots {
 
 export function computeWinningShots(
   rows: Array<RallyScored>,
-  p1Id: string,
+  p1Id: string
 ): Record<Side, WinningShots> {
   const tallies: Record<Side, Map<ShotType, number>> = {
     p1: new Map(),
@@ -253,7 +254,8 @@ export function computeWinningShots(
     const side = sideOf(r.winner_id, p1Id)
     out[side].total += 1
     if (r.shot_type === null) out[side].untyped += 1
-    else tallies[side].set(r.shot_type, (tallies[side].get(r.shot_type) ?? 0) + 1)
+    else
+      tallies[side].set(r.shot_type, (tallies[side].get(r.shot_type) ?? 0) + 1)
   }
   for (const side of ["p1", "p2"] as const) {
     out[side].shots = [...tallies[side].entries()]
@@ -272,7 +274,7 @@ export function buildMatchStory(
   rows: Array<RallyScored>,
   p1Id: string,
   p1Name: string,
-  p2Name: string,
+  p2Name: string
 ): string | null {
   const sources = computePointSources(rows, p1Id)
   const totalPoints = sources.p1.total + sources.p2.total
@@ -338,4 +340,105 @@ export function buildMatchStory(
   }
 
   return `${name[winner]} outscored ${name[loser]} ${w.total}–${l.total} across ${rows.length} rallies.`
+}
+
+// -------------------------------------------------------------- takeaways
+// One thresholded sentence per section — they speak only when the numbers
+// clearly say something, and stay silent otherwise. All deterministic.
+
+const pct = (x: number) => `${Math.round(x * 100)}%`
+
+export function pointSourcesTakeaway(
+  sources: Record<Side, PointSources>,
+  p1Name: string,
+  p2Name: string
+): string | null {
+  if (sources.p1.total === sources.p2.total) return null
+  const winner: Side = sources.p1.total > sources.p2.total ? "p1" : "p2"
+  const name: Record<Side, string> = { p1: p1Name, p2: p2Name }
+  const w = sources[winner]
+  const gifts = w.unforced + w.untagged
+  const earned = earnedShare(w)
+  if (w.total >= 15 && gifts / w.total > 0.55) {
+    return `${name[winner]} won this on ${name[other(winner)]}'s mistakes — ${gifts} of their ${w.total} points were gifts.`
+  }
+  if (w.total >= 15 && earned !== null && earned >= 0.7) {
+    return `${name[winner]} earned it — ${pct(earned)} of their points came off their own racket.`
+  }
+  return null
+}
+
+export function grindTakeaway(
+  split: RallyLengthSplit,
+  p1Name: string,
+  p2Name: string
+): string | null {
+  const long = split.buckets.at(-1)
+  if (!long) return null
+  const total = long.won.p1 + long.won.p2
+  if (total < 8) return null
+  const side: Side = long.won.p1 >= long.won.p2 ? "p1" : "p2"
+  const share = long.won[side] / total
+  if (share < 0.7) return null
+  const name = side === "p1" ? p1Name : p2Name
+  return `${name} owns the long rallies — ${pct(share)} of everything past ${long.min - 1} shots.`
+}
+
+export function serveTakeaway(
+  serve: Record<Side, ServeInsight>,
+  p1Name: string,
+  p2Name: string
+): string | null {
+  const name: Record<Side, string> = { p1: p1Name, p2: p2Name }
+  let best: { side: Side; gap: number } | null = null
+  for (const side of ["p1", "p2"] as const) {
+    const s = serve[side]
+    if (s.leftBox.total < 8 || s.rightBox.total < 8) continue
+    const left = rate(s.leftBox)
+    const right = rate(s.rightBox)
+    if (left === null || right === null) continue
+    const gap = Math.abs(left - right)
+    if (gap >= 0.2 && (best === null || gap > best.gap)) best = { side, gap }
+  }
+  if (!best) return null
+  const s = serve[best.side]
+  const left = rate(s.leftBox) ?? 0
+  const right = rate(s.rightBox) ?? 0
+  const [strong, weak, strongRate, weakRate] =
+    right >= left
+      ? (["right", "left", right, left] as const)
+      : (["left", "right", left, right] as const)
+  return `${name[best.side]} serves best from the ${strong} box — ${pct(strongRate)} against ${pct(weakRate)} from the ${weak}.`
+}
+
+export function errorTakeaway(
+  errors: Record<Side, ErrorBreakdown>,
+  p1Name: string,
+  p2Name: string
+): string | null {
+  const side: Side = errors.p1.total >= errors.p2.total ? "p1" : "p2"
+  const e = errors[side]
+  const name = side === "p1" ? p1Name : p2Name
+  if (e.total < 10) return null
+  if (e.tin / e.total >= 0.5) {
+    return `${name} tinned ${e.tin} balls — ${pct(e.tin / e.total)} of their errors went down.`
+  }
+  if (e.unforced / e.total >= 0.7) {
+    return `${pct(e.unforced / e.total)} of ${name}'s errors were unforced.`
+  }
+  return null
+}
+
+export function shotsTakeaway(
+  shots: Record<Side, WinningShots>,
+  p1Name: string,
+  p2Name: string
+): string | null {
+  const top1 = shots.p1.shots.at(0)
+  const top2 = shots.p2.shots.at(0)
+  if (!top1 || !top2 || top1.count < 4 || top2.count < 4) return null
+  if (top1.shot === top2.shot) {
+    return `Both finish with the ${top1.shot}.`
+  }
+  return `Different weapons: ${p1Name} finishes with the ${top1.shot}, ${p2Name} with the ${top2.shot}.`
 }

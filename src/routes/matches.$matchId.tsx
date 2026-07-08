@@ -6,11 +6,25 @@ import {
   matchDetailQueryOptions,
   useMatchDetail,
 } from "@/lib/api/get-match-detail"
+import { ErrorDestinations } from "@/features/dashboard/components/error-destinations"
 import { H2hBars } from "@/features/dashboard/components/h2h-bars"
 import { MatchMomentum } from "@/features/dashboard/components/match-momentum"
 import { MatchScoreboard } from "@/features/dashboard/components/match-scoreboard"
+import { MatchStory } from "@/features/dashboard/components/match-story"
+import { PointSourceBars } from "@/features/dashboard/components/point-source-bars"
+import { RallyLengthBars } from "@/features/dashboard/components/rally-length-bars"
+import { ServePanels } from "@/features/dashboard/components/serve-panels"
+import { WinningShots } from "@/features/dashboard/components/winning-shots"
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
+import {
+  buildMatchStory,
+  computeErrorBreakdown,
+  computePointSources,
+  computeRallyLengthSplit,
+  computeServeInsights,
+  computeWinningShots,
+} from "@/features/dashboard/lib/match-insights"
 import { computeMatchStats } from "@/features/dashboard/lib/match-stats"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
 import { BallDots } from "@/components/ball-dots"
@@ -163,15 +177,26 @@ function MatchDetailPage() {
         ? m.player2_id
         : null
 
-  // the lens scopes the momentum and the head-to-head; "match" = everything
+  // the lens scopes everything below the strip; "match" = the whole match
   const scopedGames =
     lens === "match" ? folded : folded.filter((g) => g.gameId === lens)
-  const stats = computeMatchStats(
-    scopedGames.flatMap((g) => g.rows),
-    m.player1_id
-  )
+  const scopedRows = scopedGames.flatMap((g) => g.rows)
+  const stats = computeMatchStats(scopedRows, m.player1_id)
   const lensLabel =
     lens === "match" ? "Match" : `Game ${scopedGames[0]?.gameNumber ?? "?"}`
+
+  // the insight modules — all pure derivations over the same scoped rows
+  const sources = computePointSources(scopedRows, m.player1_id)
+  const lengthSplit = computeRallyLengthSplit(scopedRows, m.player1_id)
+  const serveInsights = computeServeInsights(scopedRows, m.player1_id)
+  const errorBreakdown = computeErrorBreakdown(scopedRows, m.player1_id)
+  const winningShots = computeWinningShots(scopedRows, m.player1_id)
+  const story = buildMatchStory(scopedRows, m.player1_id, p1Name, p2Name)
+  const decidedPoints = sources.p1.total + sources.p2.total
+  const taggedLengths = lengthSplit.buckets.reduce(
+    (sum, b) => sum + b.won.p1 + b.won.p2,
+    0
+  )
 
   const pct = (won: number, total: number) =>
     total === 0 ? "—" : `${Math.round((won / total) * 100)}%`
@@ -353,7 +378,10 @@ function MatchDetailPage() {
 
       {allRows.length > 0 && (
         <>
-          {/* the story */}
+          {/* the headline the numbers chose */}
+          <MatchStory story={story} />
+
+          {/* the story of the flow */}
           <section className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-bold">Momentum</h2>
             <p className="mb-2 text-sm text-muted-foreground">
@@ -366,7 +394,7 @@ function MatchDetailPage() {
             />
           </section>
 
-          {/* the why — bounded measure so the mirrored bars keep their proportions */}
+          {/* the compact numbers — bounded measure keeps the bars in proportion */}
           <section className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
             <p className="mb-2 text-sm text-muted-foreground">
@@ -376,6 +404,88 @@ function MatchDetailPage() {
               <H2hBars rows={statRows} />
             </div>
           </section>
+
+          {/* the detail: how, not just who */}
+          {decidedPoints > 0 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">
+                How the points were won
+              </h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Every point traced to its source — earned off the racket, or
+                gifted by mistakes.
+              </p>
+              <PointSourceBars
+                sources={sources}
+                p1Name={p1Name}
+                p2Name={p2Name}
+              />
+            </section>
+          )}
+
+          {taggedLengths > 0 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">
+                Who wins the grind
+              </h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Win rate by rally length — the quick strike against the war of
+                attrition.
+              </p>
+              <RallyLengthBars
+                split={lengthSplit}
+                p1Name={p1Name}
+                p2Name={p2Name}
+              />
+            </section>
+          )}
+
+          {decidedPoints > 0 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">
+                Serve and return
+              </h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Points won behind serve, on return, and by service box.
+              </p>
+              <ServePanels
+                serve={serveInsights}
+                p1Name={p1Name}
+                p2Name={p2Name}
+              />
+            </section>
+          )}
+
+          {errorBreakdown.p1.total + errorBreakdown.p2.total > 0 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">
+                Where the errors went
+              </h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Every error by destination — and how many were unforced.
+              </p>
+              <ErrorDestinations
+                errors={errorBreakdown}
+                p1Name={p1Name}
+                p2Name={p2Name}
+              />
+            </section>
+          )}
+
+          {winningShots.p1.total + winningShots.p2.total > 0 && (
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">Winning shots</h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                What the winners actually were — each player&rsquo;s putaway
+                weapon.
+              </p>
+              <WinningShots
+                shots={winningShots}
+                p1Name={p1Name}
+                p2Name={p2Name}
+              />
+            </section>
+          )}
 
           {/* the receipts — appear only once a game is picked (the
               point-by-point pattern: choose a game, step through it) */}

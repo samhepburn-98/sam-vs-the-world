@@ -73,7 +73,7 @@ describe("computePointSources", () => {
         untagged: 0,
         stroke: 0,
         total: 8,
-      }),
+      })
     ).toBeCloseTo(0.5)
     expect(
       earnedShare({
@@ -83,7 +83,7 @@ describe("computePointSources", () => {
         untagged: 0,
         stroke: 0,
         total: 0,
-      }),
+      })
     ).toBeNull()
   })
 })
@@ -139,13 +139,38 @@ describe("computeErrorBreakdown", () => {
   it("attributes errors to their maker, grouped by destination", () => {
     const rows = [
       // P2's errors (P1 won the point)
-      rally({ end_reason: "error", winner_id: P1, error_detail: "tin", forced: false }),
-      rally({ end_reason: "error", winner_id: P1, error_detail: "out_top", forced: false }),
-      rally({ end_reason: "error", winner_id: P1, error_detail: "out_back", forced: true }),
-      rally({ end_reason: "error", winner_id: P1, error_detail: "not_up", forced: null }),
+      rally({
+        end_reason: "error",
+        winner_id: P1,
+        error_detail: "tin",
+        forced: false,
+      }),
+      rally({
+        end_reason: "error",
+        winner_id: P1,
+        error_detail: "out_top",
+        forced: false,
+      }),
+      rally({
+        end_reason: "error",
+        winner_id: P1,
+        error_detail: "out_back",
+        forced: true,
+      }),
+      rally({
+        end_reason: "error",
+        winner_id: P1,
+        error_detail: "not_up",
+        forced: null,
+      }),
       rally({ end_reason: "error", winner_id: P1, error_detail: null }),
       // P1's serve fault (an error of P1's, point to P2)
-      rally({ end_reason: "serve_fault", winner_id: P2, server_id: P1, error_detail: "out_side" }),
+      rally({
+        end_reason: "serve_fault",
+        winner_id: P2,
+        server_id: P1,
+        error_detail: "out_side",
+      }),
       // winners are not errors
       rally({ end_reason: "winner", winner_id: P1 }),
     ]
@@ -197,7 +222,7 @@ describe("buildMatchStory", () => {
     Array.from({ length: n }, () => rally({ end_reason: "winner", winner_id }))
   const gifts = (n: number, to: string) =>
     Array.from({ length: n }, () =>
-      rally({ end_reason: "error", winner_id: to, forced: false }),
+      rally({ end_reason: "error", winner_id: to, forced: false })
     )
 
   it("returns null when the match is level or the sample is tiny", () => {
@@ -207,21 +232,17 @@ describe("buildMatchStory", () => {
         [...winners(12, P1), ...winners(12, P2)],
         P1,
         "Sam",
-        "Dave",
-      ),
+        "Dave"
+      )
     ).toBeNull()
     expect(
-      buildMatchStory([...winners(5, P1), ...winners(2, P2)], P1, "Sam", "Dave"),
+      buildMatchStory([...winners(5, P1), ...winners(2, P2)], P1, "Sam", "Dave")
     ).toBeNull()
   })
 
   it("leads with the crossover when the loser earned more of their points", () => {
     // Dave earns all 20 of his points; Sam wins on 25 gifts + 5 winners
-    const rows = [
-      ...winners(20, P2),
-      ...winners(5, P1),
-      ...gifts(25, P1),
-    ]
+    const rows = [...winners(20, P2), ...winners(5, P1), ...gifts(25, P1)]
     const story = buildMatchStory(rows, P1, "Sam", "Dave")
     expect(story).toContain("Dave played the better squash")
     expect(story).toContain("handed Sam 25 unforced errors")
@@ -230,7 +251,7 @@ describe("buildMatchStory", () => {
   it("is deterministic", () => {
     const rows = [...winners(20, P1), ...gifts(10, P1), ...winners(8, P2)]
     expect(buildMatchStory(rows, P1, "Sam", "Dave")).toBe(
-      buildMatchStory(rows, P1, "Sam", "Dave"),
+      buildMatchStory(rows, P1, "Sam", "Dave")
     )
   })
 
@@ -238,5 +259,75 @@ describe("buildMatchStory", () => {
     const rows = [...winners(15, P1), ...winners(10, P2)]
     const story = buildMatchStory(rows, P1, "Sam", "Dave")
     expect(story).not.toBeNull()
+  })
+})
+
+describe("takeaways stay silent below their thresholds", async () => {
+  const {
+    computeErrorBreakdown: errFn,
+    computeServeInsights: serveFn,
+    errorTakeaway,
+    serveTakeaway,
+    grindTakeaway,
+  } = await import("./match-insights")
+
+  it("errorTakeaway names the tin problem only past 10 errors, half down", () => {
+    const tins = Array.from({ length: 12 }, () =>
+      rally({
+        end_reason: "error",
+        winner_id: P1,
+        error_detail: "tin",
+        forced: false,
+      })
+    )
+    expect(errorTakeaway(errFn(tins, P1), "Sam", "Dave")).toBe(
+      "Dave tinned 12 balls — 100% of their errors went down."
+    )
+    expect(errorTakeaway(errFn(tins.slice(0, 5), P1), "Sam", "Dave")).toBeNull()
+  })
+
+  it("serveTakeaway needs 8+ serves per box and a 20-point gap", () => {
+    const rows = [
+      // Sam: right box strong (8/8), left box weak (2/8)
+      ...Array.from({ length: 8 }, () =>
+        rally({ server_id: P1, serve_side: "right", winner_id: P1 })
+      ),
+      ...Array.from({ length: 2 }, () =>
+        rally({ server_id: P1, serve_side: "left", winner_id: P1 })
+      ),
+      ...Array.from({ length: 6 }, () =>
+        rally({
+          server_id: P1,
+          serve_side: "left",
+          winner_id: P2,
+          end_reason: "error",
+        })
+      ),
+    ]
+    expect(serveTakeaway(serveFn(rows, P1), "Sam", "Dave")).toBe(
+      "Sam serves best from the right box — 100% against 25% from the left."
+    )
+    expect(
+      serveTakeaway(serveFn(rows.slice(0, 9), P1), "Sam", "Dave")
+    ).toBeNull()
+  })
+
+  it("grindTakeaway needs 8+ long rallies and 70% dominance", () => {
+    const long = (n: number, winner_id: string) =>
+      Array.from({ length: n }, () => rally({ shot_count: 12, winner_id }))
+    expect(
+      grindTakeaway(
+        computeRallyLengthSplit([...long(7, P1), ...long(1, P2)], P1),
+        "Sam",
+        "Dave"
+      )
+    ).toBe("Sam owns the long rallies — 88% of everything past 9 shots.")
+    expect(
+      grindTakeaway(
+        computeRallyLengthSplit([...long(4, P1), ...long(3, P2)], P1),
+        "Sam",
+        "Dave"
+      )
+    ).toBeNull()
   })
 })
