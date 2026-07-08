@@ -66,7 +66,7 @@ export function PointSourceBars({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {(["p1", "p2"] as const).map((side) => (
         <div key={side} className="flex flex-col gap-1.5">
           <PlayerLine

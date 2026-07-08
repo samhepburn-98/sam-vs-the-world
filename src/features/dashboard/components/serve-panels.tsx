@@ -41,7 +41,9 @@ function Panel({
   const right = rate(insight.rightBox)
   const fill = side === "p1" ? "bg-primary" : "bg-foreground/75"
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 ring-1 ring-foreground/10">
+    // a plain player block, like every other module — the card surface
+    // belongs to the section, and cards don't nest
+    <div className="flex flex-col gap-3">
       <PlayerLine side={side} name={name} />
       <div className="flex gap-6">
         <BigRate label="On serve" wt={insight.serve} />
@@ -91,8 +93,8 @@ export function ServePanels({
     // container query, not a viewport breakpoint — the panels pair up only
     // when THIS column is wide enough, so they stack inside a half-width
     // grid cell and sit side by side when given the full page
-    <div className="@container flex flex-col gap-3">
-      <div className="grid gap-3 @lg:grid-cols-2">
+    <div className="@container flex flex-col gap-4">
+      <div className="grid gap-5 @lg:grid-cols-2">
         <Panel side="p1" name={p1Name} insight={serve.p1} />
         <Panel side="p2" name={p2Name} insight={serve.p2} />
       </div>

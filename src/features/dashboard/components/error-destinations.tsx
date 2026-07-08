@@ -39,7 +39,7 @@ export function ErrorDestinations({
 }) {
   const anyOther = errors.p1.other + errors.p2.other > 0
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {(["p1", "p2"] as const).map((side) => {
         const e = errors[side]
         const name = side === "p1" ? p1Name : p2Name

@@ -26,7 +26,7 @@ export function RallyLengthBars({
   p2Name: string
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {split.buckets.map((b) => {
         const total = b.won.p1 + b.won.p2
         const p1Share = total === 0 ? 0 : b.won.p1 / total

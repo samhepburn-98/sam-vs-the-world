@@ -107,6 +107,26 @@ function humanDate(isoDate: string) {
   }).format(new Date(`${isoDate}T00:00:00`))
 }
 
+/** One insight module on its own card surface — grouping by surface, not
+ *  distance, so the grid reads as tiles instead of a wall of bars. */
+function InsightCard({
+  title,
+  sub,
+  children,
+}: {
+  title: string
+  sub: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="flex flex-col rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
+      <h2 className="font-heading text-lg font-bold">{title}</h2>
+      <p className="mt-1 mb-5 text-sm text-muted-foreground">{sub}</p>
+      {children}
+    </section>
+  )
+}
+
 function MatchDetailPage() {
   const { matchId } = Route.useParams()
   const search = Route.useSearch()
@@ -230,7 +250,7 @@ function MatchDetailPage() {
   ]
 
   return (
-    <main className="container mx-auto flex max-w-4xl flex-col gap-8 px-4 py-10">
+    <main className="container mx-auto flex max-w-4xl flex-col gap-10 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Breadcrumb>
           <BreadcrumbList>
@@ -397,97 +417,76 @@ function MatchDetailPage() {
           {/* the numbers, paired by meaning: totals beside their quality,
               points lost beside points won, style beside tactics. One column
               on a phone; two side by side on desktop, where every module is
-              happiest at half width. */}
-          <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-2">
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                {lensLabel} totals.
-              </p>
+              happiest at half width. Cards, so each module reads as its own
+              thing instead of one continuous wall of bars. */}
+          <div className="grid items-start gap-6 lg:grid-cols-2">
+            <InsightCard title="Head-to-head" sub={`${lensLabel} totals.`}>
               <H2hBars rows={statRows} />
-            </section>
+            </InsightCard>
 
             {decidedPoints > 0 && (
-              <section className="flex flex-col gap-1">
-                <h2 className="font-heading text-lg font-bold">
-                  How the points were won
-                </h2>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  Every point traced to its source — earned off the racket, or
-                  gifted by mistakes.
-                </p>
+              <InsightCard
+                title="How the points were won"
+                sub="Every point traced to its source — earned off the racket, or gifted by mistakes."
+              >
                 <PointSourceBars
                   sources={sources}
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </section>
+              </InsightCard>
             )}
 
             {errorBreakdown.p1.total + errorBreakdown.p2.total > 0 && (
-              <section className="flex flex-col gap-1">
-                <h2 className="font-heading text-lg font-bold">
-                  Where the errors went
-                </h2>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  Every error by destination — and how many were unforced.
-                </p>
+              <InsightCard
+                title="Where the errors went"
+                sub="Every error by destination — and how many were unforced."
+              >
                 <ErrorDestinations
                   errors={errorBreakdown}
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </section>
+              </InsightCard>
             )}
 
             {winningShots.p1.total + winningShots.p2.total > 0 && (
-              <section className="flex flex-col gap-1">
-                <h2 className="font-heading text-lg font-bold">
-                  Winning shots
-                </h2>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  What the winners actually were — each player&rsquo;s putaway
-                  weapon.
-                </p>
+              <InsightCard
+                title="Winning shots"
+                sub="What the winners actually were — each player's putaway weapon."
+              >
                 <WinningShots
                   shots={winningShots}
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </section>
+              </InsightCard>
             )}
 
             {taggedLengths > 0 && (
-              <section className="flex flex-col gap-1">
-                <h2 className="font-heading text-lg font-bold">
-                  Who wins the grind
-                </h2>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  Win rate by rally length — the quick strike against the war of
-                  attrition.
-                </p>
+              <InsightCard
+                title="Who wins the grind"
+                sub="Win rate by rally length — the quick strike against the war of attrition."
+              >
                 <RallyLengthBars
                   split={lengthSplit}
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </section>
+              </InsightCard>
             )}
 
             {decidedPoints > 0 && (
-              <section className="flex flex-col gap-1">
-                <h2 className="font-heading text-lg font-bold">
-                  Serve and return
-                </h2>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  Points won behind serve, on return, and by service box.
-                </p>
+              <InsightCard
+                title="Serve and return"
+                sub="Points won behind serve, on return, and by service box."
+              >
                 <ServePanels
                   serve={serveInsights}
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </section>
+              </InsightCard>
             )}
           </div>
 
