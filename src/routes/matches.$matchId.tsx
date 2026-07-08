@@ -394,98 +394,102 @@ function MatchDetailPage() {
             />
           </section>
 
-          {/* the compact numbers — bounded measure keeps the bars in proportion */}
-          <section className="flex flex-col gap-1">
-            <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
-            <p className="mb-2 text-sm text-muted-foreground">
-              {lensLabel} totals.
-            </p>
-            <div className="mx-auto w-full max-w-3xl">
+          {/* the numbers, paired by meaning: totals beside their quality,
+              points lost beside points won, style beside tactics. One column
+              on a phone; two side by side on desktop, where every module is
+              happiest at half width. */}
+          <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-2">
+            <section className="flex flex-col gap-1">
+              <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
+              <p className="mb-2 text-sm text-muted-foreground">
+                {lensLabel} totals.
+              </p>
               <H2hBars rows={statRows} />
-            </div>
-          </section>
-
-          {/* the detail: how, not just who */}
-          {decidedPoints > 0 && (
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">
-                How the points were won
-              </h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                Every point traced to its source — earned off the racket, or
-                gifted by mistakes.
-              </p>
-              <PointSourceBars
-                sources={sources}
-                p1Name={p1Name}
-                p2Name={p2Name}
-              />
             </section>
-          )}
 
-          {taggedLengths > 0 && (
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">
-                Who wins the grind
-              </h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                Win rate by rally length — the quick strike against the war of
-                attrition.
-              </p>
-              <RallyLengthBars
-                split={lengthSplit}
-                p1Name={p1Name}
-                p2Name={p2Name}
-              />
-            </section>
-          )}
+            {decidedPoints > 0 && (
+              <section className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-bold">
+                  How the points were won
+                </h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  Every point traced to its source — earned off the racket, or
+                  gifted by mistakes.
+                </p>
+                <PointSourceBars
+                  sources={sources}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                />
+              </section>
+            )}
 
-          {decidedPoints > 0 && (
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">
-                Serve and return
-              </h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                Points won behind serve, on return, and by service box.
-              </p>
-              <ServePanels
-                serve={serveInsights}
-                p1Name={p1Name}
-                p2Name={p2Name}
-              />
-            </section>
-          )}
+            {errorBreakdown.p1.total + errorBreakdown.p2.total > 0 && (
+              <section className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-bold">
+                  Where the errors went
+                </h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  Every error by destination — and how many were unforced.
+                </p>
+                <ErrorDestinations
+                  errors={errorBreakdown}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                />
+              </section>
+            )}
 
-          {errorBreakdown.p1.total + errorBreakdown.p2.total > 0 && (
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">
-                Where the errors went
-              </h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                Every error by destination — and how many were unforced.
-              </p>
-              <ErrorDestinations
-                errors={errorBreakdown}
-                p1Name={p1Name}
-                p2Name={p2Name}
-              />
-            </section>
-          )}
+            {winningShots.p1.total + winningShots.p2.total > 0 && (
+              <section className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-bold">
+                  Winning shots
+                </h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  What the winners actually were — each player&rsquo;s putaway
+                  weapon.
+                </p>
+                <WinningShots
+                  shots={winningShots}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                />
+              </section>
+            )}
 
-          {winningShots.p1.total + winningShots.p2.total > 0 && (
-            <section className="flex flex-col gap-1">
-              <h2 className="font-heading text-lg font-bold">Winning shots</h2>
-              <p className="mb-2 text-sm text-muted-foreground">
-                What the winners actually were — each player&rsquo;s putaway
-                weapon.
-              </p>
-              <WinningShots
-                shots={winningShots}
-                p1Name={p1Name}
-                p2Name={p2Name}
-              />
-            </section>
-          )}
+            {taggedLengths > 0 && (
+              <section className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-bold">
+                  Who wins the grind
+                </h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  Win rate by rally length — the quick strike against the war of
+                  attrition.
+                </p>
+                <RallyLengthBars
+                  split={lengthSplit}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                />
+              </section>
+            )}
+
+            {decidedPoints > 0 && (
+              <section className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-bold">
+                  Serve and return
+                </h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  Points won behind serve, on return, and by service box.
+                </p>
+                <ServePanels
+                  serve={serveInsights}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
+                />
+              </section>
+            )}
+          </div>
 
           {/* the receipts — appear only once a game is picked (the
               point-by-point pattern: choose a game, step through it) */}

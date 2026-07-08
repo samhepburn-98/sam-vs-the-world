@@ -65,8 +65,10 @@ export function WinningShots({
   p2Name: string
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid gap-6 sm:grid-cols-2">
+    // container query — the two columns pair up only when this section is
+    // actually wide enough, not when the viewport happens to be
+    <div className="@container flex flex-col gap-3">
+      <div className="grid gap-6 @lg:grid-cols-2">
         <ShotColumn side="p1" name={p1Name} data={shots.p1} />
         <ShotColumn side="p2" name={p2Name} data={shots.p2} />
       </div>

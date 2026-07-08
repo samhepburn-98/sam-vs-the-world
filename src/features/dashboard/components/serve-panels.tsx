@@ -88,8 +88,11 @@ export function ServePanels({
   p2Name: string
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
+    // container query, not a viewport breakpoint — the panels pair up only
+    // when THIS column is wide enough, so they stack inside a half-width
+    // grid cell and sit side by side when given the full page
+    <div className="@container flex flex-col gap-3">
+      <div className="grid gap-3 @lg:grid-cols-2">
         <Panel side="p1" name={p1Name} insight={serve.p1} />
         <Panel side="p2" name={p2Name} insight={serve.p2} />
       </div>
