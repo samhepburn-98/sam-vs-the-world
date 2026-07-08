@@ -50,7 +50,7 @@ function PlayerSide({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 pt-2",
+        "flex flex-col items-start gap-1.5 pt-2",
         side === "p2" && "items-end text-right",
       )}
     >
