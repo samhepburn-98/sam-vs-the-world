@@ -75,12 +75,33 @@ describe("RallyTimeline", () => {
     expect(within(items[2]).getByText("1–0")).toBeDefined()
   })
 
-  it("outcomes read as human phrases, plus serve context", () => {
+  it("rows read at two altitudes: bold head, muted detail, tiny receipts", () => {
     renderTimeline()
-    expect(screen.getByText("Unforced error · tin")).toBeDefined()
-    expect(
-      screen.getByText(/#3 · Sam served · left box · 1st serve/)
-    ).toBeDefined()
+    const items = screen.getAllByRole("listitem")
+    // dave's point: headline phrase + qualifier, receipts without the
+    // server's name (the dot carries it) or the default "1st serve"
+    expect(within(items[0]).getByText("Unforced error")).toBeDefined()
+    expect(items[0].textContent).toContain("Unforced error · tin")
+    expect(within(items[0]).getByText("#3 · left box")).toBeDefined()
+    expect(items[0].textContent).not.toContain("served ·")
+  })
+
+  it("the serve dot names the server for screen readers", () => {
+    renderTimeline()
+    // Sam served both decided rallies; the let row draws no spine
+    expect(screen.getAllByText("Sam served")).toHaveLength(2)
+  })
+
+  it("a second serve is called out; a first serve goes unsaid", () => {
+    renderTimeline({
+      rows: [row({ rally_number: 1, serve_number: 2 })],
+    })
+    expect(screen.getByText(/2nd serve/)).toBeDefined()
+    cleanup()
+
+    renderTimeline({ rows: [row({ rally_number: 1, serve_number: 1 })] })
+    expect(screen.queryByText(/2nd serve/)).toBeNull()
+    expect(screen.getByText("#1 · left box")).toBeDefined()
   })
 
   it("shows the sticky who's-who header only when asked", () => {
@@ -113,11 +134,14 @@ describe("RallyTimeline", () => {
       renderEditor: (r) => <p>editing rally {r.rally_number}</p>,
     })
     expect(screen.getByText("editing rally 3")).toBeDefined()
-    expect(screen.queryByText("Unforced error · tin")).toBeNull()
+    expect(screen.queryByText("Unforced error")).toBeNull()
   })
 
-  it("single-serve match hides the serve-number chip", () => {
-    renderTimeline({ servesPerPoint: 1 })
-    expect(screen.queryByText(/1st serve/)).toBeNull()
+  it("single-serve matches never mention serve number", () => {
+    renderTimeline({
+      servesPerPoint: 1,
+      rows: [row({ rally_number: 1, serve_number: 2 })],
+    })
+    expect(screen.queryByText(/2nd serve/)).toBeNull()
   })
 })

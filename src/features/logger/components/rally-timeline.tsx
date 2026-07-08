@@ -10,37 +10,48 @@ import type { ReactNode } from "react"
 // (read-only). Scores are derived from the rows on every render — an edited
 // row recomputes everything downstream, exactly like the DB views.
 
-/** The rally's outcome as a human phrase — "Unforced error · tin", not a
- *  column dump of raw enum values. */
-export function outcomeLine(row: RallyRow): string {
-  const detail = row.error_detail?.replace("_", " ")
+/** The rally's outcome at two altitudes: `head` is the scannable phrase
+ *  ("Unforced error"), `detail` the muted texture behind it ("tin · 2
+ *  shots") — so the row renders a real hierarchy, not a column dump. */
+export function outcomeParts(row: RallyRow): {
+  head: string
+  detail: string | null
+} {
+  const errorDetail = row.error_detail?.replace("_", " ")
   const shots =
     row.shot_count === null
       ? null
       : `${row.shot_count} shot${row.shot_count === 1 ? "" : "s"}`
+  const join = (...parts: Array<string | null | undefined>) => {
+    const joined = parts.filter(Boolean).join(" · ")
+    return joined === "" ? null : joined
+  }
   switch (row.end_reason) {
     case "winner":
-    case "ace": {
-      const head = row.end_reason === "ace" ? "Ace" : "Winner"
-      return [head, row.shot_type, shots].filter(Boolean).join(" · ")
-    }
-    case "error": {
-      const head =
-        row.forced === null
-          ? "Error"
-          : row.forced
-            ? "Forced error"
-            : "Unforced error"
-      return [head, detail, shots].filter(Boolean).join(" · ")
-    }
+    case "ace":
+      return {
+        head: row.end_reason === "ace" ? "Ace" : "Winner",
+        detail: join(row.shot_type, shots),
+      }
+    case "error":
+      return {
+        head:
+          row.forced === null
+            ? "Error"
+            : row.forced
+              ? "Forced error"
+              : "Unforced error",
+        detail: join(errorDetail, shots),
+      }
     case "stroke":
-      return ["Stroke", shots].filter(Boolean).join(" · ")
+      return { head: "Stroke", detail: join(shots) }
     case "serve_fault":
-      return [row.serve_number === 2 ? "Double fault" : "Serve fault", detail]
-        .filter(Boolean)
-        .join(" · ")
+      return {
+        head: row.serve_number === 2 ? "Double fault" : "Serve fault",
+        detail: join(errorDetail),
+      }
     case "let":
-      return "Let"
+      return { head: "Let", detail: null }
   }
 }
 
@@ -93,12 +104,12 @@ export function RallyTimeline({
     return { row, score: { p1, p2 } }
   })
 
-  const serveLine = (row: RallyRow) => {
-    const server = row.server_id === p1Id ? p1Name : p2Name
-    const parts = [`${server} served`, `${row.serve_side} box`]
-    if (servesPerPoint === 2) {
-      parts.push(row.serve_number === 1 ? "1st serve" : "2nd serve")
-    }
+  // the receipts line: just enough to find the rally in the footage. The
+  // server isn't named — the dot beside the score carries that — and a 1st
+  // serve goes unsaid; only the deviation ("2nd serve") is information.
+  const receiptLine = (row: RallyRow) => {
+    const parts = [`#${row.rally_number}`, `${row.serve_side} box`]
+    if (servesPerPoint === 2 && row.serve_number === 2) parts.push("2nd serve")
     return parts.join(" · ")
   }
 
@@ -128,11 +139,18 @@ export function RallyTimeline({
 
             const isLet = row.end_reason === "let"
             const p1Won = row.winner_id === p1Id
+            const servedByP1 = row.server_id === p1Id
+            const { head, detail } = outcomeParts(row)
             const cell = (
               <>
-                <span className="font-medium">{outcomeLine(row)}</span>
-                <span className="block text-[11px] text-muted-foreground">
-                  #{row.rally_number} · {serveLine(row)}
+                <span>
+                  <span className="font-medium">{head}</span>
+                  {detail && (
+                    <span className="text-muted-foreground"> · {detail}</span>
+                  )}
+                </span>
+                <span className="block text-[11px] text-muted-foreground/80">
+                  {receiptLine(row)}
                 </span>
               </>
             )
@@ -157,8 +175,10 @@ export function RallyTimeline({
                         className="flex-1 border-t border-dashed"
                       />
                       <span className="shrink-0 text-center text-[11px] text-muted-foreground">
-                        #{row.rally_number} · Let (replayed)
-                        <span className="block">{serveLine(row)}</span>
+                        Let (replayed)
+                        <span className="block text-muted-foreground/80">
+                          {receiptLine(row)}
+                        </span>
                       </span>
                       <span
                         aria-hidden
@@ -168,8 +188,29 @@ export function RallyTimeline({
                   ) : (
                     <>
                       <span className="text-right">{p1Won && cell}</span>
+                      {/* the serve dot sits on the server's side of the score —
+                          position carries it, so no colour to decode and no
+                          name repeated on every row. The invisible twin keeps
+                          the score perfectly centred. */}
                       <span className="self-center text-center text-xs font-semibold text-muted-foreground tabular-nums">
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "mr-1 inline-block size-1 rounded-full bg-muted-foreground/70 align-middle",
+                            !servedByP1 && "invisible"
+                          )}
+                        />
                         {score.p1}–{score.p2}
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "ml-1 inline-block size-1 rounded-full bg-muted-foreground/70 align-middle",
+                            servedByP1 && "invisible"
+                          )}
+                        />
+                        <span className="sr-only">
+                          {servedByP1 ? p1Name : p2Name} served
+                        </span>
                       </span>
                       <span>{!p1Won && cell}</span>
                     </>

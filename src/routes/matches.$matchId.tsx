@@ -388,7 +388,8 @@ function MatchDetailPage() {
             ) : (
               <>
                 <p className="mb-2 text-sm text-muted-foreground">
-                  {lensLabel}, newest rally first.
+                  {lensLabel}, newest rally first — the dot beside the score
+                  marks the server.
                 </p>
                 <RallyTimeline
                   rows={scopedGames[0].rows.map(toRallyRow)}

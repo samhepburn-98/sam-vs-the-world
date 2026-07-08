@@ -71,7 +71,7 @@ function renderShell() {
       queue={queue}
       firstServerId={SAM}
       onExit={() => undefined}
-    />,
+    />
   )
 }
 
@@ -101,10 +101,12 @@ describe("keyboard-first logging (§5.3)", () => {
     press("2") // 12 shots (replace then append)
     press("Enter")
 
-    expect(screen.getByText("Forced error · tin · 12 shots")).toBeDefined()
+    expect(screen.getByText("Forced error").parentElement?.textContent).toBe(
+      "Forced error · tin · 12 shots"
+    )
 
     press("u") // undo pops it
-    expect(screen.queryByText(/Forced error · tin/)).toBeNull()
+    expect(screen.queryByText("Forced error")).toBeNull()
   })
 
   it("serve fault is hidden (and f inert) when the winner is the shown server", () => {
@@ -114,7 +116,7 @@ describe("keyboard-first logging (§5.3)", () => {
     press("f") // inert — nothing selected, save stays disabled
     expect(screen.getByRole("button", { name: /save/i })).toHaveProperty(
       "disabled",
-      true,
+      true
     )
 
     press("d") // switch to Dave — now a fault by server Sam fits
@@ -147,7 +149,7 @@ describe("keyboard-first logging (§5.3)", () => {
     // the open sheet still shows its keys — they're content, not hints
     expect(
       screen.getByRole("dialog", { name: "Hotkeys" }).querySelectorAll("kbd")
-        .length,
+        .length
     ).toBeGreaterThan(0)
     press("Escape")
 
