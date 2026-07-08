@@ -107,9 +107,9 @@ function humanDate(isoDate: string) {
   }).format(new Date(`${isoDate}T00:00:00`))
 }
 
-/** One insight module on its own card surface — grouping by surface, not
- *  distance, so the grid reads as tiles instead of a wall of bars. */
-function InsightCard({
+/** One supplementary insight module — a plain editorial section, so uneven
+ *  heights in the grid read as columns of text, not ragged tiles. */
+function InsightSection({
   title,
   sub,
   children,
@@ -119,9 +119,9 @@ function InsightCard({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
+    <section className="flex flex-col">
       <h2 className="font-heading text-lg font-bold">{title}</h2>
-      <p className="mt-1 mb-5 text-sm text-muted-foreground">{sub}</p>
+      <p className="mt-1 mb-4 text-sm text-muted-foreground">{sub}</p>
       {children}
     </section>
   )
@@ -414,18 +414,23 @@ function MatchDetailPage() {
             />
           </section>
 
-          {/* the numbers, paired by meaning: totals beside their quality,
-              points lost beside points won, style beside tactics. One column
-              on a phone; two side by side on desktop, where every module is
-              happiest at half width. Cards, so each module reads as its own
-              thing instead of one continuous wall of bars. */}
-          <div className="grid items-start gap-6 lg:grid-cols-2">
-            <InsightCard title="Head-to-head" sub={`${lensLabel} totals.`}>
-              <H2hBars rows={statRows} />
-            </InsightCard>
+          {/* the primary numbers — full width, before the supplementary
+              insights: this is the first thing to read after the score */}
+          <section className="flex flex-col gap-1">
+            <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
+            <p className="mb-2 text-sm text-muted-foreground">
+              {lensLabel} totals.
+            </p>
+            <H2hBars rows={statRows} />
+          </section>
 
+          {/* the supplementary insights, paired by meaning: points lost
+              beside points won, style beside tactics. One column on a phone;
+              two side by side on desktop, where each module is happiest at
+              half width. */}
+          <div className="grid items-start gap-x-12 gap-y-10 lg:grid-cols-2">
             {decidedPoints > 0 && (
-              <InsightCard
+              <InsightSection
                 title="How the points were won"
                 sub="Every point traced to its source — earned off the racket, or gifted by mistakes."
               >
@@ -434,11 +439,11 @@ function MatchDetailPage() {
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </InsightCard>
+              </InsightSection>
             )}
 
             {errorBreakdown.p1.total + errorBreakdown.p2.total > 0 && (
-              <InsightCard
+              <InsightSection
                 title="Where the errors went"
                 sub="Every error by destination — and how many were unforced."
               >
@@ -447,11 +452,11 @@ function MatchDetailPage() {
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </InsightCard>
+              </InsightSection>
             )}
 
             {winningShots.p1.total + winningShots.p2.total > 0 && (
-              <InsightCard
+              <InsightSection
                 title="Winning shots"
                 sub="What the winners actually were — each player's putaway weapon."
               >
@@ -460,11 +465,11 @@ function MatchDetailPage() {
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </InsightCard>
+              </InsightSection>
             )}
 
             {taggedLengths > 0 && (
-              <InsightCard
+              <InsightSection
                 title="Who wins the grind"
                 sub="Win rate by rally length — the quick strike against the war of attrition."
               >
@@ -473,11 +478,11 @@ function MatchDetailPage() {
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </InsightCard>
+              </InsightSection>
             )}
 
             {decidedPoints > 0 && (
-              <InsightCard
+              <InsightSection
                 title="Serve and return"
                 sub="Points won behind serve, on return, and by service box."
               >
@@ -486,7 +491,7 @@ function MatchDetailPage() {
                   p1Name={p1Name}
                   p2Name={p2Name}
                 />
-              </InsightCard>
+              </InsightSection>
             )}
           </div>
 
