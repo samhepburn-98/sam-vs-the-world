@@ -95,8 +95,8 @@ describe("buildMatchLeadSeries", () => {
     expect(series.points.map((p) => p.x)).toEqual([0, 1, 2, 3, 4, 5])
     expect(series.boundaries).toEqual([3])
     expect(series.ticks).toEqual([
-      { x: 1, label: "Game 1" },
-      { x: 4.5, label: "Game 2" },
+      { x: 1, gameNumber: 1 },
+      { x: 4.5, gameNumber: 2 },
     ])
   })
 

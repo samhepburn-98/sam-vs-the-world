@@ -80,8 +80,8 @@ export interface MatchLeadSeries {
   points: Array<MatchLeadPoint>
   /** x positions of the dividers between games */
   boundaries: Array<number>
-  /** one labelled tick per game, at its midpoint */
-  ticks: Array<{ x: number; label: string }>
+  /** one tick per game, at its midpoint */
+  ticks: Array<{ x: number; gameNumber: number }>
 }
 
 export function buildMatchLeadSeries(
@@ -89,7 +89,7 @@ export function buildMatchLeadSeries(
 ): MatchLeadSeries {
   const points: Array<MatchLeadPoint> = []
   const boundaries: Array<number> = []
-  const ticks: Array<{ x: number; label: string }> = []
+  const ticks: Array<{ x: number; gameNumber: number }> = []
   let x = 0
 
   for (const [i, game] of games.entries()) {
@@ -112,7 +112,7 @@ export function buildMatchLeadSeries(
     }
     ticks.push({
       x: (start + x - 1) / 2,
-      label: `Game ${game.gameNumber}`,
+      gameNumber: game.gameNumber,
     })
   }
 

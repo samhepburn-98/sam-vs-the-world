@@ -37,12 +37,10 @@ export function MatchMomentum({
   p2Name: string
 }) {
   const { points, boundaries, ticks } = buildMatchLeadSeries(games)
-  const leads = points
-    .map((p) => p.lead)
-    .filter((l): l is number => l !== null)
+  const leads = points.map((p) => p.lead).filter((l): l is number => l !== null)
   if (points.length === 0 || leads.every((l) => l === 0)) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         Nothing to chart yet — log a few rallies first.
       </p>
     )
@@ -77,8 +75,18 @@ export function MatchMomentum({
           margin={{ left: 4, right: 8, top: 8, bottom: 4 }}
         >
           <defs>
-            <linearGradient id="match-momentum-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset={off} stopColor="var(--primary)" stopOpacity={0.45} />
+            <linearGradient
+              id="match-momentum-fill"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset={off}
+                stopColor="var(--primary)"
+                stopOpacity={0.45}
+              />
               <stop
                 offset={off}
                 stopColor="var(--foreground)"
@@ -104,8 +112,12 @@ export function MatchMomentum({
             ticks={games.length > 1 ? ticks.map((t) => t.x) : undefined}
             tickFormatter={(x: number) =>
               games.length > 1
-                ? (ticks.find((t) => t.x === x)?.label ?? "")
-                : String(x)
+                ? // the app's Gn shorthand — all seven fit a phone, no auto-skip
+                  `G${ticks.find((t) => t.x === x)?.gameNumber ?? ""}`
+                : // x is the rally number; 0 is the synthetic level start
+                  x === 0
+                  ? ""
+                  : String(x)
             }
             tickLine={false}
             axisLine={false}
@@ -116,6 +128,8 @@ export function MatchMomentum({
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
+            // the sign is the side of the line; "-5" is chart-brain, not viewer-brain
+            tickFormatter={(v: number) => String(Math.abs(v))}
           />
           <ReferenceLine y={0} stroke="var(--border)" />
           {boundaries.map((x) => (
@@ -150,7 +164,7 @@ export function MatchMomentum({
       {max > 0 && (
         <span
           aria-hidden
-          className="text-muted-foreground pointer-events-none absolute top-2 left-10 text-[11px]"
+          className="pointer-events-none absolute top-2 left-10 rounded-sm bg-background/80 px-1 text-[11px] text-muted-foreground"
         >
           {p1Name} ahead
         </span>
@@ -158,7 +172,7 @@ export function MatchMomentum({
       {min < 0 && (
         <span
           aria-hidden
-          className="text-muted-foreground pointer-events-none absolute bottom-9 left-10 text-[11px]"
+          className="pointer-events-none absolute bottom-9 left-10 rounded-sm bg-background/80 px-1 text-[11px] text-muted-foreground"
         >
           {p2Name} ahead
         </span>

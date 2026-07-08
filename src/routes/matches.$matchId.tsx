@@ -25,6 +25,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { CourtEmptyMedia } from "@/components/court/court-empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
@@ -49,7 +56,7 @@ export const Route = createFileRoute("/matches/$matchId")({
   loader: async ({ context, params }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(
-        matchDetailQueryOptions(params.matchId),
+        matchDetailQueryOptions(params.matchId)
       ),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
@@ -76,6 +83,15 @@ function toRallyRow(r: RallyScored): RallyRow {
 
 function formatLabel(format: number | null) {
   return format === null ? "Casual" : `Best of ${format}`
+}
+
+/** "2026-07-04" → "4 Jul 2026" — a date in prose reads as words, not data. */
+function humanDate(isoDate: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(`${isoDate}T00:00:00`))
 }
 
 function MatchDetailPage() {
@@ -134,11 +150,7 @@ function MatchDetailPage() {
     const scoreP1 = last?.score_p1 ?? 0
     const scoreP2 = last?.score_p2 ?? 0
     const winner =
-      scoreP1 > scoreP2
-        ? m.player1_id
-        : scoreP2 > scoreP1
-          ? m.player2_id
-          : null
+      scoreP1 > scoreP2 ? m.player1_id : scoreP2 > scoreP1 ? m.player2_id : null
     return { ...g, scoreP1, scoreP2, winner }
   })
   const gamesWonP1 = results.filter((r) => r.winner === m.player1_id).length
@@ -155,12 +167,10 @@ function MatchDetailPage() {
     lens === "match" ? folded : folded.filter((g) => g.gameId === lens)
   const stats = computeMatchStats(
     scopedGames.flatMap((g) => g.rows),
-    m.player1_id,
+    m.player1_id
   )
   const lensLabel =
-    lens === "match"
-      ? "Match"
-      : `Game ${scopedGames[0]?.gameNumber ?? "?"}`
+    lens === "match" ? "Match" : `Game ${scopedGames[0]?.gameNumber ?? "?"}`
 
   const pct = (won: number, total: number) =>
     total === 0 ? "—" : `${Math.round((won / total) * 100)}%`
@@ -175,8 +185,10 @@ function MatchDetailPage() {
     { label: "Aces", v1: stats.aces.p1, v2: stats.aces.p2 },
     {
       label: "Points won on serve",
-      v1: stats.serveTotal.p1 === 0 ? 0 : stats.serveWon.p1 / stats.serveTotal.p1,
-      v2: stats.serveTotal.p2 === 0 ? 0 : stats.serveWon.p2 / stats.serveTotal.p2,
+      v1:
+        stats.serveTotal.p1 === 0 ? 0 : stats.serveWon.p1 / stats.serveTotal.p1,
+      v2:
+        stats.serveTotal.p2 === 0 ? 0 : stats.serveWon.p2 / stats.serveTotal.p2,
       display: [
         pct(stats.serveWon.p1, stats.serveTotal.p1),
         pct(stats.serveWon.p2, stats.serveTotal.p2),
@@ -189,7 +201,7 @@ function MatchDetailPage() {
   ]
 
   return (
-    <main className="container mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10">
+    <main className="container mx-auto flex max-w-4xl flex-col gap-8 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Breadcrumb>
           <BreadcrumbList>
@@ -212,7 +224,13 @@ function MatchDetailPage() {
           <Button asChild variant="outline" size="sm">
             <Link
               to="/manage"
-              search={{ tab: "rallies", q: matchId, page: 1, sort: "", dir: "desc" }}
+              search={{
+                tab: "rallies",
+                q: matchId,
+                page: 1,
+                sort: "",
+                dir: "desc",
+              }}
             >
               Edit in manage
             </Link>
@@ -238,8 +256,8 @@ function MatchDetailPage() {
                 : "p2"
           }
         />
-        <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
-          <span className="tabular-nums">{m.date}</span>
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+          <span>{humanDate(m.date)}</span>
           {m.venue && <span>· {m.venue}</span>}
           <span>· {formatLabel(m.format)}</span>
           {m.ball_type && (
@@ -252,9 +270,9 @@ function MatchDetailPage() {
             · {allRows.length} {allRows.length === 1 ? "rally" : "rallies"}
           </span>
         </div>
-        {matchWinner === null && (
-          <p className="text-muted-foreground text-center text-sm">
-            Casual session.
+        {matchWinner === null && allRows.length > 0 && (
+          <p className="text-center text-sm text-muted-foreground">
+            Level on games — no match winner.
           </p>
         )}
       </header>
@@ -285,95 +303,122 @@ function MatchDetailPage() {
                     aria-hidden
                     className={cn(
                       "size-2 rounded-full",
-                      g.winner === m.player1_id
-                        ? "bg-primary"
-                        : "bg-foreground",
+                      g.winner === m.player1_id ? "bg-primary" : "bg-foreground"
                     )}
                   />
                 )}
-                <span className={cn(g.winner === m.player1_id && "font-semibold")}>
+                <span
+                  className={cn(g.winner === m.player1_id && "font-semibold")}
+                >
                   {g.scoreP1}
                 </span>
                 –
-                <span className={cn(g.winner === m.player2_id && "font-semibold")}>
+                <span
+                  className={cn(g.winner === m.player2_id && "font-semibold")}
+                >
                   {g.scoreP2}
                 </span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Game scores read {p1Name}–{p2Name}; the dot marks the game winner.
           </p>
         </div>
       )}
 
-      {/* the story */}
-      <section className="flex flex-col gap-1">
-        <h2 className="font-heading text-lg font-bold">Momentum</h2>
-        <p className="text-muted-foreground mb-2 text-sm">
-          Who was ahead, rally by rally.
-        </p>
-        <MatchMomentum games={scopedGames} p1Name={p1Name} p2Name={p2Name} />
-      </section>
+      {allRows.length === 0 && (
+        <Empty>
+          <EmptyHeader>
+            <CourtEmptyMedia />
+            <EmptyTitle className="font-heading">
+              No rallies logged yet
+            </EmptyTitle>
+            <EmptyDescription>
+              The story of this match — momentum, head-to-head, the rally log —
+              appears once its rallies are in.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
 
-      {/* the why */}
-      <section className="flex flex-col gap-1">
-        <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
-        <p className="text-muted-foreground mb-2 text-sm">
-          {lensLabel} totals · bold marks the better number.
-        </p>
-        <H2hBars rows={statRows} />
-      </section>
+      {allRows.length > 0 && (
+        <>
+          {/* the story */}
+          <section className="flex flex-col gap-1">
+            <h2 className="font-heading text-lg font-bold">Momentum</h2>
+            <p className="mb-2 text-sm text-muted-foreground">
+              Who was ahead, rally by rally.
+            </p>
+            <MatchMomentum
+              games={scopedGames}
+              p1Name={p1Name}
+              p2Name={p2Name}
+            />
+          </section>
 
-      {/* the receipts, demoted */}
-      <section className="flex flex-col gap-4">
-        <button
-          type="button"
-          aria-expanded={logOpen}
-          onClick={() => setLogOpen((o) => !o)}
-          className="ring-foreground/10 hover:bg-muted/60 flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-sm ring-1 transition-colors"
-        >
-          <ListIcon aria-hidden className="text-muted-foreground size-4" />
-          <span className="font-medium">Rally log</span>
-          <span className="text-muted-foreground ml-auto tabular-nums">
-            {allRows.length}
-          </span>
-          <ChevronDownIcon
-            aria-hidden
-            className={cn(
-              "text-muted-foreground size-4 transition-transform",
-              logOpen && "rotate-180",
-            )}
-          />
-        </button>
-        {logOpen &&
-          folded.map((g, gi) => (
-            <section
-              key={g.gameId}
-              ref={(el) => {
-                gameRefs.current[g.gameId] = el
-              }}
-              className="flex scroll-mt-4 flex-col gap-3"
+          {/* the why — bounded measure so the mirrored bars keep their proportions */}
+          <section className="flex flex-col gap-1">
+            <h2 className="font-heading text-lg font-bold">Head-to-head</h2>
+            <p className="mb-2 text-sm text-muted-foreground">
+              {lensLabel} totals · bold marks the better number.
+            </p>
+            <div className="mx-auto w-full max-w-2xl">
+              <H2hBars rows={statRows} />
+            </div>
+          </section>
+
+          {/* the receipts, demoted */}
+          <section className="flex flex-col gap-4">
+            <button
+              type="button"
+              aria-expanded={logOpen}
+              onClick={() => setLogOpen((o) => !o)}
+              className="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-sm ring-1 ring-foreground/10 transition-colors hover:bg-muted/60"
             >
-              <h3 className="font-heading text-base font-bold">
-                Game {g.gameNumber}
-              </h3>
-              <RallyTimeline
-                rows={g.rows.map(toRallyRow)}
-                p1Id={m.player1_id}
-                p1Name={p1Name}
-                p2Name={p2Name}
-                servesPerPoint={m.serves_per_point}
-                editable
-                onRowClick={(row) => {
-                  const idx = allRows.findIndex((r) => r.id === row.id)
-                  if (idx >= 0) setSelected(idx)
-                }}
+              <ListIcon aria-hidden className="size-4 text-muted-foreground" />
+              <span className="font-medium">Rally log</span>
+              <span className="ml-auto text-muted-foreground tabular-nums">
+                {allRows.length}
+              </span>
+              <ChevronDownIcon
+                aria-hidden
+                className={cn(
+                  "size-4 text-muted-foreground transition-transform",
+                  logOpen && "rotate-180"
+                )}
               />
-              {gi < folded.length - 1 && <div className="border-b" />}
-            </section>
-          ))}
-      </section>
+            </button>
+            {logOpen &&
+              folded.map((g, gi) => (
+                <section
+                  key={g.gameId}
+                  ref={(el) => {
+                    gameRefs.current[g.gameId] = el
+                  }}
+                  className="flex scroll-mt-4 flex-col gap-3"
+                >
+                  <h3 className="font-heading text-base font-bold">
+                    Game {g.gameNumber}
+                  </h3>
+                  <RallyTimeline
+                    rows={g.rows.map(toRallyRow)}
+                    p1Id={m.player1_id}
+                    p1Name={p1Name}
+                    p2Name={p2Name}
+                    servesPerPoint={m.serves_per_point}
+                    editable
+                    onRowClick={(row) => {
+                      const idx = allRows.findIndex((r) => r.id === row.id)
+                      if (idx >= 0) setSelected(idx)
+                    }}
+                  />
+                  {gi < folded.length - 1 && <div className="border-b" />}
+                </section>
+              ))}
+          </section>
+        </>
+      )}
 
       <RallyDetailSheet
         rally={selected === null ? null : allRows[selected]}
@@ -382,7 +427,7 @@ function MatchDetailPage() {
         onPrev={() => setSelected((i) => (i === null ? i : Math.max(0, i - 1)))}
         onNext={() =>
           setSelected((i) =>
-            i === null ? i : Math.min(allRows.length - 1, i + 1),
+            i === null ? i : Math.min(allRows.length - 1, i + 1)
           )
         }
         hasPrev={selected !== null && selected > 0}
