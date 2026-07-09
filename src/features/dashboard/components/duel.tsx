@@ -6,17 +6,19 @@ import {
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
 import { DuelRadar } from "@/features/dashboard/components/duel-radar"
 import {
-  computeDuelAttributes,
   dominanceFromForm,
   dominanceFromH2h,
   duelTally,
-  duelTrait,
-  heroStat,
   superlatives,
-} from "@/features/dashboard/lib/duel-attributes"
+} from "@/features/dashboard/lib/duel-scoring"
+import {
+  computePlayerAttributes,
+  heroStat,
+  playerTrait,
+} from "@/features/dashboard/lib/player-attributes"
 
 import type { DuelReceipt } from "@/features/dashboard/components/duel-center"
-import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { PlayerSummary } from "@/lib/schemas/player"
 
 // The duel: the whole three-column contest. Cards flank a
@@ -80,8 +82,8 @@ export function Duel({
 }) {
   const h2h = useH2h(player1.id, player2.id)
 
-  const attrs1 = computeDuelAttributes(d1)
-  const attrs2 = computeDuelAttributes(d2)
+  const attrs1 = computePlayerAttributes(d1)
+  const attrs2 = computePlayerAttributes(d2)
   const tally = duelTally(attrs1, attrs2)
   const pills = superlatives(d1, d2, attrs1, attrs2)
 
@@ -111,7 +113,7 @@ export function Duel({
           name={player1.name}
           side="p1"
           avatarSrc={player1.avatar_url ?? "/avatars/default.svg"}
-          trait={duelTrait(d1)}
+          trait={playerTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
           attrs={attrs1}
@@ -122,7 +124,7 @@ export function Duel({
           </div>
           <DuelCardFooter
             name={player1.name}
-            trait={duelTrait(d1)}
+            trait={playerTrait(d1)}
             pills={pills.p1}
           />
         </div>
@@ -133,7 +135,7 @@ export function Duel({
           name={player2.name}
           side="p2"
           avatarSrc={player2.avatar_url ?? "/avatars/default.svg"}
-          trait={duelTrait(d2)}
+          trait={playerTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
           attrs={attrs2}
@@ -144,7 +146,7 @@ export function Duel({
           </div>
           <DuelCardFooter
             name={player2.name}
-            trait={duelTrait(d2)}
+            trait={playerTrait(d2)}
             pills={pills.p2}
           />
         </div>

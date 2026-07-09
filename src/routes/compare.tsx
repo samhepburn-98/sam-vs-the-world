@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/empty"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type {
   ErrorProfile,
   InsightFilters,

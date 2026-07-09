@@ -1,4 +1,4 @@
-import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
 // The hexagon radar under each duel card: the six measured
 // attributes as a shape, so the two players' styles read at a glance — a
@@ -29,7 +29,7 @@ export function DuelRadar({
   side,
   name,
 }: {
-  attrs: Array<DuelAttribute>
+  attrs: Array<PlayerAttribute>
   side: "p1" | "p2"
   name: string
 }) {

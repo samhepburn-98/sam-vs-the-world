@@ -1,9 +1,9 @@
 import { HandIcon } from "lucide-react"
 import { useId } from "react"
 
-import { TRAIT_LABELS } from "@/features/dashboard/lib/duel-attributes"
+import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 
-import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 import type { Handedness } from "@/lib/schemas/enums"
 
@@ -88,13 +88,13 @@ export function DuelCard({
   trait: SignatureTrait | null
   handedness: Handedness | null
   hero: { display: string; label: string }
-  attrs: Array<DuelAttribute>
+  attrs: Array<PlayerAttribute>
 }) {
   const t = THEMES[side]
   const clipId = useId()
   const shield = `url(#${clipId})`
 
-  const stat = (a: DuelAttribute) => (
+  const stat = (a: PlayerAttribute) => (
     <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
       <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
         {a.display}

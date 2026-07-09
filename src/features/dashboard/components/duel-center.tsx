@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 
-import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
 // The centre column of the duel: score, dominance split,
 // the six attributes as diverging rows, the stats verdict, the receipts
@@ -36,8 +36,8 @@ export function DuelCenter({
   score: { p1: number; p2: number; heading: string; caption: string }
   /** player one's share, 0–1 — null hides the bar (not enough data) */
   dominance: number | null
-  attrs1: Array<DuelAttribute>
-  attrs2: Array<DuelAttribute>
+  attrs1: Array<PlayerAttribute>
+  attrs2: Array<PlayerAttribute>
   tally: { p1: number; p2: number }
   receipts: Array<DuelReceipt>
 }) {
@@ -123,7 +123,7 @@ export function DuelCenter({
   )
 }
 
-function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
+function AttrRow({ a, b }: { a: PlayerAttribute; b: PlayerAttribute | undefined }) {
   if (!b) return null
   const v1 = a.value
   const v2 = b.value
