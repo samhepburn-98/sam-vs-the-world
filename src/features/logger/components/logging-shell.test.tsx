@@ -58,8 +58,8 @@ vi.mock("@/lib/api/session-ops", () => ({
 }))
 
 const players = [
-  { id: SAM, name: "Sam", handedness: null },
-  { id: DAVE, name: "Dave", handedness: null },
+  { id: SAM, name: "Sam", handedness: null, avatar_url: null },
+  { id: DAVE, name: "Dave", handedness: null, avatar_url: null },
 ]
 
 function renderShell() {

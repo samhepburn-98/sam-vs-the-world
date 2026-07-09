@@ -177,7 +177,7 @@ export function DuelCard({
     <div
       role="img"
       aria-label={`${name}'s photo`}
-      className="h-[54cqi] min-w-0 flex-1 self-start bg-cover bg-top bg-no-repeat"
+      className="h-[54cqi] min-w-0 flex-1 self-start bg-cover bg-center bg-no-repeat"
       style={{
         // the feather overlay sits on top of the photo (first layer wins)
         backgroundImage: `${t.feather}, url(${avatarSrc})`,

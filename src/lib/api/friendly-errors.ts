@@ -21,12 +21,31 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   players_name_check: "Give the player a non-empty name.",
 }
 
+// Storage API failures phrase things differently from Postgres — no
+// constraint names, no SQLSTATE codes — so avatar uploads get their own
+// message-substring translations (the bucket's server-side limits, §8.5).
+const STORAGE_MESSAGES: Array<[string, string]> = [
+  [
+    "exceeded the maximum allowed size",
+    "That photo is too large — try a smaller one.",
+  ],
+  ["Payload too large", "That photo is too large — try a smaller one."],
+  ["mime type", "That file type isn't supported — use a JPEG or PNG."],
+  [
+    "row-level security",
+    "You don't have permission to change this — sign in as the owner.",
+  ],
+]
+
 export function friendlyWriteError(error: unknown): string {
   const e = error as { message?: string; details?: string; code?: string } | null
   const haystack = `${e?.message ?? ""} ${e?.details ?? ""}`
 
   for (const [constraint, message] of Object.entries(CONSTRAINT_MESSAGES)) {
     if (haystack.includes(constraint)) return message
+  }
+  for (const [needle, message] of STORAGE_MESSAGES) {
+    if (haystack.toLowerCase().includes(needle.toLowerCase())) return message
   }
   if (e?.code === "42501") {
     return "You don't have permission to change this — sign in as the owner."

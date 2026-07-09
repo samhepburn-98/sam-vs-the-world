@@ -6,6 +6,9 @@ export const playerSummary = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   handedness: handedness.nullable(),
+  // full public storage URL (with a ?v= cache-buster), or null for the
+  // silhouette fallback
+  avatar_url: z.string().nullable(),
 })
 
 export type PlayerSummary = z.infer<typeof playerSummary>

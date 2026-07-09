@@ -8,7 +8,7 @@ export async function fetchPlayers() {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
     .from("players")
-    .select("id, name, handedness")
+    .select("id, name, handedness, avatar_url")
     .order("name")
   if (error) throw error
   return z.array(playerSummary).parse(data)
