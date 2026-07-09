@@ -41,7 +41,7 @@ referenced (`on delete restrict`).
 | `end_reason` | how the point ended (see enums below) |
 | `error_detail` | which kind of error, when `end_reason` is `error`/`serve_fault` |
 | `forced` | forced vs unforced — only on `error`; NULL = untagged |
-| `shot_type` | what shot won it — only on `winner`/`ace`; optional forever |
+| `shot_type` | the rally winner's decisive shot — their winner, ace, or the shot that forced the error; only on `winner`/`ace`/forced `error`; optional forever |
 | `shot_count` | total shots **including the serve** (ace = 1, double fault = 0); NULL = untagged |
 
 ## Enums
@@ -67,8 +67,8 @@ referenced (`on delete restrict`).
 | `not_up` | hit the ball but it didn't reach the front wall |
 | `double_bounce` | didn't get to the ball — it bounced twice |
 
-Also: `serve_side` (`left`/`right`), `shot_type` (`drop`/`drive`/`kill`/`nick`/`boast`/`volley`/
-`lob`/`other`), `handedness`, `tiebreak`, `ball_type` (`blue`/`red`/`yellow`/`double_yellow` —
+Also: `serve_side` (`left`/`right`), `shot_type` (`drop`/`drive`/`boast` — kill/nick/volley/
+lob/other retired, kept in the enum but rejected by CHECK), `handedness`, `tiebreak`, `ball_type` (`blue`/`red`/`yellow`/`double_yellow` —
 bounce ≈ difficulty: blue easiest, double yellow coldest/hardest).
 
 ## Integrity guards

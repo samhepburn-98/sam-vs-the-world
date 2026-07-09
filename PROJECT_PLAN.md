@@ -579,7 +579,7 @@ are collectively the match's **house rules** (§7.7).
 - `end_reason`: winner · error · stroke · let · ace · serve_fault
 - `error_detail`: tin · out_top · out_side · out_back · not_up · double_bounce
 - `serve_side`: left · right
-- `shot_type`: drop · drive · kill · nick · boast · volley · lob · other
+- `shot_type`: drop · drive · boast (kill/nick/volley/lob/other retired 2026-07 — kill remapped to drive, the rest untagged; values remain in the enum, a CHECK rejects them on write)
 - `handedness`: left · right
 - `tiebreak`: win_by_2 · sudden_death
 - `ball_type`: blue · red · yellow · double_yellow  (bounce → difficulty: blue easiest, double_yellow hardest)
@@ -612,7 +612,8 @@ are collectively the match's **house rules** (§7.7).
   silently orphan every rally's winner/server mapping.
 - CHECK-enforced: let ⇔ null winner (biconditional); `error_detail` only on error/serve_fault;
   serve_fault ⇒ 2nd serve; ace ⇒ winner = server; serve_fault ⇒ winner = receiver; `forced` only on
-  errors; `shot_type` only on winner/ace; `player1 <> player2`; `format in (3,5)` or null.
+  errors; `shot_type` only on winner/ace/forced-error (the rally winner's decisive shot);
+  `player1 <> player2`; `format in (3,5)` or null.
 
 ### 7.3 SQL — migration files
 
