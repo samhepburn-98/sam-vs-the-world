@@ -106,9 +106,9 @@ export function Duel({
   // middle-aligned; on phones the cards face off two-up (gitfut style) with
   // the engine full-width below
   return (
-    <div className="grid grid-cols-2 items-center gap-x-5 gap-y-10 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
+    <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
       <DuelShieldDef />
-      <div className="flex flex-col gap-6 md:col-start-1 md:row-start-1 md:gap-14">
+      <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1 md:gap-14">
         <DuelCard
           name={player1.name}
           side="p1"
@@ -119,7 +119,9 @@ export function Duel({
           attrs={attrs1}
         />
         <div className="flex flex-col gap-3">
-          <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
+          <div className="mx-auto w-full max-w-36 md:max-w-none">
+            <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
+          </div>
           <DuelCardFooter
             name={player1.name}
             trait={duelTrait(d1)}
@@ -128,7 +130,7 @@ export function Duel({
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 md:col-start-3 md:row-start-1 md:gap-14">
+      <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1 md:gap-14">
         <DuelCard
           name={player2.name}
           side="p2"
@@ -139,7 +141,9 @@ export function Duel({
           attrs={attrs2}
         />
         <div className="flex flex-col gap-3">
-          <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
+          <div className="mx-auto w-full max-w-36 md:max-w-none">
+            <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
+          </div>
           <DuelCardFooter
             name={player2.name}
             trait={duelTrait(d2)}
