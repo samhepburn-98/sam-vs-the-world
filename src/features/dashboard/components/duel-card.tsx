@@ -51,7 +51,7 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // leaves the box edges near-solid), letting the figure dissolve into the
 // dark ground like the FUT photo treatment, strongest at the bottom
 const AVATAR_MASK =
-  "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
+  "radial-gradient(66% 70% at 52% 46%, #000 14%, transparent 72%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
@@ -95,39 +95,23 @@ export function DuelCard({
   attrs: Array<DuelAttribute>
 }) {
   const t = THEMES[side]
-  // the player's standout attribute wears the accent — every card gets a
-  // different hero row, like a real deck
-  const best = attrs.reduce<DuelAttribute | null>(
-    (acc, a) =>
-      a.value !== null && (acc?.value == null || a.value > acc.value) ? a : acc,
-    null,
-  )
 
-  const stat = (a: DuelAttribute) => {
-    const isBest = best !== null && a.key === best.key
-    return (
-      <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
-        <dd
-          className="text-[6.4cqi] font-extrabold tabular-nums"
-          style={{ color: isBest ? t.accent : "#ffffff" }}
-        >
-          {a.display}
-        </dd>
-        {/* label matches the number's size (so they scale identically) but
-            is lighter weight so the number still leads */}
-        <dt
-          className="text-[6.4cqi] font-normal"
-          style={{ color: isBest ? t.accentSoft : t.muted }}
-        >
-          {a.code}
-          <span className="sr-only">
-            {" "}
-            — {a.detail}: {a.sr}
-          </span>
-        </dt>
-      </div>
-    )
-  }
+  const stat = (a: DuelAttribute) => (
+    <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
+      <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
+        {a.display}
+      </dd>
+      {/* label matches the number's size (so they scale identically) but is
+          lighter weight so the number still leads */}
+      <dt className="text-[6.4cqi] font-normal" style={{ color: t.muted }}>
+        {a.code}
+        <span className="sr-only">
+          {" "}
+          — {a.detail}: {a.sr}
+        </span>
+      </dt>
+    </div>
+  )
 
   const stats = (
     <div className="flex w-[23cqi] flex-col items-center text-center">
@@ -161,11 +145,14 @@ export function DuelCard({
       )}
     </div>
   )
+  // the photo bleeds to the card's top and right edges (feathered on every
+  // side, so no hard corners), which is why the content has no top/right
+  // padding around it
   const avatar = (
     <div
       role="img"
       aria-label={`${name}'s photo`}
-      className="h-[50cqi] min-w-0 flex-1 self-end bg-cover bg-top bg-no-repeat"
+      className="h-[54cqi] min-w-0 flex-1 self-start bg-cover bg-top bg-no-repeat"
       style={{
         backgroundImage: `url(${avatarSrc})`,
         WebkitMaskImage: AVATAR_MASK,
@@ -202,21 +189,13 @@ export function DuelCard({
               "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
           }}
         />
-        <div className="relative px-[7cqi] pt-[6cqi] pb-[13cqi]">
-        <div className="flex items-end gap-[3cqi]">
-          {side === "p1" ? (
-            <>
-              {stats}
-              {avatar}
-            </>
-          ) : (
-            <>
-              {avatar}
-              {stats}
-            </>
-          )}
+        <div className="relative pb-[13cqi]">
+        <div className="flex items-start gap-[6cqi]">
+          <div className="shrink-0 pt-[8cqi] pl-[8cqi]">{stats}</div>
+          {avatar}
         </div>
 
+        <div className="px-[7cqi]">
         <div className="mt-[2cqi] text-center">
           <p className="truncate text-[10cqi] font-extrabold tracking-wide text-white uppercase">
             {name}
@@ -250,6 +229,7 @@ export function DuelCard({
           <dl className="flex flex-col gap-[3.5cqi]">
             {[attrs[1], attrs[3], attrs[5]].map(stat)}
           </dl>
+        </div>
         </div>
         </div>
         </div>
