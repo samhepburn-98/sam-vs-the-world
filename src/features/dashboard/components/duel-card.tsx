@@ -1,3 +1,5 @@
+import { HandIcon } from "lucide-react"
+
 import { TRAIT_LABELS } from "@/features/dashboard/lib/duel-attributes"
 
 import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
@@ -51,18 +53,6 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 const AVATAR_MASK =
   "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
 
-function Crest({ color }: { color: string }) {
-  return (
-    <svg viewBox="0 0 640 975" className="w-[11cqi]" fill="none" aria-hidden>
-      <g stroke={color} strokeWidth={44} strokeLinejoin="round">
-        <rect x={22} y={22} width={596} height={931} rx={16} />
-        <line x1={0} y1={544} x2={640} y2={544} />
-        <line x1={320} y1={544} x2={320} y2={953} />
-      </g>
-    </svg>
-  )
-}
-
 export function DuelCard({
   name,
   side,
@@ -111,9 +101,22 @@ export function DuelCard({
           {TRAIT_LABELS[trait]}
         </span>
       )}
-      <span className="mt-[3cqi]">
-        <Crest color={t.accent} />
-      </span>
+      {handedness && (
+        <span
+          className="mt-[3.5cqi] flex items-center gap-[1.5cqi] text-[4cqi] font-semibold"
+          style={{ color: t.muted }}
+        >
+          <HandIcon
+            aria-hidden
+            className="size-[4.5cqi]"
+            style={
+              handedness === "left" ? { transform: "scaleX(-1)" } : undefined
+            }
+          />
+          {handedness === "left" ? "LH" : "RH"}
+          <span className="sr-only"> ({HANDEDNESS_LABELS[handedness]})</span>
+        </span>
+      )}
     </div>
   )
   const avatar = (
@@ -168,11 +171,6 @@ export function DuelCard({
           <p className="truncate text-[10cqi] font-extrabold tracking-wide text-white uppercase">
             {name}
           </p>
-          {handedness && (
-            <p className="mt-[0.5cqi] text-[4cqi]" style={{ color: t.muted }}>
-              {HANDEDNESS_LABELS[handedness]}
-            </p>
-          )}
         </div>
 
         <div

@@ -107,7 +107,7 @@ function ComparePage() {
   const ready = Boolean(player1 && player2)
 
   return (
-    <main className="container mx-auto flex max-w-5xl flex-col gap-12 px-4 py-12 md:gap-20">
+    <main className="container mx-auto flex max-w-5xl flex-col gap-10 px-4 py-12">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight">
