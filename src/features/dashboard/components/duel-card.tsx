@@ -53,6 +53,13 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 const AVATAR_MASK =
   "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
 
+// the FUT pennant silhouette — chamfered top corners, straight sides, and a
+// point at the bottom centre. Applied to both the accent shell and the inner
+// fill (percentage-based so it scales), which is how the accent border keeps
+// following the shape all the way down to the tip
+const SHIELD =
+  "polygon(0% 4%, 4% 0%, 96% 0%, 100% 4%, 100% 87%, 50% 100%, 0% 87%)"
+
 export function DuelCard({
   name,
   side,
@@ -134,25 +141,29 @@ export function DuelCard({
 
   return (
     <div
-      className="@container relative overflow-hidden rounded-2xl border-2"
-      style={{ backgroundColor: t.bg, borderColor: t.border }}
+      className="@container relative"
+      style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "1.1cqi" }}
     >
       <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(120% 62% at ${t.glowAt}, ${t.glow}, transparent 62%)`,
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
-        }}
-      />
-      <div className="relative p-[7cqi]">
+        className="relative"
+        style={{ clipPath: SHIELD, backgroundColor: t.bg }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(120% 62% at ${t.glowAt}, ${t.glow}, transparent 62%)`,
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
+          }}
+        />
+        <div className="relative px-[7cqi] pt-[6cqi] pb-[15cqi]">
         <div className="flex items-end gap-[3cqi]">
           {side === "p1" ? (
             <>
@@ -205,6 +216,7 @@ export function DuelCard({
             )
           })}
         </dl>
+        </div>
       </div>
     </div>
   )
