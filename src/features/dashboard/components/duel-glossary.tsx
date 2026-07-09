@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-// The stats glossary (§5.1 redesign): the six attribute codes are terse by
+// The stats glossary: the six attribute codes are terse by
 // design, so this lives behind a dialog — a quiet "what do these mean?"
 // trigger opens the full spell-out. Single-sourced from DUEL_GLOSSARY.
 

@@ -6,15 +6,15 @@ import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 import type { Handedness } from "@/lib/schemas/enums"
 
-// The FUT-style player card (§5.1 redesign). A physical collectible object,
-// so its dark scene colours are hardcoded — the card looks the same in light
-// and dark mode rather than inverting. Player one runs hot (gold/orange),
-// player two cool (silver/blue), matching the app's p1/p2 convention.
+// The FUT-style player card. A physical collectible object, so its dark
+// scene colours are hardcoded — the card looks the same in light and dark
+// mode rather than inverting. Player one runs hot (gold/orange), player two
+// cool (silver/blue), matching the app's p1/p2 convention.
 //
 // Everything inside scales in `cqi` (container-inline) units, so the card
 // holds its proportions whether it's 16rem on desktop or a ~10rem half of a
-// mobile two-up. The foil sheen, glow, crest, and gradient rule are what
-// make it read as a premium card and not a stat panel.
+// mobile two-up. The foil sheen, glow, and gradient rule are what make it
+// read as a premium card and not a stat panel.
 
 const THEMES = {
   p1: {
@@ -27,9 +27,9 @@ const THEMES = {
     muted: "#c9b79c",
     rule: "245,184,65",
     numberGlow: "rgba(245,184,65,0.55)",
-    // gitfut's photo treatment: an overlay that's clear in the middle, a warm
-    // sheen through the mid, then the card's own dark toward the edges, so the
-    // photo blends into the ground instead of ending in a hard rectangle
+    // colour overlay for the photo: clear in the middle, a warm sheen through
+    // the mid, then the card's own dark toward the edges, so the photo blends
+    // into the ground instead of ending in a hard rectangle
     feather:
       "radial-gradient(ellipse 72% 72% at 52% 42%, transparent 36%, rgba(232,205,160,0.14) 66%, rgba(19,15,14,0.66))",
   },
@@ -53,28 +53,11 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
   right: "Right-handed",
 }
 
-// feather the photo into the card on every edge — the radii are kept well
-// under 100% so the fade zone falls INSIDE the box (a 100%-radius ellipse
-// leaves the box edges near-solid), letting the figure dissolve into the
-// dark ground like the FUT photo treatment, strongest at the bottom
-// the mask does the shape. A solid core keeps the face legible, then a long,
-// gentle fade (28%→90% with a soft mid-stop) dissolves the outer band so the
-// edge reads smooth rather than abrupt. The ellipse is deliberately wide and
-// tall (uneven radii) so the blob is oval, not a circle. The colour overlay
-// (per theme) tints what's left so it blends into the card ground.
-// ── PLAY WITH THIS LINE ──────────────────────────────────────────────────
-// This is the shape/feather of the photo. It's a radial gradient used as a
-// mask: where it's #000 the photo is solid, where it's transparent the photo
-// disappears. Four knobs, in order:
-//   1. "66% 66%"  = the fade ellipse radii (width% height%). SMALLER = blob
-//      sits further inside the box = more rounded / less square. Equal numbers
-//      = circular; make them differ for an oval.
-//   2. "at 52% 43%" = where the blob is centred.
-//   3. "#000 18%"  = photo is fully solid out to 18% of the radius. LOWER =
-//      smaller solid core = more of the photo is feathering.
-//   4. "transparent 80%" = fully gone by 80%. A BIGGER gap between 18% and 80%
-//      = longer, softer feather. Keep this well under 100% or the fade runs
-//      off the box edge and looks abrupt/square again.
+// The photo's shape: a radial-gradient mask with a solid core that keeps the
+// face legible and a long fade that dissolves the outer band, so the figure
+// reads as a soft oval rather than a hard rectangle. The radii stay well
+// under 100% so the fade completes inside the box — at 100% the box edges
+// are still near-solid and the crop shows.
 const AVATAR_MASK =
   "radial-gradient(66% 76% at 52% 43%, #000 18%, #000 40%, transparent 82%)"
 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
 
-// The centre column of the duel (§5.1 redesign): score, dominance split,
+// The centre column of the duel: score, dominance split,
 // the six attributes as diverging rows, the stats verdict, the receipts
 // table of raw counts, and the share button. Player one is always the left
 // side in orange; player two the right in blue — same convention as the

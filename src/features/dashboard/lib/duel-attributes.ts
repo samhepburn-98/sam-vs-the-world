@@ -14,12 +14,12 @@ import type {
   SignatureTrait,
 } from "@/features/dashboard/schemas/insights"
 
-// The duel model (§5.1 redesign): six measured win rates — never invented
+// The duel model: six measured win rates — never invented
 // ratings — derived from the insight RPC payloads each player already
 // fetches. The same six numbers drive the card grid, the radar shape, and
 // the centre comparison rows, so the whole duel is one honest model viewed
 // three ways. Below a threshold a value is null and the UI says "n=X"
-// instead of showing a noisy rate (§3.5).
+// instead of showing a noisy rate.
 
 /** The five insight payloads the compare page fetches per player. */
 export interface PlayerData {
@@ -55,7 +55,7 @@ function rate(
 ): Pick<DuelAttribute, "value" | "display" | "sr"> {
   if (of < min) {
     // below the threshold a rate is noise — show a quiet dash, not a raw
-    // "n=4", and let the accessible label carry the why (§3.5)
+    // "n=4", and let the accessible label carry the why
     return {
       value: null,
       display: "—",

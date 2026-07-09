@@ -9,12 +9,9 @@ import { cn } from "@/lib/utils"
 
 import type { PlayerSummary } from "@/lib/schemas/player"
 
-// The duel setup (§5.1 redesign): two player slots facing off across a VS,
-// then the scope toggle — a proper segmented control, not a plain button
-// pair. The slots echo the cards below (player one hot, player two cool),
-// so choosing feels like assembling the matchup. Each slot is a standard
-// Select — the trigger mirrors the chosen item's avatar-and-name via
-// SelectValue, the reliable pattern used across the app.
+// The duel setup: two player slots facing off across a VS, then the scope
+// toggle. The slots echo the cards below (player one hot, player two cool),
+// so choosing feels like assembling the matchup.
 
 const SLOT_STYLES = {
   p1: {

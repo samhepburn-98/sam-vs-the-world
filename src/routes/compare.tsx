@@ -30,10 +30,10 @@ import type {
   ServeStats,
 } from "@/features/dashboard/schemas/insights"
 
-// Compare (§5.1, §2.3): two players go head to head as a duel — cards on
+// Compare: two players go head to head as a duel — cards on
 // the outer edges, the comparison engine down the centre. The mode toggle
 // scopes the stats: "all games" is each player's overall form, "head to
-// head" runs every stat through the opponent filter (§3.6), so both sides
+// head" runs every stat through the opponent filter, so both sides
 // show only their shared games. Selection + mode live in the URL, so a
 // duel is shareable.
 

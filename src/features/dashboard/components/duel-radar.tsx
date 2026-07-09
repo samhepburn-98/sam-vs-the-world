@@ -1,6 +1,6 @@
 import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
 
-// The hexagon radar under each duel card (§5.1 redesign): the six measured
+// The hexagon radar under each duel card: the six measured
 // attributes as a shape, so the two players' styles read at a glance — a
 // grinder bulges toward CON/GRD/CLU, a shotmaker toward SRV/ATT. Axes run
 // clockwise from the top in attribute order. An unmeasured axis collapses

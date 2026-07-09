@@ -20,7 +20,7 @@ import type { DuelReceipt } from "@/features/dashboard/components/duel-center"
 import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
 import type { PlayerSummary } from "@/lib/schemas/player"
 
-// The duel (§5.1 redesign): the whole three-column contest. Cards flank a
+// The duel: the whole three-column contest. Cards flank a
 // centre engine — score, dominance, attribute rows, verdict, receipts. In
 // head-to-head mode the score is their real record and every number is
 // scoped to shared games; in all-games mode the score is the stat duel
@@ -103,7 +103,7 @@ export function Duel({
       : dominanceFromForm(d1.headline, d2.headline)
 
   // desktop is the three-column duel — cards flank the engine, all three
-  // middle-aligned; on phones the cards face off two-up (gitfut style) with
+  // middle-aligned; on phones the cards face off two-up with
   // the engine full-width below
   return (
     <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
