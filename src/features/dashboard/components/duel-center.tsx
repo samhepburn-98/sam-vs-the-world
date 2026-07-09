@@ -1,7 +1,6 @@
 import { CheckIcon, Share2Icon } from "lucide-react"
 import { useState } from "react"
 
-import { DuelGlossaryDialog } from "@/features/dashboard/components/duel-glossary"
 import { Button } from "@/components/ui/button"
 
 import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
@@ -91,9 +90,6 @@ export function DuelCenter({
         {attrs1.map((a, i) => (
           <AttrRow key={a.key} a={a} b={attrs2[i]} />
         ))}
-      </div>
-      <div className="mt-2 flex justify-center">
-        <DuelGlossaryDialog />
       </div>
 
       <div className="mt-8 text-center">

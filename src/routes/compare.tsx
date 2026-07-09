@@ -1,6 +1,5 @@
 import { useQueries } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { XIcon } from "lucide-react"
 import { z } from "zod"
 
 import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
@@ -9,23 +8,16 @@ import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headl
 import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 import { Duel } from "@/features/dashboard/components/duel"
+import { DuelGlossaryDialog } from "@/features/dashboard/components/duel-glossary"
+import { DuelModeToggle, DuelPicker } from "@/features/dashboard/components/duel-picker"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
-import { Badge } from "@/components/ui/badge"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
@@ -76,6 +68,15 @@ function ComparePage() {
       }),
     })
 
+  const pickSlot = (index: number, id: string) => {
+    const next = [selected[0], selected[1]]
+    next[index] = id
+    setSelected(next.filter((x): x is string => Boolean(x)))
+  }
+
+  const setMode = (mode: "all" | "h2h") =>
+    void navigate({ search: (prev) => ({ ...prev, mode }) })
+
   const h2h = selected.length === 2 && search.mode === "h2h"
   // in head-to-head, each player's stats are filtered to games against the other
   const filtersFor = (i: number): InsightFilters =>
@@ -101,50 +102,27 @@ function ComparePage() {
     momentum: results[i * 5 + 4]?.data as Momentum | undefined,
   }))
 
-  const nameOf = (id: string) => roster.find((p) => p.id === id)?.name ?? "?"
-  const addable = roster.filter((p) => !selected.includes(p.id))
   const player1 = roster.find((p) => p.id === selected[0])
   const player2 = roster.find((p) => p.id === selected[1])
+  const ready = Boolean(player1 && player2)
 
   return (
-    <main className="container mx-auto flex max-w-5xl flex-col gap-10 px-4 py-12">
-      <header>
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
-          Compare players
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Pick two players to see them go head to head.
-        </p>
+    <main className="container mx-auto flex max-w-5xl flex-col gap-12 px-4 py-12">
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">
+            Compare players
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Pick two players to see them go head to head.
+          </p>
+        </div>
+        {ready && <DuelGlossaryDialog />}
       </header>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {selected.map((id) => (
-          <Badge key={id} variant="secondary" className="gap-1 py-1 pr-1 pl-2">
-            {nameOf(id)}
-            <button
-              type="button"
-              aria-label={`Remove ${nameOf(id)}`}
-              className="hover:bg-foreground/10 rounded-full p-0.5"
-              onClick={() => setSelected(selected.filter((x) => x !== id))}
-            >
-              <XIcon className="size-3" />
-            </button>
-          </Badge>
-        ))}
-        {addable.length > 0 && selected.length < 2 && (
-          <Select value="" onValueChange={(v) => setSelected([...selected, v])}>
-            <SelectTrigger className="w-40" aria-label="Add player">
-              <SelectValue placeholder="Add player…" />
-            </SelectTrigger>
-            <SelectContent>
-              {addable.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+      <div className="flex flex-col items-center gap-5">
+        <DuelPicker roster={roster} selected={selected} onPick={pickSlot} />
+        {ready && <DuelModeToggle mode={search.mode} onChange={setMode} />}
       </div>
 
       {!player1 || !player2 ? (
@@ -153,29 +131,12 @@ function ComparePage() {
             <CourtEmptyMedia />
             <EmptyTitle className="font-heading">Pick two players</EmptyTitle>
             <EmptyDescription>
-              Add two players above to see them go head to head.
+              Choose a player in each slot above to see them go head to head.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
         <>
-          <div className="flex justify-center">
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={search.mode}
-              onValueChange={(v) =>
-                v &&
-                void navigate({
-                  search: (prev) => ({ ...prev, mode: v as "all" | "h2h" }),
-                })
-              }
-            >
-              <ToggleGroupItem value="all">All games</ToggleGroupItem>
-              <ToggleGroupItem value="h2h">Head to head</ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-
           <Duel
             player1={player1}
             player2={player2}
