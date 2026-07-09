@@ -73,7 +73,7 @@ const AVATAR_MASK =
 const SHIELD_PATH =
   "M 0.05 0 L 0.95 0 Q 1 0 1 0.05 L 1 0.78 C 1 0.9 0.72 0.96 0.5 1 C 0.28 0.96 0 0.9 0 0.78 L 0 0.05 Q 0 0 0.05 0 Z"
 
-export function DuelCard({
+export function PlayerCard({
   name,
   side,
   avatarSrc,

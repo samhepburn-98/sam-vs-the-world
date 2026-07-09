@@ -1,6 +1,6 @@
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
-// The hexagon radar under each duel card: the six measured
+// The hexagon radar under each player card: the six measured
 // attributes as a shape, so the two players' styles read at a glance — a
 // grinder bulges toward CON/GRD/CLU, a shotmaker toward SRV/ATT. Axes run
 // clockwise from the top in attribute order. An unmeasured axis collapses
@@ -24,7 +24,7 @@ function ring(radius: number): string {
   ).join(" ")
 }
 
-export function DuelRadar({
+export function AttributeRadar({
   attrs,
   side,
   name,

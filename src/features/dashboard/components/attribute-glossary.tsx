@@ -13,7 +13,7 @@ import {
 // design, so this lives behind a dialog — a quiet "what do these mean?"
 // trigger opens the full spell-out. Single-sourced from ATTRIBUTE_META.
 
-export function DuelGlossaryDialog() {
+export function AttributeGlossaryDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>

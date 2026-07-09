@@ -8,7 +8,7 @@ import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headl
 import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 import { Duel } from "@/features/dashboard/components/duel"
-import { DuelGlossaryDialog } from "@/features/dashboard/components/duel-glossary"
+import { AttributeGlossaryDialog } from "@/features/dashboard/components/attribute-glossary"
 import { DuelModeToggle } from "@/features/dashboard/components/duel-mode-toggle"
 import { DuelPicker } from "@/features/dashboard/components/duel-picker"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
@@ -118,7 +118,7 @@ function ComparePage() {
             Pick two players to see them go head to head.
           </p>
         </div>
-        {ready && <DuelGlossaryDialog />}
+        {ready && <AttributeGlossaryDialog />}
       </header>
 
       <div className="flex flex-col items-center gap-5">

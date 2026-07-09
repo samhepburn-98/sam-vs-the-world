@@ -1,8 +1,8 @@
 import { useH2h } from "@/features/dashboard/api/get-h2h"
-import { DuelCard } from "@/features/dashboard/components/duel-card"
+import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
 import { PlayerCardFooter } from "@/features/dashboard/components/player-card-footer"
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
-import { DuelRadar } from "@/features/dashboard/components/duel-radar"
+import { PlayerCard } from "@/features/dashboard/components/player-card"
 import {
   dominanceFromForm,
   dominanceFromH2h,
@@ -107,7 +107,7 @@ export function Duel({
   return (
     <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
       <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1 md:gap-14">
-        <DuelCard
+        <PlayerCard
           name={player1.name}
           side="p1"
           avatarSrc={player1.avatar_url ?? "/avatars/default.svg"}
@@ -118,7 +118,7 @@ export function Duel({
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
+            <AttributeRadar attrs={attrs1} side="p1" name={player1.name} />
           </div>
           <PlayerCardFooter
             name={player1.name}
@@ -129,7 +129,7 @@ export function Duel({
       </div>
 
       <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1 md:gap-14">
-        <DuelCard
+        <PlayerCard
           name={player2.name}
           side="p2"
           avatarSrc={player2.avatar_url ?? "/avatars/default.svg"}
@@ -140,7 +140,7 @@ export function Duel({
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
+            <AttributeRadar attrs={attrs2} side="p2" name={player2.name} />
           </div>
           <PlayerCardFooter
             name={player2.name}
