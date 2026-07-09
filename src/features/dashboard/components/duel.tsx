@@ -1,26 +1,25 @@
 import { useH2h } from "@/features/dashboard/api/get-h2h"
-import {
-  DuelCard,
-  DuelCardFooter,
-  DuelShieldDef,
-} from "@/features/dashboard/components/duel-card"
+import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
+import { PlayerCardFooter } from "@/features/dashboard/components/player-card-footer"
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
-import { DuelRadar } from "@/features/dashboard/components/duel-radar"
+import { PlayerCard } from "@/features/dashboard/components/player-card"
 import {
-  computeDuelAttributes,
   dominanceFromForm,
   dominanceFromH2h,
   duelTally,
-  duelTrait,
-  heroStat,
   superlatives,
-} from "@/features/dashboard/lib/duel-attributes"
+} from "@/features/dashboard/lib/duel-scoring"
+import {
+  computePlayerAttributes,
+  heroStat,
+  playerTrait,
+} from "@/features/dashboard/lib/player-attributes"
 
 import type { DuelReceipt } from "@/features/dashboard/components/duel-center"
-import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
+import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { PlayerSummary } from "@/lib/schemas/player"
 
-// The duel (§5.1 redesign): the whole three-column contest. Cards flank a
+// The duel: the whole three-column contest. Cards flank a
 // centre engine — score, dominance, attribute rows, verdict, receipts. In
 // head-to-head mode the score is their real record and every number is
 // scoped to shared games; in all-games mode the score is the stat duel
@@ -81,8 +80,8 @@ export function Duel({
 }) {
   const h2h = useH2h(player1.id, player2.id)
 
-  const attrs1 = computeDuelAttributes(d1)
-  const attrs2 = computeDuelAttributes(d2)
+  const attrs1 = computePlayerAttributes(d1)
+  const attrs2 = computePlayerAttributes(d2)
   const tally = duelTally(attrs1, attrs2)
   const pills = superlatives(d1, d2, attrs1, attrs2)
 
@@ -103,50 +102,49 @@ export function Duel({
       : dominanceFromForm(d1.headline, d2.headline)
 
   // desktop is the three-column duel — cards flank the engine, all three
-  // middle-aligned; on phones the cards face off two-up (gitfut style) with
+  // middle-aligned; on phones the cards face off two-up with
   // the engine full-width below
   return (
     <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
-      <DuelShieldDef />
       <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1 md:gap-14">
-        <DuelCard
+        <PlayerCard
           name={player1.name}
           side="p1"
           avatarSrc={player1.avatar_url ?? "/avatars/default.svg"}
-          trait={duelTrait(d1)}
+          trait={playerTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
           attrs={attrs1}
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
+            <AttributeRadar attrs={attrs1} side="p1" name={player1.name} />
           </div>
-          <DuelCardFooter
+          <PlayerCardFooter
             name={player1.name}
-            trait={duelTrait(d1)}
+            trait={playerTrait(d1)}
             pills={pills.p1}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1 md:gap-14">
-        <DuelCard
+        <PlayerCard
           name={player2.name}
           side="p2"
           avatarSrc={player2.avatar_url ?? "/avatars/default.svg"}
-          trait={duelTrait(d2)}
+          trait={playerTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
           attrs={attrs2}
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
+            <AttributeRadar attrs={attrs2} side="p2" name={player2.name} />
           </div>
-          <DuelCardFooter
+          <PlayerCardFooter
             name={player2.name}
-            trait={duelTrait(d2)}
+            trait={playerTrait(d2)}
             pills={pills.p2}
           />
         </div>

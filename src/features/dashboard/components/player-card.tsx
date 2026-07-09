@@ -1,122 +1,245 @@
-import { Link } from "@tanstack/react-router"
-import { CheckIcon } from "lucide-react"
+import { HandIcon } from "lucide-react"
+import { useId } from "react"
 
-import { CountUp } from "@/components/count-up"
-import { Button } from "@/components/ui/button"
-import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
-import { cn } from "@/lib/utils"
+import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 
-import type { RosterHeadline } from "@/features/dashboard/schemas/insights"
+import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
+import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
+import type { Handedness } from "@/lib/schemas/enums"
 
-// The roster card (§6.1): win rate with its denominator, a form line of the
-// last few game results, and the games record — all game-level, decided
-// games only. The card links to the player page; the corner control selects
-// it for a side-by-side compare without navigating.
+// The FUT-style player card. A physical collectible object, so its dark
+// scene colours are hardcoded — the card looks the same in light and dark
+// mode rather than inverting. Player one runs hot (gold/orange), player two
+// cool (silver/blue), matching the app's p1/p2 convention.
+//
+// Everything inside scales in `cqi` (container-inline) units, so the card
+// holds its proportions whether it's 16rem on desktop or a ~10rem half of a
+// mobile two-up. The foil sheen, glow, and gradient rule are what make it
+// read as a premium card and not a stat panel.
 
-interface PlayerCardProps {
-  player: RosterHeadline
-  selected: boolean
-  onToggleSelect: () => void
+const THEMES = {
+  p1: {
+    border: "#F5B841",
+    glow: "rgba(234,88,12,0.55)",
+    glowAt: "55% 22%",
+    bg: "#130f0e",
+    accent: "#F5B841",
+    accentSoft: "#f5d9a8",
+    muted: "#c9b79c",
+    rule: "245,184,65",
+    numberGlow: "rgba(245,184,65,0.55)",
+    // colour overlay for the photo: clear in the middle, a warm sheen through
+    // the mid, then the card's own dark toward the edges, so the photo blends
+    // into the ground instead of ending in a hard rectangle
+    feather:
+      "radial-gradient(ellipse 72% 72% at 52% 42%, transparent 36%, rgba(232,205,160,0.14) 66%, rgba(19,15,14,0.66))",
+  },
+  p2: {
+    border: "#C7CCD4",
+    glow: "rgba(59,130,246,0.55)",
+    glowAt: "45% 22%",
+    bg: "#0d1018",
+    accent: "#93C5FD",
+    accentSoft: "#bcd6f7",
+    muted: "#aab4c4",
+    rule: "199,204,212",
+    numberGlow: "rgba(147,197,253,0.5)",
+    feather:
+      "radial-gradient(ellipse 72% 72% at 52% 42%, transparent 36%, rgba(170,188,210,0.18) 66%, rgba(13,16,24,0.66))",
+  },
+} as const
+
+const HANDEDNESS_LABELS: Record<Handedness, string> = {
+  left: "Left-handed",
+  right: "Right-handed",
 }
 
-export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps) {
-  const { games_won, games_decided } = player
-  const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
-  const losses = games_decided - games_won
-  // recent_games is newest-first; a form line reads left-to-right, oldest-first
-  const form = player.recent_games.slice(0, 5).reverse()
+// The photo's shape: a radial-gradient mask with a solid core that keeps the
+// face legible and a long fade that dissolves the outer band, so the figure
+// reads as a soft oval rather than a hard rectangle. The radii stay well
+// under 100% so the fade completes inside the box — at 100% the box edges
+// are still near-solid and the crop shows.
+const AVATAR_MASK =
+  "radial-gradient(66% 76% at 52% 43%, #000 18%, #000 40%, transparent 82%)"
+
+// The FUT shield silhouette. A CSS polygon() can only draw straight lines,
+// so the bottom would be a crude chevron; instead this is an SVG path with
+// real bezier curves — straight sides that sweep through rounded shoulders
+// down to the point. clipPathUnits="objectBoundingBox" means the 0–1
+// coordinates scale to whatever size the card is, and the same clip on the
+// accent shell + inner fill keeps the hairline edge following the curve to
+// the tip. Each card renders its own def under a useId, so the card is
+// self-contained wherever it's mounted.
+const SHIELD_PATH =
+  "M 0.05 0 L 0.95 0 Q 1 0 1 0.05 L 1 0.78 C 1 0.9 0.72 0.96 0.5 1 C 0.28 0.96 0 0.9 0 0.78 L 0 0.05 Q 0 0 0.05 0 Z"
+
+export function PlayerCard({
+  name,
+  side,
+  avatarSrc,
+  trait,
+  handedness,
+  hero,
+  attrs,
+}: {
+  name: string
+  side: "p1" | "p2"
+  avatarSrc: string
+  trait: SignatureTrait | null
+  handedness: Handedness | null
+  hero: { display: string; label: string }
+  attrs: Array<PlayerAttribute>
+}) {
+  const t = THEMES[side]
+  const clipId = useId()
+  const shield = `url(#${clipId})`
+
+  const stat = (a: PlayerAttribute) => (
+    <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
+      <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
+        {a.display}
+      </dd>
+      {/* label matches the number's size (so they scale identically) but is
+          lighter weight so the number still leads */}
+      <dt className="text-[6.4cqi] font-normal" style={{ color: t.muted }}>
+        {a.code}
+        <span className="sr-only">
+          {" "}
+          — {a.detail}: {a.sr}
+        </span>
+      </dt>
+    </div>
+  )
+
+  const stats = (
+    <div className="flex w-[23cqi] flex-col items-center text-center">
+      <span
+        className="text-[11cqi] leading-none font-extrabold"
+        style={{ color: t.accent, textShadow: `0 0 3cqi ${t.numberGlow}` }}
+      >
+        {hero.display}
+      </span>
+      <span
+        className="mt-[1cqi] text-[3.2cqi] font-semibold tracking-[0.1em] uppercase"
+        style={{ color: t.accent }}
+      >
+        {hero.label}
+      </span>
+      {handedness && (
+        <span
+          className="mt-[3.5cqi] flex items-center gap-[1.5cqi] text-[4.6cqi] font-semibold"
+          style={{ color: t.muted }}
+        >
+          <HandIcon
+            aria-hidden
+            className="size-[5cqi]"
+            style={
+              handedness === "left" ? { transform: "scaleX(-1)" } : undefined
+            }
+          />
+          {handedness === "left" ? "LH" : "RH"}
+          <span className="sr-only"> ({HANDEDNESS_LABELS[handedness]})</span>
+        </span>
+      )}
+    </div>
+  )
+  // the photo bleeds to the card's top and right edges (feathered on every
+  // side, so no hard corners), which is why the content has no top/right
+  // padding around it
+  const avatar = (
+    <div
+      role="img"
+      aria-label={`${name}'s photo`}
+      className="h-[54cqi] min-w-0 flex-1 self-start bg-cover bg-center bg-no-repeat"
+      style={{
+        // the feather overlay sits on top of the photo (first layer wins)
+        backgroundImage: `${t.feather}, url(${avatarSrc})`,
+        WebkitMaskImage: AVATAR_MASK,
+        maskImage: AVATAR_MASK,
+      }}
+    />
+  )
 
   return (
-    <div
-      className={cn(
-        "relative rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/10 transition-shadow hover:shadow-md",
-        selected && "ring-2 ring-primary",
-      )}
-    >
-      <Button
-        type="button"
-        variant={selected ? "default" : "outline"}
-        size="icon-sm"
-        aria-label={selected ? `Deselect ${player.name}` : `Select ${player.name} to compare`}
-        aria-pressed={selected}
-        className="absolute top-3 right-3 z-10 rounded-full"
-        onClick={onToggleSelect}
+    // the @container lives on this wrapper (not the shell) so the border can
+    // also be a cqi value — otherwise the shell can't query its own width and
+    // the border would be the one thing that isn't proportional to the card
+    <div className="@container">
+      <svg width="0" height="0" aria-hidden focusable="false" className="absolute">
+        <defs>
+          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+            <path d={SHIELD_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
+      <div
+        className="relative"
+        style={{ clipPath: shield, backgroundColor: t.border, padding: "0.8cqi" }}
       >
-        {selected && <CheckIcon />}
-      </Button>
-
-      <Link
-        to="/players/$playerId"
-        params={{ playerId: player.player_id }}
-        className="flex flex-col gap-3 p-6"
-      >
-        <div className="flex items-center gap-2 pr-8">
-          <h3 className="font-heading truncate text-lg font-bold">
-            {player.name}
-          </h3>
-          {player.handedness && (
-            <span
-              className="text-muted-foreground text-xs"
-              title={`${player.handedness === "left" ? "Left" : "Right"}-handed`}
-            >
-              {player.handedness === "left" ? "LH" : "RH"}
-            </span>
-          )}
+        <div
+          className="relative"
+          style={{ clipPath: shield, backgroundColor: t.bg }}
+        >
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(120% 62% at ${t.glowAt}, ${t.glow}, transparent 62%)`,
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
+          }}
+        />
+        <div className="relative pb-[13cqi]">
+        <div className="flex items-start gap-[6cqi]">
+          <div className="shrink-0 pt-[8cqi] pl-[8cqi]">{stats}</div>
+          {avatar}
         </div>
 
-        {enough ? (
-          // the denominator is carried by the W–L record below, so the rate
-          // stands alone here without repeating "of N"
-          <p className="text-3xl font-bold">
-            <CountUp
-              value={Math.round((games_won / games_decided) * 100)}
-              suffix="%"
-            />
+        <div className="px-[7cqi]">
+        <div className="mt-[2cqi] text-center">
+          <p className="truncate text-[10cqi] font-extrabold tracking-wide text-white uppercase">
+            {name}
           </p>
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            Not enough data yet{" "}
-            <span className="tabular-nums">(n={games_decided})</span>
+        </div>
+
+        <div
+          className="mx-[2cqi] mt-[4cqi] mb-[3cqi] h-[0.8cqi]"
+          style={{
+            background: `linear-gradient(90deg, transparent, rgba(${t.rule},0.9) 50%, transparent)`,
+          }}
+        />
+
+        {trait && (
+          <p
+            className="mb-[4cqi] text-center text-[4.2cqi] font-bold tracking-[0.08em] uppercase"
+            style={{ color: t.accentSoft }}
+          >
+            {TRAIT_LABELS[trait]}
           </p>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-sm tabular-nums">
-            {games_won} W · {losses} L
-          </span>
-          {form.length > 0 && (
-            <span className="flex items-center gap-1.5">
-              <span className="text-muted-foreground text-xs" aria-hidden>
-                Form
-              </span>
-              <span
-                className="flex items-center gap-1"
-                role="img"
-                aria-label={`Recent form, oldest to newest: ${form
-                  .map((g) =>
-                    g.won === null ? "undecided" : g.won ? "won" : "lost",
-                  )
-                  .join(", ")}`}
-              >
-                {form.map((g, i) => (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className={cn(
-                      "size-2 rounded-full",
-                      g.won === null
-                        ? "bg-muted-foreground/40"
-                        : g.won
-                          ? "bg-emerald-500"
-                          : "bg-red-500",
-                    )}
-                  />
-                ))}
-              </span>
-            </span>
-          )}
+        <div className="flex justify-center gap-[8cqi]">
+          <dl className="flex flex-col gap-[3.5cqi]">
+            {[attrs[0], attrs[2], attrs[4]].map(stat)}
+          </dl>
+          <div
+            className="w-px self-stretch"
+            style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
+          />
+          <dl className="flex flex-col gap-[3.5cqi]">
+            {[attrs[1], attrs[3], attrs[5]].map(stat)}
+          </dl>
         </div>
-      </Link>
+        </div>
+        </div>
+        </div>
+      </div>
     </div>
   )
 }

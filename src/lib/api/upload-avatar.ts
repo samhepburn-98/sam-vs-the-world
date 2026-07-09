@@ -1,6 +1,6 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
-// Avatar upload (§5.4): one fixed object per player — `{id}.jpg`, upserted —
+// Avatar upload: one fixed object per player — `{id}.jpg`, upserted —
 // so a re-upload replaces the old photo with no orphan cleanup. The stored
 // avatar_url is the full public URL with a ?v= cache-buster appended at
 // write time: the CDN and the browser both key on the query string, so

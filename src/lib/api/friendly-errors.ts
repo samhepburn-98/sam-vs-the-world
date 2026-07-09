@@ -1,5 +1,5 @@
-// DB constraint violations, translated for the manage edit forms (§5.4
-// "validation honesty"): the constraint IS the validation, so its rejection
+// DB constraint violations, translated for the manage edit forms: the
+// constraint IS the validation, so its rejection
 // deserves a sentence, not a Postgres identifier. Trigger messages (e.g.
 // "server_id … is not a player in this match") are already sentences and
 // pass through as-is.
@@ -23,7 +23,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
 
 // Storage API failures phrase things differently from Postgres — no
 // constraint names, no SQLSTATE codes — so avatar uploads get their own
-// message-substring translations (the bucket's server-side limits, §8.5).
+// message-substring translations (the bucket's server-side limits).
 const STORAGE_MESSAGES: Array<[string, string]> = [
   [
     "exceeded the maximum allowed size",

@@ -1,4 +1,4 @@
-// §3.5 small-sample honesty, in one tunable place. Below these, the UI shows
+// Small-sample honesty, in one tunable place. Below these, the UI shows
 // a quiet "not enough data yet" state instead of a misleading number — and a
 // trend plots points, not a line, until there's enough to imply a direction.
 

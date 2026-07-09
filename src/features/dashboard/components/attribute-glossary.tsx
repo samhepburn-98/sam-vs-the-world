@@ -1,4 +1,4 @@
-import { DUEL_GLOSSARY } from "@/features/dashboard/lib/duel-attributes"
+import { ATTRIBUTE_META } from "@/features/dashboard/lib/player-attributes"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -9,11 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-// The stats glossary (§5.1 redesign): the six attribute codes are terse by
+// The stats glossary: the six attribute codes are terse by
 // design, so this lives behind a dialog — a quiet "what do these mean?"
-// trigger opens the full spell-out. Single-sourced from DUEL_GLOSSARY.
+// trigger opens the full spell-out. Single-sourced from ATTRIBUTE_META.
 
-export function DuelGlossaryDialog() {
+export function AttributeGlossaryDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -32,14 +32,14 @@ export function DuelGlossaryDialog() {
           </DialogDescription>
         </DialogHeader>
         <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-          {DUEL_GLOSSARY.map((g) => (
+          {ATTRIBUTE_META.map((g) => (
             <div key={g.key} className="flex gap-3">
               <dt className="text-muted-foreground w-10 shrink-0 pt-0.5 text-xs font-semibold tracking-[0.06em]">
                 {g.code}
               </dt>
               <dd>
                 <p className="text-sm font-medium">{g.name}</p>
-                <p className="text-muted-foreground text-sm">{g.how}</p>
+                <p className="text-muted-foreground text-sm">{g.detail}</p>
               </dd>
             </div>
           ))}
