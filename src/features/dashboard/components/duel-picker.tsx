@@ -80,7 +80,7 @@ export function DuelPicker({
 }) {
   // each slot can pick anyone except whoever fills the other slot
   const optionsFor = (i: number) =>
-    roster.filter((p) => p.id === selected[i] || p.id !== selected[i === 0 ? 1 : 0])
+    roster.filter((p) => p.id !== selected[i === 0 ? 1 : 0])
 
   return (
     <div className="flex items-center justify-center gap-3 sm:gap-4">
@@ -103,43 +103,3 @@ export function DuelPicker({
   )
 }
 
-export function DuelModeToggle({
-  mode,
-  onChange,
-}: {
-  mode: "all" | "h2h"
-  onChange: (mode: "all" | "h2h") => void
-}) {
-  const options: Array<{ value: "all" | "h2h"; label: string }> = [
-    { value: "all", label: "All games" },
-    { value: "h2h", label: "Head to head" },
-  ]
-  return (
-    <div
-      role="tablist"
-      aria-label="Comparison scope"
-      className="bg-muted inline-flex items-center gap-1 rounded-full p-1"
-    >
-      {options.map((o) => {
-        const active = mode === o.value
-        return (
-          <button
-            key={o.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(o.value)}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {o.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}

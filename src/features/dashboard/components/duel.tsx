@@ -1,8 +1,6 @@
 import { useH2h } from "@/features/dashboard/api/get-h2h"
-import {
-  DuelCard,
-  DuelCardFooter,
-} from "@/features/dashboard/components/duel-card"
+import { DuelCard } from "@/features/dashboard/components/duel-card"
+import { PlayerCardFooter } from "@/features/dashboard/components/player-card-footer"
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
 import { DuelRadar } from "@/features/dashboard/components/duel-radar"
 import {
@@ -122,7 +120,7 @@ export function Duel({
           <div className="mx-auto w-full max-w-36 md:max-w-none">
             <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
           </div>
-          <DuelCardFooter
+          <PlayerCardFooter
             name={player1.name}
             trait={playerTrait(d1)}
             pills={pills.p1}
@@ -144,7 +142,7 @@ export function Duel({
           <div className="mx-auto w-full max-w-36 md:max-w-none">
             <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
           </div>
-          <DuelCardFooter
+          <PlayerCardFooter
             name={player2.name}
             trait={playerTrait(d2)}
             pills={pills.p2}
