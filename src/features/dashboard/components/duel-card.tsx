@@ -106,15 +106,17 @@ export function DuelCard({
   const stat = (a: DuelAttribute) => {
     const isBest = best !== null && a.key === best.key
     return (
-      <div key={a.key} className="flex items-baseline gap-[2cqi]">
+      <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
         <dd
           className="text-[6.4cqi] font-extrabold tabular-nums"
           style={{ color: isBest ? t.accent : "#ffffff" }}
         >
           {a.display}
         </dd>
+        {/* label matches the number's size (so they scale identically) but
+            is lighter weight so the number still leads */}
         <dt
-          className="text-[4cqi] tracking-[0.04em]"
+          className="text-[6.4cqi] font-normal"
           style={{ color: isBest ? t.accentSoft : t.muted }}
         >
           {a.code}
