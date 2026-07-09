@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 975" role="img" aria-label="Squash court" fill="none" color="#1c1917">
+  <title>Squash court</title>
+  <g stroke="currentColor" stroke-width="28">
+    <rect x="14" y="14" width="612" height="947" rx="8" />
+    <line x1="0" y1="544" x2="640" y2="544" />
+    <line x1="320" y1="544" x2="320" y2="961" />
+    <path d="M 160 544 v 160 h -146" />
+    <path d="M 480 544 v 160 h 146" />
+  </g>
+</svg>
