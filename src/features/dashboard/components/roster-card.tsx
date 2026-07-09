@@ -8,18 +8,18 @@ import { cn } from "@/lib/utils"
 
 import type { RosterHeadline } from "@/features/dashboard/schemas/insights"
 
-// The roster card (§6.1): win rate with its denominator, a form line of the
+// The roster card: win rate with its denominator, a form line of the
 // last few game results, and the games record — all game-level, decided
 // games only. The card links to the player page; the corner control selects
 // it for a side-by-side compare without navigating.
 
-interface PlayerCardProps {
+interface RosterCardProps {
   player: RosterHeadline
   selected: boolean
   onToggleSelect: () => void
 }
 
-export function PlayerCard({ player, selected, onToggleSelect }: PlayerCardProps) {
+export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps) {
   const { games_won, games_decided } = player
   const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
   const losses = games_decided - games_won

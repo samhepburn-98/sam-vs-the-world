@@ -5,7 +5,7 @@ import { BallDots } from "@/components/ball-dots"
 import { CountUp } from "@/components/count-up"
 import { CourtDiagram } from "@/components/court/court-diagram"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
-import { PlayerCard } from "@/features/dashboard/components/player-card"
+import { RosterCard } from "@/features/dashboard/components/roster-card"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -127,7 +127,7 @@ function HomePage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {players.map((p) => (
-              <PlayerCard
+              <RosterCard
                 key={p.player_id}
                 player={p}
                 selected={selected.includes(p.player_id)}
