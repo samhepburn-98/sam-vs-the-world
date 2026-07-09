@@ -102,8 +102,8 @@ export function Duel({
   // cards stack full-width (richer, more legible than a cramped two-up) with
   // the engine below
   return (
-    <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-8">
-      <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1">
+    <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
+      <div className="flex flex-col gap-4 md:col-start-1 md:row-start-1">
         <DuelCard
           name={player1.name}
           side="p1"
@@ -121,7 +121,7 @@ export function Duel({
         />
       </div>
 
-      <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1">
+      <div className="flex flex-col gap-4 md:col-start-3 md:row-start-1">
         <DuelCard
           name={player2.name}
           side="p2"

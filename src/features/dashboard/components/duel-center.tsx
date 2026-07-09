@@ -1,6 +1,7 @@
 import { CheckIcon, Share2Icon } from "lucide-react"
 import { useState } from "react"
 
+import { DuelGlossaryDialog } from "@/features/dashboard/components/duel-glossary"
 import { Button } from "@/components/ui/button"
 
 import type { DuelAttribute } from "@/features/dashboard/lib/duel-attributes"
@@ -65,7 +66,7 @@ export function DuelCenter({
       </div>
 
       {dominance !== null && (
-        <div className="mt-5">
+        <div className="mt-6">
           <div className="mb-1.5 flex items-baseline justify-between text-sm">
             <span className="font-bold" style={{ color: P1_COLOR }}>
               {Math.round(dominance * 100)}%
@@ -86,26 +87,26 @@ export function DuelCenter({
         </div>
       )}
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="mt-7 flex flex-col gap-3.5">
         {attrs1.map((a, i) => (
           <AttrRow key={a.key} a={a} b={attrs2[i]} />
         ))}
       </div>
-      <p className="text-muted-foreground mt-2.5 text-center text-[11px]">
-        Every number is a measured win rate, not a rating.
-      </p>
+      <div className="mt-2 flex justify-center">
+        <DuelGlossaryDialog />
+      </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
           On the stats
         </p>
-        <p className="font-heading mt-1 text-3xl leading-tight">
+        <p className="font-heading mt-1.5 text-3xl leading-tight">
           {leader ?? "All square"}
         </p>
-        <p className="text-muted-foreground text-sm">{tallyLine}</p>
+        <p className="text-muted-foreground mt-0.5 text-sm">{tallyLine}</p>
       </div>
 
-      <div className="ring-border mt-6 overflow-hidden rounded-xl ring-1">
+      <div className="ring-border mt-8 overflow-hidden rounded-xl ring-1">
         <p className="text-muted-foreground py-2.5 text-center text-[11px] tracking-[0.18em] uppercase">
           The receipts
         </p>

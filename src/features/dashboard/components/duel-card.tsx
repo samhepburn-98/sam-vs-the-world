@@ -13,12 +13,10 @@ import type { Handedness } from "@/lib/schemas/enums"
 
 const THEMES = {
   p1: {
-    tier: "GOLD",
     border: "#F5B841",
     glow: "rgba(234,88,12,0.55)",
-    glowAt: "55% 15%",
+    glowAt: "55% 22%",
     bg: "#130f0e",
-    well: "#2a2320",
     accent: "#F5B841",
     accentSoft: "#f5d9a8",
     muted: "#c9b79c",
@@ -26,12 +24,10 @@ const THEMES = {
     numberGlow: "rgba(245,184,65,0.55)",
   },
   p2: {
-    tier: "SILVER",
     border: "#C7CCD4",
     glow: "rgba(59,130,246,0.55)",
-    glowAt: "45% 15%",
+    glowAt: "45% 22%",
     bg: "#0d1018",
-    well: "#1c2230",
     accent: "#93C5FD",
     accentSoft: "#bcd6f7",
     muted: "#aab4c4",
@@ -45,8 +41,10 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
   right: "Right-handed",
 }
 
+// feather the avatar into the card on every edge — no container box, the
+// figure just dissolves into the dark ground like the FUT photo treatment
 const AVATAR_MASK =
-  "radial-gradient(120% 92% at 50% 30%, #000 48%, transparent 82%)"
+  "radial-gradient(105% 96% at 50% 40%, #000 42%, transparent 78%)"
 
 function Crest({ color }: { color: string }) {
   return (
@@ -102,29 +100,24 @@ export function DuelCard({
       </span>
       {trait && (
         <span
-          className="mt-2 text-[10px] font-bold tracking-[0.08em] uppercase"
+          className="mt-2.5 text-[10px] font-bold tracking-[0.08em] uppercase"
           style={{ color: t.accentSoft }}
         >
           {TRAIT_LABELS[trait]}
         </span>
       )}
-      <span className="mt-2">
+      <span className="mt-2.5">
         <Crest color={t.accent} />
       </span>
     </div>
   )
   const avatar = (
-    <div
-      className="h-32 min-w-0 flex-1"
+    <img
+      src={avatarSrc}
+      alt=""
+      className="h-36 w-36 min-w-0 flex-1 self-end object-contain object-bottom"
       style={{ WebkitMaskImage: AVATAR_MASK, maskImage: AVATAR_MASK }}
-    >
-      <div
-        className="flex size-full items-end justify-center"
-        style={{ backgroundColor: t.well }}
-      >
-        <img src={avatarSrc} alt="" className="w-32 max-w-full" />
-      </div>
-    </div>
+    />
   )
 
   return (
@@ -147,17 +140,8 @@ export function DuelCard({
             "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
         }}
       />
-      <div className="relative p-3.5">
-        <div className="flex justify-end">
-          <span
-            className="rounded px-2 py-0.5 text-[9px] font-bold tracking-[0.1em]"
-            style={{ backgroundColor: t.border, color: t.bg }}
-          >
-            {t.tier}
-          </span>
-        </div>
-
-        <div className="mt-1 flex items-end gap-1.5">
+      <div className="relative p-5">
+        <div className="flex items-end gap-2">
           {side === "p1" ? (
             <>
               {stats}
@@ -171,25 +155,25 @@ export function DuelCard({
           )}
         </div>
 
-        <div className="mt-1 text-center">
+        <div className="mt-2 text-center">
           <p className="truncate text-2xl font-extrabold tracking-wide text-white uppercase">
             {name}
           </p>
           {handedness && (
-            <p className="text-[11px]" style={{ color: t.muted }}>
+            <p className="mt-0.5 text-[11px]" style={{ color: t.muted }}>
               {HANDEDNESS_LABELS[handedness]}
             </p>
           )}
         </div>
 
         <div
-          className="mx-1 my-2.5 h-0.5"
+          className="mx-1 my-4 h-0.5"
           style={{
             background: `linear-gradient(90deg, transparent, rgba(${t.rule},0.9) 50%, transparent)`,
           }}
         />
 
-        <dl className="grid grid-cols-2 gap-x-3 gap-y-2 px-1.5">
+        <dl className="grid grid-cols-2 gap-x-3 gap-y-3 px-1.5">
           {attrs.map((a) => {
             const isBest = best !== null && a.key === best.key
             return (
