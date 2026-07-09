@@ -103,7 +103,7 @@ export function Duel({
   // the engine full-width below
   return (
     <div className="grid grid-cols-2 items-center gap-x-5 gap-y-10 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
-      <div className="flex flex-col gap-4 md:col-start-1 md:row-start-1">
+      <div className="flex flex-col gap-6 md:col-start-1 md:row-start-1 md:gap-14">
         <DuelCard
           name={player1.name}
           side="p1"
@@ -113,15 +113,17 @@ export function Duel({
           hero={heroStat(d1)}
           attrs={attrs1}
         />
-        <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
-        <DuelCardFooter
-          name={player1.name}
-          trait={duelTrait(d1)}
-          pills={pills.p1}
-        />
+        <div className="flex flex-col gap-3">
+          <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
+          <DuelCardFooter
+            name={player1.name}
+            trait={duelTrait(d1)}
+            pills={pills.p1}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 md:col-start-3 md:row-start-1">
+      <div className="flex flex-col gap-6 md:col-start-3 md:row-start-1 md:gap-14">
         <DuelCard
           name={player2.name}
           side="p2"
@@ -131,12 +133,14 @@ export function Duel({
           hero={heroStat(d2)}
           attrs={attrs2}
         />
-        <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
-        <DuelCardFooter
-          name={player2.name}
-          trait={duelTrait(d2)}
-          pills={pills.p2}
-        />
+        <div className="flex flex-col gap-3">
+          <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
+          <DuelCardFooter
+            name={player2.name}
+            trait={duelTrait(d2)}
+            pills={pills.p2}
+          />
+        </div>
       </div>
 
       <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">

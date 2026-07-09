@@ -92,7 +92,7 @@ export function DuelCenter({
         ))}
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="mt-10 text-center md:mt-14">
         <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
           On the stats
         </p>
