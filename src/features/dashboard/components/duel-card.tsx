@@ -27,6 +27,11 @@ const THEMES = {
     muted: "#c9b79c",
     rule: "245,184,65",
     numberGlow: "rgba(245,184,65,0.55)",
+    // gitfut's photo treatment: an overlay that's clear in the middle, a warm
+    // sheen through the mid, then the card's own dark toward the edges, so the
+    // photo blends into the ground instead of ending in a hard rectangle
+    feather:
+      "radial-gradient(ellipse 74% 78% at 52% 42%, transparent 44%, rgba(232,205,160,0.16) 74%, rgba(19,15,14,0.72))",
   },
   p2: {
     border: "#C7CCD4",
@@ -38,6 +43,8 @@ const THEMES = {
     muted: "#aab4c4",
     rule: "199,204,212",
     numberGlow: "rgba(147,197,253,0.5)",
+    feather:
+      "radial-gradient(ellipse 74% 78% at 52% 42%, transparent 44%, rgba(170,188,210,0.20) 74%, rgba(13,16,24,0.72))",
   },
 } as const
 
@@ -50,8 +57,11 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // under 100% so the fade zone falls INSIDE the box (a 100%-radius ellipse
 // leaves the box edges near-solid), letting the figure dissolve into the
 // dark ground like the FUT photo treatment, strongest at the bottom
+// a gentle mask on top of the colour overlay — only softens the very outer
+// edge where the photo bleeds into the card, since the overlay does the bulk
+// of the blending (gitfut's technique)
 const AVATAR_MASK =
-  "radial-gradient(66% 70% at 52% 46%, #000 14%, transparent 72%)"
+  "radial-gradient(80% 84% at 52% 44%, #000 46%, transparent 92%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
@@ -154,7 +164,8 @@ export function DuelCard({
       aria-label={`${name}'s photo`}
       className="h-[54cqi] min-w-0 flex-1 self-start bg-cover bg-top bg-no-repeat"
       style={{
-        backgroundImage: `url(${avatarSrc})`,
+        // the feather overlay sits on top of the photo (first layer wins)
+        backgroundImage: `${t.feather}, url(${avatarSrc})`,
         WebkitMaskImage: AVATAR_MASK,
         maskImage: AVATAR_MASK,
       }}
