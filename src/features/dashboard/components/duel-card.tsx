@@ -81,6 +81,7 @@ export function DuelCard({
   name,
   side,
   avatarSrc,
+  trait,
   handedness,
   hero,
   attrs,
@@ -88,6 +89,7 @@ export function DuelCard({
   name: string
   side: "p1" | "p2"
   avatarSrc: string
+  trait: SignatureTrait | null
   handedness: Handedness | null
   hero: { display: string; label: string }
   attrs: Array<DuelAttribute>
@@ -128,8 +130,8 @@ export function DuelCard({
   const stats = (
     <div className="flex w-[23cqi] flex-col items-center text-center">
       <span
-        className="text-[16cqi] leading-none font-extrabold"
-        style={{ color: t.accent, textShadow: `0 0 4cqi ${t.numberGlow}` }}
+        className="text-[12cqi] leading-none font-extrabold"
+        style={{ color: t.accent, textShadow: `0 0 3cqi ${t.numberGlow}` }}
       >
         {hero.display}
       </span>
@@ -216,11 +218,20 @@ export function DuelCard({
         </div>
 
         <div
-          className="mx-[2cqi] my-[4cqi] h-[0.8cqi]"
+          className="mx-[2cqi] mt-[4cqi] mb-[3cqi] h-[0.8cqi]"
           style={{
             background: `linear-gradient(90deg, transparent, rgba(${t.rule},0.9) 50%, transparent)`,
           }}
         />
+
+        {trait && (
+          <p
+            className="mb-[4cqi] text-center text-[4.2cqi] font-bold tracking-[0.08em] uppercase"
+            style={{ color: t.accentSoft }}
+          >
+            {TRAIT_LABELS[trait]}
+          </p>
+        )}
 
         <div className="flex justify-center gap-[8cqi]">
           <dl className="flex flex-col gap-[3.5cqi]">
