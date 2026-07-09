@@ -8,7 +8,7 @@ import { momentumOptions } from "@/features/dashboard/api/get-momentum"
 import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
 import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
-import { CompareShowcase } from "@/features/dashboard/components/compare-showcase"
+import { Duel } from "@/features/dashboard/components/duel"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Badge } from "@/components/ui/badge"
@@ -28,7 +28,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { PlayerData } from "@/features/dashboard/components/compare-showcase"
+import type { PlayerData } from "@/features/dashboard/lib/duel-attributes"
 import type {
   ErrorProfile,
   InsightFilters,
@@ -38,10 +38,12 @@ import type {
   ServeStats,
 } from "@/features/dashboard/schemas/insights"
 
-// Compare (§5.1, §2.3): two players go head to head. The mode toggle scopes
-// the stats — "all games" is each player's overall form, "head to head" runs
-// every stat through the opponent filter (§3.6), so both sides show only
-// their shared games. Selection + mode live in the URL, so it's shareable.
+// Compare (§5.1, §2.3): two players go head to head as a duel — cards on
+// the outer edges, the comparison engine down the centre. The mode toggle
+// scopes the stats: "all games" is each player's overall form, "head to
+// head" runs every stat through the opponent filter (§3.6), so both sides
+// show only their shared games. Selection + mode live in the URL, so a
+// duel is shareable.
 
 const compareSearch = z.object({
   players: z.string().optional().catch(undefined),
@@ -101,6 +103,8 @@ function ComparePage() {
 
   const nameOf = (id: string) => roster.find((p) => p.id === id)?.name ?? "?"
   const addable = roster.filter((p) => !selected.includes(p.id))
+  const player1 = roster.find((p) => p.id === selected[0])
+  const player2 = roster.find((p) => p.id === selected[1])
 
   return (
     <main className="container mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10">
@@ -143,13 +147,11 @@ function ComparePage() {
         )}
       </div>
 
-      {selected.length < 2 ? (
+      {!player1 || !player2 ? (
         <Empty>
           <EmptyHeader>
             <CourtEmptyMedia />
-            <EmptyTitle className="font-heading">
-              Pick two players
-            </EmptyTitle>
+            <EmptyTitle className="font-heading">Pick two players</EmptyTitle>
             <EmptyDescription>
               Add two players above to see them go head to head.
             </EmptyDescription>
@@ -174,17 +176,18 @@ function ComparePage() {
             </ToggleGroup>
           </div>
 
-          <CompareShowcase
-            name1={nameOf(selected[0])}
-            name2={nameOf(selected[1])}
+          <Duel
+            player1={player1}
+            player2={player2}
             d1={data[0]}
             d2={data[1]}
+            mode={search.mode}
           />
           <H2hPanel
-            player1Id={selected[0]}
-            player2Id={selected[1]}
-            name1={nameOf(selected[0])}
-            name2={nameOf(selected[1])}
+            player1Id={player1.id}
+            player2Id={player2.id}
+            name1={player1.name}
+            name2={player2.name}
           />
         </>
       )}
