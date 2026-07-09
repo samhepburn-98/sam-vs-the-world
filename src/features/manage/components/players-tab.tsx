@@ -38,7 +38,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
             <img
               src={p.avatar_url}
               alt=""
-              className="size-6 shrink-0 rounded-full object-cover object-top"
+              className="size-6 shrink-0 rounded-full object-cover"
             />
           ) : (
             <span

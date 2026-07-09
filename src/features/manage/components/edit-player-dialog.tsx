@@ -116,7 +116,7 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
                 <img
                   src={shownAvatar}
                   alt=""
-                  className="size-14 shrink-0 rounded-full object-cover object-top"
+                  className="size-14 shrink-0 rounded-full object-cover"
                 />
               ) : (
                 <span
