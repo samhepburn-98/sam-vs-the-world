@@ -21,7 +21,7 @@ export function DuelGlossaryDialog() {
           What do these mean?
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="font-heading">
             What the stats mean

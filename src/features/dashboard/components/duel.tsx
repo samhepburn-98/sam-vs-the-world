@@ -98,16 +98,16 @@ export function Duel({
         : null
       : dominanceFromForm(d1.headline, d2.headline)
 
-  // desktop is the three-column duel — cards flank the engine; on phones the
-  // cards stack full-width (richer, more legible than a cramped two-up) with
-  // the engine below
+  // desktop is the three-column duel — cards flank the engine, all three
+  // middle-aligned; on phones the cards face off two-up (gitfut style) with
+  // the engine full-width below
   return (
-    <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
+    <div className="grid grid-cols-2 items-center gap-x-5 gap-y-10 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
       <div className="flex flex-col gap-4 md:col-start-1 md:row-start-1">
         <DuelCard
           name={player1.name}
           side="p1"
-          avatarSrc="/avatars/player-1.svg"
+          avatarSrc="/avatars/player-1.jpg"
           trait={duelTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
@@ -125,7 +125,7 @@ export function Duel({
         <DuelCard
           name={player2.name}
           side="p2"
-          avatarSrc="/avatars/player-2.svg"
+          avatarSrc="/avatars/player-2.jpg"
           trait={duelTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
@@ -139,7 +139,7 @@ export function Duel({
         />
       </div>
 
-      <div className="md:col-start-2 md:row-start-1 md:pt-1">
+      <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">
         <DuelCenter
           name1={player1.name}
           name2={player2.name}
