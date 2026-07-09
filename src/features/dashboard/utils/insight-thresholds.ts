@@ -10,3 +10,6 @@ export const MIN_RALLIES_FOR_RATE = 30
 
 /** Matches needed before a trend is drawn as a line rather than bare points. */
 export const MIN_MATCHES_FOR_TREND = 5
+
+/** Tagged errors needed before an error-composition rate is shown. */
+export const MIN_ERRORS_FOR_RATE = 15
