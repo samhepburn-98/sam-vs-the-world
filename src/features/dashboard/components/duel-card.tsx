@@ -53,12 +53,13 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 const AVATAR_MASK =
   "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
 
-// the FUT pennant silhouette — chamfered top corners, straight sides, and a
-// point at the bottom centre. Applied to both the accent shell and the inner
-// fill (percentage-based so it scales), which is how the accent border keeps
-// following the shape all the way down to the tip
+// the FUT pennant silhouette — softly rounded top corners, straight sides,
+// and a gently pointed bottom (the extra points either side of the tip round
+// it off rather than leaving a sharp spike). Percentage-based so it scales,
+// and shared by the accent shell + inner fill so the hairline edge follows
+// the shape all the way down to the tip.
 const SHIELD =
-  "polygon(0% 4%, 4% 0%, 96% 0%, 100% 4%, 100% 87%, 50% 100%, 0% 87%)"
+  "polygon(0% 5%, 1.5% 1.5%, 5% 0%, 95% 0%, 98.5% 1.5%, 100% 5%, 100% 88%, 57% 97%, 50% 100%, 43% 97%, 0% 88%)"
 
 export function DuelCard({
   name,
@@ -142,7 +143,7 @@ export function DuelCard({
   return (
     <div
       className="@container relative"
-      style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "1.1cqi" }}
+      style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "2px" }}
     >
       <div
         className="relative"
@@ -163,7 +164,7 @@ export function DuelCard({
               "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
           }}
         />
-        <div className="relative px-[7cqi] pt-[6cqi] pb-[15cqi]">
+        <div className="relative px-[7cqi] pt-[6cqi] pb-[13cqi]">
         <div className="flex items-end gap-[3cqi]">
           {side === "p1" ? (
             <>
