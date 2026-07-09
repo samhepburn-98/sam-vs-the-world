@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Fallback duel-card portrait: a neutral head-and-shoulders silhouette on
+       transparency, so the card's own theme colour reads through and the
+       feather mask still shapes it like a photo. -->
+  <g fill="#8a8f98" opacity="0.55">
+    <circle cx="100" cy="74" r="34"/>
+    <path d="M100 116c-38 0-62 26-66 62 0 12 10 22 22 22h88c12 0 22-10 22-22-4-36-28-62-66-62Z"/>
+  </g>
+</svg>

@@ -28,7 +28,30 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
   const [deleting, setDeleting] = useState<PlayerRow | null>(null)
 
   const columns: Array<ManageColumn<PlayerRow>> = [
-    { key: "name", label: "Name", sortable: true, render: (p) => p.name },
+    {
+      key: "name",
+      label: "Name",
+      sortable: true,
+      render: (p) => (
+        <span className="flex items-center gap-2">
+          {p.avatar_url ? (
+            <img
+              src={p.avatar_url}
+              alt=""
+              className="size-6 shrink-0 rounded-full object-cover object-top"
+            />
+          ) : (
+            <span
+              aria-hidden
+              className="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+            >
+              {p.name.charAt(0)}
+            </span>
+          )}
+          {p.name}
+        </span>
+      ),
+    },
     {
       key: "handedness",
       label: "Handedness",

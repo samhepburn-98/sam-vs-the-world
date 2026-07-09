@@ -112,7 +112,7 @@ export function Duel({
         <DuelCard
           name={player1.name}
           side="p1"
-          avatarSrc="/avatars/player-1.jpg"
+          avatarSrc={player1.avatar_url ?? "/avatars/default.svg"}
           trait={duelTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
@@ -134,7 +134,7 @@ export function Duel({
         <DuelCard
           name={player2.name}
           side="p2"
-          avatarSrc="/avatars/player-2.jpg"
+          avatarSrc={player2.avatar_url ?? "/avatars/default.svg"}
           trait={duelTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
