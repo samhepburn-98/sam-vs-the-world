@@ -31,7 +31,7 @@ const THEMES = {
     // sheen through the mid, then the card's own dark toward the edges, so the
     // photo blends into the ground instead of ending in a hard rectangle
     feather:
-      "radial-gradient(ellipse 74% 78% at 52% 42%, transparent 44%, rgba(232,205,160,0.16) 74%, rgba(19,15,14,0.72))",
+      "radial-gradient(ellipse 90% 80% at 52% 42%, transparent 40%, rgba(232,205,160,0.14) 68%, rgba(19,15,14,0.68))",
   },
   p2: {
     border: "#C7CCD4",
@@ -44,7 +44,7 @@ const THEMES = {
     rule: "199,204,212",
     numberGlow: "rgba(147,197,253,0.5)",
     feather:
-      "radial-gradient(ellipse 74% 78% at 52% 42%, transparent 44%, rgba(170,188,210,0.20) 74%, rgba(13,16,24,0.72))",
+      "radial-gradient(ellipse 90% 80% at 52% 42%, transparent 40%, rgba(170,188,210,0.18) 68%, rgba(13,16,24,0.68))",
   },
 } as const
 
@@ -57,12 +57,13 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // under 100% so the fade zone falls INSIDE the box (a 100%-radius ellipse
 // leaves the box edges near-solid), letting the figure dissolve into the
 // dark ground like the FUT photo treatment, strongest at the bottom
-// the mask does the shape. A large fully-solid core keeps the face legible
-// (the "step"), then it only feathers the outer band to transparent so the
-// photo reads as a soft blob rather than a square. The colour overlay (per
-// theme) tints what's left so it blends into the card ground.
+// the mask does the shape. A solid core keeps the face legible, then a long,
+// gentle fade (28%→90% with a soft mid-stop) dissolves the outer band so the
+// edge reads smooth rather than abrupt. The ellipse is deliberately wide and
+// tall (uneven radii) so the blob is oval, not a circle. The colour overlay
+// (per theme) tints what's left so it blends into the card ground.
 const AVATAR_MASK =
-  "radial-gradient(68% 72% at 53% 44%, #000 32%, transparent 76%)"
+  "radial-gradient(84% 80% at 52% 43%, #000 26%, rgba(0,0,0,0.55) 62%, transparent 92%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
