@@ -19,8 +19,7 @@ import {
   showsServeFault,
   showsShotType,
 } from "@/lib/rally/rally-draft"
-import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -167,7 +166,7 @@ export function OutcomeChips({
         </div>
       )}
 
-      {showsShotType(draft.endReason) && (
+      {showsShotType(draft.endReason, draft.forced) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Shot
@@ -182,7 +181,7 @@ export function OutcomeChips({
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="none">—</SelectItem>
-                {Constants.public.Enums.shot_type.map((s) => (
+                {LOGGABLE_SHOT_TYPES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
                   </SelectItem>

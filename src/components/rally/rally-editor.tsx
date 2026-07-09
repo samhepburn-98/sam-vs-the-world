@@ -12,12 +12,13 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
 import {
   buildRallyRow,
   canSave,
   rowToDraft,
   selectEndReason,
+  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -195,10 +196,7 @@ export function RallyEditor({
             size="sm"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) =>
-              setDraft((d) => ({
-                ...d,
-                forced: v === "" ? null : v === "yes",
-              }))
+              setDraft((d) => setForced(d, v === "" ? null : v === "yes"))
             }
           >
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
@@ -207,7 +205,7 @@ export function RallyEditor({
         )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {showsShotType(draft.endReason) && (
+        {showsShotType(draft.endReason, draft.forced) && (
           <>
             <span className="text-muted-foreground w-12 shrink-0 text-xs">
               Shot
@@ -227,7 +225,7 @@ export function RallyEditor({
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="none">—</SelectItem>
-                  {Constants.public.Enums.shot_type.map((s) => (
+                  {LOGGABLE_SHOT_TYPES.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
                     </SelectItem>

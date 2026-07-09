@@ -10,6 +10,7 @@ import {
   showsErrorDetail,
   showsForced,
   showsServeFault,
+  setForced,
   showsShotType,
   tapWinner,
   toggleServeNumber,
@@ -118,16 +119,39 @@ describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
 })
 
 describe("field visibility per end reason", () => {
+  // shot type on an error depends on forced: it's the winner's forcing shot
   it.each([
-    ["winner", false, false, true],
-    ["error", true, true, false],
-    ["stroke", false, false, false],
-    ["ace", false, false, true],
-    ["serve_fault", true, false, false],
-  ] as const)("%s → detail %s, forced %s, shotType %s", (reason, d, f, s) => {
-    expect(showsErrorDetail(reason)).toBe(d)
-    expect(showsForced(reason)).toBe(f)
-    expect(showsShotType(reason)).toBe(s)
+    ["winner", null, false, false, true],
+    ["error", true, true, true, true],
+    ["error", false, true, true, false],
+    ["error", null, true, true, false],
+    ["stroke", null, false, false, false],
+    ["ace", null, false, false, true],
+    ["serve_fault", null, true, false, false],
+  ] as const)(
+    "%s (forced %s) → detail %s, forced %s, shotType %s",
+    (reason, forced, d, f, s) => {
+      expect(showsErrorDetail(reason)).toBe(d)
+      expect(showsForced(reason)).toBe(f)
+      expect(showsShotType(reason, forced)).toBe(s)
+    },
+  )
+})
+
+describe("setForced", () => {
+  it("flipping a forced error to unforced retires its shot", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, true)
+    draft = { ...draft, shotType: "drop" }
+    expect(setForced(draft, false).shotType).toBeNull()
+    expect(setForced(draft, null).shotType).toBeNull()
+  })
+
+  it("keeps the shot while the error stays forced", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, true)
+    draft = { ...draft, shotType: "boast" }
+    expect(setForced(draft, true).shotType).toBe("boast")
   })
 })
 

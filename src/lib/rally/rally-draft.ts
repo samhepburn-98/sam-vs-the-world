@@ -97,12 +97,14 @@ export function selectEndReason(
   return applyAutoRules(next)
 }
 
-/** clears fields that don't apply to the current end reason (DB scopes) */
+/** clears fields that don't apply to the current end reason (DB scopes) —
+ *  forced is cleared before the shot check, so a reason change that retires
+ *  `forced` also retires the shot that depended on it */
 function applyAutoRules(draft: RallyDraft): RallyDraft {
   const next = { ...draft }
   if (!showsErrorDetail(next.endReason)) next.errorDetail = null
   if (!showsForced(next.endReason)) next.forced = null
-  if (!showsShotType(next.endReason)) next.shotType = null
+  if (!showsShotType(next.endReason, next.forced)) next.shotType = null
   return next
 }
 
@@ -114,8 +116,24 @@ export function showsForced(endReason: EndReason | null): boolean {
   return endReason === "error"
 }
 
-export function showsShotType(endReason: EndReason | null): boolean {
-  return endReason === "winner" || endReason === "ace"
+/** Setting forced re-runs the auto rules — flipping a forced error back to
+ *  unforced retires the shot that depended on it. */
+export function setForced(
+  draft: RallyDraft,
+  forced: boolean | null,
+): RallyDraft {
+  return applyAutoRules({ ...draft, forced })
+}
+
+/** The shot is always the rally WINNER's decisive one — their winner, their
+ *  ace, or the shot that forced the error. An unforced error has no decisive
+ *  shot by the winner, so it takes none (mirrors rallies_shot_type_scope). */
+export function showsShotType(
+  endReason: EndReason | null,
+  forced: boolean | null,
+): boolean {
+  if (endReason === "winner" || endReason === "ace") return true
+  return endReason === "error" && forced === true
 }
 
 /** a point-ending serve fault is lost by the server — if the tapped winner

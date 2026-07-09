@@ -96,6 +96,12 @@ export function Glossary({ open, onClose }: GlossaryProps) {
             it&rsquo;s unforced; if the opponent&rsquo;s shot forced the miss,
             it&rsquo;s forced.
           </dd>
+          <dt className="mt-2 font-medium sm:mt-0">Shot</dt>
+          <dd className="text-muted-foreground">
+            The rally winner&rsquo;s decisive shot, and optional — their
+            winner, their ace, or the shot that forced the error. Unforced
+            errors take none: nothing decisive happened.
+          </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shots</dt>
           <dd className="text-muted-foreground">
             The rally length. Count every shot a racket touched, including the
