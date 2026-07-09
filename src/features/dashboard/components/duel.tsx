@@ -113,7 +113,6 @@ export function Duel({
           name={player1.name}
           side="p1"
           avatarSrc="/avatars/player-1.jpg"
-          trait={duelTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
           attrs={attrs1}
@@ -133,7 +132,6 @@ export function Duel({
           name={player2.name}
           side="p2"
           avatarSrc="/avatars/player-2.jpg"
-          trait={duelTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
           attrs={attrs2}

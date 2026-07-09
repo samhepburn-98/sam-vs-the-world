@@ -161,10 +161,12 @@ describe("duelTally", () => {
 })
 
 describe("heroStat", () => {
-  it("formats the average rally", () => {
-    expect(heroStat(player())).toEqual({ display: "8.4", label: "Avg rally" })
+  it("shows the win rate, per player", () => {
+    expect(heroStat(player())).toEqual({ display: "60%", label: "Win rate" }) // 24/40
     expect(heroStat({}).display).toBe("—")
-    expect(heroStat({ rally: rally({ avg_length: null }) }).display).toBe("—")
+    expect(
+      heroStat({ headline: headline({ games_won: 2, games_decided: 3 }) }).display,
+    ).toBe("—") // under threshold
   })
 })
 

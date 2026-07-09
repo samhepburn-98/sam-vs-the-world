@@ -156,12 +156,17 @@ export function duelTally(
   return { p1, p2 }
 }
 
-/** The card's hero stat — average rally length, the shape of how they play. */
+/** The card's hero stat — win rate over the games in view. Unlike average
+ *  rally length (a property of the shared rallies, identical on both cards in
+ *  head-to-head), this is genuinely per-player and differs on each card. */
 export function heroStat(d: PlayerData): { display: string; label: string } {
-  const avg = d.rally?.avg_length
+  const h = d.headline
+  if (!h || h.games_decided < MIN_GAMES_FOR_WIN_RATE) {
+    return { display: "—", label: "Win rate" }
+  }
   return {
-    display: avg == null ? "—" : avg.toFixed(1),
-    label: "Avg rally",
+    display: `${Math.round((h.games_won / h.games_decided) * 100)}%`,
+    label: "Win rate",
   }
 }
 

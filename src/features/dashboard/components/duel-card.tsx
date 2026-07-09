@@ -81,7 +81,6 @@ export function DuelCard({
   name,
   side,
   avatarSrc,
-  trait,
   handedness,
   hero,
   attrs,
@@ -89,7 +88,6 @@ export function DuelCard({
   name: string
   side: "p1" | "p2"
   avatarSrc: string
-  trait: SignatureTrait | null
   handedness: Handedness | null
   hero: { display: string; label: string }
   attrs: Array<DuelAttribute>
@@ -102,6 +100,30 @@ export function DuelCard({
       a.value !== null && (acc?.value == null || a.value > acc.value) ? a : acc,
     null,
   )
+
+  const stat = (a: DuelAttribute) => {
+    const isBest = best !== null && a.key === best.key
+    return (
+      <div key={a.key} className="flex items-baseline gap-[2cqi]">
+        <dd
+          className="text-[6.4cqi] font-extrabold tabular-nums"
+          style={{ color: isBest ? t.accent : "#ffffff" }}
+        >
+          {a.display}
+        </dd>
+        <dt
+          className="text-[4cqi] tracking-[0.04em]"
+          style={{ color: isBest ? t.accentSoft : t.muted }}
+        >
+          {a.code}
+          <span className="sr-only">
+            {" "}
+            — {a.detail}: {a.sr}
+          </span>
+        </dt>
+      </div>
+    )
+  }
 
   const stats = (
     <div className="flex w-[23cqi] flex-col items-center text-center">
@@ -117,14 +139,6 @@ export function DuelCard({
       >
         {hero.label}
       </span>
-      {trait && (
-        <span
-          className="mt-[3cqi] text-[3.8cqi] font-bold tracking-[0.06em] uppercase"
-          style={{ color: t.accentSoft }}
-        >
-          {TRAIT_LABELS[trait]}
-        </span>
-      )}
       {handedness && (
         <span
           className="mt-[3.5cqi] flex items-center gap-[1.5cqi] text-[4cqi] font-semibold"
@@ -208,31 +222,18 @@ export function DuelCard({
           }}
         />
 
-        <dl className="grid grid-cols-2 gap-x-[4cqi] gap-y-[3cqi] px-[2cqi]">
-          {attrs.map((a) => {
-            const isBest = best !== null && a.key === best.key
-            return (
-              <div key={a.key} className="flex items-baseline gap-[2cqi]">
-                <dd
-                  className="text-[6.4cqi] font-extrabold tabular-nums"
-                  style={{ color: isBest ? t.accent : "#ffffff" }}
-                >
-                  {a.display}
-                </dd>
-                <dt
-                  className="text-[4cqi] tracking-[0.04em]"
-                  style={{ color: isBest ? t.accentSoft : t.muted }}
-                >
-                  {a.code}
-                  <span className="sr-only">
-                    {" "}
-                    — {a.detail}: {a.sr}
-                  </span>
-                </dt>
-              </div>
-            )
-          })}
-        </dl>
+        <div className="flex justify-center gap-[8cqi]">
+          <dl className="flex flex-col gap-[3.5cqi]">
+            {[attrs[0], attrs[2], attrs[4]].map(stat)}
+          </dl>
+          <div
+            className="w-px self-stretch"
+            style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
+          />
+          <dl className="flex flex-col gap-[3.5cqi]">
+            {[attrs[1], attrs[3], attrs[5]].map(stat)}
+          </dl>
+        </div>
         </div>
       </div>
     </div>
