@@ -2,7 +2,6 @@ import { useH2h } from "@/features/dashboard/api/get-h2h"
 import {
   DuelCard,
   DuelCardFooter,
-  DuelShieldDef,
 } from "@/features/dashboard/components/duel-card"
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
 import { DuelRadar } from "@/features/dashboard/components/duel-radar"
@@ -107,7 +106,6 @@ export function Duel({
   // the engine full-width below
   return (
     <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
-      <DuelShieldDef />
       <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1 md:gap-14">
         <DuelCard
           name={player1.name}

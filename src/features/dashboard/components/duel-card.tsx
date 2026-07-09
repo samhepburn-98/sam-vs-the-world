@@ -1,4 +1,5 @@
 import { HandIcon } from "lucide-react"
+import { useId } from "react"
 
 import { TRAIT_LABELS } from "@/features/dashboard/lib/duel-attributes"
 
@@ -61,29 +62,16 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 const AVATAR_MASK =
   "radial-gradient(66% 76% at 52% 43%, #000 18%, #000 40%, transparent 82%)"
 
-// the FUT shield silhouette. A polygon() can only draw straight lines, so
-// the bottom would be a crude chevron; instead this is an SVG path with real
-// bezier curves — straight sides that sweep through rounded shoulders down to
-// the point. clipPathUnits="objectBoundingBox" means the 0–1 coordinates
-// scale to whatever size the card is, and the same clip on the accent shell +
-// inner fill keeps the hairline edge following the curve to the tip.
+// The FUT shield silhouette. A CSS polygon() can only draw straight lines,
+// so the bottom would be a crude chevron; instead this is an SVG path with
+// real bezier curves — straight sides that sweep through rounded shoulders
+// down to the point. clipPathUnits="objectBoundingBox" means the 0–1
+// coordinates scale to whatever size the card is, and the same clip on the
+// accent shell + inner fill keeps the hairline edge following the curve to
+// the tip. Each card renders its own def under a useId, so the card is
+// self-contained wherever it's mounted.
 const SHIELD_PATH =
   "M 0.05 0 L 0.95 0 Q 1 0 1 0.05 L 1 0.78 C 1 0.9 0.72 0.96 0.5 1 C 0.28 0.96 0 0.9 0 0.78 L 0 0.05 Q 0 0 0.05 0 Z"
-const SHIELD = "url(#duel-shield)"
-
-/** The shield clip-path definition — rendered once per duel and referenced by
- *  every card's clip-path. objectBoundingBox units scale it to any card size. */
-export function DuelShieldDef() {
-  return (
-    <svg width="0" height="0" aria-hidden focusable="false" className="absolute">
-      <defs>
-        <clipPath id="duel-shield" clipPathUnits="objectBoundingBox">
-          <path d={SHIELD_PATH} />
-        </clipPath>
-      </defs>
-    </svg>
-  )
-}
 
 export function DuelCard({
   name,
@@ -103,6 +91,8 @@ export function DuelCard({
   attrs: Array<DuelAttribute>
 }) {
   const t = THEMES[side]
+  const clipId = useId()
+  const shield = `url(#${clipId})`
 
   const stat = (a: DuelAttribute) => (
     <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
@@ -175,13 +165,20 @@ export function DuelCard({
     // also be a cqi value — otherwise the shell can't query its own width and
     // the border would be the one thing that isn't proportional to the card
     <div className="@container">
+      <svg width="0" height="0" aria-hidden focusable="false" className="absolute">
+        <defs>
+          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+            <path d={SHIELD_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
       <div
         className="relative"
-        style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "0.8cqi" }}
+        style={{ clipPath: shield, backgroundColor: t.border, padding: "0.8cqi" }}
       >
         <div
           className="relative"
-          style={{ clipPath: SHIELD, backgroundColor: t.bg }}
+          style={{ clipPath: shield, backgroundColor: t.bg }}
         >
         <div
           aria-hidden
