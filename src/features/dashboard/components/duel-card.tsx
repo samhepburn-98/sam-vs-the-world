@@ -76,7 +76,7 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 //      = longer, softer feather. Keep this well under 100% or the fade runs
 //      off the box edge and looks abrupt/square again.
 const AVATAR_MASK =
-  "radial-gradient(66% 66% at 52% 43%, #000 18%, transparent 80%)"
+  "radial-gradient(66% 76% at 52% 43%, #000 18%, #000 40%, transparent 82%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
