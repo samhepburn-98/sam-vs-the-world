@@ -51,33 +51,33 @@ export function DuelCenter({
   return (
     <div className="flex flex-col">
       <div className="text-center">
-        <p className="text-muted-foreground text-[9px] tracking-[0.2em] uppercase">
+        <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
           {score.heading}
         </p>
-        <p className="mt-0.5 text-4xl leading-none font-extrabold tabular-nums">
+        <p className="mt-1 text-6xl leading-none font-extrabold tabular-nums">
           <span style={{ color: P1_COLOR }}>{score.p1}</span>
-          <span className="text-muted-foreground mx-2 font-normal">–</span>
+          <span className="text-muted-foreground mx-3 font-normal">–</span>
           <span style={{ color: P2_TEXT }}>{score.p2}</span>
         </p>
-        <p className="text-muted-foreground mt-1 text-[9px] tracking-[0.12em] uppercase">
+        <p className="text-muted-foreground mt-1.5 text-[11px] tracking-[0.12em] uppercase">
           {score.caption}
         </p>
       </div>
 
       {dominance !== null && (
-        <div className="mt-4">
-          <div className="mb-1 flex items-baseline justify-between text-[11px]">
+        <div className="mt-5">
+          <div className="mb-1.5 flex items-baseline justify-between text-sm">
             <span className="font-bold" style={{ color: P1_COLOR }}>
               {Math.round(dominance * 100)}%
             </span>
-            <span className="text-muted-foreground tracking-[0.16em] uppercase">
+            <span className="text-muted-foreground text-xs tracking-[0.16em] uppercase">
               Dominance
             </span>
             <span className="font-bold" style={{ color: P2_TEXT }}>
               {Math.round((1 - dominance) * 100)}%
             </span>
           </div>
-          <div className="flex h-1.5 overflow-hidden rounded-full">
+          <div className="flex h-2 overflow-hidden rounded-full">
             <div
               style={{ width: `${dominance * 100}%`, backgroundColor: P1_COLOR }}
             />
@@ -86,36 +86,36 @@ export function DuelCenter({
         </div>
       )}
 
-      <div className="mt-5 flex flex-col gap-2.5">
+      <div className="mt-6 flex flex-col gap-3">
         {attrs1.map((a, i) => (
           <AttrRow key={a.key} a={a} b={attrs2[i]} />
         ))}
       </div>
-      <p className="text-muted-foreground mt-2 text-center text-[10px]">
+      <p className="text-muted-foreground mt-2.5 text-center text-[11px]">
         Every number is a measured win rate, not a rating.
       </p>
 
-      <div className="mt-5 text-center">
-        <p className="text-muted-foreground text-[9px] tracking-[0.2em] uppercase">
+      <div className="mt-6 text-center">
+        <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
           On the stats
         </p>
-        <p className="font-heading mt-0.5 text-2xl leading-tight">
+        <p className="font-heading mt-1 text-3xl leading-tight">
           {leader ?? "All square"}
         </p>
-        <p className="text-muted-foreground text-[11px]">{tallyLine}</p>
+        <p className="text-muted-foreground text-sm">{tallyLine}</p>
       </div>
 
-      <div className="ring-border mt-5 overflow-hidden rounded-xl ring-1">
-        <p className="text-muted-foreground py-2 text-center text-[9px] tracking-[0.18em] uppercase">
+      <div className="ring-border mt-6 overflow-hidden rounded-xl ring-1">
+        <p className="text-muted-foreground py-2.5 text-center text-[11px] tracking-[0.18em] uppercase">
           The receipts
         </p>
         {receipts.map((r, i) => (
           <div
             key={r.label}
-            className={`flex items-center justify-between px-3.5 py-1.5 text-xs ${i % 2 === 0 ? "bg-muted/40" : ""}`}
+            className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""}`}
           >
             <span className="font-bold tabular-nums">{r.v1}</span>
-            <span className="text-muted-foreground text-[11px]">{r.label}</span>
+            <span className="text-muted-foreground text-xs">{r.label}</span>
             <span className="font-bold tabular-nums">{r.v2}</span>
           </div>
         ))}
@@ -137,9 +137,9 @@ function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
   const p2Wins = v1 !== null && v2 !== null && v2 > v1
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2">
       <span
-        className="w-8 shrink-0 text-right text-[13px] font-bold tabular-nums"
+        className="w-9 shrink-0 text-right text-base font-bold tabular-nums"
         style={{
           color: p1Wins ? P1_COLOR : "var(--muted-foreground)",
         }}
@@ -149,7 +149,7 @@ function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
       </span>
       <div className="flex min-w-0 flex-1 justify-end">
         <div
-          className="h-1.5 rounded-l-sm"
+          className="h-2 rounded-l-sm"
           style={{
             width: `${width(a.value)}%`,
             backgroundColor: P1_COLOR,
@@ -158,7 +158,7 @@ function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
         />
       </div>
       <span
-        className="w-9 shrink-0 text-center text-[10px] tracking-[0.06em] text-muted-foreground"
+        className="text-muted-foreground w-10 shrink-0 text-center text-xs tracking-[0.06em]"
         title={b.detail}
       >
         {a.code}
@@ -166,7 +166,7 @@ function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
       </span>
       <div className="min-w-0 flex-1">
         <div
-          className="h-1.5 rounded-r-sm"
+          className="h-2 rounded-r-sm"
           style={{
             width: `${width(b.value)}%`,
             backgroundColor: P2_COLOR,
@@ -175,7 +175,7 @@ function AttrRow({ a, b }: { a: DuelAttribute; b: DuelAttribute | undefined }) {
         />
       </div>
       <span
-        className="w-8 shrink-0 text-[13px] font-bold tabular-nums"
+        className="w-9 shrink-0 text-base font-bold tabular-nums"
         style={{
           color: p2Wins ? P2_TEXT : "var(--muted-foreground)",
         }}

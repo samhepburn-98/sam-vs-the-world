@@ -111,25 +111,31 @@ describe("computeDuelAttributes", () => {
     expect(byKey.ret.value).toBe(47)
     expect(byKey.att.value).toBe(44) // 35/80
     expect(byKey.con.value).toBe(60) // 33/(33+22)
-    expect(byKey.grd.value).toBe(63) // 25/40
+    expect(byKey.grd.value).toBe(54) // (40+25)/(80+40) extended rallies
     expect(byKey.clu.value).toBe(64) // 32/50
     expect(byKey.srv.display).toBe("58")
     expect(byKey.srv.sr).toBe("58 of 100 serve rallies won")
     expect(byKey.con.sr).toBe("33 of 55 tagged errors were forced")
   })
 
-  it("holds back under-sampled rates as n=X", () => {
+  it("holds back under-sampled rates as a dash, not a raw n=X", () => {
     const attrs = computeDuelAttributes(
       player({
-        rally: rally({ long_rallies: 8, long_wins: 6 }),
+        rally: rally({
+          medium_rallies: 10,
+          medium_wins: 5,
+          long_rallies: 8,
+          long_wins: 6,
+        }),
         error: error({ forced_errors: 4, unforced_errors: 3 }),
       }),
     )
     const byKey = Object.fromEntries(attrs.map((a) => [a.key, a]))
-    expect(byKey.grd.value).toBeNull()
-    expect(byKey.grd.display).toBe("n=8")
+    expect(byKey.grd.value).toBeNull() // 18 extended rallies < 30
+    expect(byKey.grd.display).toBe("—")
     expect(byKey.con.value).toBeNull()
-    expect(byKey.con.display).toBe("n=7")
+    expect(byKey.con.display).toBe("—")
+    expect(byKey.con.sr).toContain("only 7 tagged errors")
   })
 
   it("shows an em dash before any payload arrives", () => {
@@ -144,12 +150,13 @@ describe("duelTally", () => {
     const a2 = computeDuelAttributes(
       player({
         serve: serve({ serve_wins: 62, return_wins: 47 }), // srv to p2, ret tied
-        rally: rally({ short_wins: 30, long_rallies: 8 }), // att to p1, grd unmeasured
+        rally: rally({ short_wins: 30, long_wins: 40 }), // att to p1, grd to p2
         error: error({ forced_errors: 20 }), // con 48 → p1
         momentum: momentum({ close_wins: 20 }), // clu 40 → p1
       }),
     )
-    expect(duelTally(a1, a2)).toEqual({ p1: 3, p2: 1 })
+    // p1 takes att, con, clu; p2 takes srv, grd; ret is tied
+    expect(duelTally(a1, a2)).toEqual({ p1: 3, p2: 2 })
   })
 })
 

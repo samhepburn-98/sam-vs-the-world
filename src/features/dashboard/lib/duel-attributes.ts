@@ -54,7 +54,13 @@ function rate(
   verb = "won",
 ): Pick<DuelAttribute, "value" | "display" | "sr"> {
   if (of < min) {
-    return { value: null, display: `n=${of}`, sr: `only ${of} ${unit} so far` }
+    // below the threshold a rate is noise — show a quiet dash, not a raw
+    // "n=4", and let the accessible label carry the why (§3.5)
+    return {
+      value: null,
+      display: "—",
+      sr: `not enough games yet — only ${of} ${unit} so far`,
+    }
   }
   const pct = Math.round((won / of) * 100)
   return { value: pct, display: String(pct), sr: `${won} of ${of} ${unit} ${verb}` }
@@ -96,7 +102,7 @@ export function computeDuelAttributes(d: PlayerData): Array<DuelAttribute> {
     {
       key: "con",
       code: "CON",
-      detail: "Errors forced, not gifted",
+      detail: "Errors forced by you, not gifted cheaply",
       ...(error
         ? rate(
             error.forced_errors,
@@ -110,9 +116,17 @@ export function computeDuelAttributes(d: PlayerData): Array<DuelAttribute> {
     {
       key: "grd",
       code: "GRD",
-      detail: "Long rallies won (10+ shots)",
+      // long (10+) rallies alone are too rare to rate on this much play, so
+      // "grind" spans every extended rally (5+ shots) — plenty of sample,
+      // same story of who wins the wars of attrition
+      detail: "Extended rallies won (5+ shots)",
       ...(rally
-        ? rate(rally.long_wins, rally.long_rallies, MIN_RALLIES_FOR_RATE, "long rallies")
+        ? rate(
+            rally.medium_wins + rally.long_wins,
+            rally.medium_rallies + rally.long_rallies,
+            MIN_RALLIES_FOR_RATE,
+            "extended rallies",
+          )
         : empty),
     },
     {
@@ -156,6 +170,34 @@ export const TRAIT_LABELS: Record<SignatureTrait, string> = {
   shotmaker: "Shotmaker",
   balanced: "Balanced",
 }
+
+/** The card's class line. Prefers the SQL-computed signature_trait; until
+ *  there's enough tagged play for that, falls back to the shape of the
+ *  average rally — long rallies mark a grinder, short ones a shotmaker. */
+export function duelTrait(d: PlayerData): SignatureTrait | null {
+  if (d.headline?.signature_trait) return d.headline.signature_trait
+  const avg = d.rally?.avg_length
+  if (avg == null) return null
+  if (avg >= 6.5) return "grinder"
+  if (avg <= 4.5) return "shotmaker"
+  return "balanced"
+}
+
+/** What each attribute code means and how it's measured — the single source
+ *  for the on-page glossary and any tooltip copy. */
+export const DUEL_GLOSSARY: Array<{
+  key: DuelAttrKey
+  code: string
+  name: string
+  how: string
+}> = [
+  { key: "srv", code: "SRV", name: "Serve", how: "Points won on your own serve" },
+  { key: "ret", code: "RET", name: "Return", how: "Points won when receiving serve" },
+  { key: "att", code: "ATT", name: "Attack", how: "Short rallies (1–4 shots) won" },
+  { key: "con", code: "CON", name: "Control", how: "Errors you forced, not gifted cheaply" },
+  { key: "grd", code: "GRD", name: "Grind", how: "Extended rallies (5+ shots) won" },
+  { key: "clu", code: "CLU", name: "Clutch", how: "Points won from 9–all" },
+]
 
 /** One earned pill per category — the plainly higher side takes it; ties and
  *  unmeasured values award nobody. Capped at two per player, list order. */

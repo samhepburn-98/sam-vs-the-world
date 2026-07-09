@@ -79,7 +79,7 @@ export function DuelRadar({
             x={x.toFixed(1)}
             y={(y + 3).toFixed(1)}
             textAnchor="middle"
-            className="fill-muted-foreground text-[8px]"
+            className="fill-muted-foreground text-[10px] font-medium"
           >
             {a.code}
           </text>

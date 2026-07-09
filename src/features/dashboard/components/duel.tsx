@@ -1,5 +1,5 @@
 import { useH2h } from "@/features/dashboard/api/get-h2h"
-import { DuelCard, DuelCardFooter, traitOf } from "@/features/dashboard/components/duel-card"
+import { DuelCard, DuelCardFooter } from "@/features/dashboard/components/duel-card"
 import { DuelCenter } from "@/features/dashboard/components/duel-center"
 import { DuelRadar } from "@/features/dashboard/components/duel-radar"
 import {
@@ -7,6 +7,7 @@ import {
   dominanceFromForm,
   dominanceFromH2h,
   duelTally,
+  duelTrait,
   heroStat,
   superlatives,
 } from "@/features/dashboard/lib/duel-attributes"
@@ -97,14 +98,17 @@ export function Duel({
         : null
       : dominanceFromForm(d1.headline, d2.headline)
 
+  // desktop is the three-column duel — cards flank the engine; on phones the
+  // cards stack full-width (richer, more legible than a cramped two-up) with
+  // the engine below
   return (
-    <div className="grid grid-cols-2 items-start gap-x-3 gap-y-6 md:grid-cols-[11.5rem_minmax(0,1fr)_11.5rem] md:gap-x-6">
-      <div className="flex flex-col gap-2.5">
+    <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-8">
+      <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1">
         <DuelCard
           name={player1.name}
           side="p1"
           avatarSrc="/avatars/player-1.svg"
-          trait={traitOf(d1)}
+          trait={duelTrait(d1)}
           handedness={player1.handedness}
           hero={heroStat(d1)}
           attrs={attrs1}
@@ -112,17 +116,17 @@ export function Duel({
         <DuelRadar attrs={attrs1} side="p1" name={player1.name} />
         <DuelCardFooter
           name={player1.name}
-          trait={traitOf(d1)}
+          trait={duelTrait(d1)}
           pills={pills.p1}
         />
       </div>
 
-      <div className="flex flex-col gap-2.5 md:col-start-3 md:row-start-1">
+      <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1">
         <DuelCard
           name={player2.name}
           side="p2"
           avatarSrc="/avatars/player-2.svg"
-          trait={traitOf(d2)}
+          trait={duelTrait(d2)}
           handedness={player2.handedness}
           hero={heroStat(d2)}
           attrs={attrs2}
@@ -130,12 +134,12 @@ export function Duel({
         <DuelRadar attrs={attrs2} side="p2" name={player2.name} />
         <DuelCardFooter
           name={player2.name}
-          trait={traitOf(d2)}
+          trait={duelTrait(d2)}
           pills={pills.p2}
         />
       </div>
 
-      <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1 md:pt-1">
+      <div className="md:col-start-2 md:row-start-1 md:pt-1">
         <DuelCenter
           name1={player1.name}
           name2={player2.name}
