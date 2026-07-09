@@ -1,14 +1,9 @@
-import { useQueries } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
-import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
-import { momentumOptions } from "@/features/dashboard/api/get-momentum"
-import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
-import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
-import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
-import { Duel } from "@/features/dashboard/components/duel"
+import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
 import { AttributeGlossaryDialog } from "@/features/dashboard/components/attribute-glossary"
+import { Duel } from "@/features/dashboard/components/duel"
 import { DuelModeToggle } from "@/features/dashboard/components/duel-mode-toggle"
 import { DuelPicker } from "@/features/dashboard/components/duel-picker"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
@@ -21,15 +16,7 @@ import {
 } from "@/components/ui/empty"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
-import type {
-  ErrorProfile,
-  InsightFilters,
-  Momentum,
-  PlayerHeadline,
-  RallyLengths,
-  ServeStats,
-} from "@/features/dashboard/schemas/insights"
+import type { InsightFilters } from "@/features/dashboard/schemas/insights"
 
 // Compare: two players go head to head as a duel — cards on
 // the outer edges, the comparison engine down the centre. The mode toggle
@@ -83,25 +70,8 @@ function ComparePage() {
   const filtersFor = (i: number): InsightFilters =>
     h2h ? { opponentId: selected[i === 0 ? 1 : 0] } : {}
 
-  const results = useQueries({
-    queries: selected.flatMap((id, i) => {
-      const f = filtersFor(i)
-      return [
-        playerHeadlineOptions(id, f),
-        serveStatsOptions(id, f),
-        errorProfileOptions(id, f),
-        rallyLengthsOptions(id, f),
-        momentumOptions(id, f),
-      ]
-    }),
-  })
-  const data: Array<PlayerData> = selected.map((_, i) => ({
-    headline: results[i * 5]?.data as PlayerHeadline | undefined,
-    serve: results[i * 5 + 1]?.data as ServeStats | undefined,
-    error: results[i * 5 + 2]?.data as ErrorProfile | undefined,
-    rally: results[i * 5 + 3]?.data as RallyLengths | undefined,
-    momentum: results[i * 5 + 4]?.data as Momentum | undefined,
-  }))
+  const d1 = usePlayerInsights(selected[0], filtersFor(0))
+  const d2 = usePlayerInsights(selected[1], filtersFor(1))
 
   const player1 = roster.find((p) => p.id === selected[0])
   const player2 = roster.find((p) => p.id === selected[1])
@@ -141,8 +111,8 @@ function ComparePage() {
           <Duel
             player1={player1}
             player2={player2}
-            d1={data[0]}
-            d2={data[1]}
+            d1={d1}
+            d2={d2}
             mode={search.mode}
           />
           <H2hPanel
