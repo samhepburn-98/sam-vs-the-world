@@ -31,7 +31,7 @@ const THEMES = {
     // sheen through the mid, then the card's own dark toward the edges, so the
     // photo blends into the ground instead of ending in a hard rectangle
     feather:
-      "radial-gradient(ellipse 90% 80% at 52% 42%, transparent 40%, rgba(232,205,160,0.14) 68%, rgba(19,15,14,0.68))",
+      "radial-gradient(ellipse 82% 79% at 52% 42%, transparent 42%, rgba(232,205,160,0.15) 71%, rgba(19,15,14,0.70))",
   },
   p2: {
     border: "#C7CCD4",
@@ -44,7 +44,7 @@ const THEMES = {
     rule: "199,204,212",
     numberGlow: "rgba(147,197,253,0.5)",
     feather:
-      "radial-gradient(ellipse 90% 80% at 52% 42%, transparent 40%, rgba(170,188,210,0.18) 68%, rgba(13,16,24,0.68))",
+      "radial-gradient(ellipse 82% 79% at 52% 42%, transparent 42%, rgba(170,188,210,0.19) 71%, rgba(13,16,24,0.70))",
   },
 } as const
 
@@ -63,7 +63,7 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // tall (uneven radii) so the blob is oval, not a circle. The colour overlay
 // (per theme) tints what's left so it blends into the card ground.
 const AVATAR_MASK =
-  "radial-gradient(84% 80% at 52% 43%, #000 26%, rgba(0,0,0,0.55) 62%, transparent 92%)"
+  "radial-gradient(78% 76% at 52% 43%, #000 29%, rgba(0,0,0,0.6) 60%, transparent 84%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
