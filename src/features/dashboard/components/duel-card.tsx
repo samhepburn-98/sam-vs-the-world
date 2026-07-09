@@ -44,10 +44,12 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
   right: "Right-handed",
 }
 
-// feather the photo into the card on every edge — no container box, the
-// figure dissolves into the dark ground like the FUT photo treatment
+// feather the photo into the card on every edge — the radii are kept well
+// under 100% so the fade zone falls INSIDE the box (a 100%-radius ellipse
+// leaves the box edges near-solid), letting the figure dissolve into the
+// dark ground like the FUT photo treatment, strongest at the bottom
 const AVATAR_MASK =
-  "radial-gradient(100% 96% at 50% 34%, #000 44%, transparent 80%)"
+  "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
 
 function Crest({ color }: { color: string }) {
   return (
