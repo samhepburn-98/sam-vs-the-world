@@ -53,13 +53,29 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 const AVATAR_MASK =
   "radial-gradient(72% 78% at 50% 40%, #000 38%, transparent 86%)"
 
-// the FUT pennant silhouette — softly rounded top corners, straight sides,
-// and a gently pointed bottom (the extra points either side of the tip round
-// it off rather than leaving a sharp spike). Percentage-based so it scales,
-// and shared by the accent shell + inner fill so the hairline edge follows
-// the shape all the way down to the tip.
-const SHIELD =
-  "polygon(0% 5%, 1.5% 1.5%, 5% 0%, 95% 0%, 98.5% 1.5%, 100% 5%, 100% 88%, 57% 97%, 50% 100%, 43% 97%, 0% 88%)"
+// the FUT shield silhouette. A polygon() can only draw straight lines, so
+// the bottom would be a crude chevron; instead this is an SVG path with real
+// bezier curves — straight sides that sweep through rounded shoulders down to
+// the point. clipPathUnits="objectBoundingBox" means the 0–1 coordinates
+// scale to whatever size the card is, and the same clip on the accent shell +
+// inner fill keeps the hairline edge following the curve to the tip.
+const SHIELD_PATH =
+  "M 0.05 0 L 0.95 0 Q 1 0 1 0.05 L 1 0.78 C 1 0.9 0.72 0.96 0.5 1 C 0.28 0.96 0 0.9 0 0.78 L 0 0.05 Q 0 0 0.05 0 Z"
+const SHIELD = "url(#duel-shield)"
+
+/** The shield clip-path definition — rendered once per duel and referenced by
+ *  every card's clip-path. objectBoundingBox units scale it to any card size. */
+export function DuelShieldDef() {
+  return (
+    <svg width="0" height="0" aria-hidden focusable="false" className="absolute">
+      <defs>
+        <clipPath id="duel-shield" clipPathUnits="objectBoundingBox">
+          <path d={SHIELD_PATH} />
+        </clipPath>
+      </defs>
+    </svg>
+  )
+}
 
 export function DuelCard({
   name,
