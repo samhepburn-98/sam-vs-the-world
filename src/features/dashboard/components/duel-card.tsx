@@ -31,7 +31,7 @@ const THEMES = {
     // sheen through the mid, then the card's own dark toward the edges, so the
     // photo blends into the ground instead of ending in a hard rectangle
     feather:
-      "radial-gradient(ellipse 88% 80% at 52% 42%, transparent 40%, rgba(232,205,160,0.142) 69%, rgba(19,15,14,0.685))",
+      "radial-gradient(ellipse 72% 72% at 52% 42%, transparent 36%, rgba(232,205,160,0.14) 66%, rgba(19,15,14,0.66))",
   },
   p2: {
     border: "#C7CCD4",
@@ -44,7 +44,7 @@ const THEMES = {
     rule: "199,204,212",
     numberGlow: "rgba(147,197,253,0.5)",
     feather:
-      "radial-gradient(ellipse 88% 80% at 52% 42%, transparent 40%, rgba(170,188,210,0.182) 69%, rgba(13,16,24,0.685))",
+      "radial-gradient(ellipse 72% 72% at 52% 42%, transparent 36%, rgba(170,188,210,0.18) 66%, rgba(13,16,24,0.66))",
   },
 } as const
 
@@ -62,8 +62,21 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // edge reads smooth rather than abrupt. The ellipse is deliberately wide and
 // tall (uneven radii) so the blob is oval, not a circle. The colour overlay
 // (per theme) tints what's left so it blends into the card ground.
+// ── PLAY WITH THIS LINE ──────────────────────────────────────────────────
+// This is the shape/feather of the photo. It's a radial gradient used as a
+// mask: where it's #000 the photo is solid, where it's transparent the photo
+// disappears. Four knobs, in order:
+//   1. "66% 66%"  = the fade ellipse radii (width% height%). SMALLER = blob
+//      sits further inside the box = more rounded / less square. Equal numbers
+//      = circular; make them differ for an oval.
+//   2. "at 52% 43%" = where the blob is centred.
+//   3. "#000 18%"  = photo is fully solid out to 18% of the radius. LOWER =
+//      smaller solid core = more of the photo is feathering.
+//   4. "transparent 80%" = fully gone by 80%. A BIGGER gap between 18% and 80%
+//      = longer, softer feather. Keep this well under 100% or the fade runs
+//      off the box edge and looks abrupt/square again.
 const AVATAR_MASK =
-  "radial-gradient(82% 79% at 52% 43%, #000 26%, rgba(0,0,0,0.56) 61%, transparent 90%)"
+  "radial-gradient(66% 66% at 52% 43%, #000 18%, transparent 80%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
