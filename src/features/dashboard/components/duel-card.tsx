@@ -173,14 +173,18 @@ export function DuelCard({
   )
 
   return (
-    <div
-      className="@container relative"
-      style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "2px" }}
-    >
+    // the @container lives on this wrapper (not the shell) so the border can
+    // also be a cqi value — otherwise the shell can't query its own width and
+    // the border would be the one thing that isn't proportional to the card
+    <div className="@container">
       <div
         className="relative"
-        style={{ clipPath: SHIELD, backgroundColor: t.bg }}
+        style={{ clipPath: SHIELD, backgroundColor: t.border, padding: "0.8cqi" }}
       >
+        <div
+          className="relative"
+          style={{ clipPath: SHIELD, backgroundColor: t.bg }}
+        >
         <div
           aria-hidden
           className="absolute inset-0"
@@ -244,6 +248,7 @@ export function DuelCard({
           <dl className="flex flex-col gap-[3.5cqi]">
             {[attrs[1], attrs[3], attrs[5]].map(stat)}
           </dl>
+        </div>
         </div>
         </div>
       </div>
