@@ -57,11 +57,12 @@ const HANDEDNESS_LABELS: Record<Handedness, string> = {
 // under 100% so the fade zone falls INSIDE the box (a 100%-radius ellipse
 // leaves the box edges near-solid), letting the figure dissolve into the
 // dark ground like the FUT photo treatment, strongest at the bottom
-// a gentle mask on top of the colour overlay — only softens the very outer
-// edge where the photo bleeds into the card, since the overlay does the bulk
-// of the blending (gitfut's technique)
+// the mask does the shape. A large fully-solid core keeps the face legible
+// (the "step"), then it only feathers the outer band to transparent so the
+// photo reads as a soft blob rather than a square. The colour overlay (per
+// theme) tints what's left so it blends into the card ground.
 const AVATAR_MASK =
-  "radial-gradient(80% 84% at 52% 44%, #000 46%, transparent 92%)"
+  "radial-gradient(68% 72% at 53% 44%, #000 32%, transparent 76%)"
 
 // the FUT shield silhouette. A polygon() can only draw straight lines, so
 // the bottom would be a crude chevron; instead this is an SVG path with real
@@ -126,25 +127,25 @@ export function DuelCard({
   const stats = (
     <div className="flex w-[23cqi] flex-col items-center text-center">
       <span
-        className="text-[12cqi] leading-none font-extrabold"
+        className="text-[11cqi] leading-none font-extrabold"
         style={{ color: t.accent, textShadow: `0 0 3cqi ${t.numberGlow}` }}
       >
         {hero.display}
       </span>
       <span
-        className="mt-[1cqi] text-[3.2cqi] font-medium tracking-[0.1em] uppercase"
+        className="mt-[1cqi] text-[3.2cqi] font-semibold tracking-[0.1em] uppercase"
         style={{ color: t.accent }}
       >
         {hero.label}
       </span>
       {handedness && (
         <span
-          className="mt-[3.5cqi] flex items-center gap-[1.5cqi] text-[4cqi] font-semibold"
+          className="mt-[3.5cqi] flex items-center gap-[1.5cqi] text-[4.6cqi] font-semibold"
           style={{ color: t.muted }}
         >
           <HandIcon
             aria-hidden
-            className="size-[4.5cqi]"
+            className="size-[5cqi]"
             style={
               handedness === "left" ? { transform: "scaleX(-1)" } : undefined
             }
