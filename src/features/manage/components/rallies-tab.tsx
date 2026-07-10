@@ -104,10 +104,16 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
       render: (r) => <BoolCell value={r.forced} />,
     },
     {
-      key: "shot_type",
-      label: "Shot",
+      key: "winning_shot",
+      label: "Winning shot",
       render: (r) =>
-        r.shot_type ? <EnumCell value={r.shot_type} /> : <NullCell />,
+        r.winning_shot ? <EnumCell value={r.winning_shot} /> : <NullCell />,
+    },
+    {
+      key: "losing_shot",
+      label: "Losing shot",
+      render: (r) =>
+        r.losing_shot ? <EnumCell value={r.losing_shot} /> : <NullCell />,
     },
     {
       key: "shot_count",

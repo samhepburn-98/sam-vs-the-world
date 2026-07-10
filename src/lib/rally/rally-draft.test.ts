@@ -6,7 +6,9 @@ import {
   buildRallyRow,
   canSave,
   createDraft,
+  rowToDraft,
   selectEndReason,
+  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -120,6 +122,59 @@ describe("field visibility per end reason", () => {
   })
 })
 
+describe("decisive-shot mapping", () => {
+  it("a winner's shot saves as the winning shot", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "winner", ctx)
+    draft = { ...draft, shotType: "drive" }
+    const row = buildRallyRow(draft, { id: "r", gameId: "g", rallyNumber: 1 })
+    expect(row).toMatchObject({ winning_shot: "drive", losing_shot: null })
+  })
+
+  it("a forced error's shot is the winner's forcing shot", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, true)
+    draft = { ...draft, shotType: "drop" }
+    const row = buildRallyRow(draft, { id: "r", gameId: "g", rallyNumber: 2 })
+    expect(row).toMatchObject({ winning_shot: "drop", losing_shot: null })
+  })
+
+  it("an unforced error's shot is the loser's own failed shot", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, false)
+    draft = { ...draft, shotType: "boast" }
+    const row = buildRallyRow(draft, { id: "r", gameId: "g", rallyNumber: 3 })
+    expect(row).toMatchObject({ winning_shot: null, losing_shot: "boast" })
+  })
+
+  it("reopening a row recovers the tag from either column", () => {
+    const base = buildRallyRow(
+      { ...selectEndReason(draftWithWinner("sam"), "winner", ctx), shotType: "drive" },
+      { id: "r", gameId: "g", rallyNumber: 4 },
+    )
+    expect(rowToDraft(base).shotType).toBe("drive")
+    expect(rowToDraft({ ...base, winning_shot: null, losing_shot: "drop" }).shotType).toBe("drop")
+  })
+})
+
+describe("setForced", () => {
+  it("flipping forced re-owns the shot, so the tag clears", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, true)
+    draft = { ...draft, shotType: "drop" }
+    expect(setForced(draft, false).shotType).toBeNull()
+    expect(setForced(draft, null).shotType).toBeNull()
+  })
+
+  it("keeps the shot while the owner is unchanged", () => {
+    let draft = selectEndReason(draftWithWinner("sam"), "error", ctx)
+    draft = setForced(draft, false)
+    draft = { ...draft, shotType: "boast" }
+    expect(setForced(draft, null).shotType).toBe("boast") // loser's shot either way
+    draft = setForced(draft, true)
+    expect(draft.shotType).toBeNull() // owner flipped to the winner
+  })
+})
+
 describe("serve context toggles", () => {
   it("q toggles serve number in a two-serve match", () => {
     const draft = createDraft(suggestion)
@@ -174,7 +229,8 @@ describe("saving", () => {
       end_reason: "error",
       error_detail: "tin",
       forced: false,
-      shot_type: null,
+      winning_shot: null,
+      losing_shot: null,
       shot_count: 12,
     })
   })
@@ -189,7 +245,8 @@ describe("saving", () => {
       serve_number: 2,
       error_detail: null,
       forced: null,
-      shot_type: null,
+      winning_shot: null,
+      losing_shot: null,
       shot_count: null,
     })
   })

@@ -59,7 +59,8 @@ export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) 
           end_reason: "let",
           error_detail: null,
           forced: null,
-          shot_type: null,
+          winning_shot: null,
+          losing_shot: null,
           shot_count: null,
         },
   )

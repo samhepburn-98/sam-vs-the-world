@@ -111,11 +111,26 @@ export function showsForced(endReason: EndReason | null): boolean {
   return endReason === "error"
 }
 
-/** The shot is the LAST shot of the rally — the winning shot on a winner,
- *  the failed attempt on an error. Strokes, lets, and serve faults have no
- *  last shot worth tagging (mirrors rallies_shot_type_scope). */
+/** The shot is the DECISIVE one, and which column it lands in follows from
+ *  the outcome: the winner's shot on a winner or forced error (winning_shot),
+ *  the loser's own failed shot on an unforced error (losing_shot). One select
+ *  in the UI; the row mapping in buildRallyRow does the rest. */
 export function showsShotType(endReason: EndReason | null): boolean {
   return endReason === "winner" || endReason === "error"
+}
+
+/** Setting forced re-runs the auto rules — and because it flips WHOSE shot
+ *  the tag would describe (forcing shot vs failed shot), an owner change
+ *  retires the tagged value rather than silently reassigning it. */
+export function setForced(
+  draft: RallyDraft,
+  forced: boolean | null,
+): RallyDraft {
+  const next = { ...draft, forced }
+  if (draft.endReason === "error" && (draft.forced === true) !== (forced === true)) {
+    next.shotType = null
+  }
+  return applyAutoRules(next)
 }
 
 /** a point-ending serve fault is lost by the server — if the tapped winner
@@ -168,7 +183,8 @@ export interface RallyRow {
   end_reason: EndReason
   error_detail: ErrorDetail | null
   forced: boolean | null
-  shot_type: ShotType | null
+  winning_shot: ShotType | null
+  losing_shot: ShotType | null
   shot_count: number | null
 }
 
@@ -191,7 +207,16 @@ export function buildRallyRow(
     end_reason: draft.endReason!,
     error_detail: draft.errorDetail,
     forced: draft.forced,
-    shot_type: draft.shotType,
+    // the one tagged shot is the DECISIVE one — the winner's on a winner or
+    // forced error, the loser's own on an unforced error (DB scopes)
+    winning_shot:
+      draft.endReason === "winner" || draft.forced === true
+        ? draft.shotType
+        : null,
+    losing_shot:
+      draft.endReason === "error" && draft.forced !== true
+        ? draft.shotType
+        : null,
     shot_count: draft.shotCount,
   }
 }
@@ -211,7 +236,8 @@ export function buildLetRow(
     end_reason: "let",
     error_detail: null,
     forced: null,
-    shot_type: null,
+    winning_shot: null,
+    losing_shot: null,
     shot_count: null,
   }
 }
@@ -226,7 +252,7 @@ export function rowToDraft(row: RallyRow): RallyDraft {
     endReason: row.end_reason,
     errorDetail: row.error_detail,
     forced: row.forced,
-    shotType: row.shot_type,
+    shotType: row.winning_shot ?? row.losing_shot,
     shotCount: row.shot_count,
   }
 }

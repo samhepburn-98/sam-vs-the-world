@@ -20,7 +20,8 @@ function rally(n: number, winner: string | null): RallySummary {
     end_reason: winner === null ? "let" : "winner",
     error_detail: null,
     forced: null,
-    shot_type: null,
+    winning_shot: null,
+  losing_shot: null,
     shot_count: null,
   }
 }

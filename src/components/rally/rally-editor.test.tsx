@@ -31,7 +31,8 @@ const saved: RallyRow = {
   end_reason: "winner",
   error_detail: null,
   forced: null,
-  shot_type: null,
+  winning_shot: null,
+  losing_shot: null,
   shot_count: 4,
 }
 
@@ -59,7 +60,8 @@ describe("RallyEditor", () => {
         rally_number: 5,
         end_reason: "stroke",
         winner_id: SAM,
-        shot_type: null, // auto-rule: shot type doesn't apply to a stroke
+        winning_shot: null,
+  losing_shot: null, // auto-rule: shot type doesn't apply to a stroke
       }),
     )
   })

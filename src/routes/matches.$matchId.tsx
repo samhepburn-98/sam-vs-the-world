@@ -63,7 +63,8 @@ function toRallyRow(r: RallyScored): RallyRow {
     end_reason: r.end_reason,
     error_detail: r.error_detail,
     forced: r.forced,
-    shot_type: r.shot_type,
+    winning_shot: r.winning_shot,
+    losing_shot: r.losing_shot,
     shot_count: r.shot_count,
   }
 }
