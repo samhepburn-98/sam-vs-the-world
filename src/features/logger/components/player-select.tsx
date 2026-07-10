@@ -37,43 +37,61 @@ export function PlayerSelect({
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState("")
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (creating) {
     return (
-      <div className="flex gap-2">
-        <Input
-          autoFocus
-          value={name}
-          placeholder="Player name"
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Button
-          type="button"
-          disabled={saving || name.trim().length === 0}
-          onClick={() => {
-            void (async () => {
-              setSaving(true)
-              try {
-                const player = await onCreatePlayer(name.trim())
-                onChange(player.id)
-                setCreating(false)
-                setName("")
-              } finally {
-                setSaving(false)
-              }
-            })()
-          }}
-        >
-          {saving && <Spinner data-icon="inline-start" />}
-          Add
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setCreating(false)}
-        >
-          Cancel
-        </Button>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex gap-2">
+          <Input
+            autoFocus
+            value={name}
+            placeholder="Player name"
+            aria-invalid={error ? true : undefined}
+            onChange={(e) => {
+              setName(e.target.value)
+              setError(null)
+            }}
+          />
+          <Button
+            type="button"
+            disabled={saving || name.trim().length === 0}
+            onClick={() => {
+              void (async () => {
+                setSaving(true)
+                setError(null)
+                try {
+                  const player = await onCreatePlayer(name.trim())
+                  onChange(player.id)
+                  setCreating(false)
+                  setName("")
+                } catch {
+                  setError("Couldn't add the player. Try again.")
+                } finally {
+                  setSaving(false)
+                }
+              })()
+            }}
+          >
+            {saving && <Spinner data-icon="inline-start" />}
+            Add
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setCreating(false)
+              setError(null)
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+        {error && (
+          <p role="alert" className="text-destructive text-sm">
+            {error}
+          </p>
+        )}
       </div>
     )
   }
