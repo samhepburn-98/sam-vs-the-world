@@ -3,7 +3,6 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemGroup,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
@@ -17,6 +16,10 @@ import type { HistoryMatch } from "@/features/dashboard/lib/profile-fixture"
 // would bury the note column. A CSS breakpoint does the switching — both
 // layouts are always rendered, so there's no matchMedia hook to drift from
 // SSR or fall over in jsdom.
+//
+// The mobile rows are flat — no per-row background or side padding — so the
+// enclosing panel is the only card and each match reads as a hairline-ruled
+// row of it, not a card floating inside another.
 
 function ScorePill({ score }: { score: string }) {
   const [mine, theirs] = score.split("-").map(Number)
@@ -98,9 +101,14 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
 
 function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
   return (
-    <ItemGroup className="gap-2">
+    <div role="list" className="divide-y divide-border/60">
       {matches.map((m) => (
-        <Item key={`${m.date}-${m.opponent}`} variant="muted" size="sm">
+        <Item
+          key={`${m.date}-${m.opponent}`}
+          role="listitem"
+          size="sm"
+          className="rounded-none border-0 px-0"
+        >
           <ItemMedia>
             <ResultBadge won={m.won} />
           </ItemMedia>
@@ -123,7 +131,7 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
           </ItemActions>
         </Item>
       ))}
-    </ItemGroup>
+    </div>
   )
 }
 
