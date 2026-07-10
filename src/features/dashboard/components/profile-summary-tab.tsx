@@ -1,6 +1,6 @@
 import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
 import { ErrorWall } from "@/features/dashboard/components/error-wall"
-import { MatchHistoryTable } from "@/features/dashboard/components/match-history-table"
+import { MatchHistory } from "@/features/dashboard/components/match-history"
 import { NarrativeInsight } from "@/features/dashboard/components/narrative-insight"
 import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 
@@ -89,7 +89,7 @@ export function ProfileSummaryTab({ profile }: { profile: ProfileFixture }) {
 
       <Section title="Match history" lede={profile.history.lede}>
         <div className={PANEL}>
-          <MatchHistoryTable matches={profile.history.matches} />
+          <MatchHistory matches={profile.history.matches} />
           <p className="mt-4 text-xs text-muted-foreground/70">
             {profile.history.foldNote}
           </p>
