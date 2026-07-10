@@ -1,3 +1,6 @@
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
+import { useState } from "react"
+
 import { ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
@@ -22,8 +25,15 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // translating at review speed. The two common outcomes (winner, error) are
 // prominent cards settled by the one thing visible on the clip — did the
 // other player get a racket on it? — while the rare calls (stroke, serve
-// fault) sit demoted below them. Only the fields valid for the chosen end
-// reason exist; the draft state machine clears the rest.
+// fault) sit demoted below them.
+//
+// The outcome is the only required decision, so Save sits directly under it;
+// every refinement (where, why, shot, shots) lives in one quieter detail
+// zone below, collapsible for score-only sessions — the preference sticks
+// across rallies. Only the fields valid for the chosen end reason exist; the
+// draft state machine clears the rest.
+
+const DETAIL_PREF_KEY = "svw:log-detail"
 
 const SHOT_TYPE_LABELS: Record<(typeof LOGGABLE_SHOT_TYPES)[number], string> = {
   drive: "Drive",
@@ -133,6 +143,15 @@ export function OutcomeChips({
   onCancel,
   onOpenGlossary,
 }: OutcomeChipsProps) {
+  const [showDetail, setShowDetail] = useState(
+    () => window.localStorage.getItem(DETAIL_PREF_KEY) !== "0",
+  )
+  const toggleDetail = () => {
+    const next = !showDetail
+    setShowDetail(next)
+    window.localStorage.setItem(DETAIL_PREF_KEY, next ? "1" : "0")
+  }
+
   return (
     <section
       aria-label="How the rally ended"
@@ -189,6 +208,43 @@ export function OutcomeChips({
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          disabled={!canSave(draft)}
+          onClick={onSave}
+        >
+          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+            {HOTKEY_HINTS.save}
+          </Kbd>
+          Save
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <span className="text-muted-foreground flex-1 text-right text-xs">
+          saves as-is — detail is optional
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-expanded={showDetail}
+          onClick={toggleDetail}
+          className="text-muted-foreground h-7 px-2"
+        >
+          {showDetail ? (
+            <ChevronDownIcon aria-hidden />
+          ) : (
+            <ChevronRightIcon aria-hidden />
+          )}
+          {showDetail ? "Hide detail" : "Show detail"}
+        </Button>
+      </div>
+
+      {showDetail && (
+      <div className="bg-muted/30 flex flex-col gap-3 rounded-lg border p-3">
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
@@ -276,23 +332,8 @@ export function OutcomeChips({
           every racket touch counts, including the last
         </span>
       </div>
-
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          disabled={!canSave(draft)}
-          onClick={onSave}
-        >
-          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-            {HOTKEY_HINTS.save}
-          </Kbd>
-          Save
-        </Button>
       </div>
+      )}
     </section>
   )
 }

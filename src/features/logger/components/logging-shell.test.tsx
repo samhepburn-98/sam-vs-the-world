@@ -121,6 +121,25 @@ describe("keyboard-first logging (§5.3)", () => {
     expect(screen.getByRole("button", { name: /faulted the serve/i })).toBeDefined()
   })
 
+  it("the detail zone collapses via its toggle and the preference sticks", () => {
+    renderShell()
+    press("d")
+    press("e") // error → the Where row exists in the detail zone
+    expect(screen.getByText("Where")).toBeDefined()
+
+    fireEvent.click(screen.getByRole("button", { name: /hide detail/i }))
+    expect(screen.queryByText("Where")).toBeNull()
+    expect(window.localStorage.getItem("svw:log-detail")).toBe("0")
+
+    // the preference survives a remount (next rally, next session)
+    cleanup()
+    renderShell()
+    press("d")
+    press("e")
+    expect(screen.queryByText("Where")).toBeNull()
+    expect(screen.getByRole("button", { name: /show detail/i })).toBeDefined()
+  })
+
   it("cmd+z undoes; l saves a let immediately", () => {
     renderShell()
     press("l")
