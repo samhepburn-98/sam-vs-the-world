@@ -218,10 +218,9 @@ export function OutcomeChips({
         <Button
           type="button"
           variant="ghost"
-          size="sm"
-          aria-expanded={showDetail}
+          size="xs"
           onClick={toggleDetail}
-          className="text-muted-foreground h-7 px-2"
+          className="text-muted-foreground"
         >
           {showDetail ? (
             <ChevronDownIcon aria-hidden data-icon="inline-start" />
