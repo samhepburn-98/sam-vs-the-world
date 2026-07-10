@@ -20,8 +20,8 @@ const GROUPS: Array<{ title: string; rows: Array<[string, string]> }> = [
   {
     title: "How it ended",
     rows: [
-      [HOTKEY_HINTS.endReason.winner, "No touch (winner)"],
-      [HOTKEY_HINTS.endReason.error, "Hit, no return (error)"],
+      [HOTKEY_HINTS.endReason.winner, "Winner (they didn't touch it)"],
+      [HOTKEY_HINTS.endReason.error, "Error (hit it, no return)"],
       [HOTKEY_HINTS.endReason.stroke, "Stroke"],
       [HOTKEY_HINTS.endReason.serve_fault, "Serve fault"],
     ],

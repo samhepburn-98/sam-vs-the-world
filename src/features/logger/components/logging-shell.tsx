@@ -520,6 +520,11 @@ function MatchLogger({
         <OutcomeChips
           draft={draft}
           winnerName={nameOf(draft.winnerId)}
+          loserName={nameOf(
+            draft.winnerId === match.player1_id
+              ? match.player2_id
+              : match.player1_id,
+          )}
           onEndReason={(r) => setDraftState(selectEndReason(draft, r, draftCtx))}
           onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
           onForced={(v) => setDraftState({ ...draft, forced: v })}

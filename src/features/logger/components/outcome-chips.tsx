@@ -1,15 +1,10 @@
-import { END_REASON_HELP, ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
+import { useState } from "react"
+
+import { ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Kbd } from "@/components/ui/kbd"
+import { NumberStepper } from "@/components/ui/number-stepper"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
 import {
@@ -24,19 +19,25 @@ import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 
-// The secondary chips (§5.3): appear after the winner tap; only the fields
-// valid for the chosen end reason exist — the state machine clears the rest.
+// The outcome form: appears after the winner tap, and every option names a
+// player — no label ever refers to an unnamed "opponent", so nothing needs
+// translating at review speed. The two common outcomes (winner, error) are
+// prominent cards settled by the one thing visible on the clip — did the
+// other player get a racket on it? — while the rare calls (stroke, serve
+// fault) sit demoted below them.
+//
+// The outcome is the only required decision, so Save sits directly under it;
+// every refinement (where, why, shot, shots) lives in one quieter detail
+// zone below, collapsible for score-only sessions — the preference sticks
+// across rallies. Only the fields valid for the chosen end reason exist; the
+// draft state machine clears the rest.
 
-// Logging labels are framed by the one thing you can see on the clip: did the
-// opponent get a racket on the ball? (§2). "No touch" stores a winner, "Hit,
-// no return" an error — the analytics still call them winners and errors.
-const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "No touch",
-  error: "Hit, no return",
-  stroke: "Stroke",
-  let: "Let",
-  ace: "Ace",
-  serve_fault: "Serve fault",
+const DETAIL_PREF_KEY = "svw:log-detail"
+
+const SHOT_TYPE_LABELS: Record<(typeof LOGGABLE_SHOT_TYPES)[number], string> = {
+  drive: "Drive",
+  boast: "Boast",
+  drop: "Drop",
 }
 
 const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
@@ -48,9 +49,64 @@ const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
   double_bounce: "Dbl bounce",
 }
 
+/** One of the two prominent outcome cards: a named headline plus the one-line
+ *  rule that settles the call at a glance. A ToggleGroupItem, so the whole
+ *  outcome set is one real single-choice group (radio semantics, arrow-key
+ *  focus) rather than looped buttons with hand-managed pressed state. */
+function OutcomeCard({
+  value,
+  hint,
+  headline,
+  rule,
+}: {
+  value: EndReason
+  hint: string
+  headline: string
+  rule: string
+}) {
+  return (
+    <ToggleGroupItem
+      value={value}
+      variant="outline"
+      className="group/card h-auto flex-1 flex-col items-start gap-0.5 px-3 py-2 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+    >
+      <span className="flex items-center gap-1.5 font-medium">
+        <Kbd>{hint}</Kbd>
+        {headline}
+      </span>
+      <span className="text-muted-foreground group-data-[state=on]/card:text-primary-foreground/85 text-xs font-normal">
+        {rule}
+      </span>
+    </ToggleGroupItem>
+  )
+}
+
+/** A demoted outcome for the rare calls — quiet text until selected. */
+function RareOutcome({
+  value,
+  hint,
+  label,
+}: {
+  value: EndReason
+  hint: string
+  label: string
+}) {
+  return (
+    <ToggleGroupItem
+      value={value}
+      size="sm"
+      className="text-muted-foreground h-7 px-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+    >
+      <Kbd>{hint}</Kbd>
+      {label}
+    </ToggleGroupItem>
+  )
+}
+
 interface OutcomeChipsProps {
   draft: RallyDraft
   winnerName: string
+  loserName: string
   onEndReason: (reason: EndReason) => void
   onErrorDetail: (detail: ErrorDetail | null) => void
   onForced: (forced: boolean | null) => void
@@ -64,6 +120,7 @@ interface OutcomeChipsProps {
 export function OutcomeChips({
   draft,
   winnerName,
+  loserName,
   onEndReason,
   onErrorDetail,
   onForced,
@@ -73,6 +130,15 @@ export function OutcomeChips({
   onCancel,
   onOpenGlossary,
 }: OutcomeChipsProps) {
+  const [showDetail, setShowDetail] = useState(
+    () => window.localStorage.getItem(DETAIL_PREF_KEY) !== "0",
+  )
+  const toggleDetail = () => {
+    const next = !showDetail
+    setShowDetail(next)
+    window.localStorage.setItem(DETAIL_PREF_KEY, next ? "1" : "0")
+  }
+
   return (
     <section
       aria-label="How the rally ended"
@@ -93,43 +159,90 @@ export function OutcomeChips({
           ?
         </Button>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">How</span>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
-          className="flex-wrap"
-          value={draft.endReason ?? ""}
-          onValueChange={(v) => v && onEndReason(v as EndReason)}
-        >
-          {(["winner", "error", "stroke"] as const).map((r) => (
-            <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
-              <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
-              {END_REASON_LABELS[r]}
-            </ToggleGroupItem>
-          ))}
+
+      <ToggleGroup
+        type="single"
+        aria-label="How the rally ended"
+        value={draft.endReason ?? ""}
+        onValueChange={(v) => v && onEndReason(v as EndReason)}
+        className="flex w-full flex-col items-stretch gap-1.5"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <OutcomeCard
+            value="winner"
+            hint={HOTKEY_HINTS.endReason.winner}
+            headline={`${winnerName} hit a winner`}
+            rule={`${loserName} didn't touch it`}
+          />
+          <OutcomeCard
+            value="error"
+            hint={HOTKEY_HINTS.endReason.error}
+            headline={`${loserName} made an error`}
+            rule="hit it, but no return"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1">
+          <RareOutcome
+            value="stroke"
+            hint={HOTKEY_HINTS.endReason.stroke}
+            label={`Stroke to ${winnerName}`}
+          />
           {showsServeFault(draft) && (
-            <ToggleGroupItem
+            <RareOutcome
               value="serve_fault"
-              title={END_REASON_HELP.serve_fault}
-            >
-              <Kbd>{HOTKEY_HINTS.endReason.serve_fault}</Kbd>
-              {END_REASON_LABELS.serve_fault}
-            </ToggleGroupItem>
+              hint={HOTKEY_HINTS.endReason.serve_fault}
+              label={`${loserName} faulted the serve`}
+            />
           )}
-        </ToggleGroup>
+        </div>
+      </ToggleGroup>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          disabled={!canSave(draft)}
+          onClick={onSave}
+        >
+          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+            {HOTKEY_HINTS.save}
+          </Kbd>
+          Save
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <span className="text-muted-foreground flex-1 text-right text-xs">
+          saves as-is — detail is optional
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          onClick={toggleDetail}
+          className="text-muted-foreground"
+        >
+          {showDetail ? (
+            <ChevronDownIcon aria-hidden data-icon="inline-start" />
+          ) : (
+            <ChevronRightIcon aria-hidden data-icon="inline-start" />
+          )}
+          {showDetail ? "Hide detail" : "Show detail"}
+        </Button>
       </div>
 
+      {showDetail && (
+      <div className="bg-muted/30 flex flex-col gap-3 rounded-lg border p-3">
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Detail
+            Where
           </span>
           <ToggleGroup
             type="single"
             variant="outline"
             size="sm"
+            aria-label="Where the error went"
             className="flex-wrap"
             value={draft.errorDetail ?? ""}
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
@@ -147,12 +260,13 @@ export function OutcomeChips({
       {showsForced(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Forced?
+            Why
           </span>
           <ToggleGroup
             type="single"
             variant="outline"
             size="sm"
+            aria-label="Forced or unforced"
             className="flex-wrap"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
@@ -160,7 +274,7 @@ export function OutcomeChips({
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
             <ToggleGroupItem value="yes">
               <Kbd>{HOTKEY_HINTS.forced}</Kbd>
-              Forced
+              {winnerName} forced it
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -171,24 +285,26 @@ export function OutcomeChips({
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Shot
           </span>
-          <Select
-            value={draft.shotType ?? "none"}
-            onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            aria-label="Shot type"
+            className="flex-wrap"
+            value={draft.shotType ?? ""}
+            onValueChange={(v) => onShotType(v === "" ? null : (v as ShotType))}
           >
-            <SelectTrigger size="sm" className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="none">—</SelectItem>
-                {LOGGABLE_SHOT_TYPES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            {LOGGABLE_SHOT_TYPES.map((s) => (
+              <ToggleGroupItem key={s} value={s}>
+                {SHOT_TYPE_LABELS[s]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <span className="text-muted-foreground text-xs">
+            {draft.endReason === "error"
+              ? `the shot ${loserName} was playing`
+              : "the winning shot"}
+          </span>
         </div>
       )}
 
@@ -196,37 +312,19 @@ export function OutcomeChips({
         <span className="text-muted-foreground w-12 shrink-0 text-xs">
           Shots
         </span>
-        <Input
-          type="number"
+        <NumberStepper
+          value={draft.shotCount}
+          onChange={onShotCount}
           min={0}
-          inputMode="numeric"
-          className="w-20"
-          value={draft.shotCount ?? ""}
-          onChange={(e) =>
-            onShotCount(e.target.value === "" ? null : Number(e.target.value))
-          }
+          max={999}
+          ariaLabel="shot count"
         />
         <span className="text-muted-foreground text-xs">
           every racket touch counts, including the last
         </span>
       </div>
-
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          disabled={!canSave(draft)}
-          onClick={onSave}
-        >
-          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-            {HOTKEY_HINTS.save}
-          </Kbd>
-          Save
-        </Button>
       </div>
+      )}
     </section>
   )
 }
