@@ -1,13 +1,5 @@
 import { ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Kbd } from "@/components/ui/kbd"
 import { NumberStepper } from "@/components/ui/number-stepper"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -32,6 +24,12 @@ import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 // other player get a racket on it? — while the rare calls (stroke, serve
 // fault) sit demoted below them. Only the fields valid for the chosen end
 // reason exist; the draft state machine clears the rest.
+
+const SHOT_TYPE_LABELS: Record<(typeof LOGGABLE_SHOT_TYPES)[number], string> = {
+  drive: "Drive",
+  boast: "Boast",
+  drop: "Drop",
+}
 
 const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
   tin: "Tin",
@@ -241,24 +239,20 @@ export function OutcomeChips({
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Shot
           </span>
-          <Select
-            value={draft.shotType ?? "none"}
-            onValueChange={(v) => onShotType(v === "none" ? null : (v as ShotType))}
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            className="flex-wrap"
+            value={draft.shotType ?? ""}
+            onValueChange={(v) => onShotType(v === "" ? null : (v as ShotType))}
           >
-            <SelectTrigger size="sm" className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="none">—</SelectItem>
-                {LOGGABLE_SHOT_TYPES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            {LOGGABLE_SHOT_TYPES.map((s) => (
+              <ToggleGroupItem key={s} value={s}>
+                {SHOT_TYPE_LABELS[s]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
           <span className="text-muted-foreground text-xs">
             {draft.endReason === "error"
               ? `the shot ${loserName} was playing`
