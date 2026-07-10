@@ -1,5 +1,4 @@
 import { PlayerCard } from "@/features/dashboard/components/player-card"
-import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 import { cn } from "@/lib/utils"
 
 import type { ProfileKpi } from "@/features/dashboard/lib/profile-fixture"
@@ -50,16 +49,9 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h1 className="font-heading text-3xl font-bold tracking-tight">
-              {header.name}
-            </h1>
-            {header.trait && (
-              <span className="text-sm font-semibold tracking-widest text-primary uppercase">
-                {TRAIT_LABELS[header.trait]}
-              </span>
-            )}
-          </div>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">
+            {header.name}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {header.signature ? (
               <>

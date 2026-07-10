@@ -4,10 +4,6 @@ import {
   playerTrait,
   signatureLine,
 } from "@/features/dashboard/lib/player-attributes"
-import {
-  MIN_ERRORS_FOR_RATE,
-  MIN_GAMES_FOR_WIN_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
 
 import type {
   PlayerAttribute,
@@ -76,24 +72,13 @@ function buildMeta(handedness: Handedness | null, data: PlayerData): string {
   return segments.join(" · ")
 }
 
-function pct(won: number, of: number): number {
-  return Math.round((won / of) * 100)
-}
-
-/** The six KPI tiles, each honest about its own sample. A tile with no data
- *  yet shows a dash rather than a zero or a misleading rate. */
+/** The six KPI tiles — counting stats and records that complement the card,
+ *  never a rate the card already shows (win rate is the card's hero, the six
+ *  attributes its grid). Each is honest about its own sample: a tile with no
+ *  payload yet shows a dash. Records and counts show from the first game —
+ *  they're not rates, so there's no small-sample lie to guard against. */
 function buildKpis(data: PlayerData): Array<ProfileKpi> {
-  const { headline: h, rally: r, error: e, momentum: m } = data
-
-  const winRate: ProfileKpi = {
-    value:
-      h && h.games_decided >= MIN_GAMES_FOR_WIN_RATE
-        ? `${pct(h.games_won, h.games_decided)}%`
-        : DASH,
-    label: "Win rate",
-    detail: h ? `${h.games_won}–${h.games_decided - h.games_won} games` : "",
-    accent: true,
-  }
+  const { headline: h, rally: r, momentum: m, serve: s } = data
 
   const matches: ProfileKpi = {
     value:
@@ -102,6 +87,15 @@ function buildKpis(data: PlayerData): Array<ProfileKpi> {
         : DASH,
     label: "Matches",
     detail: h && h.matches_decided > 0 ? `${h.matches_decided} decided` : "",
+  }
+
+  const games: ProfileKpi = {
+    value:
+      h && h.games_decided > 0
+        ? `${h.games_won}–${h.games_decided - h.games_won}`
+        : DASH,
+    label: "Games",
+    detail: h && h.games_decided > 0 ? `${h.games_decided} decided` : "",
   }
 
   const avgRally: ProfileKpi = {
@@ -122,17 +116,13 @@ function buildKpis(data: PlayerData): Array<ProfileKpi> {
     detail: "games won from behind",
   }
 
-  const tagged = e ? e.forced_errors + e.unforced_errors : 0
-  const errorsForced: ProfileKpi = {
-    value:
-      e && tagged >= MIN_ERRORS_FOR_RATE
-        ? `${pct(e.forced_errors, tagged)}%`
-        : DASH,
-    label: "Errors forced",
-    detail: e && tagged > 0 ? `${e.forced_errors} of ${tagged} tagged` : "",
+  const aces: ProfileKpi = {
+    value: s ? String(s.aces) : DASH,
+    label: "Aces",
+    detail: s ? `${s.double_faults} double faults` : "",
   }
 
-  return [winRate, matches, avgRally, streak, comebacks, errorsForced]
+  return [matches, games, avgRally, streak, comebacks, aces]
 }
 
 export function computeProfileHeader(

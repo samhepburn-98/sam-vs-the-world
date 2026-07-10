@@ -60,33 +60,27 @@ describe("computeProfileHeader", () => {
     expect(header.signature).toBe("Wins 60% of 1–3 shot rallies")
   })
 
-  it("shows the win-rate KPI once enough games are decided", () => {
+  it("shows the games record as a count, not the win rate", () => {
     const header = computeProfileHeader(
       player(),
-      fx.player({ headline: fx.headline({ games_won: 6, games_decided: 10 }) })
+      fx.player({ headline: fx.headline({ games_won: 8, games_decided: 19 }) }),
     )
-    const wr = kpi(header, "Win rate")
-    expect(wr.value).toBe("60%")
-    expect(wr.detail).toBe("6–4 games")
+    // win rate lives on the card's hero — the row shows the raw record behind it
+    expect(header.kpis.some((k) => k.label === "Win rate")).toBe(false)
+    const g = kpi(header, "Games")
+    expect(g.value).toBe("8–11")
+    expect(g.detail).toBe("19 decided")
   })
 
-  it("dashes the win-rate KPI below the games threshold", () => {
+  it("shows aces with double faults, and no errors-forced rate (the card's CON)", () => {
     const header = computeProfileHeader(
       player(),
-      fx.player({ headline: fx.headline({ games_won: 2, games_decided: 3 }) })
+      fx.player({ serve: fx.serve({ aces: 6, double_faults: 4 }) }),
     )
-    expect(kpi(header, "Win rate").value).toBe("—")
-  })
-
-  it("dashes the errors-forced KPI below the tagged-error threshold", () => {
-    const header = computeProfileHeader(
-      player(),
-      fx.player({ error: fx.error({ forced_errors: 5, unforced_errors: 4 }) })
-    )
-    // 9 tagged < MIN_ERRORS_FOR_RATE (15) — dash, but the denominator still shows
-    const ef = kpi(header, "Errors forced")
-    expect(ef.value).toBe("—")
-    expect(ef.detail).toBe("5 of 9 tagged")
+    expect(header.kpis.some((k) => k.label === "Errors forced")).toBe(false)
+    const a = kpi(header, "Aces")
+    expect(a.value).toBe("6")
+    expect(a.detail).toBe("4 double faults")
   })
 
   it("dashes every KPI when the payloads have not arrived", () => {
