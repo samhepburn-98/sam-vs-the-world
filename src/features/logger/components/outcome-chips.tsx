@@ -19,8 +19,7 @@ import {
   showsServeFault,
   showsShotType,
 } from "@/lib/rally/rally-draft"
-import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -104,7 +103,7 @@ export function OutcomeChips({
           value={draft.endReason ?? ""}
           onValueChange={(v) => v && onEndReason(v as EndReason)}
         >
-          {(["winner", "error", "stroke", "ace"] as const).map((r) => (
+          {(["winner", "error", "stroke"] as const).map((r) => (
             <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
               <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
               {END_REASON_LABELS[r]}
@@ -182,7 +181,7 @@ export function OutcomeChips({
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="none">—</SelectItem>
-                {Constants.public.Enums.shot_type.map((s) => (
+                {LOGGABLE_SHOT_TYPES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
                   </SelectItem>

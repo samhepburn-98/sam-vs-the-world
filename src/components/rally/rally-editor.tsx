@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
 import {
   buildRallyRow,
   canSave,
@@ -122,6 +122,7 @@ export function RallyEditor({
           }}
         >
           {Constants.public.Enums.end_reason
+            .filter((r) => r !== "ace")
             .filter((r) => r !== "serve_fault" || showsServeFault(draft))
             .map((r) => (
               <ToggleGroupItem key={r} value={r}>
@@ -227,7 +228,7 @@ export function RallyEditor({
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="none">—</SelectItem>
-                  {Constants.public.Enums.shot_type.map((s) => (
+                  {LOGGABLE_SHOT_TYPES.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
                     </SelectItem>

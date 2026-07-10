@@ -89,11 +89,11 @@ describe("RallyEditor", () => {
     )
   })
 
-  it("switching the winner on an ace drags the server along (auto-rule)", () => {
+  it("switching the winner on a serve fault drags the server along (auto-rule)", () => {
     const onSave = vi.fn()
     render(
       <RallyEditor
-        row={{ ...saved, end_reason: "ace" }}
+        row={{ ...saved, winner_id: DAVE, server_id: SAM, end_reason: "serve_fault" }}
         ctx={ctx}
         p1Name="Sam"
         p2Name="Dave"
@@ -102,14 +102,14 @@ describe("RallyEditor", () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole("radio", { name: "Dave" }))
+    fireEvent.click(screen.getByRole("radio", { name: "Sam" }))
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }))
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        winner_id: DAVE,
+        winner_id: SAM,
         server_id: DAVE,
-        end_reason: "ace",
+        end_reason: "serve_fault",
       }),
     )
   })
