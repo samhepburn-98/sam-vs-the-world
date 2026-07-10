@@ -6,12 +6,14 @@ import { StatBarRow } from "@/features/dashboard/components/stat-bar-row"
 import { cn } from "@/lib/utils"
 
 import type { ProfileFixture } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileStatsData } from "@/features/dashboard/lib/profile-stats"
 import type { ReactNode } from "react"
 
-// The Stats tab: the whole player as a dense bento of small multiples,
-// built for scanning before a match. Wide panels carry the two shapes
-// (rally curve, head-to-head); the small ones are single-question cards —
-// which box, which shot, where do the errors go, what happens at 9–all.
+// The Stats tab: the whole player as a dense bento of small multiples, built
+// for scanning before a match. The four RPC-backed cards (rally curve, phase
+// win rates, serve, errors given) read `stats`; point-enders, head-to-head,
+// recent matches, and the season strip still read `fixture` until each is
+// wired.
 
 function Panel({
   title,
@@ -49,30 +51,35 @@ function Panel({
   )
 }
 
-export function ProfileStatsTab({ profile }: { profile: ProfileFixture }) {
-  const { stats, season } = profile
-
+export function ProfileStatsTab({
+  stats,
+  fixture,
+}: {
+  stats: ProfileStatsData
+  fixture: ProfileFixture
+}) {
   return (
     <div className="grid gap-4 lg:grid-cols-12">
       <Panel
         title="Win rate by rally length"
-        sub="the shotmaker curve"
+        sub="1–3 · 4–8 · 9+ shots"
         className="lg:col-span-7"
       >
         <RallyLengthCurve buckets={stats.curve} />
       </Panel>
 
       <Panel
-        title="Pressure record"
-        read={stats.pressure.read}
+        title="By game phase"
+        sub="win rate early → close"
+        read={stats.phases.read}
         className="lg:col-span-5"
       >
-        {stats.pressure.rows.map((row) => (
+        {stats.phases.rows.map((row) => (
           <StatBarRow
             key={row.label}
             label={row.label}
-            pct={Math.round((row.won / row.of) * 100)}
-            value={`${row.won} of ${row.of}`}
+            pct={row.of > 0 ? Math.round((row.won / row.of) * 100) : 0}
+            value={row.of > 0 ? `${row.won} of ${row.of}` : "—"}
           />
         ))}
       </Panel>
@@ -83,10 +90,10 @@ export function ProfileStatsTab({ profile }: { profile: ProfileFixture }) {
 
       <Panel
         title="Point-enders"
-        read={stats.pointEnders.read}
+        read={fixture.stats.pointEnders.read}
         className="lg:col-span-4"
       >
-        {stats.pointEnders.rows.map((row) => (
+        {fixture.stats.pointEnders.rows.map((row) => (
           <StatBarRow
             key={row.label}
             label={row.label}
@@ -115,10 +122,10 @@ export function ProfileStatsTab({ profile }: { profile: ProfileFixture }) {
       <Panel
         title="Head-to-head"
         sub="games won share per rival"
-        read={stats.h2h.read}
+        read={fixture.stats.h2h.read}
         className="lg:col-span-7"
       >
-        <H2hTable rows={stats.h2h.rows} />
+        <H2hTable rows={fixture.stats.h2h.rows} />
       </Panel>
 
       <Panel
@@ -127,7 +134,7 @@ export function ProfileStatsTab({ profile }: { profile: ProfileFixture }) {
         className="lg:col-span-5"
       >
         <ul className="divide-y">
-          {stats.recent.map((m) => (
+          {fixture.stats.recent.map((m) => (
             <li
               key={`${m.date}-${m.opponent}`}
               className="flex items-center gap-3 py-2 text-sm"
@@ -157,7 +164,7 @@ export function ProfileStatsTab({ profile }: { profile: ProfileFixture }) {
         sub="oldest to newest"
         className="lg:col-span-12"
       >
-        <SeasonStrip games={season.games} />
+        <SeasonStrip games={fixture.season.games} />
       </Panel>
     </div>
   )

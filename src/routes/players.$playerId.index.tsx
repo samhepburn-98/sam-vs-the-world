@@ -10,6 +10,7 @@ import { ProfileHero } from "@/features/dashboard/components/profile-hero"
 import { ProfileStatsTab } from "@/features/dashboard/components/profile-stats-tab"
 import { ProfileSummaryTab } from "@/features/dashboard/components/profile-summary-tab"
 import { computeProfileHeader } from "@/features/dashboard/lib/profile-header"
+import { computeProfileStats } from "@/features/dashboard/lib/profile-stats"
 import { PROFILE_FIXTURE } from "@/features/dashboard/lib/profile-fixture"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,9 +20,10 @@ import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 // two tabs — Summary tells the story (radar, error wall, season strip,
 // match history), Stats is the dense bento for scanning before a match.
 //
-// WIRING IN PROGRESS. The header now reads real data — identity, the six
-// measured attributes, the win-rate hero, and the KPI tiles. The two tabs
-// still render PROFILE_FIXTURE while their sections are wired one at a time.
+// WIRING IN PROGRESS. The header and the Stats tab's four RPC-backed cards
+// (rally curve, phase win rates, serve, errors given) read real data; the
+// Summary tab and the remaining Stats cards (point-enders, head-to-head,
+// recent, season) still render PROFILE_FIXTURE, wired one at a time.
 
 export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {
@@ -53,7 +55,8 @@ function PlayerProfilePage() {
   }
 
   const header = computeProfileHeader(player, data)
-  // Tabs are still fixture-driven; wired section by section next.
+  const stats = computeProfileStats(data)
+  // Summary tab + the not-yet-wired Stats cards still read the fixture.
   const profile = PROFILE_FIXTURE
 
   return (
@@ -69,7 +72,7 @@ function PlayerProfilePage() {
           <ProfileSummaryTab profile={profile} />
         </TabsContent>
         <TabsContent value="stats" className="pt-4">
-          <ProfileStatsTab profile={profile} />
+          <ProfileStatsTab stats={stats} fixture={profile} />
         </TabsContent>
       </Tabs>
     </main>

@@ -1,10 +1,12 @@
 import type { CurveBucket } from "@/features/dashboard/lib/profile-fixture"
 
 // Win rate against rally length — the archetype curve. A shotmaker's line
-// starts high and sags past ten shots; a grinder's climbs. The dashed 50%
-// line makes break-even visible, and the area fill under the curve keeps
-// the shape readable at a glance. Geometry is computed from the buckets so
-// the component doesn't care how many there are.
+// starts high and sags past nine shots; a grinder's climbs. The dashed 50%
+// line makes break-even visible, and the area fill under the curve keeps the
+// shape readable at a glance. Geometry is computed from the buckets so the
+// component doesn't care how many there are. A bucket with no rallies plots
+// no point (its win rate is null) but still labels its slot on the axis, so
+// the length scale stays honest even when the middle is empty.
 
 const W = 560
 const H = 170
@@ -18,21 +20,37 @@ function y(rate: number): number {
 }
 
 export function RallyLengthCurve({ buckets }: { buckets: Array<CurveBucket> }) {
-  const step = (W - PAD_X * 2) / (buckets.length - 1)
-  const points = buckets.map((b, i) => ({
-    x: PAD_X + i * step,
-    y: y(b.winRate),
-    ...b,
-  }))
-  const line = points.map((p) => `${p.x},${p.y.toFixed(1)}`).join(" ")
-  const area = `M ${line.replaceAll(" ", " L ")} L ${points.at(-1)?.x},${BASE_Y} L ${points[0].x},${BASE_Y} Z`
+  const step = (W - PAD_X * 2) / Math.max(1, buckets.length - 1)
+  const slots = buckets.map((b, i) => ({ ...b, x: PAD_X + i * step }))
+  // only buckets with a rate get a plotted point; the line threads through them
+  const plotted = slots
+    .filter((s): s is typeof s & { winRate: number } => s.winRate !== null)
+    .map((s) => ({ ...s, y: y(s.winRate) }))
+
+  const line = plotted.map((p) => `${p.x},${p.y.toFixed(1)}`).join(" ")
+  const area =
+    plotted.length >= 2
+      ? `M ${line.replaceAll(" ", " L ")} L ${plotted.at(-1)?.x},${BASE_Y} L ${plotted[0].x},${BASE_Y} Z`
+      : null
+
+  if (plotted.length === 0) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        Not enough rallies logged yet.
+      </p>
+    )
+  }
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
       aria-label={`Win rate by rally length: ${buckets
-        .map((b) => `${b.winRate}% at ${b.label}`)
+        .map((b) =>
+          b.winRate === null
+            ? `no rallies at ${b.label}`
+            : `${b.winRate}% at ${b.label}`
+        )
         .join(", ")}.`}
       className="w-full"
     >
@@ -53,14 +71,16 @@ export function RallyLengthCurve({ buckets }: { buckets: Array<CurveBucket> }) {
         50%
       </text>
 
-      <path d={area} className="fill-primary/10" />
-      <polyline
-        points={line}
-        className="fill-none stroke-primary"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      {points.map((p) => (
+      {area && <path d={area} className="fill-primary/10" />}
+      {plotted.length >= 2 && (
+        <polyline
+          points={line}
+          className="fill-none stroke-primary"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+      )}
+      {plotted.map((p) => (
         <g key={p.label}>
           <circle cx={p.x} cy={p.y} r="4" className="fill-primary" />
           <text
@@ -71,15 +91,18 @@ export function RallyLengthCurve({ buckets }: { buckets: Array<CurveBucket> }) {
           >
             {p.winRate}%
           </text>
-          <text
-            x={p.x}
-            y={LABEL_Y}
-            textAnchor="middle"
-            className="fill-muted-foreground text-[10.5px] tabular-nums"
-          >
-            {p.label}
-          </text>
         </g>
+      ))}
+      {slots.map((s) => (
+        <text
+          key={s.label}
+          x={s.x}
+          y={LABEL_Y}
+          textAnchor="middle"
+          className="fill-muted-foreground text-[10.5px] tabular-nums"
+        >
+          {s.label}
+        </text>
       ))}
     </svg>
   )

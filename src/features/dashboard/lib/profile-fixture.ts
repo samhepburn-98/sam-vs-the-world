@@ -50,7 +50,8 @@ export interface HistoryMatch {
 export interface CurveBucket {
   label: string
   rallies: number
-  winRate: number
+  /** Win rate over the bucket, or null when it has no rallies to rate. */
+  winRate: number | null
 }
 
 export interface PressureRow {

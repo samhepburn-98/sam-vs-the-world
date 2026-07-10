@@ -26,18 +26,20 @@ function Box({
           accent && "text-primary"
         )}
       >
-        {Math.round((won / of) * 100)}%
+        {of > 0 ? `${Math.round((won / of) * 100)}%` : "—"}
       </p>
       <p className="text-xs text-muted-foreground/70 tabular-nums">
-        {won} of {of} serves won
+        {of > 0 ? `${won} of ${of} serves won` : "no serves yet"}
       </p>
     </div>
   )
 }
 
 export function ServeBoxes({ serve }: { serve: ServeBoxesData }) {
-  const leftRate = serve.left.won / serve.left.of
-  const rightRate = serve.right.won / serve.right.of
+  // rate is only comparable where the box has serves; an empty box never wins
+  // the accent
+  const leftRate = serve.left.of > 0 ? serve.left.won / serve.left.of : -1
+  const rightRate = serve.right.of > 0 ? serve.right.won / serve.right.of : -1
 
   return (
     <div className="flex flex-col gap-3">
