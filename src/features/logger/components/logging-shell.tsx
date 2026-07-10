@@ -22,6 +22,7 @@ import {
   createDraft,
   rowToRallyInput,
   selectEndReason,
+  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -136,7 +137,8 @@ function normalizeRow(r: {
   end_reason: RallyRow["end_reason"]
   error_detail: RallyRow["error_detail"]
   forced: boolean | null
-  shot_type: RallyRow["shot_type"]
+  winning_shot: RallyRow["winning_shot"]
+  losing_shot: RallyRow["losing_shot"]
   shot_count: number | null
 }): RallyRow {
   return { ...r, serve_number: r.serve_number === 2 ? 2 : 1 }
@@ -527,7 +529,7 @@ function MatchLogger({
           )}
           onEndReason={(r) => setDraftState(selectEndReason(draft, r, draftCtx))}
           onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
-          onForced={(v) => setDraftState({ ...draft, forced: v })}
+          onForced={(v) => setDraftState(setForced(draft, v))}
           onShotType={(v) => setDraftState({ ...draft, shotType: v })}
           onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
           onSave={saveDraftRally}

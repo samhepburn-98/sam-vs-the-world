@@ -14,7 +14,8 @@ export const rallySummary = z.object({
   end_reason: endReason,
   error_detail: errorDetail.nullable(),
   forced: z.boolean().nullable(),
-  shot_type: shotType.nullable(),
+  winning_shot: shotType.nullable(),
+  losing_shot: shotType.nullable(),
   shot_count: z.number().int().nullable(),
 })
 

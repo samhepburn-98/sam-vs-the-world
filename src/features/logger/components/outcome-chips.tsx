@@ -301,9 +301,11 @@ export function OutcomeChips({
             ))}
           </ToggleGroup>
           <span className="text-muted-foreground text-xs">
-            {draft.endReason === "error"
-              ? `the shot ${loserName} was playing`
-              : "the winning shot"}
+            {draft.endReason === "winner"
+              ? `${winnerName}'s winning shot`
+              : draft.forced === true
+                ? `${winnerName}'s forcing shot`
+                : `the shot ${loserName} was playing`}
           </span>
         </div>
       )}
