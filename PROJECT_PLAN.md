@@ -415,7 +415,7 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
 │                                          …                                     │
 │  [ SAM WON RALLY ]                                        [ DAVE WON RALLY ]   │
 │                                                                                │
-│  how: [winner][error][stroke][ace][serve fault]      + [let]                   │
+│  how: [winner][error][stroke][serve fault]           + [let]                   │
 │  error detail (if error): [tin][out top][out side][out back][not up][dbl bounce]│
 │  forced? [y/n]   shot type (optional)   shots: [__]                            │
 │                                  [ SAVE ]      [ undo last ]                   │
@@ -430,12 +430,13 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
   slim **let** button sits between — a let **saves immediately** with the current serve context (one
   tap, no chips; fixable afterwards in the timeline like any rally).
 - **Secondary chips appear after the winner tap:** end-reason `ToggleGroup` (winner · error · stroke ·
-  ace · serve fault); if *error*/*serve fault*, the error-detail chip row + forced toggle appear;
-  optional shot-type; `shot_count` numeric input. Save → row appended, chips reset, winner cleared,
+  serve fault — no ace: a 1-shot winner on serve IS an ace, derived); if *error*/*serve fault*, the
+  error-detail chip row + forced toggle appear; optional shot-type (the rally's last shot, on
+  winner/error); `shot_count` numeric input. Save → row appended, chips reset, winner cleared,
   focus returns. Context (game, server, sides) sticks.
 - **Hotkeys** (buttons remain for discoverability): `s`/`d` = winner on the **left/right side of the
-  screen** (court positions, not initials — generalises to any opponent) · `l` = let · `w/e/k/a/f` =
-  winner/error/stroke/ace/fault · `t/o/i/b/n/x` = error details · `g` = forced toggle · `q` = toggle
+  screen** (court positions, not initials — generalises to any opponent) · `l` = let · `w/e/k/f` =
+  winner/error/stroke/fault · `t/o/i/b/n/x` = error details · `g` = forced toggle · `q` = toggle
   1st/2nd serve · `z` = toggle serve box · digits = shot count · `enter` = save · `u` or `cmd+z` =
   undo · `?` = hotkey cheat-sheet overlay.
 - **Serve-fault consistency (rule-aware):** in a two-serve match, selecting *serve fault* auto-sets
