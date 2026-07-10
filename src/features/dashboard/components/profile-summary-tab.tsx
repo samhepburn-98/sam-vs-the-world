@@ -1,6 +1,6 @@
 import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
 import { ErrorWall } from "@/features/dashboard/components/error-wall"
-import { MatchTimeline } from "@/features/dashboard/components/match-timeline"
+import { MatchHistoryTable } from "@/features/dashboard/components/match-history-table"
 import { NarrativeInsight } from "@/features/dashboard/components/narrative-insight"
 import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 
@@ -13,7 +13,8 @@ import type { ReactNode } from "react"
 // The Summary tab: the story of the player, told visual-first. Each section
 // pairs one graphic with the narrative insights it supports — the radar with
 // the strength/weakness read, the error wall with the tin tax, then the
-// season strip and the match timeline. The Stats tab holds the dense grid.
+// season strip and the match history table. The Stats tab holds the dense
+// grid.
 
 function Section({
   title,
@@ -86,11 +87,11 @@ export function ProfileSummaryTab({ profile }: { profile: ProfileFixture }) {
         </div>
       </Section>
 
-      <Section title="Match timeline" lede={profile.timeline.lede}>
+      <Section title="Match history" lede={profile.history.lede}>
         <div className={PANEL}>
-          <MatchTimeline matches={profile.timeline.matches} />
-          <p className="mt-5 text-xs text-muted-foreground/70">
-            {profile.timeline.foldNote}
+          <MatchHistoryTable matches={profile.history.matches} />
+          <p className="mt-4 text-xs text-muted-foreground/70">
+            {profile.history.foldNote}
           </p>
         </div>
       </Section>

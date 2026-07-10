@@ -36,13 +36,14 @@ export interface ErrorWallCounts {
   tinShare: string
 }
 
-export interface TimelineMatch {
+export interface HistoryMatch {
   date: string
-  venue: string
   opponent: string
   won: boolean
   result: string
-  games: string
+  /** Per-game scores, this player first (e.g. "11-7") — the table derives
+   *  each pill's won/lost styling from the two numbers. */
+  games: Array<string>
   note: string
 }
 
@@ -113,9 +114,9 @@ export interface ProfileFixture {
     /** Game results oldest to newest. */
     games: Array<boolean>
   }
-  timeline: {
+  history: {
     lede: string
-    matches: Array<TimelineMatch>
+    matches: Array<HistoryMatch>
     foldNote: string
   }
   stats: {
@@ -255,56 +256,75 @@ export const PROFILE_FIXTURE: ProfileFixture = {
     lede: "All 40 games in order. The six-in-a-row run through late June is the best stretch logged; it ended the night the return stats fell off.",
     games: SEASON_GAMES.split("").map((g) => g === "W"),
   },
-  timeline: {
-    lede: "Most recent first. Each entry will open the full rally log.",
+  history: {
+    lede: "Most recent first. Each row will open the full rally-by-rally log.",
     matches: [
       {
         date: "9 Jul",
-        venue: "The Court House",
         opponent: "Woody",
         won: true,
-        result: "Won 3–1",
-        games: "11-7, 8-11, 11-9, 11-5",
+        result: "3–1",
+        games: ["11-7", "8-11", "11-9", "11-5"],
         note: "Longest rally of the season — 34 shots",
       },
       {
         date: "6 Jul",
-        venue: "The Court House",
         opponent: "Woody",
         won: false,
-        result: "Lost 1–3",
-        games: "9-11, 11-8, 7-11, 8-11",
+        result: "1–3",
+        games: ["9-11", "11-8", "7-11", "8-11"],
         note: "All three 9–all points lost",
       },
       {
         date: "2 Jul",
-        venue: "Uni courts",
         opponent: "Charlie",
         won: true,
-        result: "Won 3–0",
-        games: "11-5, 11-7, 11-8",
+        result: "3–0",
+        games: ["11-5", "11-7", "11-8"],
         note: "6-point streak in game one",
       },
       {
         date: "28 Jun",
-        venue: "The Court House",
         opponent: "Woody",
         won: true,
-        result: "Won 3–2",
-        games: "11-9, 9-11, 13-11, 6-11, 11-9",
+        result: "3–2",
+        games: ["11-9", "9-11", "13-11", "6-11", "11-9"],
         note: "Comeback from 8–10 in the third",
       },
       {
         date: "24 Jun",
-        venue: "Uni courts",
         opponent: "Jack",
         won: false,
-        result: "Lost 2–3",
-        games: "8-11, 11-6, 11-9, 5-11, 9-11",
+        result: "2–3",
+        games: ["8-11", "11-6", "11-9", "5-11", "9-11"],
         note: "7 tins — the worst error night logged",
       },
+      {
+        date: "21 Jun",
+        opponent: "Charlie",
+        won: true,
+        result: "3–1",
+        games: ["11-8", "11-9", "10-12", "11-4"],
+        note: "3 aces — season best",
+      },
+      {
+        date: "18 Jun",
+        opponent: "Woody",
+        won: false,
+        result: "0–3",
+        games: ["6-11", "9-11", "7-11"],
+        note: "Won just 31% of return points",
+      },
+      {
+        date: "14 Jun",
+        opponent: "Jack",
+        won: false,
+        result: "1–3",
+        games: ["9-11", "11-7", "8-11", "10-12"],
+        note: "Two games lost from game ball up",
+      },
     ],
-    foldNote: "7 earlier matches collapse below this fold.",
+    foldNote: "4 earlier matches load below this fold.",
   },
   stats: {
     curve: [
