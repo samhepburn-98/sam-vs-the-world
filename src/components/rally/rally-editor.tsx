@@ -18,7 +18,6 @@ import {
   canSave,
   rowToDraft,
   selectEndReason,
-  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -123,6 +122,7 @@ export function RallyEditor({
           }}
         >
           {Constants.public.Enums.end_reason
+            .filter((r) => r !== "ace")
             .filter((r) => r !== "serve_fault" || showsServeFault(draft))
             .map((r) => (
               <ToggleGroupItem key={r} value={r}>
@@ -196,7 +196,10 @@ export function RallyEditor({
             size="sm"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) =>
-              setDraft((d) => setForced(d, v === "" ? null : v === "yes"))
+              setDraft((d) => ({
+                ...d,
+                forced: v === "" ? null : v === "yes",
+              }))
             }
           >
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
@@ -205,7 +208,7 @@ export function RallyEditor({
         )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {showsShotType(draft.endReason, draft.forced) && (
+        {showsShotType(draft.endReason) && (
           <>
             <span className="text-muted-foreground w-12 shrink-0 text-xs">
               Shot

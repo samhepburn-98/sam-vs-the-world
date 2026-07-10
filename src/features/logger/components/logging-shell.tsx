@@ -22,7 +22,6 @@ import {
   createDraft,
   rowToRallyInput,
   selectEndReason,
-  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -523,7 +522,7 @@ function MatchLogger({
           winnerName={nameOf(draft.winnerId)}
           onEndReason={(r) => setDraftState(selectEndReason(draft, r, draftCtx))}
           onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
-          onForced={(v) => setDraftState(setForced(draft, v))}
+          onForced={(v) => setDraftState({ ...draft, forced: v })}
           onShotType={(v) => setDraftState({ ...draft, shotType: v })}
           onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
           onSave={saveDraftRally}

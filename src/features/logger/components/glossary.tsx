@@ -61,7 +61,9 @@ export function Glossary({ open, onClose }: GlossaryProps) {
             How the rally ended
           </h3>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
-            {Constants.public.Enums.end_reason.map((r) => (
+            {Constants.public.Enums.end_reason
+              .filter((r) => r !== "ace")
+              .map((r) => (
               <Fragment key={r}>
                 <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
                 <dd className="text-muted-foreground">{END_REASON_HELP[r]}</dd>
@@ -98,9 +100,14 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shot</dt>
           <dd className="text-muted-foreground">
-            The rally winner&rsquo;s decisive shot, and optional — their
-            winner, their ace, or the shot that forced the error. Unforced
-            errors take none: nothing decisive happened.
+            The last shot of the rally, and optional — the shot that won it,
+            or the failed attempt on an error (paired with the detail: tried
+            a drop, went not up).
+          </dd>
+          <dt className="mt-2 font-medium sm:mt-0">Aces</dt>
+          <dd className="text-muted-foreground">
+            There&rsquo;s no ace button — a winner with the rally length left
+            at 1 is an ace, counted automatically.
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shots</dt>
           <dd className="text-muted-foreground">

@@ -10,12 +10,13 @@ import type { HouseRules, RallyInput, Suggestion } from "@/lib/scoring"
 // a draft object — the components are a thin skin. Auto-rules mirror the DB
 // constraints so invalid combinations are unrepresentable in the UI:
 //
-//   ace         ⇒ the winner served        (server chip corrected to winner)
-//   serve_fault ⇒ the receiver won         (server corrected to non-winner)
-//                 and, in two-serve matches, it happened on serve 2
+//   serve_fault ⇒ the receiver won (server corrected to non-winner) and, in
+//                 two-serve matches, it happened on serve 2
 //
 // The user's winner tap is their primary assertion — when an end reason
 // implies who served, we correct the *server suggestion*, never the winner.
+// There is no ace reason: an ace is a winner where the server won on shot 1,
+// derived, never stored.
 
 export interface RallyDraft {
   serverId: string
@@ -66,7 +67,7 @@ export function tapWinner(
     endReason: draft.endReason === "let" ? null : draft.endReason,
   }
   // a re-tap is a misclick correction: re-apply the chosen end reason so its
-  // server corrections (ace/serve_fault) track the new winner
+  // server correction (serve_fault) tracks the new winner
   if (next.endReason) return selectEndReason(next, next.endReason, ctx)
   return applyAutoRules(next)
 }
@@ -83,10 +84,6 @@ export function selectEndReason(
     // to convert a mis-logged decided rally back into a let
     next = { ...next, winnerId: null }
   }
-  if (endReason === "ace" && next.winnerId) {
-    // an ace is by definition served by the winner
-    next = { ...next, serverId: next.winnerId }
-  }
   if (endReason === "serve_fault" && next.winnerId) {
     // a point-ending fault is by definition lost by the server
     next = { ...next, serverId: otherPlayer(ctx, next.winnerId) }
@@ -97,14 +94,12 @@ export function selectEndReason(
   return applyAutoRules(next)
 }
 
-/** clears fields that don't apply to the current end reason (DB scopes) —
- *  forced is cleared before the shot check, so a reason change that retires
- *  `forced` also retires the shot that depended on it */
+/** clears fields that don't apply to the current end reason (DB scopes) */
 function applyAutoRules(draft: RallyDraft): RallyDraft {
   const next = { ...draft }
   if (!showsErrorDetail(next.endReason)) next.errorDetail = null
   if (!showsForced(next.endReason)) next.forced = null
-  if (!showsShotType(next.endReason, next.forced)) next.shotType = null
+  if (!showsShotType(next.endReason)) next.shotType = null
   return next
 }
 
@@ -116,24 +111,11 @@ export function showsForced(endReason: EndReason | null): boolean {
   return endReason === "error"
 }
 
-/** Setting forced re-runs the auto rules — flipping a forced error back to
- *  unforced retires the shot that depended on it. */
-export function setForced(
-  draft: RallyDraft,
-  forced: boolean | null,
-): RallyDraft {
-  return applyAutoRules({ ...draft, forced })
-}
-
-/** The shot is always the rally WINNER's decisive one — their winner, their
- *  ace, or the shot that forced the error. An unforced error has no decisive
- *  shot by the winner, so it takes none (mirrors rallies_shot_type_scope). */
-export function showsShotType(
-  endReason: EndReason | null,
-  forced: boolean | null,
-): boolean {
-  if (endReason === "winner" || endReason === "ace") return true
-  return endReason === "error" && forced === true
+/** The shot is the LAST shot of the rally — the winning shot on a winner,
+ *  the failed attempt on an error. Strokes, lets, and serve faults have no
+ *  last shot worth tagging (mirrors rallies_shot_type_scope). */
+export function showsShotType(endReason: EndReason | null): boolean {
+  return endReason === "winner" || endReason === "error"
 }
 
 /** a point-ending serve fault is lost by the server — if the tapped winner

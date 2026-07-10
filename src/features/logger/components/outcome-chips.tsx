@@ -103,7 +103,7 @@ export function OutcomeChips({
           value={draft.endReason ?? ""}
           onValueChange={(v) => v && onEndReason(v as EndReason)}
         >
-          {(["winner", "error", "stroke", "ace"] as const).map((r) => (
+          {(["winner", "error", "stroke"] as const).map((r) => (
             <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
               <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
               {END_REASON_LABELS[r]}
@@ -166,7 +166,7 @@ export function OutcomeChips({
         </div>
       )}
 
-      {showsShotType(draft.endReason, draft.forced) && (
+      {showsShotType(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
             Shot
