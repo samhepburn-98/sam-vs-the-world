@@ -90,10 +90,10 @@ export function ProfileStatsTab({
 
       <Panel
         title="Point-enders"
-        read={fixture.stats.pointEnders.read}
+        read={stats.pointEnders.read}
         className="lg:col-span-4"
       >
-        {fixture.stats.pointEnders.rows.map((row) => (
+        {stats.pointEnders.rows.map((row) => (
           <StatBarRow
             key={row.label}
             label={row.label}

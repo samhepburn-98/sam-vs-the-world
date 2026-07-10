@@ -5,6 +5,7 @@ import {
 } from "@/features/dashboard/utils/insight-thresholds"
 
 import type {
+  DecisiveShots,
   ErrorProfile,
   Momentum,
   PlayerHeadline,
@@ -20,13 +21,14 @@ import type {
 // model. Below a sample threshold a value is null and the UI shows a quiet
 // dash instead of a noisy rate.
 
-/** The five insight payloads fetched per player. */
+/** The insight payloads fetched per player. */
 export interface PlayerData {
   headline?: PlayerHeadline
   serve?: ServeStats
   error?: ErrorProfile
   rally?: RallyLengths
   momentum?: Momentum
+  decisive?: DecisiveShots
 }
 
 export type AttributeKey = "srv" | "ret" | "att" | "con" | "grd" | "clu"

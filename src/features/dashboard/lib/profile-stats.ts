@@ -19,6 +19,7 @@ export interface ProfileStatsData {
   curve: Array<CurveBucket>
   phases: { rows: Array<PressureRow>; read: string }
   serve: ServeBoxes
+  pointEnders: { rows: Array<ShareRow>; read: string }
   errorsGiven: { rows: Array<ShareRow>; read: string }
 }
 
@@ -74,6 +75,29 @@ function buildPhases(data: PlayerData): {
   return { rows, read }
 }
 
+/** The winner's decisive shots — drive/drop/boast — behind the player's own
+ *  points won. Shares are of the tagged total, and the read names it. */
+function buildPointEnders(data: PlayerData): {
+  rows: Array<ShareRow>
+  read: string
+} {
+  const d = data.decisive
+  const drive = d?.winning_drive ?? 0
+  const drop = d?.winning_drop ?? 0
+  const boast = d?.winning_boast ?? 0
+  const total = drive + drop + boast
+  const rows: Array<ShareRow> = [
+    { label: "Drive", count: drive, share: share(drive, total) },
+    { label: "Drop", count: drop, share: share(drop, total) },
+    { label: "Boast", count: boast, share: share(boast, total) },
+  ]
+  const read =
+    total > 0
+      ? `${total} decisive ${total === 1 ? "shot" : "shots"} tagged.`
+      : "No decisive shots tagged yet."
+  return { rows, read }
+}
+
 function buildServe(data: PlayerData): ServeBoxes {
   const s = data.serve
   return {
@@ -109,6 +133,7 @@ export function computeProfileStats(data: PlayerData): ProfileStatsData {
     curve: buildCurve(data),
     phases: buildPhases(data),
     serve: buildServe(data),
+    pointEnders: buildPointEnders(data),
     errorsGiven: buildErrorsGiven(data),
   }
 }

@@ -101,10 +101,31 @@ describe("computeProfileStats", () => {
     )
   })
 
+  it("counts the winning point-enders by shot with their shares", () => {
+    const { pointEnders } = computeProfileStats(
+      fx.player({
+        decisive: fx.decisive({
+          winning_drive: 9,
+          winning_drop: 2,
+          winning_boast: 1,
+        }),
+      })
+    )
+    expect(pointEnders.rows.map((r) => [r.label, r.count])).toEqual([
+      ["Drive", 9],
+      ["Drop", 2],
+      ["Boast", 1],
+    ])
+    expect(pointEnders.rows.find((r) => r.label === "Drive")!.share).toBe(75)
+    expect(pointEnders.read).toBe("12 decisive shots tagged.")
+  })
+
   it("dashes rather than dividing by zero when payloads are empty", () => {
-    const { curve, serve, errorsGiven } = computeProfileStats({})
+    const { curve, serve, pointEnders, errorsGiven } = computeProfileStats({})
     expect(curve.every((b) => b.winRate === null)).toBe(true)
     expect(serve.left.of).toBe(0)
+    expect(pointEnders.rows.every((r) => r.count === 0)).toBe(true)
+    expect(pointEnders.read).toBe("No decisive shots tagged yet.")
     expect(errorsGiven.rows.every((r) => r.share === 0)).toBe(true)
   })
 })

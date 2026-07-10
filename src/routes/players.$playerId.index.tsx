@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { decisiveShotsOptions } from "@/features/dashboard/api/get-decisive-shots"
 import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
 import { momentumOptions } from "@/features/dashboard/api/get-momentum"
 import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/players/$playerId/")({
       context.queryClient.ensureQueryData(errorProfileOptions(id, {})),
       context.queryClient.ensureQueryData(rallyLengthsOptions(id, {})),
       context.queryClient.ensureQueryData(momentumOptions(id, {})),
+      context.queryClient.ensureQueryData(decisiveShotsOptions(id, {})),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
   },
