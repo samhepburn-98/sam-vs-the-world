@@ -1,6 +1,5 @@
-import { END_REASON_HELP, ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
+import { ERROR_DETAIL_HELP } from "@/features/logger/components/glossary"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -10,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Kbd } from "@/components/ui/kbd"
+import { NumberStepper } from "@/components/ui/number-stepper"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
 import {
@@ -20,24 +20,18 @@ import {
   showsShotType,
 } from "@/lib/rally/rally-draft"
 import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
+import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
 
-// The secondary chips (§5.3): appear after the winner tap; only the fields
-// valid for the chosen end reason exist — the state machine clears the rest.
-
-// Logging labels are framed by the one thing you can see on the clip: did the
-// opponent get a racket on the ball? (§2). "No touch" stores a winner, "Hit,
-// no return" an error — the analytics still call them winners and errors.
-const END_REASON_LABELS: Record<EndReason, string> = {
-  winner: "No touch",
-  error: "Hit, no return",
-  stroke: "Stroke",
-  let: "Let",
-  ace: "Ace",
-  serve_fault: "Serve fault",
-}
+// The outcome form: appears after the winner tap, and every option names a
+// player — no label ever refers to an unnamed "opponent", so nothing needs
+// translating at review speed. The two common outcomes (winner, error) are
+// prominent cards settled by the one thing visible on the clip — did the
+// other player get a racket on it? — while the rare calls (stroke, serve
+// fault) sit demoted below them. Only the fields valid for the chosen end
+// reason exist; the draft state machine clears the rest.
 
 const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
   tin: "Tin",
@@ -48,9 +42,76 @@ const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
   double_bounce: "Dbl bounce",
 }
 
+/** One of the two prominent outcome cards: a named headline plus the one-line
+ *  rule that settles the call at a glance. */
+function OutcomeCard({
+  hint,
+  headline,
+  rule,
+  selected,
+  onSelect,
+}: {
+  hint: string
+  headline: string
+  rule: string
+  selected: boolean
+  onSelect: () => void
+}) {
+  return (
+    <Button
+      type="button"
+      variant={selected ? "default" : "outline"}
+      aria-pressed={selected}
+      onClick={onSelect}
+      className="h-auto flex-1 flex-col items-start gap-0.5 py-2"
+    >
+      <span className="flex items-center gap-1.5 font-medium">
+        <Kbd>{hint}</Kbd>
+        {headline}
+      </span>
+      <span
+        className={cn(
+          "text-xs font-normal",
+          selected ? "text-primary-foreground/85" : "text-muted-foreground",
+        )}
+      >
+        {rule}
+      </span>
+    </Button>
+  )
+}
+
+/** A demoted outcome for the rare calls — quiet text until selected. */
+function RareOutcome({
+  hint,
+  label,
+  selected,
+  onSelect,
+}: {
+  hint: string
+  label: string
+  selected: boolean
+  onSelect: () => void
+}) {
+  return (
+    <Button
+      type="button"
+      variant={selected ? "default" : "ghost"}
+      size="sm"
+      aria-pressed={selected}
+      onClick={onSelect}
+      className={cn("h-7 px-2", !selected && "text-muted-foreground")}
+    >
+      <Kbd>{hint}</Kbd>
+      {label}
+    </Button>
+  )
+}
+
 interface OutcomeChipsProps {
   draft: RallyDraft
   winnerName: string
+  loserName: string
   onEndReason: (reason: EndReason) => void
   onErrorDetail: (detail: ErrorDetail | null) => void
   onForced: (forced: boolean | null) => void
@@ -64,6 +125,7 @@ interface OutcomeChipsProps {
 export function OutcomeChips({
   draft,
   winnerName,
+  loserName,
   onEndReason,
   onErrorDetail,
   onForced,
@@ -93,38 +155,46 @@ export function OutcomeChips({
           ?
         </Button>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">How</span>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
-          className="flex-wrap"
-          value={draft.endReason ?? ""}
-          onValueChange={(v) => v && onEndReason(v as EndReason)}
-        >
-          {(["winner", "error", "stroke"] as const).map((r) => (
-            <ToggleGroupItem key={r} value={r} title={END_REASON_HELP[r]}>
-              <Kbd>{HOTKEY_HINTS.endReason[r]}</Kbd>
-              {END_REASON_LABELS[r]}
-            </ToggleGroupItem>
-          ))}
+
+      <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <OutcomeCard
+            hint={HOTKEY_HINTS.endReason.winner}
+            headline={`${winnerName} hit a winner`}
+            rule={`${loserName} didn't touch it`}
+            selected={draft.endReason === "winner"}
+            onSelect={() => onEndReason("winner")}
+          />
+          <OutcomeCard
+            hint={HOTKEY_HINTS.endReason.error}
+            headline={`${loserName} made an error`}
+            rule="hit it, but no return"
+            selected={draft.endReason === "error"}
+            onSelect={() => onEndReason("error")}
+          />
+        </div>
+        <div className="flex flex-wrap gap-1">
+          <RareOutcome
+            hint={HOTKEY_HINTS.endReason.stroke}
+            label={`Stroke to ${winnerName}`}
+            selected={draft.endReason === "stroke"}
+            onSelect={() => onEndReason("stroke")}
+          />
           {showsServeFault(draft) && (
-            <ToggleGroupItem
-              value="serve_fault"
-              title={END_REASON_HELP.serve_fault}
-            >
-              <Kbd>{HOTKEY_HINTS.endReason.serve_fault}</Kbd>
-              {END_REASON_LABELS.serve_fault}
-            </ToggleGroupItem>
+            <RareOutcome
+              hint={HOTKEY_HINTS.endReason.serve_fault}
+              label={`${loserName} faulted the serve`}
+              selected={draft.endReason === "serve_fault"}
+              onSelect={() => onEndReason("serve_fault")}
+            />
           )}
-        </ToggleGroup>
+        </div>
       </div>
 
       {showsErrorDetail(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Detail
+            Where
           </span>
           <ToggleGroup
             type="single"
@@ -147,7 +217,7 @@ export function OutcomeChips({
       {showsForced(draft.endReason) && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Forced?
+            Why
           </span>
           <ToggleGroup
             type="single"
@@ -160,7 +230,7 @@ export function OutcomeChips({
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
             <ToggleGroupItem value="yes">
               <Kbd>{HOTKEY_HINTS.forced}</Kbd>
-              Forced
+              {winnerName} forced it
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -189,6 +259,11 @@ export function OutcomeChips({
               </SelectGroup>
             </SelectContent>
           </Select>
+          <span className="text-muted-foreground text-xs">
+            {draft.endReason === "error"
+              ? `the shot ${loserName} was playing`
+              : "the winning shot"}
+          </span>
         </div>
       )}
 
@@ -196,15 +271,12 @@ export function OutcomeChips({
         <span className="text-muted-foreground w-12 shrink-0 text-xs">
           Shots
         </span>
-        <Input
-          type="number"
+        <NumberStepper
+          value={draft.shotCount}
+          onChange={onShotCount}
           min={0}
-          inputMode="numeric"
-          className="w-20"
-          value={draft.shotCount ?? ""}
-          onChange={(e) =>
-            onShotCount(e.target.value === "" ? null : Number(e.target.value))
-          }
+          max={999}
+          ariaLabel="shot count"
         />
         <span className="text-muted-foreground text-xs">
           every racket touch counts, including the last
