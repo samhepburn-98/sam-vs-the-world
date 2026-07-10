@@ -2,14 +2,13 @@ import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 import { cn } from "@/lib/utils"
 
-import type {
-  ProfileFixture,
-  ProfileKpi,
-} from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileKpi } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileHeaderData } from "@/features/dashboard/lib/profile-header"
 
 // The profile header: the card is the identity anchor on the left, the
 // right column carries the name, the signature read, and six KPI tiles —
 // the whole player at a glance before the tabs split into story and detail.
+// Presentational only; computeProfileHeader decides every value it's handed.
 
 function KpiTile({ kpi }: { kpi: ProfileKpi }) {
   return (
@@ -25,31 +24,27 @@ function KpiTile({ kpi }: { kpi: ProfileKpi }) {
       <p className="mt-0.5 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
         {kpi.label}
       </p>
-      <p className="text-xs text-muted-foreground/70 tabular-nums">
-        {kpi.detail}
-      </p>
+      {kpi.detail && (
+        <p className="text-xs text-muted-foreground/70 tabular-nums">
+          {kpi.detail}
+        </p>
+      )}
     </div>
   )
 }
 
-export function ProfileHero({
-  profile,
-  avatarSrc,
-}: {
-  profile: ProfileFixture
-  avatarSrc: string
-}) {
+export function ProfileHero({ header }: { header: ProfileHeaderData }) {
   return (
     <header className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
       <div className="w-48 shrink-0 sm:w-52">
         <PlayerCard
-          name={profile.name}
+          name={header.name}
           side="p1"
-          avatarSrc={avatarSrc}
-          trait={profile.trait}
-          handedness={profile.handedness}
-          hero={profile.card.hero}
-          attrs={profile.card.attrs}
+          avatarSrc={header.avatarSrc}
+          trait={header.trait}
+          handedness={header.handedness}
+          hero={header.hero}
+          attrs={header.attrs}
         />
       </div>
 
@@ -57,22 +52,30 @@ export function ProfileHero({
         <div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1 className="font-heading text-3xl font-bold tracking-tight">
-              {profile.name}
+              {header.name}
             </h1>
-            <span className="text-sm font-semibold tracking-widest text-primary uppercase">
-              {TRAIT_LABELS[profile.trait]}
-            </span>
+            {header.trait && (
+              <span className="text-sm font-semibold tracking-widest text-primary uppercase">
+                {TRAIT_LABELS[header.trait]}
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {profile.signature}
-            </span>{" "}
-            {profile.meta}
+            {header.signature ? (
+              <>
+                <span className="font-medium text-foreground">
+                  {header.signature}
+                </span>{" "}
+                {header.meta}
+              </>
+            ) : (
+              header.meta
+            )}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {profile.kpis.map((kpi) => (
+          {header.kpis.map((kpi) => (
             <KpiTile key={kpi.label} kpi={kpi} />
           ))}
         </div>

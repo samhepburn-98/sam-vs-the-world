@@ -41,14 +41,39 @@ export const ATTRIBUTE_META: Array<{
   /** what the number actually measures — also the accessible label */
   detail: string
 }> = [
-  { key: "srv", code: "SRV", name: "Serve", detail: "Points won on your own serve" },
-  { key: "ret", code: "RET", name: "Return", detail: "Points won when receiving serve" },
-  { key: "att", code: "ATT", name: "Attack", detail: "Short rallies (1–4 shots) won" },
-  { key: "con", code: "CON", name: "Control", detail: "Errors you forced, not gifted cheaply" },
+  {
+    key: "srv",
+    code: "SRV",
+    name: "Serve",
+    detail: "Points won on your own serve",
+  },
+  {
+    key: "ret",
+    code: "RET",
+    name: "Return",
+    detail: "Points won when receiving serve",
+  },
+  {
+    key: "att",
+    code: "ATT",
+    name: "Attack",
+    detail: "Short rallies (1–4 shots) won",
+  },
+  {
+    key: "con",
+    code: "CON",
+    name: "Control",
+    detail: "Errors you forced, not gifted cheaply",
+  },
   // long (10+) rallies alone are too rare to rate on this much play, so
   // "grind" spans every extended rally (5+ shots) — plenty of sample, same
   // story of who wins the wars of attrition
-  { key: "grd", code: "GRD", name: "Grind", detail: "Extended rallies (5+ shots) won" },
+  {
+    key: "grd",
+    code: "GRD",
+    name: "Grind",
+    detail: "Extended rallies (5+ shots) won",
+  },
   { key: "clu", code: "CLU", name: "Clutch", detail: "Points won from 9–all" },
 ]
 
@@ -69,7 +94,7 @@ function rate(
   of: number,
   min: number,
   unit: string,
-  verb = "won",
+  verb = "won"
 ): Pick<PlayerAttribute, "value" | "display" | "sr"> {
   if (of < min) {
     // below the threshold a rate is noise — show a quiet dash, not a raw
@@ -81,7 +106,11 @@ function rate(
     }
   }
   const pct = Math.round((won / of) * 100)
-  return { value: pct, display: String(pct), sr: `${won} of ${of} ${unit} ${verb}` }
+  return {
+    value: pct,
+    display: String(pct),
+    sr: `${won} of ${of} ${unit} ${verb}`,
+  }
 }
 
 const EMPTY = { value: null, display: "—", sr: "no data yet" }
@@ -90,15 +119,33 @@ const EMPTY = { value: null, display: "—", sr: "no data yet" }
 export function computePlayerAttributes(d: PlayerData): Array<PlayerAttribute> {
   const { serve, rally, error, momentum } = d
 
-  const rates: Record<AttributeKey, Pick<PlayerAttribute, "value" | "display" | "sr">> = {
+  const rates: Record<
+    AttributeKey,
+    Pick<PlayerAttribute, "value" | "display" | "sr">
+  > = {
     srv: serve
-      ? rate(serve.serve_wins, serve.rallies_served, MIN_RALLIES_FOR_RATE, "serve rallies")
+      ? rate(
+          serve.serve_wins,
+          serve.rallies_served,
+          MIN_RALLIES_FOR_RATE,
+          "serve rallies"
+        )
       : EMPTY,
     ret: serve
-      ? rate(serve.return_wins, serve.rallies_returned, MIN_RALLIES_FOR_RATE, "return rallies")
+      ? rate(
+          serve.return_wins,
+          serve.rallies_returned,
+          MIN_RALLIES_FOR_RATE,
+          "return rallies"
+        )
       : EMPTY,
     att: rally
-      ? rate(rally.short_wins, rally.short_rallies, MIN_RALLIES_FOR_RATE, "short rallies")
+      ? rate(
+          rally.short_wins,
+          rally.short_rallies,
+          MIN_RALLIES_FOR_RATE,
+          "short rallies"
+        )
       : EMPTY,
     con: error
       ? rate(
@@ -106,7 +153,7 @@ export function computePlayerAttributes(d: PlayerData): Array<PlayerAttribute> {
           error.forced_errors + error.unforced_errors,
           MIN_ERRORS_FOR_RATE,
           "tagged errors",
-          "were forced",
+          "were forced"
         )
       : EMPTY,
     grd: rally
@@ -114,11 +161,16 @@ export function computePlayerAttributes(d: PlayerData): Array<PlayerAttribute> {
           rally.medium_wins + rally.long_wins,
           rally.medium_rallies + rally.long_rallies,
           MIN_RALLIES_FOR_RATE,
-          "extended rallies",
+          "extended rallies"
         )
       : EMPTY,
     clu: momentum
-      ? rate(momentum.close_wins, momentum.close_rallies, MIN_RALLIES_FOR_RATE, "close-phase rallies")
+      ? rate(
+          momentum.close_wins,
+          momentum.close_rallies,
+          MIN_RALLIES_FOR_RATE,
+          "close-phase rallies"
+        )
       : EMPTY,
   }
 
@@ -148,6 +200,38 @@ export const TRAIT_LABELS: Record<SignatureTrait, string> = {
   grinder: "Grinder",
   shotmaker: "Shotmaker",
   balanced: "Balanced",
+}
+
+function bucketRate(wins: number, rallies: number): number | null {
+  return rallies > 0 ? Math.round((wins / rallies) * 100) : null
+}
+
+/** The card's one-line signature read (§3.2): "Grinder — wins 61% of 9+ shot
+ *  rallies", etc. Null when the trait can't be called (too few rallies in a
+ *  bucket) — the headline RPC already gates that. */
+export function signatureLine(
+  headline: Pick<PlayerHeadline, "signature_trait">,
+  lengths: Pick<
+    RallyLengths,
+    "long_wins" | "long_rallies" | "short_wins" | "short_rallies"
+  >
+) {
+  const long = bucketRate(lengths.long_wins, lengths.long_rallies)
+  const short = bucketRate(lengths.short_wins, lengths.short_rallies)
+  switch (headline.signature_trait) {
+    case "grinder":
+      return long === null
+        ? "Grinder — stronger the longer the rally"
+        : `Grinder — wins ${long}% of 9+ shot rallies`
+    case "shotmaker":
+      return short === null
+        ? "Shotmaker — stronger in short rallies"
+        : `Shotmaker — wins ${short}% of 1–3 shot rallies`
+    case "balanced":
+      return "Balanced — no clear long- or short-rally edge"
+    default:
+      return null
+  }
 }
 
 /** The card's class line. Prefers the SQL-computed signature_trait; until
