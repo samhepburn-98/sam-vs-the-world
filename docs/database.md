@@ -41,8 +41,8 @@ referenced (`on delete restrict`).
 | `end_reason` | how the point ended (see enums below) |
 | `error_detail` | which kind of error, when `end_reason` is `error`/`serve_fault` |
 | `forced` | forced vs unforced — only on `error`; NULL = untagged |
-| `shot_type` | what shot won it — only on `winner`/`ace`; optional forever |
-| `shot_count` | total shots **including the serve** (ace = 1, double fault = 0); NULL = untagged |
+| `shot_type` | the last shot of the rally — the winning shot on a `winner`, the failed attempt on an `error`; optional forever |
+| `shot_count` | total shots **including the serve** (double fault = 0); NULL = untagged. A `winner` with `shot_count = 1` where the server won **is** an ace — derived, never stored |
 
 ## Enums
 
@@ -54,7 +54,6 @@ referenced (`on delete restrict`).
 | `error` | the loser made a mistake (see `error_detail`) | the non-erring player |
 | `stroke` | interference call, point awarded | the obstructed player |
 | `let` | interference call, point replayed — no winner, no score change | NULL |
-| `ace` | unreturnable serve | the server (CHECK-enforced) |
 | `serve_fault` | second-serve fault = double fault | the receiver (CHECK-enforced) |
 
 **`error_detail`** — the error taxonomy (house definitions):
@@ -67,8 +66,8 @@ referenced (`on delete restrict`).
 | `not_up` | hit the ball but it didn't reach the front wall |
 | `double_bounce` | didn't get to the ball — it bounced twice |
 
-Also: `serve_side` (`left`/`right`), `shot_type` (`drop`/`drive`/`kill`/`nick`/`boast`/`volley`/
-`lob`/`other`), `handedness`, `tiebreak`, `ball_type` (`blue`/`red`/`yellow`/`double_yellow` —
+Also: `serve_side` (`left`/`right`), `shot_type` (`drop`/`drive`/`boast` — kill/nick/volley/
+lob/other retired, kept in the enum but rejected by CHECK), `handedness`, `tiebreak`, `ball_type` (`blue`/`red`/`yellow`/`double_yellow` —
 bounce ≈ difficulty: blue easiest, double yellow coldest/hardest).
 
 ## Integrity guards
@@ -79,7 +78,7 @@ The most likely data-entry bugs are *blocked by the database*, not policed by go
 |---|---|
 | `let ⇔ winner IS NULL` (biconditional CHECK) | a non-let rally silently missing its winner — which would corrupt every running score |
 | **rule-aware serve validation** (trigger reads the match's `serves_per_point`): `serve_number ≤ serves_per_point`; two-serve matches require `serve_fault ⇒ serve_number = 2` | serve data that contradicts the match's own rules — while keeping official single-serve squash loggable |
-| `ace ⇒ winner = server` · `serve_fault ⇒ winner = receiver` | mis-tagged winners poisoning serve stats and error attribution (hold under any serve rule, so they stay CHECKs) |
+| `serve_fault ⇒ winner = receiver` | mis-tagged winners poisoning serve stats and error attribution (holds under any serve rule, so it stays a CHECK) |
 | `error_detail`/`forced`/`shot_type` scope CHECKs | detail fields on rally types they don't apply to |
 | trigger: rally's server & winner must be players of the match | orphaned stats from a stray UUID |
 | trigger: match players **and `serves_per_point`** immutable once games exist | silently orphaning rally mappings / invalidating logged serve data |

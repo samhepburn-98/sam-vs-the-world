@@ -18,11 +18,10 @@ export type HotkeyAction =
   | { type: "undo" }
   | { type: "help" }
 
-const END_REASON_KEYS: Record<string, Exclude<EndReason, "let">> = {
+const END_REASON_KEYS: Record<string, Exclude<EndReason, "let" | "ace">> = {
   w: "winner",
   e: "error",
   k: "stroke",
-  a: "ace",
   f: "serve_fault",
 }
 
@@ -80,7 +79,7 @@ export const HOTKEY_HINTS = {
   winnerP1: "s",
   winnerP2: "d",
   let: "l",
-  endReason: { winner: "w", error: "e", stroke: "k", ace: "a", serve_fault: "f" },
+  endReason: { winner: "w", error: "e", stroke: "k", serve_fault: "f" },
   errorDetail: {
     tin: "t",
     out_top: "o",

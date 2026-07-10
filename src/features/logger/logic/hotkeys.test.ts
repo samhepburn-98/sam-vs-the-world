@@ -22,7 +22,6 @@ describe("hotkeyAction — the §5.3 map, exactly", () => {
     expect(hotkeyAction(key("w"))).toEqual({ type: "endReason", reason: "winner" })
     expect(hotkeyAction(key("e"))).toEqual({ type: "endReason", reason: "error" })
     expect(hotkeyAction(key("k"))).toEqual({ type: "endReason", reason: "stroke" })
-    expect(hotkeyAction(key("a"))).toEqual({ type: "endReason", reason: "ace" })
     expect(hotkeyAction(key("f"))).toEqual({
       type: "endReason",
       reason: "serve_fault",

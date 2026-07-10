@@ -2,13 +2,14 @@ import { forwardRef } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
-import { cn } from "@/lib/utils"
 
-// The primary action (§5.3): two big buttons — who won the rally — with the
-// slim let between them (a let saves immediately, no chips). Once a winner is
-// tapped that button stays visibly pressed; tapping the other side switches
-// the winner (misclick correction).
+// The primary action: who won the rally — a real single-choice group, with
+// the slim let between the two sides (a let saves immediately, no chips, so
+// it stays a plain action button). Both sides start prominent; once a winner
+// is tapped the other side recedes, and tapping it switches the winner
+// (misclick correction).
 
 interface WinnerButtonsProps {
   p1Name: string
@@ -20,32 +21,28 @@ interface WinnerButtonsProps {
 
 export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
   function WinnerButtons({ p1Name, p2Name, selected, onWinner, onLet }, ref) {
-    const winnerButton = (side: "p1" | "p2", name: string) => (
-      <Button
-        type="button"
-        size="lg"
-        variant={selected === null || selected === side ? "default" : "outline"}
-        aria-pressed={selected === side}
-        className={cn(
-          "h-16 min-w-0 px-2 text-sm leading-tight tracking-wide whitespace-normal uppercase sm:px-6 sm:text-base",
-          selected === side && "ring-primary/50 ring-2 ring-offset-2",
-          selected !== null && selected !== side && "opacity-60",
-        )}
+    const winnerItem = (side: "p1" | "p2", name: string) => (
+      <ToggleGroupItem
+        value={side}
+        className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-primary/50 h-16 min-w-0 px-2 text-sm leading-tight tracking-wide whitespace-normal uppercase data-[state=on]:ring-2 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base"
         onClick={() => onWinner(side)}
       >
         <Kbd>{side === "p1" ? HOTKEY_HINTS.winnerP1 : HOTKEY_HINTS.winnerP2}</Kbd>
         {name} won
         {selected === side && <span aria-hidden>✓</span>}
-      </Button>
+      </ToggleGroupItem>
     )
 
     return (
-      <div
+      <ToggleGroup
         ref={ref}
+        type="single"
         tabIndex={-1}
-        className="grid grid-cols-[1fr_auto_1fr] gap-2 outline-none"
+        aria-label="Who won the rally"
+        value={selected ?? ""}
+        className="group/winners grid w-full grid-cols-[1fr_auto_1fr] gap-2 outline-none"
       >
-        {winnerButton("p1", p1Name)}
+        {winnerItem("p1", p1Name)}
         <Button
           type="button"
           variant="outline"
@@ -55,8 +52,8 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
           <Kbd>{HOTKEY_HINTS.let}</Kbd>
           Let
         </Button>
-        {winnerButton("p2", p2Name)}
-      </div>
+        {winnerItem("p2", p2Name)}
+      </ToggleGroup>
     )
   },
 )

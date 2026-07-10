@@ -2,17 +2,9 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
+import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
 import {
   buildRallyRow,
   canSave,
@@ -122,6 +114,7 @@ export function RallyEditor({
           }}
         >
           {Constants.public.Enums.end_reason
+            .filter((r) => r !== "ace")
             .filter((r) => r !== "serve_fault" || showsServeFault(draft))
             .map((r) => (
               <ToggleGroupItem key={r} value={r}>
@@ -212,29 +205,25 @@ export function RallyEditor({
             <span className="text-muted-foreground w-12 shrink-0 text-xs">
               Shot
             </span>
-            <Select
-              value={draft.shotType ?? "none"}
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              className="flex-wrap"
+              value={draft.shotType ?? ""}
               onValueChange={(v) =>
                 setDraft((d) => ({
                   ...d,
-                  shotType: v === "none" ? null : (v as ShotType),
+                  shotType: v === "" ? null : (v as ShotType),
                 }))
               }
             >
-              <SelectTrigger size="sm" className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="none">—</SelectItem>
-                  {Constants.public.Enums.shot_type.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              {LOGGABLE_SHOT_TYPES.map((s) => (
+                <ToggleGroupItem key={s} value={s} className="capitalize">
+                  {s}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           </>
         )}
         {draft.endReason !== "let" && (

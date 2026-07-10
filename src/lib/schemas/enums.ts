@@ -21,6 +21,16 @@ export const LOGGABLE_ERROR_DETAILS = E.error_detail.filter(
 export const handedness = z.enum(E.handedness)
 export const serveSide = z.enum(E.serve_side)
 export const shotType = z.enum(E.shot_type)
+
+/** The shot types the logger offers. Only drive, boast, and drop carry real
+ *  signal at review speed — kill was a drive that died, nick/volley are
+ *  modifiers, lob is rare as a winner, other is no tag at all. The retired
+ *  values stay in the DB enum so legacy rows still read; a CHECK keeps them
+ *  out of new rows. */
+export const LOGGABLE_SHOT_TYPES = E.shot_type.filter(
+  (s): s is Extract<ShotType, "drive" | "boast" | "drop"> =>
+    s === "drive" || s === "boast" || s === "drop",
+)
 export const tiebreak = z.enum(E.tiebreak)
 
 export type BallType = z.infer<typeof ballType>
