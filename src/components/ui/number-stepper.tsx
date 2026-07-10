@@ -1,13 +1,18 @@
 import { MinusIcon, PlusIcon } from "lucide-react"
 import { useRef } from "react"
 
-import { Button } from "@/components/ui/button"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { cn } from "@/lib/utils"
 
-// A shadcn-style number stepper: round − / + buttons flanking a value that's
-// still typeable, so small tweaks are one tap and large jumps don't need a
-// dozen clicks. `value` may be null (an empty field); the buttons step from
-// `min`.
+// A number stepper composed from InputGroup: − / + buttons flanking a value
+// that's still typeable, so small tweaks are one tap and large jumps don't
+// need a dozen clicks. `value` may be null (an empty field); the buttons step
+// from `min`.
 
 export function NumberStepper({
   value,
@@ -40,21 +45,21 @@ export function NumberStepper({
   }
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon-sm"
-        className="rounded-full"
-        aria-label={ariaLabel ? `Decrease ${ariaLabel}` : "Decrease"}
-        disabled={value !== null && value <= min}
-        onClick={() => {
-          step(-1)
-        }}
-      >
-        <MinusIcon />
-      </Button>
-      <input
+    <InputGroup className={cn("w-28", className)}>
+      <InputGroupAddon align="inline-start">
+        <InputGroupButton
+          size="icon-xs"
+          className="rounded-full"
+          aria-label={ariaLabel ? `Decrease ${ariaLabel}` : "Decrease"}
+          disabled={value !== null && value <= min}
+          onClick={() => {
+            step(-1)
+          }}
+        >
+          <MinusIcon />
+        </InputGroupButton>
+      </InputGroupAddon>
+      <InputGroupInput
         type="number"
         inputMode="numeric"
         aria-label={ariaLabel}
@@ -62,21 +67,21 @@ export function NumberStepper({
         onChange={(e) =>
           onChange(e.target.value === "" ? null : clamp(Number(e.target.value)))
         }
-        className="w-10 bg-transparent text-center text-sm font-medium tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="text-center tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
-      <Button
-        type="button"
-        variant="outline"
-        size="icon-sm"
-        className="rounded-full"
-        aria-label={ariaLabel ? `Increase ${ariaLabel}` : "Increase"}
-        disabled={max !== undefined && value !== null && value >= max}
-        onClick={() => {
-          step(1)
-        }}
-      >
-        <PlusIcon />
-      </Button>
-    </div>
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton
+          size="icon-xs"
+          className="rounded-full"
+          aria-label={ariaLabel ? `Increase ${ariaLabel}` : "Increase"}
+          disabled={max !== undefined && value !== null && value >= max}
+          onClick={() => {
+            step(1)
+          }}
+        >
+          <PlusIcon />
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   )
 }
