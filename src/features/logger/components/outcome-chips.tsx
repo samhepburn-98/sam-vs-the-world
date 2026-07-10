@@ -15,7 +15,6 @@ import {
   showsShotType,
 } from "@/lib/rally/rally-draft"
 import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
-import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -51,68 +50,56 @@ const ERROR_DETAIL_LABELS: Record<ErrorDetail, string> = {
 }
 
 /** One of the two prominent outcome cards: a named headline plus the one-line
- *  rule that settles the call at a glance. */
+ *  rule that settles the call at a glance. A ToggleGroupItem, so the whole
+ *  outcome set is one real single-choice group (radio semantics, arrow-key
+ *  focus) rather than looped buttons with hand-managed pressed state. */
 function OutcomeCard({
+  value,
   hint,
   headline,
   rule,
-  selected,
-  onSelect,
 }: {
+  value: EndReason
   hint: string
   headline: string
   rule: string
-  selected: boolean
-  onSelect: () => void
 }) {
   return (
-    <Button
-      type="button"
-      variant={selected ? "default" : "outline"}
-      aria-pressed={selected}
-      onClick={onSelect}
-      className="h-auto flex-1 flex-col items-start gap-0.5 py-2"
+    <ToggleGroupItem
+      value={value}
+      variant="outline"
+      className="group/card h-auto flex-1 flex-col items-start gap-0.5 px-3 py-2 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
     >
       <span className="flex items-center gap-1.5 font-medium">
         <Kbd>{hint}</Kbd>
         {headline}
       </span>
-      <span
-        className={cn(
-          "text-xs font-normal",
-          selected ? "text-primary-foreground/85" : "text-muted-foreground",
-        )}
-      >
+      <span className="text-muted-foreground group-data-[state=on]/card:text-primary-foreground/85 text-xs font-normal">
         {rule}
       </span>
-    </Button>
+    </ToggleGroupItem>
   )
 }
 
 /** A demoted outcome for the rare calls — quiet text until selected. */
 function RareOutcome({
+  value,
   hint,
   label,
-  selected,
-  onSelect,
 }: {
+  value: EndReason
   hint: string
   label: string
-  selected: boolean
-  onSelect: () => void
 }) {
   return (
-    <Button
-      type="button"
-      variant={selected ? "default" : "ghost"}
+    <ToggleGroupItem
+      value={value}
       size="sm"
-      aria-pressed={selected}
-      onClick={onSelect}
-      className={cn("h-7 px-2", !selected && "text-muted-foreground")}
+      className="text-muted-foreground h-7 px-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
     >
       <Kbd>{hint}</Kbd>
       {label}
-    </Button>
+    </ToggleGroupItem>
   )
 }
 
@@ -173,40 +160,42 @@ export function OutcomeChips({
         </Button>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <ToggleGroup
+        type="single"
+        aria-label="How the rally ended"
+        value={draft.endReason ?? ""}
+        onValueChange={(v) => v && onEndReason(v as EndReason)}
+        className="flex w-full flex-col items-stretch gap-1.5"
+      >
         <div className="flex flex-col gap-2 sm:flex-row">
           <OutcomeCard
+            value="winner"
             hint={HOTKEY_HINTS.endReason.winner}
             headline={`${winnerName} hit a winner`}
             rule={`${loserName} didn't touch it`}
-            selected={draft.endReason === "winner"}
-            onSelect={() => onEndReason("winner")}
           />
           <OutcomeCard
+            value="error"
             hint={HOTKEY_HINTS.endReason.error}
             headline={`${loserName} made an error`}
             rule="hit it, but no return"
-            selected={draft.endReason === "error"}
-            onSelect={() => onEndReason("error")}
           />
         </div>
         <div className="flex flex-wrap gap-1">
           <RareOutcome
+            value="stroke"
             hint={HOTKEY_HINTS.endReason.stroke}
             label={`Stroke to ${winnerName}`}
-            selected={draft.endReason === "stroke"}
-            onSelect={() => onEndReason("stroke")}
           />
           {showsServeFault(draft) && (
             <RareOutcome
+              value="serve_fault"
               hint={HOTKEY_HINTS.endReason.serve_fault}
               label={`${loserName} faulted the serve`}
-              selected={draft.endReason === "serve_fault"}
-              onSelect={() => onEndReason("serve_fault")}
             />
           )}
         </div>
-      </div>
+      </ToggleGroup>
 
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -235,9 +224,9 @@ export function OutcomeChips({
           className="text-muted-foreground h-7 px-2"
         >
           {showDetail ? (
-            <ChevronDownIcon aria-hidden />
+            <ChevronDownIcon aria-hidden data-icon="inline-start" />
           ) : (
-            <ChevronRightIcon aria-hidden />
+            <ChevronRightIcon aria-hidden data-icon="inline-start" />
           )}
           {showDetail ? "Hide detail" : "Show detail"}
         </Button>
@@ -254,6 +243,7 @@ export function OutcomeChips({
             type="single"
             variant="outline"
             size="sm"
+            aria-label="Where the error went"
             className="flex-wrap"
             value={draft.errorDetail ?? ""}
             onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
@@ -277,6 +267,7 @@ export function OutcomeChips({
             type="single"
             variant="outline"
             size="sm"
+            aria-label="Forced or unforced"
             className="flex-wrap"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
@@ -299,6 +290,7 @@ export function OutcomeChips({
             type="single"
             variant="outline"
             size="sm"
+            aria-label="Shot type"
             className="flex-wrap"
             value={draft.shotType ?? ""}
             onValueChange={(v) => onShotType(v === "" ? null : (v as ShotType))}
