@@ -64,7 +64,7 @@ function ManagePage() {
   const tabProps = { params, owner, onSort, onPage }
 
   return (
-    <main className="container mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10">
+    <main className="container mx-auto flex max-w-5xl flex-col gap-4 px-4 py-10">
       <header>
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           Manage
