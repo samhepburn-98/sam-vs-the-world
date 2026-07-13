@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router"
+
 import {
   Item,
   ItemActions,
@@ -17,9 +19,12 @@ import type { HistoryMatch } from "@/features/dashboard/lib/match-history"
 // layouts are always rendered, so there's no matchMedia hook to drift from
 // SSR or fall over in jsdom.
 //
-// The mobile rows are flat — no per-row background or side padding — so the
-// enclosing panel is the only card and each match reads as a hairline-ruled
-// row of it, not a card floating inside another.
+// Every row opens its match. The table uses a stretched link (an anchor
+// positioned over the whole row) so the click target is the row while the
+// markup stays one accessible link per match; the mobile Item is rendered
+// as that link directly. The mobile rows are flat — no per-row background
+// or side padding — so the enclosing panel is the only card and each match
+// reads as a hairline-ruled row of it, not a card floating inside another.
 
 function ScorePill({ score }: { score: string }) {
   const [mine, theirs] = score.split("-").map(Number)
@@ -74,8 +79,19 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
         </thead>
         <tbody>
           {matches.map((m) => (
-            <tr key={m.id} className="border-b last:border-b-0">
+            <tr
+              key={m.id}
+              className="relative border-b transition-colors last:border-b-0 hover:bg-muted/40"
+            >
               <td className="py-2.5 pr-3 whitespace-nowrap text-muted-foreground tabular-nums">
+                {/* stretched link: covers the whole row (nearest positioned
+                    ancestor is the tr) so a click anywhere opens the match */}
+                <Link
+                  to="/matches/$matchId"
+                  params={{ matchId: m.id }}
+                  aria-label={`Open the ${m.date} match against ${m.opponent}`}
+                  className="absolute inset-0 rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none"
+                />
                 {m.date}
               </td>
               <td className="py-2.5 pr-3 font-medium">{m.opponent}</td>
@@ -107,10 +123,16 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
       {matches.map((m) => (
         <Item
           key={m.id}
+          asChild
           role="listitem"
           size="sm"
-          className="rounded-none border-0 px-0"
+          className="rounded-none border-0 px-0 transition-colors hover:bg-muted/40"
         >
+          <Link
+            to="/matches/$matchId"
+            params={{ matchId: m.id }}
+            aria-label={`Open the ${m.date} match against ${m.opponent}`}
+          >
           <ItemMedia>
             <ResultBadge won={m.won} />
           </ItemMedia>
@@ -133,6 +155,7 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
           <ItemActions className="self-start text-xs whitespace-nowrap text-muted-foreground tabular-nums">
             {m.date}
           </ItemActions>
+          </Link>
         </Item>
       ))}
     </div>

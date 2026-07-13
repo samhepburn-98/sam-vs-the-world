@@ -13,7 +13,7 @@ export function ProfileMatchesTab({ playerId }: { playerId: string }) {
     <div className="flex flex-col gap-10">
       <ProfileSection
         title="Match history"
-        lede="Most recent first, every game score alongside. Each row will open the full rally-by-rally log."
+        lede="Most recent first, every game score alongside. Each row opens the full rally-by-rally log."
       >
         <div className={PROFILE_PANEL}>
           <PlayerMatchHistory playerId={playerId} />
