@@ -43,7 +43,7 @@ function PlayerSlot({
         aria-label={side === "p1" ? "Player one" : "Player two"}
         className={cn(
           "h-11 w-40 justify-start gap-2.5 rounded-2xl px-3 sm:w-48 [&>span]:min-w-0 [&>span]:flex-1",
-          chosen && `ring-2 ${s.ring}`,
+          chosen && `ring-2 ${s.ring}`
         )}
       >
         <SelectValue placeholder="Choose a player" />
@@ -52,14 +52,22 @@ function PlayerSlot({
         {options.map((p) => (
           <SelectItem key={p.id} value={p.id}>
             <span className="flex items-center gap-2.5">
-              <span
-                className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                  s.chip,
-                )}
-              >
-                {p.name.charAt(0).toUpperCase()}
-              </span>
+              {p.avatar_url ? (
+                <img
+                  src={p.avatar_url}
+                  alt=""
+                  className="size-7 shrink-0 rounded-full bg-muted object-cover"
+                />
+              ) : (
+                <span
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                    s.chip
+                  )}
+                >
+                  {p.name.charAt(0).toUpperCase()}
+                </span>
+              )}
               <span className="truncate text-sm font-medium">{p.name}</span>
             </span>
           </SelectItem>
@@ -90,7 +98,7 @@ export function DuelPicker({
         options={optionsFor(0)}
         onPick={(id) => onPick(0, id)}
       />
-      <span className="font-heading text-muted-foreground text-sm font-semibold">
+      <span className="font-heading text-sm font-semibold text-muted-foreground">
         vs
       </span>
       <PlayerSlot
@@ -102,4 +110,3 @@ export function DuelPicker({
     </div>
   )
 }
-
