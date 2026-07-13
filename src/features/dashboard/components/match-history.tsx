@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/item"
 import { cn } from "@/lib/utils"
 
-import type { HistoryMatch } from "@/features/dashboard/lib/profile-fixture"
+import type { HistoryMatch } from "@/features/dashboard/lib/match-history"
 
 // Match history in two renderings of the same rows: a table from sm up
 // (date, opponent, result, score pills, the night's one remembered moment),
@@ -38,17 +38,20 @@ function ScorePill({ score }: { score: string }) {
   )
 }
 
-function ResultBadge({ won }: { won: boolean }) {
+function ResultBadge({ won }: { won: boolean | null }) {
+  // null: the match is still in play — a quiet dot, not a false verdict
   return (
     <span
       className={cn(
         "inline-flex size-6 items-center justify-center rounded-md text-xs font-bold",
-        won
-          ? "bg-emerald-500/15 text-emerald-500"
-          : "bg-red-500/15 text-red-500"
+        won === null
+          ? "bg-muted text-muted-foreground"
+          : won
+            ? "bg-emerald-500/15 text-emerald-500"
+            : "bg-red-500/15 text-red-500"
       )}
     >
-      {won ? "W" : "L"}
+      {won === null ? "·" : won ? "W" : "L"}
     </span>
   )
 }
@@ -71,10 +74,7 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
         </thead>
         <tbody>
           {matches.map((m) => (
-            <tr
-              key={`${m.date}-${m.opponent}`}
-              className="border-b last:border-b-0"
-            >
+            <tr key={m.id} className="border-b last:border-b-0">
               <td className="py-2.5 pr-3 whitespace-nowrap text-muted-foreground tabular-nums">
                 {m.date}
               </td>
@@ -90,7 +90,9 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
                   ))}
                 </div>
               </td>
-              <td className="py-2.5 text-xs text-muted-foreground">{m.note}</td>
+              <td className="py-2.5 text-xs text-muted-foreground">
+                {m.note ?? <span className="text-muted-foreground/50">—</span>}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -104,7 +106,7 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
     <div role="list" className="divide-y divide-border/60">
       {matches.map((m) => (
         <Item
-          key={`${m.date}-${m.opponent}`}
+          key={m.id}
           role="listitem"
           size="sm"
           className="rounded-none border-0 px-0"
@@ -124,7 +126,9 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
                 <ScorePill key={i} score={score} />
               ))}
             </div>
-            <ItemDescription className="text-xs">{m.note}</ItemDescription>
+            {m.note && (
+              <ItemDescription className="text-xs">{m.note}</ItemDescription>
+            )}
           </ItemContent>
           <ItemActions className="self-start text-xs whitespace-nowrap text-muted-foreground tabular-nums">
             {m.date}

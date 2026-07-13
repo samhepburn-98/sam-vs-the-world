@@ -1,10 +1,11 @@
 import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
 import { ErrorWall } from "@/features/dashboard/components/error-wall"
-import { MatchHistory } from "@/features/dashboard/components/match-history"
+import { PlayerMatchHistory } from "@/features/dashboard/components/player-match-history"
 import { NarrativeInsight } from "@/features/dashboard/components/narrative-insight"
 import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
+import type { ErrorsInsights } from "@/features/dashboard/lib/profile-errors"
 import type {
   ProfileFixture,
   ProfileInsight,
@@ -15,9 +16,10 @@ import type { ReactNode } from "react"
 // The Summary tab: the story of the player, told visual-first. Each section
 // pairs one graphic with the narrative insights it supports — the radar with
 // the strength/weakness/pattern read (real, via computeProfileShape), the
-// error wall with the tin tax, then the season strip and the match history
-// table. The Stats tab holds the dense grid. Everything below the shape
-// section still renders PROFILE_FIXTURE until its wiring lands.
+// error wall with the biggest-leak read (real, via computeProfileErrors),
+// then the season strip and the match history table (real, via
+// PlayerMatchHistory). The Stats tab holds the dense grid. Only the season
+// strip still renders PROFILE_FIXTURE.
 
 function Section({
   title,
@@ -55,14 +57,18 @@ const PANEL =
   "bg-card text-card-foreground ring-foreground/10 rounded-2xl p-5 ring-1"
 
 export function ProfileSummaryTab({
+  playerId,
   name,
   attrs,
   shape,
+  errors,
   profile,
 }: {
+  playerId: string
   name: string
   attrs: Array<PlayerAttribute>
   shape: ShapeInsights
+  errors: ErrorsInsights
   profile: ProfileFixture
 }) {
   return (
@@ -78,12 +84,12 @@ export function ProfileSummaryTab({
         </div>
       </Section>
 
-      <Section title="Where the errors die" lede={profile.errors.lede}>
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <div className={PANEL}>
-            <ErrorWall wall={profile.errors.wall} />
+      <Section title="Where the errors die" lede={errors.lede}>
+        <div className={`${PANEL} grid gap-4 lg:grid-cols-[1.4fr_1fr]`}>
+          <div className="flex items-center justify-center">
+            <ErrorWall wall={errors.wall} />
           </div>
-          <InsightColumn insights={profile.errors.insights} />
+          <InsightColumn insights={errors.insights} />
         </div>
       </Section>
 
@@ -98,10 +104,7 @@ export function ProfileSummaryTab({
 
       <Section title="Match history" lede={profile.history.lede}>
         <div className={PANEL}>
-          <MatchHistory matches={profile.history.matches} />
-          <p className="mt-4 text-xs text-muted-foreground/70">
-            {profile.history.foldNote}
-          </p>
+          <PlayerMatchHistory playerId={playerId} />
         </div>
       </Section>
     </div>

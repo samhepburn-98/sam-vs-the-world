@@ -26,27 +26,6 @@ export interface ProfileInsight {
   highlight?: boolean
 }
 
-export interface ErrorWallCounts {
-  tin: number
-  outTop: number
-  outSide: number
-  outBack: number
-  notUp: number
-  /** Tin's share of all errors, pre-formatted for the wall label. */
-  tinShare: string
-}
-
-export interface HistoryMatch {
-  date: string
-  opponent: string
-  won: boolean
-  result: string
-  /** Per-game scores, this player first (e.g. "11-7") — the table derives
-   *  each pill's won/lost styling from the two numbers. */
-  games: Array<string>
-  note: string
-}
-
 export interface CurveBucket {
   label: string
   rallies: number
@@ -105,11 +84,6 @@ export interface ProfileFixture {
     lede: string
     insights: Array<ProfileInsight>
   }
-  errors: {
-    lede: string
-    wall: ErrorWallCounts
-    insights: Array<ProfileInsight>
-  }
   season: {
     lede: string
     /** Game results oldest to newest. */
@@ -117,8 +91,6 @@ export interface ProfileFixture {
   }
   history: {
     lede: string
-    matches: Array<HistoryMatch>
-    foldNote: string
   }
   stats: {
     curve: Array<CurveBucket>
@@ -224,108 +196,12 @@ export const PROFILE_FIXTURE: ProfileFixture = {
       },
     ],
   },
-  errors: {
-    lede: "Every error given away, mapped to how it ended. Nearly half hit the tin — the price of playing the ball an inch above it.",
-    wall: {
-      tin: 24,
-      outTop: 3,
-      outSide: 9,
-      outBack: 5,
-      notUp: 11,
-      tinShare: "46% of everything given away",
-    },
-    insights: [
-      {
-        eyebrow: "The tin tax",
-        title: "24 points paid to the tin.",
-        body: "That's a full lost game and a half. Most came on attacking drops — the same shot that earns 21 winners. High reward, and here's the receipt.",
-        highlight: true,
-      },
-      {
-        eyebrow: "The trade",
-        title: "The aggression still profits.",
-        body: "35 errors forced against 38 unforced given away — plus 41 clean winners on top. The attacking ledger closes well in credit.",
-      },
-      {
-        eyebrow: "If one thing changes",
-        title: "Halve the tins, win the h2h.",
-        body: "Against Woody, tins alone account for 9 of the game margin. Trading 12 tins for lets would flip two of the five matches.",
-      },
-    ],
-  },
   season: {
     lede: "All 40 games in order. The six-in-a-row run through late June is the best stretch logged; it ended the night the return stats fell off.",
     games: SEASON_GAMES.split("").map((g) => g === "W"),
   },
   history: {
-    lede: "Most recent first. Each row will open the full rally-by-rally log.",
-    matches: [
-      {
-        date: "9 Jul",
-        opponent: "Woody",
-        won: true,
-        result: "3–1",
-        games: ["11-7", "8-11", "11-9", "11-5"],
-        note: "Longest rally of the season — 34 shots",
-      },
-      {
-        date: "6 Jul",
-        opponent: "Woody",
-        won: false,
-        result: "1–3",
-        games: ["9-11", "11-8", "7-11", "8-11"],
-        note: "All three 9–all points lost",
-      },
-      {
-        date: "2 Jul",
-        opponent: "Charlie",
-        won: true,
-        result: "3–0",
-        games: ["11-5", "11-7", "11-8"],
-        note: "6-point streak in game one",
-      },
-      {
-        date: "28 Jun",
-        opponent: "Woody",
-        won: true,
-        result: "3–2",
-        games: ["11-9", "9-11", "13-11", "6-11", "11-9"],
-        note: "Comeback from 8–10 in the third",
-      },
-      {
-        date: "24 Jun",
-        opponent: "Jack",
-        won: false,
-        result: "2–3",
-        games: ["8-11", "11-6", "11-9", "5-11", "9-11"],
-        note: "7 tins — the worst error night logged",
-      },
-      {
-        date: "21 Jun",
-        opponent: "Charlie",
-        won: true,
-        result: "3–1",
-        games: ["11-8", "11-9", "10-12", "11-4"],
-        note: "3 aces — season best",
-      },
-      {
-        date: "18 Jun",
-        opponent: "Woody",
-        won: false,
-        result: "0–3",
-        games: ["6-11", "9-11", "7-11"],
-        note: "Won just 31% of return points",
-      },
-      {
-        date: "14 Jun",
-        opponent: "Jack",
-        won: false,
-        result: "1–3",
-        games: ["9-11", "11-7", "8-11", "10-12"],
-        note: "Two games lost from game ball up",
-      },
-    ],
-    foldNote: "4 earlier matches load below this fold.",
+    lede: "Most recent first.",
   },
   stats: {
     curve: [

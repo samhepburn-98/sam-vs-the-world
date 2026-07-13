@@ -1,19 +1,89 @@
-import type { ErrorWallCounts } from "@/features/dashboard/lib/profile-fixture"
+import { biggestZone } from "@/features/dashboard/lib/profile-errors"
+import { cn } from "@/lib/utils"
 
-// The error wall: the front wall as the player sees it, with every way of
-// giving a point away drawn where it happens — the tin band along the
-// bottom, the out line along the top, the side-wall columns. Errors that
-// can't land on a front-wall elevation (not up, out off the back) sit as
-// chips on the floor below. The tin band is the loudest thing on the page
-// by design: it's usually the biggest single leak.
+import type { ErrorWallCounts } from "@/features/dashboard/lib/profile-errors"
+
+// The error wall: the court as the player sees it from the back — the front
+// wall in elevation, the floor running back toward the viewer, and the strip
+// past the bottom edge standing in for the space behind them. Every way of
+// giving a point away is drawn where it happens: the tin band and out line
+// on the wall, the side-wall columns, not-up on the floor it died on,
+// out-back beyond the back line. The loud treatment (deep fill, bold share
+// label, scatter of balls) follows whichever zone actually leads — the
+// biggest leak is different for every player.
+
+type ZoneKey = keyof ErrorWallCounts
+
+/** Decorative ball positions per zone, drawn only on the leading zone. */
+const ZONE_DOTS: Record<ZoneKey, Array<[number, number]>> = {
+  outTop: [
+    [320, 40],
+    [372, 54],
+    [410, 38],
+    [452, 50],
+    [492, 42],
+  ],
+  outSide: [
+    [52, 110],
+    [54, 168],
+    [626, 96],
+    [628, 204],
+  ],
+  tin: [
+    [470, 244],
+    [502, 256],
+    [524, 248],
+    [548, 259],
+    [566, 244],
+    [588, 253],
+    [609, 247],
+  ],
+  notUp: [
+    [232, 304],
+    [286, 330],
+    [330, 312],
+    [376, 346],
+    [416, 318],
+    [452, 338],
+    [500, 324],
+  ],
+  outBack: [
+    [232, 392],
+    [290, 402],
+    [346, 394],
+    [404, 404],
+    [458, 396],
+  ],
+}
 
 export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
-  const label = `Front wall diagram: ${wall.tin} errors in the tin, ${wall.outTop} out above the front wall, ${wall.outSide} out off the side walls, ${wall.notUp} not up, ${wall.outBack} out off the back wall.`
+  const located =
+    wall.tin + wall.outTop + wall.outSide + wall.outBack + wall.notUp
+  const hot: ZoneKey | null = located > 0 ? biggestZone(wall) : null
+  const share = (zone: ZoneKey) =>
+    ` — ${Math.round((wall[zone] / located) * 100)}% of everything given away`
+
+  // the leading zone's label carries the share and the bold voice
+  const zoneText = (zone: ZoneKey) =>
+    cn(
+      "tabular-nums",
+      hot === zone
+        ? "fill-red-500 text-[15px] font-bold"
+        : "fill-red-500/75 text-xs font-semibold"
+    )
+
+  const label = `Court diagram, seen from the back: ${wall.tin} errors in the tin, ${wall.outTop} out above the front wall, ${wall.outSide} out off the side walls, ${wall.notUp} not up on the floor, ${wall.outBack} out past the back wall.`
 
   return (
-    <svg viewBox="0 0 680 380" role="img" aria-label={label} className="w-full">
+    <svg viewBox="0 0 680 432" role="img" aria-label={label} className="w-full">
       {/* out zone above the front-wall line */}
-      <rect x="40" y="26" width="600" height="42" className="fill-red-500/5" />
+      <rect
+        x="40"
+        y="26"
+        width="600"
+        height="42"
+        className={hot === "outTop" ? "fill-red-500/15" : "fill-red-500/5"}
+      />
       <line
         x1="40"
         y1="68"
@@ -25,13 +95,9 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
       <text x="52" y="53" className="fill-muted-foreground text-[11px]">
         Out line
       </text>
-      <text
-        x="628"
-        y="53"
-        textAnchor="end"
-        className="fill-red-500 text-xs font-semibold tabular-nums"
-      >
+      <text x="628" y="53" textAnchor="end" className={zoneText("outTop")}>
         Out — top · {wall.outTop}
+        {hot === "outTop" && share("outTop")}
       </text>
 
       {/* wall body */}
@@ -39,117 +105,113 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         x="40"
         y="68"
         width="600"
-        height="242"
+        height="202"
         className="fill-muted/40 stroke-border"
       />
       <line
         x1="40"
-        y1="185"
+        y1="165"
         x2="640"
-        y2="185"
+        y2="165"
         className="stroke-border"
         strokeDasharray="5 6"
       />
-      <text x="52" y="178" className="fill-muted-foreground text-[11px]">
+      <text x="52" y="158" className="fill-muted-foreground text-[11px]">
         Service line
       </text>
 
       {/* side-out columns */}
-      <rect x="40" y="68" width="26" height="242" className="fill-red-500/10" />
+      <rect
+        x="40"
+        y="68"
+        width="26"
+        height="164"
+        className={hot === "outSide" ? "fill-red-500/25" : "fill-red-500/10"}
+      />
       <rect
         x="614"
         y="68"
         width="26"
-        height="242"
-        className="fill-red-500/10"
+        height="164"
+        className={hot === "outSide" ? "fill-red-500/25" : "fill-red-500/10"}
       />
       <text
         x="627"
-        y="160"
+        y="150"
         textAnchor="middle"
-        transform="rotate(-90 627 160)"
-        className="fill-red-500 text-[11px] font-semibold tabular-nums"
+        transform="rotate(-90 627 150)"
+        className={zoneText("outSide")}
       >
         Out — side · {wall.outSide}
       </text>
 
-      {/* the tin band */}
+      {/* the tin band along the bottom of the wall */}
       <rect
         x="40"
-        y="272"
+        y="232"
         width="600"
         height="38"
-        className="fill-red-500/20 stroke-red-500"
+        className={
+          hot === "tin"
+            ? "fill-red-500/20 stroke-red-500"
+            : "fill-red-500/10 stroke-red-500/40"
+        }
       />
-      <text
-        x="60"
-        y="296"
-        className="fill-red-500 text-[15px] font-bold tabular-nums"
-      >
-        Tin · {wall.tin} errors — {wall.tinShare}
+      <text x="60" y="256" className={zoneText("tin")}>
+        Tin · {wall.tin}
+        {hot === "tin" && share("tin")}
       </text>
-      <g className="fill-red-500/85">
-        <circle cx="470" cy="284" r="3" />
-        <circle cx="502" cy="296" r="3" />
-        <circle cx="524" cy="288" r="3" />
-        <circle cx="548" cy="299" r="3" />
-        <circle cx="566" cy="284" r="3" />
-        <circle cx="588" cy="293" r="3" />
-        <circle cx="609" cy="287" r="3" />
-      </g>
 
-      {/* floor */}
+      {/* the floor, running back toward the viewer — not-up dies on it */}
+      <polygon
+        points="40,270 640,270 668,380 12,380"
+        className={cn(
+          "stroke-border",
+          hot === "notUp" ? "fill-red-500/10" : "fill-muted/25"
+        )}
+      />
+      <text x="340" y="336" textAnchor="middle" className={zoneText("notUp")}>
+        Not up · {wall.notUp}
+        {hot === "notUp" && share("notUp")}
+      </text>
+
+      {/* past the back line is behind the player — out off the back */}
       <line
-        x1="20"
-        y1="310"
-        x2="660"
-        y2="310"
+        x1="12"
+        y1="380"
+        x2="668"
+        y2="380"
         className="stroke-muted-foreground/60"
         strokeWidth="2"
       />
+      <rect
+        x="12"
+        y="380"
+        width="656"
+        height="34"
+        className={hot === "outBack" ? "fill-red-500/15" : "fill-muted/15"}
+      />
+      <text x="340" y="402" textAnchor="middle" className={zoneText("outBack")}>
+        Out — back · {wall.outBack}
+        {hot === "outBack" && share("outBack")}
+      </text>
 
-      {/* errors with no spot on the wall */}
-      <g className="text-xs font-semibold tabular-nums">
-        <rect
-          x="40"
-          y="332"
-          width="130"
-          height="32"
-          rx="16"
-          className="fill-none stroke-border"
-        />
-        <text
-          x="105"
-          y="352"
-          textAnchor="middle"
-          className="fill-muted-foreground"
-        >
-          Not up · {wall.notUp}
-        </text>
-        <rect
-          x="182"
-          y="332"
-          width="150"
-          height="32"
-          rx="16"
-          className="fill-none stroke-border"
-        />
-        <text
-          x="257"
-          y="352"
-          textAnchor="middle"
-          className="fill-muted-foreground"
-        >
-          Out — back · {wall.outBack}
-        </text>
-      </g>
+      {/* the leading zone gets its scatter of balls */}
+      {hot && (
+        <g className="fill-red-500/85">
+          {ZONE_DOTS[hot].map(([cx, cy]) => (
+            <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="3" />
+          ))}
+        </g>
+      )}
+
       <text
-        x="640"
-        y="353"
+        x="668"
+        y="430"
         textAnchor="end"
         className="fill-muted-foreground/70 text-[11px]"
       >
-        Front wall, as you see it
+        The court, seen from the back of it
       </text>
     </svg>
   )

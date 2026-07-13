@@ -40,6 +40,15 @@ export const gameResultRow = z.object({
 
 export type GameResultRow = z.infer<typeof gameResultRow>
 
+/** A game_results row scoped to its match — the profile history's score
+ *  pills, grouped by match and ordered by game_number. */
+export const gameResultInMatch = gameResultRow.extend({
+  match_id: z.string().uuid(),
+  game_number: z.number().int(),
+})
+
+export type GameResultInMatch = z.infer<typeof gameResultInMatch>
+
 /** The browser's games row: stored columns + parent match + derived result
  *  (null = no rallies logged yet, so the view has nothing to derive). */
 export interface GameBrowserRow extends GameRowWithMatch {
