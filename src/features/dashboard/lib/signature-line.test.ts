@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { signatureLine } from "./player-header"
+import { signatureLine } from "./player-attributes"
 
 import type {
   PlayerHeadline,
@@ -22,19 +22,25 @@ const lengths = (over: Partial<RallyLengths>) =>
 describe("signatureLine", () => {
   it("names the grinder's long-rally win rate", () => {
     expect(
-      signatureLine(headline("grinder"), lengths({ long_wins: 21, long_rallies: 30 })),
+      signatureLine(
+        headline("grinder"),
+        lengths({ long_wins: 21, long_rallies: 30 })
+      )
     ).toBe("Grinder — wins 70% of 9+ shot rallies")
   })
 
   it("names the shotmaker's short-rally win rate", () => {
     expect(
-      signatureLine(headline("shotmaker"), lengths({ short_wins: 18, short_rallies: 30 })),
+      signatureLine(
+        headline("shotmaker"),
+        lengths({ short_wins: 18, short_rallies: 30 })
+      )
     ).toBe("Shotmaker — wins 60% of 1–3 shot rallies")
   })
 
   it("states balanced plainly", () => {
     expect(signatureLine(headline("balanced"), lengths({}))).toBe(
-      "Balanced — no clear long- or short-rally edge",
+      "Balanced — no clear long- or short-rally edge"
     )
   })
 
@@ -43,8 +49,8 @@ describe("signatureLine", () => {
   })
 
   it("falls back to prose when the bucket has no rallies to rate", () => {
-    expect(signatureLine(headline("grinder"), lengths({ long_rallies: 0 }))).toBe(
-      "Grinder — stronger the longer the rally",
-    )
+    expect(
+      signatureLine(headline("grinder"), lengths({ long_rallies: 0 }))
+    ).toBe("Grinder — stronger the longer the rally")
   })
 })

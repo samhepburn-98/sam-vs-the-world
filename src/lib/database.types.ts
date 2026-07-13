@@ -709,6 +709,23 @@ export type Database = {
         Returns: string
       }
       is_owner: { Args: never; Returns: boolean }
+      decisive_shots: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
+          p_player_id: string
+        }
+        Returns: {
+          losing_boast: number
+          losing_drive: number
+          losing_drop: number
+          winning_boast: number
+          winning_drive: number
+          winning_drop: number
+        }[]
+      }
       momentum: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]

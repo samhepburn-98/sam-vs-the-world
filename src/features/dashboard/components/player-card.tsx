@@ -1,7 +1,14 @@
 import { HandIcon } from "lucide-react"
 import { useId } from "react"
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
+import { cn } from "@/lib/utils"
 
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
@@ -81,6 +88,7 @@ export function PlayerCard({
   handedness,
   hero,
   attrs,
+  statTooltips = false,
 }: {
   name: string
   side: "p1" | "p2"
@@ -89,27 +97,49 @@ export function PlayerCard({
   handedness: Handedness | null
   hero: { display: string; label: string }
   attrs: Array<PlayerAttribute>
+  /** Hover/focus tooltips explaining each attribute. Off by default — a
+   *  context that already explains the attributes (the compare page's
+   *  glossary dialog) shouldn't repeat itself. */
+  statTooltips?: boolean
 }) {
   const t = THEMES[side]
   const clipId = useId()
   const shield = `url(#${clipId})`
 
-  const stat = (a: PlayerAttribute) => (
-    <div key={a.key} className="flex items-baseline gap-[2.5cqi]">
-      <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
-        {a.display}
-      </dd>
-      {/* label matches the number's size (so they scale identically) but is
-          lighter weight so the number still leads */}
-      <dt className="text-[6.4cqi] font-normal" style={{ color: t.muted }}>
-        {a.code}
-        <span className="sr-only">
-          {" "}
-          — {a.detail}: {a.sr}
-        </span>
-      </dt>
-    </div>
-  )
+  const stat = (a: PlayerAttribute) => {
+    const row = (
+      <div
+        key={a.key}
+        tabIndex={statTooltips ? 0 : undefined}
+        className={cn(
+          "flex items-baseline gap-[2.5cqi]",
+          statTooltips && "cursor-help rounded-sm"
+        )}
+      >
+        <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
+          {a.display}
+        </dd>
+        {/* label matches the number's size (so they scale identically) but is
+            lighter weight so the number still leads */}
+        <dt className="text-[6.4cqi] font-normal" style={{ color: t.muted }}>
+          {a.code}
+          <span className="sr-only">
+            {" "}
+            — {a.detail}: {a.sr}
+          </span>
+        </dt>
+      </div>
+    )
+    if (!statTooltips) return row
+    return (
+      <Tooltip key={a.key}>
+        <TooltipTrigger asChild>{row}</TooltipTrigger>
+        <TooltipContent>
+          {a.detail}: {a.sr}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
 
   const stats = (
     <div className="flex w-[23cqi] flex-col items-center text-center">
@@ -224,18 +254,20 @@ export function PlayerCard({
           </p>
         )}
 
-        <div className="flex justify-center gap-[8cqi]">
-          <dl className="flex flex-col gap-[3.5cqi]">
-            {[attrs[0], attrs[2], attrs[4]].map(stat)}
-          </dl>
-          <div
-            className="w-px self-stretch"
-            style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
-          />
-          <dl className="flex flex-col gap-[3.5cqi]">
-            {[attrs[1], attrs[3], attrs[5]].map(stat)}
-          </dl>
-        </div>
+        <TooltipProvider>
+          <div className="flex justify-center gap-[8cqi]">
+            <dl className="flex flex-col gap-[3.5cqi]">
+              {[attrs[0], attrs[2], attrs[4]].map(stat)}
+            </dl>
+            <div
+              className="w-px self-stretch"
+              style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
+            />
+            <dl className="flex flex-col gap-[3.5cqi]">
+              {[attrs[1], attrs[3], attrs[5]].map(stat)}
+            </dl>
+          </div>
+        </TooltipProvider>
         </div>
         </div>
         </div>

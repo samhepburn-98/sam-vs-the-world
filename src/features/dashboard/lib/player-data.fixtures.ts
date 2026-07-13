@@ -1,5 +1,6 @@
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type {
+  DecisiveShots,
   ErrorProfile,
   Momentum,
   PlayerHeadline,
@@ -73,7 +74,9 @@ export const momentum = (over: Partial<Momentum> = {}): Momentum => ({
   ...over,
 })
 
-export const headline = (over: Partial<PlayerHeadline> = {}): PlayerHeadline => ({
+export const headline = (
+  over: Partial<PlayerHeadline> = {}
+): PlayerHeadline => ({
   player_id: "00000000-0000-0000-0000-000000000001",
   games_won: 24,
   games_decided: 40,
@@ -84,11 +87,22 @@ export const headline = (over: Partial<PlayerHeadline> = {}): PlayerHeadline => 
   ...over,
 })
 
+export const decisive = (over: Partial<DecisiveShots> = {}): DecisiveShots => ({
+  winning_drive: 9,
+  winning_drop: 2,
+  winning_boast: 1,
+  losing_drive: 4,
+  losing_drop: 4,
+  losing_boast: 0,
+  ...over,
+})
+
 export const player = (over: Partial<PlayerData> = {}): PlayerData => ({
   headline: headline(),
   serve: serve(),
   error: error(),
   rally: rally(),
   momentum: momentum(),
+  decisive: decisive(),
   ...over,
 })

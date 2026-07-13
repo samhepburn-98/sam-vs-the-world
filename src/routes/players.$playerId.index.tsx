@@ -1,50 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { matchesQueryOptions } from "@/features/dashboard/api/get-matches"
+import { decisiveShotsOptions } from "@/features/dashboard/api/get-decisive-shots"
+import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
+import { momentumOptions } from "@/features/dashboard/api/get-momentum"
+import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
 import {
-  errorProfileOptions,
-  useErrorProfile,
-} from "@/features/dashboard/api/get-error-profile"
-import {
-  momentumOptions,
-  useMomentum,
-} from "@/features/dashboard/api/get-momentum"
-import {
-  playerHeadlineOptions,
-  usePlayerHeadline,
-} from "@/features/dashboard/api/get-player-headline"
-import {
-  rallyLengthsOptions,
-  useRallyLengths,
-} from "@/features/dashboard/api/get-rally-lengths"
-import {
-  serveStatsOptions,
-  useServeStats,
-} from "@/features/dashboard/api/get-serve-stats"
-import { InsightCard } from "@/features/dashboard/components/insight-card"
-import {
-  ErrorSplitPreview,
-  FormDotsPreview,
-  MomentumPhasePreview,
-  RallyBucketsPreview,
-  ServeSidePreview,
-} from "@/features/dashboard/components/insight-previews"
-import { PlayerHeader } from "@/features/dashboard/components/player-header"
-import { PlayerRecentMatches } from "@/features/dashboard/components/player-recent-matches"
-import { ProfileStatStrip } from "@/features/dashboard/components/profile-stat-strip"
-import {
-  MIN_GAMES_FOR_WIN_RATE,
-  MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
+  playerH2hQueryOptions,
+  usePlayerH2h,
+} from "@/features/dashboard/api/get-player-h2h"
+import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
+import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
+import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { ProfileHero } from "@/features/dashboard/components/profile-hero"
+import { ProfileMatchesTab } from "@/features/dashboard/components/profile-matches-tab"
+import { ProfileStatsTab } from "@/features/dashboard/components/profile-stats-tab"
+import { ProfileSummaryTab } from "@/features/dashboard/components/profile-summary-tab"
+import { computeProfileErrors } from "@/features/dashboard/lib/profile-errors"
+import { computeH2h } from "@/features/dashboard/lib/profile-h2h"
+import { computeProfileHeader } from "@/features/dashboard/lib/profile-header"
+import { computeProfileShape } from "@/features/dashboard/lib/profile-shape"
+import { computeProfileStats } from "@/features/dashboard/lib/profile-stats"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { RallyLengths } from "@/features/dashboard/schemas/insights"
-
-// Player profile (§5.1): a profile, not a menu. It leads with the win-rate
-// hero and an at-a-glance stat strip, then the five insight cards preview
-// their deep pages, then the player's own recent matches. All-time — filtering
-// lives on the category pages this links into.
+// The redesigned player profile: card-anchored hero with the KPI row, then
+// three tabs — Summary tells the story (radar, error wall), Stats is the
+// dense bento for scanning before a match, Matches is the full history.
+// Every card and section reads real data.
 
 export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {
@@ -55,140 +38,63 @@ export const Route = createFileRoute("/players/$playerId/")({
       context.queryClient.ensureQueryData(errorProfileOptions(id, {})),
       context.queryClient.ensureQueryData(rallyLengthsOptions(id, {})),
       context.queryClient.ensureQueryData(momentumOptions(id, {})),
-      context.queryClient.ensureQueryData(
-        matchesQueryOptions({ player: id, page: 1 }),
-      ),
+      context.queryClient.ensureQueryData(decisiveShotsOptions(id, {})),
+      context.queryClient.ensureQueryData(playerH2hQueryOptions(id)),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
   },
-  component: PlayerOverviewPage,
+  component: PlayerProfilePage,
 })
 
-function pct(n: number, d: number) {
-  return Math.round((n / d) * 100)
-}
-
-function strongestBucket(lengths: RallyLengths): string | null {
-  const buckets = [
-    { label: "1–3 shots", w: lengths.short_wins, n: lengths.short_rallies },
-    { label: "4–8 shots", w: lengths.medium_wins, n: lengths.medium_rallies },
-    { label: "9+ shots", w: lengths.long_wins, n: lengths.long_rallies },
-  ].filter((b) => b.n > 0)
-  if (buckets.length === 0) return null
-  const best = buckets.reduce((a, b) => (b.w / b.n > a.w / a.n ? b : a))
-  return best.label
-}
-
-function PlayerOverviewPage() {
+function PlayerProfilePage() {
   const { playerId } = Route.useParams()
-
-  const headline = usePlayerHeadline(playerId, {})
-  const serve = useServeStats(playerId, {})
-  const errors = useErrorProfile(playerId, {})
-  const lengths = useRallyLengths(playerId, {})
-  const momentum = useMomentum(playerId, {})
+  const data = usePlayerInsights(playerId, {})
   const players = usePlayers()
+  const h2hMatches = usePlayerH2h(playerId)
   const player = players.data?.find((p) => p.id === playerId)
 
-  if (
-    !headline.data ||
-    !serve.data ||
-    !errors.data ||
-    !lengths.data ||
-    !momentum.data ||
-    !player
-  ) {
+  if (!player) {
     return (
       <main className="container mx-auto max-w-5xl px-4 py-10">
-        <Skeleton className="h-40 w-full rounded-2xl" />
+        <Skeleton className="h-52 w-full rounded-2xl" />
       </main>
     )
   }
 
-  const h = headline.data
-  const s = serve.data
-  const e = errors.data
-  const l = lengths.data
-  const m = momentum.data
+  const nameOf = (id: string) =>
+    players.data?.find((p) => p.id === id)?.name ?? "Unknown"
 
-  const serveEnough = s.rallies_served >= MIN_RALLIES_FOR_RATE
-  const errorsEnough = e.games_played >= MIN_GAMES_FOR_WIN_RATE
-  const strongest = strongestBucket(l)
+  const header = computeProfileHeader(player, data)
+  const stats = computeProfileStats(data)
+  const shape = computeProfileShape(data)
+  const errors = computeProfileErrors(data)
+  const h2h = computeH2h(playerId, h2hMatches.data ?? [], nameOf)
 
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
-      <PlayerHeader
-        name={player.name}
-        handedness={player.handedness}
-        headline={h}
-        lengths={l}
-      />
+      <ProfileHero header={header} />
 
-      <ProfileStatStrip serve={s} errors={e} lengths={l} momentum={m} />
-
-      <section aria-label="Explore" className="flex flex-col gap-3">
-        <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-          Explore
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <InsightCard
-            playerId={playerId}
-            category="head-to-head"
-            label="Results & form"
-            preview={<FormDotsPreview games={h.recent_games} />}
-            stat={
-              <>
-                {h.matches_won}–{h.matches_decided - h.matches_won} matches ·{" "}
-                {h.games_won} of {h.games_decided} games
-              </>
-            }
+      <Tabs defaultValue="summary">
+        <TabsList aria-label="Profile sections">
+          <TabsTrigger value="summary">Summary</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="matches">Matches</TabsTrigger>
+        </TabsList>
+        <TabsContent value="summary" className="pt-4">
+          <ProfileSummaryTab
+            name={player.name}
+            attrs={header.attrs}
+            shape={shape}
+            errors={errors}
           />
-          <InsightCard
-            playerId={playerId}
-            category="serve"
-            label="Serve"
-            preview={<ServeSidePreview serve={s} />}
-            stat={
-              serveEnough
-                ? `${pct(s.serve_wins, s.rallies_served)}% won on serve · ${s.aces} aces`
-                : `${s.aces} aces · ${s.double_faults} double faults`
-            }
-          />
-          <InsightCard
-            playerId={playerId}
-            category="errors"
-            label="Errors"
-            preview={<ErrorSplitPreview errors={e} />}
-            stat={
-              errorsEnough
-                ? `${(e.unforced_errors / e.games_played).toFixed(1)} unforced per game`
-                : `${e.errors_total} errors logged`
-            }
-          />
-          <InsightCard
-            playerId={playerId}
-            category="rallies"
-            label="Rallies"
-            preview={<RallyBucketsPreview lengths={l} />}
-            stat={
-              l.avg_length === null
-                ? "Not enough rallies yet"
-                : `${l.avg_length.toFixed(1)} shots on average${
-                    strongest ? ` · strongest at ${strongest}` : ""
-                  }`
-            }
-          />
-          <InsightCard
-            playerId={playerId}
-            category="momentum"
-            label="Momentum"
-            preview={<MomentumPhasePreview momentum={m} />}
-            stat={`${m.comebacks} ${m.comebacks === 1 ? "comeback" : "comebacks"} · longest streak ${m.longest_streak}`}
-          />
-        </div>
-      </section>
-
-      <PlayerRecentMatches playerId={playerId} />
+        </TabsContent>
+        <TabsContent value="stats" className="pt-4">
+          <ProfileStatsTab stats={stats} h2h={h2h} />
+        </TabsContent>
+        <TabsContent value="matches" className="pt-4">
+          <ProfileMatchesTab playerId={playerId} />
+        </TabsContent>
+      </Tabs>
     </main>
   )
 }

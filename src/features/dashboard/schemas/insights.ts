@@ -131,6 +131,21 @@ export const errorProfile = z.object({
 
 export type ErrorProfile = z.infer<typeof errorProfile>
 
+/** `decisive_shots(...)` — the shot that ended the rally, counted per type
+ *  (drive/drop/boast). `winning_*` are the player's decisive shots on rallies
+ *  they won; `losing_*` are their failed final shots on rallies they lost.
+ *  Counts, never a rate (§3.5); untagged decided rallies aren't counted. */
+export const decisiveShots = z.object({
+  winning_drive: z.number().int(),
+  winning_drop: z.number().int(),
+  winning_boast: z.number().int(),
+  losing_drive: z.number().int(),
+  losing_drop: z.number().int(),
+  losing_boast: z.number().int(),
+})
+
+export type DecisiveShots = z.infer<typeof decisiveShots>
+
 /** `rally_lengths(...)` — average + longest over decided rallies with a
  *  tagged length ≥ 1 (untagged and 0-shot double faults excluded), and the
  *  three histogram buckets each with its win count. `avg_length` is null
