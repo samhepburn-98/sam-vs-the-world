@@ -44,6 +44,7 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
           handedness={header.handedness}
           hero={header.hero}
           attrs={header.attrs}
+          statTooltips
         />
       </div>
 
