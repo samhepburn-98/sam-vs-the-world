@@ -66,7 +66,7 @@ function PlayerProfilePage() {
       <ProfileHero header={header} />
 
       <Tabs defaultValue="summary">
-        <TabsList variant="line" aria-label="Profile sections">
+        <TabsList aria-label="Profile sections">
           <TabsTrigger value="summary">Summary</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>

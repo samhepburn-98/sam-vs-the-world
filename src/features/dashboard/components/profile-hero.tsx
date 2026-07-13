@@ -66,7 +66,7 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {header.kpis.map((kpi) => (
             <KpiTile key={kpi.label} kpi={kpi} />
           ))}
