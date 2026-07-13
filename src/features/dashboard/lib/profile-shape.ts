@@ -30,7 +30,8 @@ export interface ShapeInsights {
   insights: [ProfileInsight, ProfileInsight, ProfileInsight]
 }
 
-const SHAPE_LEDE_BASE = "Six measured win rates — never invented ratings."
+const SHAPE_LEDE_BASE =
+  "Six win rates, each measured from real rallies — never invented ratings."
 
 /** A rated attribute paired with the sentence pair it can voice. */
 interface AttributeCopy {
@@ -338,8 +339,8 @@ export function computeProfileShape(data: PlayerData): ShapeInsights {
     ATTRIBUTE_META.find((m) => m.key === key)!.name.toLowerCase()
   const lede =
     strengthAttr && weaknessAttr
-      ? `${SHAPE_LEDE_BASE} The silhouette leans toward ${name(strengthAttr.key)}; ${name(weaknessAttr.key)} is where the work is.`
-      : `${SHAPE_LEDE_BASE} The silhouette fills in as rallies are logged.`
+      ? `${SHAPE_LEDE_BASE} Strongest at ${name(strengthAttr.key)}, with ${name(weaknessAttr.key)} the clearest area to improve.`
+      : `${SHAPE_LEDE_BASE} The picture sharpens as more rallies are logged.`
 
   return { lede, insights: [strength, weakness, pattern] }
 }

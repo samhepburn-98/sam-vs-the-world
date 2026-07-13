@@ -31,10 +31,10 @@ function Section({
   return (
     <section aria-label={title} className="flex flex-col gap-4">
       <div>
-        <h2 className="text-xs font-semibold tracking-widest text-primary uppercase">
+        <h2 className="text-sm font-semibold tracking-widest text-primary uppercase">
           {title}
         </h2>
-        <p className="mt-1 max-w-prose text-sm text-muted-foreground">{lede}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{lede}</p>
       </div>
       {children}
     </section>

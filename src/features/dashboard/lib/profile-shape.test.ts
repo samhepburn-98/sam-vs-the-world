@@ -54,7 +54,7 @@ describe("strength and weakness", () => {
     expect(strength.title).toBe("Too early to call.")
     expect(strength.body).not.toMatch(/\d/)
     expect(weakness.title).toBe("Too early to call.")
-    expect(lede).toContain("fills in as rallies are logged")
+    expect(lede).toContain("sharpens as more rallies are logged")
   })
 
   it("needs a second rated attribute before calling a weakness", () => {
@@ -155,7 +155,7 @@ describe("lede", () => {
   it("names the strength and the weakness", () => {
     const { lede } = computeProfileShape(player())
     expect(lede).toContain("never invented ratings")
-    expect(lede).toContain("leans toward clutch")
-    expect(lede).toContain("attack is where the work is")
+    expect(lede).toContain("Strongest at clutch")
+    expect(lede).toContain("attack the clearest area to improve")
   })
 })
