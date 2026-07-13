@@ -70,8 +70,8 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
     cn(
       "tabular-nums",
       hot === zone
-        ? "fill-red-500 text-[15px] font-bold"
-        : "fill-red-500/75 text-xs font-semibold"
+        ? "fill-primary text-[15px] font-bold"
+        : "fill-primary/75 text-xs font-semibold"
     )
 
   const label = `Court diagram, seen from the back: ${wall.tin} errors in the tin, ${wall.outTop} out above the front wall, ${wall.outSide} out off the side walls, ${wall.notUp} not up on the floor, ${wall.outBack} out past the back wall.`
@@ -84,14 +84,14 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         y="26"
         width="600"
         height="42"
-        className={hot === "outTop" ? "fill-red-500/15" : "fill-red-500/5"}
+        className={hot === "outTop" ? "fill-primary/15" : "fill-primary/5"}
       />
       <line
         x1="40"
         y1="68"
         x2="640"
         y2="68"
-        className="stroke-red-500/70"
+        className="stroke-primary/70"
         strokeWidth="2"
       />
       <text x="52" y="53" className="fill-muted-foreground text-[11px]">
@@ -128,14 +128,14 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         y="68"
         width="26"
         height="164"
-        className={hot === "outSide" ? "fill-red-500/25" : "fill-red-500/10"}
+        className={hot === "outSide" ? "fill-primary/25" : "fill-primary/10"}
       />
       <rect
         x="614"
         y="68"
         width="26"
         height="164"
-        className={hot === "outSide" ? "fill-red-500/25" : "fill-red-500/10"}
+        className={hot === "outSide" ? "fill-primary/25" : "fill-primary/10"}
       />
       <text
         x="627"
@@ -155,8 +155,8 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         height="38"
         className={
           hot === "tin"
-            ? "fill-red-500/20 stroke-red-500"
-            : "fill-red-500/10 stroke-red-500/40"
+            ? "fill-primary/20 stroke-primary"
+            : "fill-primary/10 stroke-primary/40"
         }
       />
       <text x="60" y="256" className={zoneText("tin")}>
@@ -169,7 +169,7 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         points="40,270 640,270 668,380 12,380"
         className={cn(
           "stroke-border",
-          hot === "notUp" ? "fill-red-500/10" : "fill-muted/25"
+          hot === "notUp" ? "fill-primary/10" : "fill-muted/25"
         )}
       />
       <text x="340" y="336" textAnchor="middle" className={zoneText("notUp")}>
@@ -191,7 +191,7 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
         y="380"
         width="656"
         height="34"
-        className={hot === "outBack" ? "fill-red-500/15" : "fill-muted/15"}
+        className={hot === "outBack" ? "fill-primary/15" : "fill-muted/15"}
       />
       <text x="340" y="402" textAnchor="middle" className={zoneText("outBack")}>
         Out — back · {wall.outBack}
@@ -200,7 +200,7 @@ export function ErrorWall({ wall }: { wall: ErrorWallCounts }) {
 
       {/* the leading zone gets its scatter of balls */}
       {hot && (
-        <g className="fill-red-500/85">
+        <g className="fill-primary/85">
           {ZONE_DOTS[hot].map(([cx, cy]) => (
             <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="3" />
           ))}
