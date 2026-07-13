@@ -38,14 +38,16 @@ const ZONE_DOTS: Record<ZoneKey, Array<[number, number]>> = {
     [588, 253],
     [609, 247],
   ],
+  // the floor label sits centred around y≈336 — the scatter stays above
+  // and below it so the two never collide
   notUp: [
-    [232, 304],
-    [286, 330],
-    [330, 312],
-    [376, 346],
-    [416, 318],
-    [452, 338],
-    [500, 324],
+    [210, 300],
+    [330, 306],
+    [452, 298],
+    [560, 304],
+    [172, 360],
+    [340, 366],
+    [516, 358],
   ],
   outBack: [
     [232, 392],
