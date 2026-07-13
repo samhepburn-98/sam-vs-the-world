@@ -1,7 +1,7 @@
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { cn } from "@/lib/utils"
 
-import type { ProfileKpi } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileKpi } from "@/features/dashboard/lib/profile-types"
 import type { ProfileHeaderData } from "@/features/dashboard/lib/profile-header"
 
 // The profile header: the card is the identity anchor on the left, the

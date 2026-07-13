@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-import type { ServeBoxes as ServeBoxesData } from "@/features/dashboard/lib/profile-fixture"
+import type { ServeBoxes as ServeBoxesData } from "@/features/dashboard/lib/profile-types"
 
 // The serve split by box, plus the two serve punctuation marks (aces and
 // double faults). The stronger box gets the accent — on a squash court

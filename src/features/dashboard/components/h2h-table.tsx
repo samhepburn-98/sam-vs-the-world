@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-import type { H2hRow } from "@/features/dashboard/lib/profile-fixture"
+import type { H2hRow } from "@/features/dashboard/lib/profile-h2h"
 
 // Head-to-head per rival: the match and game records as numbers, the games
 // share as a bar so the balance of each rivalry reads without arithmetic,

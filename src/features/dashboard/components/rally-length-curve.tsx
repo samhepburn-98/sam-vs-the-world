@@ -1,4 +1,4 @@
-import type { CurveBucket } from "@/features/dashboard/lib/profile-fixture"
+import type { CurveBucket } from "@/features/dashboard/lib/profile-types"
 
 // Win rate against rally length — the archetype curve. A shotmaker's line
 // starts high and sags past nine shots; a grinder's climbs. The dashed 50%

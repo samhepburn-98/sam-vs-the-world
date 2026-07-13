@@ -4,7 +4,7 @@ import {
 } from "@/features/dashboard/utils/insight-thresholds"
 
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
-import type { ProfileInsight } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"
 import type { ErrorProfile } from "@/features/dashboard/schemas/insights"
 
 // "Where the errors die": the error wall's counts plus three deterministic

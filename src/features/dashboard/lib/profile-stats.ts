@@ -1,19 +1,22 @@
+import { MIN_RALLIES_FOR_RATE } from "@/features/dashboard/utils/insight-thresholds"
+
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type {
   CurveBucket,
   PressureRow,
   ServeBoxes,
   ShareRow,
-} from "@/features/dashboard/lib/profile-fixture"
+} from "@/features/dashboard/lib/profile-types"
 
 // Maps the insight payloads onto the Stats tab's RPC-backed cards — the seam
-// for the bento the way computeProfileHeader is for the header. The five
+// for the bento the way computeProfileHeader is for the header. The six
 // cards with an existing RPC live here: the rally-length curve (rally_lengths,
 // three buckets 1–3 / 4–8 / 9+), the phase win rates (momentum, replacing the
 // old game-ball "pressure record" the data can't back), serve boxes
-// (serve_stats), point-enders (decisive_shots), and errors given
-// (error_profile). Every rate guards its own denominator so an empty bucket
-// reads as a dash, never a NaN.
+// (serve_stats), point-enders (decisive_shots), errors given (error_profile),
+// and serve-number pressure (serve_stats again — first serve, second serve,
+// and the fault rate between them). Every rate guards its own denominator so
+// an empty bucket reads as a dash, never a NaN.
 
 export interface ProfileStatsData {
   curve: Array<CurveBucket>
@@ -21,6 +24,15 @@ export interface ProfileStatsData {
   serve: ServeBoxes
   pointEnders: { rows: Array<ShareRow>; read: string }
   errorsGiven: { rows: Array<ShareRow>; read: string }
+  servePressure: ServePressureData
+}
+
+export interface ServePressureData {
+  first: PressureRow
+  second: PressureRow
+  /** `won` carries the fault count — a leak, so the row renders loss-toned. */
+  faults: PressureRow
+  read: string
 }
 
 function winRate(wins: number, rallies: number): number | null {
@@ -128,6 +140,48 @@ function buildErrorsGiven(data: PlayerData): {
   return { rows, read }
 }
 
+/** First serve, second serve, and the fault rate between them — the cost of
+ *  a missed first serve, in two-serve matches only. The read makes a claim
+ *  only when its own sample clears the threshold. */
+function buildServePressure(data: PlayerData): ServePressureData {
+  const s = data.serve
+  const two = s?.two_serve_rallies_served ?? 0
+  const first: PressureRow = {
+    label: "First serve",
+    won: s?.serve1_wins ?? 0,
+    of: s?.serve1_served ?? 0,
+  }
+  const second: PressureRow = {
+    label: "Second serve",
+    won: s?.serve2_wins ?? 0,
+    of: s?.serve2_served ?? 0,
+  }
+  const faults: PressureRow = {
+    label: "First-serve faults",
+    won: s?.first_serve_faults ?? 0,
+    of: two,
+  }
+
+  let read = "Serve-number pressure appears once two-serve rallies are logged."
+  if (two >= MIN_RALLIES_FOR_RATE) {
+    const faultPct = share(faults.won, two)
+    const firstRate = winRate(first.won, first.of)
+    const secondRate = winRate(second.won, second.of)
+    if (faultPct <= 10) {
+      read = `The first serve rarely misses — ${faults.won} faults in ${two} serves.`
+    } else if (second.of >= MIN_RALLIES_FOR_RATE && firstRate != null && secondRate != null) {
+      read =
+        firstRate - secondRate >= 10
+          ? `The second serve is a liability — a ${firstRate - secondRate}-point drop when the first one misses.`
+          : `The second serve holds — ${secondRate}% won against ${firstRate}% behind the first.`
+    } else {
+      read = `When the first serve misses, the second has won ${second.won} of ${second.of}.`
+    }
+  }
+
+  return { first, second, faults, read }
+}
+
 export function computeProfileStats(data: PlayerData): ProfileStatsData {
   return {
     curve: buildCurve(data),
@@ -135,5 +189,6 @@ export function computeProfileStats(data: PlayerData): ProfileStatsData {
     serve: buildServe(data),
     pointEnders: buildPointEnders(data),
     errorsGiven: buildErrorsGiven(data),
+    servePressure: buildServePressure(data),
   }
 }

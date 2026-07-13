@@ -129,3 +129,93 @@ describe("computeProfileStats", () => {
     expect(errorsGiven.rows.every((r) => r.share === 0)).toBe(true)
   })
 })
+
+describe("buildServePressure", () => {
+  it("stays quiet before two-serve rallies reach the threshold", () => {
+    const { servePressure } = computeProfileStats(fx.player())
+    expect(servePressure.read).toContain("once two-serve rallies are logged")
+    expect(servePressure.first.of).toBe(0)
+  })
+
+  it("celebrates a first serve that rarely misses", () => {
+    const { servePressure } = computeProfileStats(
+      fx.player({
+        serve: fx.serve({
+          two_serve_rallies_served: 170,
+          first_serve_faults: 9,
+          serve1_served: 161,
+          serve1_wins: 98,
+          serve2_served: 9,
+          serve2_wins: 6,
+        }),
+      }),
+    )
+    expect(servePressure.read).toBe(
+      "The first serve rarely misses — 9 faults in 170 serves.",
+    )
+    expect(servePressure.first).toEqual({
+      label: "First serve",
+      won: 98,
+      of: 161,
+    })
+    expect(servePressure.faults).toEqual({
+      label: "First-serve faults",
+      won: 9,
+      of: 170,
+    })
+  })
+
+  it("counts the second serve plainly while its sample is small", () => {
+    const { servePressure } = computeProfileStats(
+      fx.player({
+        serve: fx.serve({
+          two_serve_rallies_served: 72,
+          first_serve_faults: 12,
+          serve1_served: 60,
+          serve1_wins: 43,
+          serve2_served: 12,
+          serve2_wins: 6,
+        }),
+      }),
+    )
+    expect(servePressure.read).toBe(
+      "When the first serve misses, the second has won 6 of 12.",
+    )
+  })
+
+  it("calls the liability once both serves are rated", () => {
+    const { servePressure } = computeProfileStats(
+      fx.player({
+        serve: fx.serve({
+          two_serve_rallies_served: 200,
+          first_serve_faults: 40,
+          serve1_served: 160,
+          serve1_wins: 112, // 70%
+          serve2_served: 40,
+          serve2_wins: 18, // 45%
+        }),
+      }),
+    )
+    expect(servePressure.read).toBe(
+      "The second serve is a liability — a 25-point drop when the first one misses.",
+    )
+  })
+
+  it("credits a second serve that holds", () => {
+    const { servePressure } = computeProfileStats(
+      fx.player({
+        serve: fx.serve({
+          two_serve_rallies_served: 200,
+          first_serve_faults: 40,
+          serve1_served: 160,
+          serve1_wins: 96, // 60%
+          serve2_served: 40,
+          serve2_wins: 22, // 55%
+        }),
+      }),
+    )
+    expect(servePressure.read).toBe(
+      "The second serve holds — 55% won against 60% behind the first.",
+    )
+  })
+})

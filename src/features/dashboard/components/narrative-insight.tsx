@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-import type { ProfileInsight } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"
 
 // A narrative insight card: an eyebrow naming the kind of finding, a
 // one-line thesis, and a short body with the numbers inline. The Summary tab

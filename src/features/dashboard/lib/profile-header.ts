@@ -9,7 +9,7 @@ import type {
   PlayerAttribute,
   PlayerData,
 } from "@/features/dashboard/lib/player-attributes"
-import type { ProfileKpi } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileKpi } from "@/features/dashboard/lib/profile-types"
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 import type { Handedness } from "@/lib/schemas/enums"
 import type { PlayerSummary } from "@/lib/schemas/player"

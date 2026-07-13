@@ -4,14 +4,14 @@ import { ServeBoxes } from "@/features/dashboard/components/serve-boxes"
 import { StatBarRow } from "@/features/dashboard/components/stat-bar-row"
 import { cn } from "@/lib/utils"
 
-import type { ProfileFixture } from "@/features/dashboard/lib/profile-fixture"
+import type { H2hData } from "@/features/dashboard/lib/profile-h2h"
 import type { ProfileStatsData } from "@/features/dashboard/lib/profile-stats"
 import type { ReactNode } from "react"
 
 // The Stats tab: the whole player as a dense bento of small multiples, built
-// for scanning before a match. The four RPC-backed cards (rally curve, phase
-// win rates, serve, errors given) read `stats`; point-enders, head-to-head,
-// and recent matches still read `fixture` until each is wired.
+// for scanning before a match — every card reads real data. Six cards come
+// off the insight RPCs via computeProfileStats; head-to-head aggregates the
+// player's full match_results history via computeH2h.
 
 function Panel({
   title,
@@ -51,10 +51,10 @@ function Panel({
 
 export function ProfileStatsTab({
   stats,
-  fixture,
+  h2h,
 }: {
   stats: ProfileStatsData
-  fixture: ProfileFixture
+  h2h: H2hData
 }) {
   return (
     <div className="grid gap-4 lg:grid-cols-12">
@@ -120,43 +120,45 @@ export function ProfileStatsTab({
       <Panel
         title="Head-to-head"
         sub="games won share per rival"
-        read={fixture.stats.h2h.read}
+        read={h2h.read}
         className="lg:col-span-7"
       >
-        <H2hTable rows={fixture.stats.h2h.rows} />
+        <H2hTable rows={h2h.rows} />
       </Panel>
 
       <Panel
-        title="Recent matches"
-        read="Every row will open the rally-by-rally log."
+        title="Serve pressure"
+        sub="two-serve rallies"
+        read={stats.servePressure.read}
         className="lg:col-span-5"
       >
-        <ul className="divide-y">
-          {fixture.stats.recent.map((m) => (
-            <li
-              key={`${m.date}-${m.opponent}`}
-              className="flex items-center gap-3 py-2 text-sm"
-            >
-              <span className="w-12 shrink-0 text-muted-foreground tabular-nums">
-                {m.date}
-              </span>
-              <span className="flex-1 font-medium">{m.opponent}</span>
-              <span
-                className={cn(
-                  "inline-flex size-6 items-center justify-center rounded-md text-xs font-bold",
-                  m.won
-                    ? "bg-emerald-500/15 text-emerald-500"
-                    : "bg-red-500/15 text-red-500"
-                )}
-              >
-                {m.won ? "W" : "L"}
-              </span>
-              <span className="w-9 text-right tabular-nums">{m.result}</span>
-            </li>
-          ))}
-        </ul>
+        {[stats.servePressure.first, stats.servePressure.second].map((row) => (
+          <StatBarRow
+            key={row.label}
+            label={row.label}
+            pct={row.of > 0 ? Math.round((row.won / row.of) * 100) : 0}
+            value={row.of > 0 ? `${row.won} of ${row.of}` : "—"}
+          />
+        ))}
+        <StatBarRow
+          label={stats.servePressure.faults.label}
+          pct={
+            stats.servePressure.faults.of > 0
+              ? Math.round(
+                  (stats.servePressure.faults.won /
+                    stats.servePressure.faults.of) *
+                    100
+                )
+              : 0
+          }
+          value={
+            stats.servePressure.faults.of > 0
+              ? `${stats.servePressure.faults.won} of ${stats.servePressure.faults.of}`
+              : "—"
+          }
+          tone="loss"
+        />
       </Panel>
-
     </div>
   )
 }

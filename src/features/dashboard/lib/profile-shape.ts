@@ -14,7 +14,7 @@ import type {
   PlayerAttribute,
   PlayerData,
 } from "@/features/dashboard/lib/player-attributes"
-import type { ProfileInsight } from "@/features/dashboard/lib/profile-fixture"
+import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"
 
 // "The shape of the game": three deterministic reads off the same data the
 // radar draws — no invented numbers, no free text. Strength and Weakness are
