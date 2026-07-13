@@ -18,12 +18,15 @@ export function useInsertRallyAt() {
         p_server_id: row.server_id,
         p_serve_side: row.serve_side,
         p_serve_number: row.serve_number,
-        p_winner_id: row.winner_id,
+        // null for lets — the RPC accepts it; the generated arg type conflates
+        // optional with non-null
+        p_winner_id: row.winner_id as string,
         p_end_reason: row.end_reason,
-        p_error_detail: row.error_detail,
-        p_forced: row.forced,
-        p_shot_type: row.shot_type,
-        p_shot_count: row.shot_count,
+        p_error_detail: row.error_detail ?? undefined,
+        p_forced: row.forced ?? undefined,
+        p_winning_shot: row.winning_shot ?? undefined,
+        p_losing_shot: row.losing_shot ?? undefined,
+        p_shot_count: row.shot_count ?? undefined,
       })
       if (error) throw error
     },

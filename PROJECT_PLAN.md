@@ -431,8 +431,8 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
   tap, no chips; fixable afterwards in the timeline like any rally).
 - **Secondary chips appear after the winner tap:** end-reason `ToggleGroup` (winner · error · stroke ·
   serve fault — no ace: a 1-shot winner on serve IS an ace, derived); if *error*/*serve fault*, the
-  error-detail chip row + forced toggle appear; optional shot-type (the rally's last shot, on
-  winner/error); `shot_count` numeric input. Save → row appended, chips reset, winner cleared,
+  error-detail chip row + forced toggle appear; optional shot chip row (the decisive shot —
+  saved as winning_shot or losing_shot per the outcome); `shot_count` numeric input. Save → row appended, chips reset, winner cleared,
   focus returns. Context (game, server, sides) sticks.
 - **Hotkeys** (buttons remain for discoverability): `s`/`d` = winner on the **left/right side of the
   screen** (court positions, not initials — generalises to any opponent) · `l` = let · `w/e/k/f` =
@@ -573,14 +573,14 @@ are collectively the match's **house rules** (§7.7).
 **rallies** (the heart) — `id` · `game_id` (FK, cascade) · `rally_number` (unique within game) ·
 `server_id` (FK players, **stored, never derived**) · `serve_side` enum(left/right) ·
 `serve_number` smallint(1/2) · `winner_id` (FK players, **null ONLY for lets**) · `end_reason` enum ·
-`error_detail` enum nullable · `forced` bool nullable (errors only) · `shot_type` enum nullable
+`error_detail` enum nullable · `forced` bool nullable (errors only) · `winning_shot`/`losing_shot` enum nullable
 (winner/ace only) · `shot_count` smallint nullable · timestamps.
 
 **Enums**
 - `end_reason`: winner · error · stroke · let · ace · serve_fault
 - `error_detail`: tin · out_top · out_side · out_back · not_up · double_bounce
 - `serve_side`: left · right
-- `shot_type`: drop · drive · boast (kill/nick/volley/lob/other retired 2026-07 — kill remapped to drive, the rest untagged; values remain in the enum, a CHECK rejects them on write)
+- `winning_shot` / `losing_shot` (shot_type enum): drop · drive · boast (kill/nick/volley/lob/other retired 2026-07 — kill remapped to drive, the rest untagged; values remain in the enum, CHECKs reject them on write). One column per meaning: the winner's decisive shot (winner/forced error) vs the loser's failed shot (errors).
 - `handedness`: left · right
 - `tiebreak`: win_by_2 · sudden_death
 - `ball_type`: blue · red · yellow · double_yellow  (bounce → difficulty: blue easiest, double_yellow hardest)
@@ -613,7 +613,7 @@ are collectively the match's **house rules** (§7.7).
   silently orphan every rally's winner/server mapping.
 - CHECK-enforced: let ⇔ null winner (biconditional); `error_detail` only on error/serve_fault;
   serve_fault ⇒ 2nd serve; ace ⇒ winner = server; serve_fault ⇒ winner = receiver; `forced` only on
-  errors; `shot_type` only on winner/ace/forced-error (the rally winner's decisive shot);
+  errors; `winning_shot` only on winner/forced-error, `losing_shot` only on errors;
   `player1 <> player2`; `format in (3,5)` or null.
 
 ### 7.3 SQL — migration files
@@ -897,7 +897,7 @@ running score), streaks (gaps-and-islands over `winner_id`), rally length (`shot
   it tied).
 - Score sanity-check catches *missed* rallies, not *mis-tagged* winners (mitigated by edit + trigger).
 - Small samples are noisy — dashboard must show counts beside rates.
-- No tactical/spatial data — v1 is outcome & sequence analytics; `shot_type` is the one tactical hook.
+- No tactical/spatial data — v1 is outcome & sequence analytics; `winning_shot`/`losing_shot` are the one tactical hook.
 
 ### 7.6 Verification (when applied)
 

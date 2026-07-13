@@ -10,8 +10,12 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   rallies_error_detail_scope:
     "Error detail only applies to errors and serve faults.",
   rallies_forced_scope: "Forced/unforced only applies to errors.",
-  rallies_shot_type_scope: "Shot type only applies to winners and errors.",
-  rallies_shot_type_current:
+  rallies_winning_shot_scope:
+    "A winning shot only applies to winners and forced errors.",
+  rallies_losing_shot_scope: "A losing shot only applies to errors.",
+  rallies_winning_shot_current:
+    "That shot type was retired — use drive, boast, or drop.",
+  rallies_losing_shot_current:
     "That shot type was retired — use drive, boast, or drop.",
   rallies_end_reason_current:
     "Ace was retired — log it as a winner with rally length 1.",

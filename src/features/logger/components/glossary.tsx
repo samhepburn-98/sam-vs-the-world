@@ -98,9 +98,10 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shot</dt>
           <dd className="text-muted-foreground">
-            The last shot of the rally, and optional — the shot that won it,
-            or the failed attempt on an error (paired with the detail: tried
-            a drop, went not up).
+            The decisive shot, and optional. On a winner or a forced error
+            it&rsquo;s the winner&rsquo;s shot (the winner itself, or the shot
+            that forced the miss); on an unforced error it&rsquo;s the
+            loser&rsquo;s own failed shot.
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Aces</dt>
           <dd className="text-muted-foreground">

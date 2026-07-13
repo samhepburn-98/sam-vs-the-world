@@ -169,14 +169,15 @@ export type Database = {
           forced: boolean | null
           game_id: string
           id: string
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
           rally_number: number
           serve_number: number
           serve_side: Database["public"]["Enums"]["serve_side"]
           server_id: string
           shot_count: number | null
-          shot_type: Database["public"]["Enums"]["shot_type"] | null
           updated_at: string
           winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
         }
         Insert: {
           created_at?: string
@@ -185,14 +186,15 @@ export type Database = {
           forced?: boolean | null
           game_id: string
           id?: string
+          losing_shot?: Database["public"]["Enums"]["shot_type"] | null
           rally_number: number
           serve_number: number
           serve_side: Database["public"]["Enums"]["serve_side"]
           server_id: string
           shot_count?: number | null
-          shot_type?: Database["public"]["Enums"]["shot_type"] | null
           updated_at?: string
           winner_id?: string | null
+          winning_shot?: Database["public"]["Enums"]["shot_type"] | null
         }
         Update: {
           created_at?: string
@@ -201,14 +203,15 @@ export type Database = {
           forced?: boolean | null
           game_id?: string
           id?: string
+          losing_shot?: Database["public"]["Enums"]["shot_type"] | null
           rally_number?: number
           serve_number?: number
           serve_side?: Database["public"]["Enums"]["serve_side"]
           server_id?: string
           shot_count?: number | null
-          shot_type?: Database["public"]["Enums"]["shot_type"] | null
           updated_at?: string
           winner_id?: string | null
+          winning_shot?: Database["public"]["Enums"]["shot_type"] | null
         }
         Relationships: [
           {
@@ -373,6 +376,7 @@ export type Database = {
           game_number: number | null
           id: string | null
           is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
           match_id: string | null
           player1_id: string | null
           player2_id: string | null
@@ -384,8 +388,8 @@ export type Database = {
           serve_side: Database["public"]["Enums"]["serve_side"] | null
           server_id: string | null
           shot_count: number | null
-          shot_type: Database["public"]["Enums"]["shot_type"] | null
           winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
         }
         Relationships: [
           {
@@ -443,119 +447,264 @@ export type Database = {
     Functions: {
       comeback_rallies: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
           p_deficit?: number
-          p_opponent_id?: string | null
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      error_profile: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
+          p_player_id: string
+        }
+        Returns: {
+          detail_untagged: number
+          double_bounce: number
+          errors_total: number
+          forced_errors: number
+          games_played: number
+          not_up: number
+          out_back: number
+          out_side: number
+          out_top: number
+          tin: number
+          trend: Json
+          unforced_errors: number
+          untagged_errors: number
+        }[]
+      }
+      error_rallies: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
+          p_player_id: string
+        }
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       filtered_games: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          match_id: string
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"]
+          created_at: string
+          date: string
           game_id: string
           game_number: number
-          date: string
-          created_at: string
-          opponent_id: string
-          ball_type: Database["public"]["Enums"]["ball_type"] | null
-          player_score: number
-          opponent_score: number
           is_undecided: boolean
-          won: boolean | null
-        }>
+          match_id: string
+          opponent_id: string
+          opponent_score: number
+          player_score: number
+          won: boolean
+        }[]
       }
       filtered_matches: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          match_id: string
-          date: string
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"]
           created_at: string
-          opponent_id: string
-          ball_type: Database["public"]["Enums"]["ball_type"] | null
-          player_games: number
+          date: string
+          match_id: string
           opponent_games: number
-          winner_id: string | null
-          won: boolean | null
-        }>
+          opponent_id: string
+          player_games: number
+          winner_id: string
+          won: boolean
+        }[]
       }
       filtered_rallies: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       h2h: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
           p_player1_id: string
           p_player2_id: string
         }
-        Returns: Array<{
+        Returns: {
+          games_decided: number
           games_won_p1: number
           games_won_p2: number
-          games_decided: number
+          match_history: Json
+          matches_decided: number
           matches_won_p1: number
           matches_won_p2: number
-          matches_decided: number
-          match_history: Json
-        }>
+        }[]
       }
       h2h_rallies: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
           p_player1_id: string
           p_player2_id: string
         }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
-      // Deviates from `supabase gen types`: the generator can't see that the
-      // plpgsql params accept null — a let insert passes p_winner_id: null,
-      // and RallyRow passes explicit nulls for the optional details. Keep
-      // the `| null`s when regenerating.
       insert_rally_at: {
         Args: {
           p_end_reason: Database["public"]["Enums"]["end_reason"]
-          p_error_detail?: Database["public"]["Enums"]["error_detail"] | null
-          p_forced?: boolean | null
+          p_error_detail?: Database["public"]["Enums"]["error_detail"]
+          p_forced?: boolean
           p_game_id: string
           p_id: string
+          p_losing_shot?: Database["public"]["Enums"]["shot_type"]
           p_rally_number: number
           p_serve_number: number
           p_serve_side: Database["public"]["Enums"]["serve_side"]
           p_server_id: string
-          p_shot_count?: number | null
-          p_shot_type?: Database["public"]["Enums"]["shot_type"] | null
-          p_winner_id: string | null
+          p_shot_count?: number
+          p_winner_id: string
+          p_winning_shot?: Database["public"]["Enums"]["shot_type"]
         }
         Returns: string
       }
@@ -577,167 +726,187 @@ export type Database = {
           winning_drop: number
         }[]
       }
-      error_profile: {
-        Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
-          p_player_id: string
-        }
-        Returns: Array<{
-          errors_total: number
-          forced_errors: number
-          unforced_errors: number
-          untagged_errors: number
-          tin: number
-          out_top: number
-          out_side: number
-          out_back: number
-          not_up: number
-          double_bounce: number
-          detail_untagged: number
-          games_played: number
-          trend: Json
-        }>
-      }
-      error_rallies: {
-        Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
-          p_player_id: string
-        }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
-      }
       momentum: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
           p_deficit?: number
-          p_opponent_id?: string | null
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          comebacks: number
-          longest_streak: number
-          longest_streak_game_id: string | null
-          early_rallies: number
-          early_wins: number
-          mid_rallies: number
-          mid_wins: number
+        Returns: {
           close_rallies: number
           close_wins: number
           comeback_games: Json
-        }>
+          comebacks: number
+          early_rallies: number
+          early_wins: number
+          longest_streak: number
+          longest_streak_game_id: string
+          mid_rallies: number
+          mid_wins: number
+        }[]
       }
       player_headline: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          player_id: string
-          games_won: number
+        Returns: {
           games_decided: number
-          matches_won: number
+          games_won: number
           matches_decided: number
-          signature_trait: string | null
+          matches_won: number
+          player_id: string
           recent_games: Json
-        }>
+          signature_trait: string
+        }[]
       }
       players_headline: {
         Args: never
-        Returns: Array<{
-          player_id: string
-          name: string
-          handedness: Database["public"]["Enums"]["handedness"] | null
-          games_won: number
+        Returns: {
           games_decided: number
-          matches_won: number
+          games_won: number
+          handedness: Database["public"]["Enums"]["handedness"]
           matches_decided: number
-          signature_trait: string | null
+          matches_won: number
+          name: string
+          player_id: string
           recent_games: Json
-        }>
+          signature_trait: string
+        }[]
       }
       rally_length_rallies: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_bucket?: string | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_bucket?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       rally_lengths: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          total_rallies: number
-          avg_length: number | null
-          longest: number
-          short_rallies: number
-          short_wins: number
-          medium_rallies: number
-          medium_wins: number
+        Returns: {
+          avg_length: number
           long_rallies: number
           long_wins: number
-        }>
+          longest: number
+          medium_rallies: number
+          medium_wins: number
+          short_rallies: number
+          short_wins: number
+          total_rallies: number
+        }[]
       }
       serve_rallies: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<
-          Database["public"]["Views"]["rallies_scored"]["Row"]
-        >
+        Returns: {
+          ball_type: Database["public"]["Enums"]["ball_type"] | null
+          date: string | null
+          end_reason: Database["public"]["Enums"]["end_reason"] | null
+          error_detail: Database["public"]["Enums"]["error_detail"] | null
+          forced: boolean | null
+          game_id: string | null
+          game_number: number | null
+          id: string | null
+          is_let: boolean | null
+          losing_shot: Database["public"]["Enums"]["shot_type"] | null
+          match_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          rally_number: number | null
+          receiver_id: string | null
+          score_p1: number | null
+          score_p2: number | null
+          serve_number: number | null
+          serve_side: Database["public"]["Enums"]["serve_side"] | null
+          server_id: string | null
+          shot_count: number | null
+          winner_id: string | null
+          winning_shot: Database["public"]["Enums"]["shot_type"] | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "rallies_scored"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       serve_stats: {
         Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date_from?: string | null
-          p_date_to?: string | null
-          p_opponent_id?: string | null
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
           p_player_id: string
         }
-        Returns: Array<{
-          rallies_served: number
-          serve_wins: number
-          rallies_returned: number
-          return_wins: number
+        Returns: {
           aces: number
           double_faults: number
-          two_serve_rallies_served: number
           first_serve_faults: number
+          left_served: number
+          left_wins: number
+          rallies_returned: number
+          rallies_served: number
+          return_wins: number
+          right_served: number
+          right_wins: number
+          serve_wins: number
           serve1_served: number
           serve1_wins: number
           serve2_served: number
           serve2_wins: number
-          left_served: number
-          left_wins: number
-          right_served: number
-          right_wins: number
-        }>
+          two_serve_rallies_served: number
+        }[]
       }
     }
     Enums: {

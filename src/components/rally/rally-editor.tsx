@@ -10,6 +10,7 @@ import {
   canSave,
   rowToDraft,
   selectEndReason,
+  setForced,
   showsErrorDetail,
   showsForced,
   showsServeFault,
@@ -188,10 +189,7 @@ export function RallyEditor({
             size="sm"
             value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
             onValueChange={(v) =>
-              setDraft((d) => ({
-                ...d,
-                forced: v === "" ? null : v === "yes",
-              }))
+              setDraft((d) => setForced(d, v === "" ? null : v === "yes"))
             }
           >
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>

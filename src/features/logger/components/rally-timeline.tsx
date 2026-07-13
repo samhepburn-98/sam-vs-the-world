@@ -75,7 +75,8 @@ export function RallyTimeline({
     const parts = [END_REASON_LABELS[row.end_reason]]
     if (row.error_detail) parts.push(row.error_detail.replace("_", " "))
     if (row.forced !== null) parts.push(row.forced ? "forced" : "unforced")
-    if (row.shot_type) parts.push(row.shot_type)
+    const shot = row.winning_shot ?? row.losing_shot
+    if (shot) parts.push(shot)
     if (row.shot_count !== null) {
       parts.push(`${row.shot_count} shot${row.shot_count === 1 ? "" : "s"}`)
     }

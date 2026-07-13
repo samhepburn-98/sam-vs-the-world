@@ -31,7 +31,8 @@ export function updateRallyOp(
     end_reason: row.end_reason,
     error_detail: row.error_detail,
     forced: row.forced,
-    shot_type: row.shot_type,
+    winning_shot: row.winning_shot,
+    losing_shot: row.losing_shot,
     shot_count: row.shot_count,
   }
   return {

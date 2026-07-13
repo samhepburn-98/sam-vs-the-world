@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import { newPlayerSchema, playerSummary } from "@/lib/schemas/player"
+import {
+  newPlayerSchema,
+  PLAYER_SUMMARY_COLUMNS,
+  playerSummary,
+} from "@/lib/schemas/player"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { NewPlayerInput } from "@/lib/schemas/player"
@@ -14,7 +18,7 @@ export function useCreatePlayer() {
       const { data, error } = await supabase
         .from("players")
         .insert({ id: crypto.randomUUID(), name: input.name })
-        .select("id, name, handedness")
+        .select(PLAYER_SUMMARY_COLUMNS)
         .single()
       if (error) throw error
       return playerSummary.parse(data)

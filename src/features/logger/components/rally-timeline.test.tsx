@@ -23,7 +23,8 @@ function row(overrides: Partial<RallyRow> & { rally_number: number }): RallyRow 
     end_reason: "winner",
     error_detail: null,
     forced: null,
-    shot_type: null,
+    winning_shot: null,
+  losing_shot: null,
     shot_count: null,
     ...overrides,
   }
