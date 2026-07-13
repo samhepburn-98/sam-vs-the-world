@@ -20,14 +20,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 // The redesigned player profile: card-anchored hero with the KPI row, then
-// two tabs — Summary tells the story (radar, error wall, season strip,
-// match history), Stats is the dense bento for scanning before a match.
+// two tabs — Summary tells the story (radar, error wall, match history),
+// Stats is the dense bento for scanning before a match.
 //
-// WIRING IN PROGRESS. The header, the Summary tab's shape and errors
-// sections and match history, and the Stats tab's five RPC-backed cards
-// (rally curve, phase win rates, serve, point-enders, errors given) read
-// real data; the season strip and the remaining Stats cards (head-to-head,
-// recent) still render PROFILE_FIXTURE, wired one at a time.
+// WIRING IN PROGRESS. The header, the whole Summary tab, and the Stats
+// tab's five RPC-backed cards (rally curve, phase win rates, serve,
+// point-enders, errors given) read real data; the remaining Stats cards
+// (head-to-head, recent) still render PROFILE_FIXTURE, wired one at a time.
 
 export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {

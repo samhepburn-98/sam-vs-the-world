@@ -2,7 +2,6 @@ import { AttributeRadar } from "@/features/dashboard/components/attribute-radar"
 import { ErrorWall } from "@/features/dashboard/components/error-wall"
 import { PlayerMatchHistory } from "@/features/dashboard/components/player-match-history"
 import { NarrativeInsight } from "@/features/dashboard/components/narrative-insight"
-import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 import type { ErrorsInsights } from "@/features/dashboard/lib/profile-errors"
@@ -17,9 +16,8 @@ import type { ReactNode } from "react"
 // pairs one graphic with the narrative insights it supports — the radar with
 // the strength/weakness/pattern read (real, via computeProfileShape), the
 // error wall with the biggest-leak read (real, via computeProfileErrors),
-// then the season strip and the match history table (real, via
-// PlayerMatchHistory). The Stats tab holds the dense grid. Only the season
-// strip still renders PROFILE_FIXTURE.
+// then the match history table (real, via PlayerMatchHistory). The Stats
+// tab holds the dense grid. Every section here reads real data.
 
 function Section({
   title,
@@ -90,15 +88,6 @@ export function ProfileSummaryTab({
             <ErrorWall wall={errors.wall} />
           </div>
           <InsightColumn insights={errors.insights} />
-        </div>
-      </Section>
-
-      <Section
-        title="The season, one game at a time"
-        lede={profile.season.lede}
-      >
-        <div className={PANEL}>
-          <SeasonStrip games={profile.season.games} />
         </div>
       </Section>
 

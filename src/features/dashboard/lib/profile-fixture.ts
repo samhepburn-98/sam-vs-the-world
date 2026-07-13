@@ -84,11 +84,6 @@ export interface ProfileFixture {
     lede: string
     insights: Array<ProfileInsight>
   }
-  season: {
-    lede: string
-    /** Game results oldest to newest. */
-    games: Array<boolean>
-  }
   history: {
     lede: string
   }
@@ -110,9 +105,6 @@ const attr = (
   value: number,
   sr: string
 ): PlayerAttribute => ({ key, code, detail, value, display: String(value), sr })
-
-// 40 games, 24 won: a six-game run mid-season, ending W W L W L.
-const SEASON_GAMES = "WWLWWWWWWLLWLWLWWLLWWWLLWLWWLWLWWLLWWLWL"
 
 export const PROFILE_FIXTURE: ProfileFixture = {
   name: "Sam",
@@ -195,10 +187,6 @@ export const PROFILE_FIXTURE: ProfileFixture = {
         body: "65% of tagged errors in your rallies were forced by your shot — the drive does most of that work (34 decisive drives vs 21 drops, 11 boasts).",
       },
     ],
-  },
-  season: {
-    lede: "All 40 games in order. The six-in-a-row run through late June is the best stretch logged; it ended the night the return stats fell off.",
-    games: SEASON_GAMES.split("").map((g) => g === "W"),
   },
   history: {
     lede: "Most recent first.",

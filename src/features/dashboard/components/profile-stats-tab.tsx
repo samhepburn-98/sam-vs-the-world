@@ -1,6 +1,5 @@
 import { H2hTable } from "@/features/dashboard/components/h2h-table"
 import { RallyLengthCurve } from "@/features/dashboard/components/rally-length-curve"
-import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 import { ServeBoxes } from "@/features/dashboard/components/serve-boxes"
 import { StatBarRow } from "@/features/dashboard/components/stat-bar-row"
 import { cn } from "@/lib/utils"
@@ -12,8 +11,7 @@ import type { ReactNode } from "react"
 // The Stats tab: the whole player as a dense bento of small multiples, built
 // for scanning before a match. The four RPC-backed cards (rally curve, phase
 // win rates, serve, errors given) read `stats`; point-enders, head-to-head,
-// recent matches, and the season strip still read `fixture` until each is
-// wired.
+// and recent matches still read `fixture` until each is wired.
 
 function Panel({
   title,
@@ -159,13 +157,6 @@ export function ProfileStatsTab({
         </ul>
       </Panel>
 
-      <Panel
-        title="All 40 games"
-        sub="oldest to newest"
-        className="lg:col-span-12"
-      >
-        <SeasonStrip games={fixture.season.games} />
-      </Panel>
     </div>
   )
 }
