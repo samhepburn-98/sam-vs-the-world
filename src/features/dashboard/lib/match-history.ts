@@ -1,3 +1,4 @@
+import type { BallType } from "@/lib/schemas/enums"
 import type { GameResultInMatch } from "@/lib/schemas/game"
 import type { MatchResultSummary } from "@/lib/schemas/match"
 
@@ -14,6 +15,8 @@ export interface HistoryMatch {
   /** null while the match is still in play */
   won: boolean | null
   result: string
+  /** the ball the match was played with, or null when it wasn't recorded */
+  ball: BallType | null
   /** Per-game scores, this player first (e.g. "11-7") — the table derives
    *  each pill's won/lost styling from the two numbers. */
   games: Array<string>
@@ -53,6 +56,7 @@ export function toHistoryMatches(
       opponent: nameOf(isP1 ? m.player2_id : m.player1_id),
       won: m.match_winner_id === null ? null : m.match_winner_id === playerId,
       result: `${mine}–${theirs}`,
+      ball: m.ball_type,
       games: pills,
       // note stays absent — nothing derives it yet
     }

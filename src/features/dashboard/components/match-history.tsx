@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
+import { BallDots } from "@/components/ball-dots"
 import {
   Item,
   ItemActions,
@@ -73,6 +74,7 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
               <span className="sr-only">Won or lost</span>
             </th>
             <th className="py-2 pr-3 font-medium">Result</th>
+            <th className="py-2 pr-3 font-medium">Ball</th>
             <th className="py-2 pr-3 font-medium">Games</th>
             <th className="py-2 font-medium">Note</th>
           </tr>
@@ -99,6 +101,13 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
                 <ResultBadge won={m.won} />
               </td>
               <td className="py-2.5 pr-3 tabular-nums">{m.result}</td>
+              <td className="py-2.5 pr-3">
+                {m.ball ? (
+                  <BallDots ball={m.ball} />
+                ) : (
+                  <span className="text-muted-foreground/50">—</span>
+                )}
+              </td>
               <td className="py-2.5 pr-3">
                 <div className="flex flex-wrap gap-1">
                   {m.games.map((score, i) => (
@@ -142,6 +151,7 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
               <span className="font-normal text-muted-foreground tabular-nums">
                 · {m.result}
               </span>
+              {m.ball && <BallDots ball={m.ball} />}
             </ItemTitle>
             <div className="flex flex-wrap gap-1">
               {m.games.map((score, i) => (

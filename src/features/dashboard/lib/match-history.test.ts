@@ -36,15 +36,26 @@ const game = (over: Partial<GameResultInMatch> = {}): GameResultInMatch => ({
 
 describe("toHistoryMatches", () => {
   it("orients a match to the profiled player when they are player1", () => {
-    const [row] = toHistoryMatches(SAM, [match()], [game()], nameOf)
+    const [row] = toHistoryMatches(
+      SAM,
+      [match({ ball_type: "double_yellow" })],
+      [game()],
+      nameOf
+    )
     expect(row).toMatchObject({
       id: MATCH,
       date: "9 Jul",
       opponent: "Woody",
       won: true,
       result: "3–1",
+      ball: "double_yellow",
       games: ["11-7"],
     })
+  })
+
+  it("carries a null ball through untouched", () => {
+    const [row] = toHistoryMatches(SAM, [match()], [game()], nameOf)
+    expect(row.ball).toBeNull()
   })
 
   it("flips every score when the profiled player is player2", () => {
