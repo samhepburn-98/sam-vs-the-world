@@ -1,27 +1,44 @@
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+} from "recharts"
+
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
-// The hexagon radar under each player card: the six measured
-// attributes as a shape, so the two players' styles read at a glance — a
-// grinder bulges toward CON/GRD/CLU, a shotmaker toward SRV/ATT. Axes run
-// clockwise from the top in attribute order. An unmeasured axis collapses
-// to the centre rather than pretending to a value.
+// The hexagon radar under each player card: the six measured attributes as
+// a shape, so the two players' styles read at a glance — a grinder bulges
+// toward CON/GRD/CLU, a shotmaker toward SRV/ATT. An unmeasured axis
+// collapses to the centre (null → 0) rather than pretending to a value.
+//
+// Drawn with recharts, with two hard-won constraints:
+// 1. Sized via CSS on the chart itself — recharts 3 is natively responsive.
+//    Do NOT wrap in ChartContainer/ResponsiveContainer: in this compact
+//    square column (and under SSR) ResponsiveContainer measures 0×0 and
+//    draws nothing.
+// 2. Style via recharts props, never Tailwind fill-*/stroke-* classes —
+//    fill/stroke set by CSS override recharts' own fill="none" attributes
+//    (a class on PolarAngleAxis paints its axis polygon solid).
 
-const CX = 80
-const CY = 86
-const R = 58
-const LABEL_R = 72
+const SIDE_COLOR = {
+  p1: "var(--primary)",
+  p2: "var(--p2)",
+} as const
 
-function point(index: number, radius: number): [number, number] {
-  const angle = ((index * 60 - 90) * Math.PI) / 180
-  return [CX + radius * Math.cos(angle), CY + radius * Math.sin(angle)]
+/** The rows the radar draws — an unmeasured attribute (null) collapses to
+ *  the centre (0) rather than pretending to a value. */
+export function toRadarData(attrs: Array<PlayerAttribute>) {
+  return attrs.map((a) => ({ code: a.code, value: a.value ?? 0 }))
 }
 
-function ring(radius: number): string {
-  return Array.from({ length: 6 }, (_, i) =>
-    point(i, radius)
-      .map((v) => v.toFixed(1))
-      .join(","),
-  ).join(" ")
+/** The radar as a screen reader hears it: each code with its display
+ *  value, dashes included — the same six numbers the sighted eye reads. */
+export function radarLabel(name: string, attrs: Array<PlayerAttribute>) {
+  return `${name}'s attribute radar: ${attrs
+    .map((a) => `${a.code} ${a.display}`)
+    .join(", ")}`
 }
 
 export function AttributeRadar({
@@ -29,62 +46,56 @@ export function AttributeRadar({
   side,
   name,
 }: {
+  /** the six attributes, in axis order (clockwise from the top) */
   attrs: Array<PlayerAttribute>
+  /** which duel corner the player occupies — sets the shape's colour */
   side: "p1" | "p2"
+  /** player name, for the accessible label */
   name: string
 }) {
-  const color = side === "p1" ? "var(--primary)" : "var(--p2)"
-  const shape = attrs
-    .map((a, i) =>
-      point(i, ((a.value ?? 0) / 100) * R)
-        .map((v) => v.toFixed(1))
-        .join(","),
-    )
-    .join(" ")
+  const color = SIDE_COLOR[side]
+  const data = toRadarData(attrs)
 
   return (
-    <svg
-      viewBox="0 0 160 172"
+    <div
+      // overflow-visible: at compact sizes the axis labels extend past the
+      // svg edge; let them spill into the column gap instead of clipping
+      className="mx-auto [&_svg]:overflow-visible"
       role="img"
-      aria-label={`${name}'s attribute radar: ${attrs
-        .map((a) => `${a.code} ${a.display}`)
-        .join(", ")}`}
-      className="w-full"
+      aria-label={radarLabel(name, attrs)}
     >
-      <polygon
-        points={ring(R)}
-        fill="none"
-        className="stroke-muted-foreground/30"
-        strokeWidth={0.8}
-      />
-      <polygon
-        points={ring(R / 2)}
-        fill="none"
-        className="stroke-muted-foreground/20"
-        strokeWidth={0.8}
-      />
-      <polygon
-        points={shape}
-        fill={color}
-        fillOpacity={0.32}
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinejoin="round"
-      />
-      {attrs.map((a, i) => {
-        const [x, y] = point(i, LABEL_R)
-        return (
-          <text
-            key={a.key}
-            x={x.toFixed(1)}
-            y={(y + 3).toFixed(1)}
-            textAnchor="middle"
-            className="fill-muted-foreground text-[10px] font-medium"
-          >
-            {a.code}
-          </text>
-        )
-      })}
-    </svg>
+      <RadarChart
+        style={{
+          width: "100%",
+          height: "100%",
+          maxWidth: "500px",
+          maxHeight: "80vh",
+          aspectRatio: 1,
+        }}
+        data={data}
+      >
+        <PolarGrid stroke="var(--muted-foreground)" strokeOpacity={0.3} />
+        <PolarAngleAxis
+          dataKey="code"
+          axisLine={false}
+          tick={{
+            fill: "var(--muted-foreground)",
+            fontSize: 16,
+            fontWeight: 500,
+          }}
+        />
+        {/* clamp to the same 0–100 scale as the card grid, not auto-fitted
+            to each player's max */}
+        <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+        <Radar
+          dataKey="value"
+          stroke={color}
+          fill={color}
+          fillOpacity={0.32}
+          strokeWidth={1.5}
+          isAnimationActive={false}
+        />
+      </RadarChart>
+    </div>
   )
 }
