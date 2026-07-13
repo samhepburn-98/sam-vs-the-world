@@ -4,17 +4,20 @@ import { MatchHistory } from "@/features/dashboard/components/match-history"
 import { NarrativeInsight } from "@/features/dashboard/components/narrative-insight"
 import { SeasonStrip } from "@/features/dashboard/components/season-strip"
 
+import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 import type {
   ProfileFixture,
   ProfileInsight,
 } from "@/features/dashboard/lib/profile-fixture"
+import type { ShapeInsights } from "@/features/dashboard/lib/profile-shape"
 import type { ReactNode } from "react"
 
 // The Summary tab: the story of the player, told visual-first. Each section
 // pairs one graphic with the narrative insights it supports — the radar with
-// the strength/weakness read, the error wall with the tin tax, then the
-// season strip and the match history table. The Stats tab holds the dense
-// grid.
+// the strength/weakness/pattern read (real, via computeProfileShape), the
+// error wall with the tin tax, then the season strip and the match history
+// table. The Stats tab holds the dense grid. Everything below the shape
+// section still renders PROFILE_FIXTURE until its wiring lands.
 
 function Section({
   title,
@@ -51,21 +54,27 @@ function InsightColumn({ insights }: { insights: Array<ProfileInsight> }) {
 const PANEL =
   "bg-card text-card-foreground ring-foreground/10 rounded-2xl p-5 ring-1"
 
-export function ProfileSummaryTab({ profile }: { profile: ProfileFixture }) {
+export function ProfileSummaryTab({
+  name,
+  attrs,
+  shape,
+  profile,
+}: {
+  name: string
+  attrs: Array<PlayerAttribute>
+  shape: ShapeInsights
+  profile: ProfileFixture
+}) {
   return (
     <div className="flex flex-col gap-10">
-      <Section title="The shape of the game" lede={profile.shape.lede}>
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <div className={`${PANEL} flex items-center justify-center`}>
+      <Section title="The shape of the game" lede={shape.lede}>
+        <div className={`${PANEL} grid gap-4 lg:grid-cols-[1.2fr_1fr]`}>
+          <div className="flex items-center justify-center">
             <div className="w-full max-w-sm">
-              <AttributeRadar
-                attrs={profile.card.attrs}
-                side="p1"
-                name={profile.name}
-              />
+              <AttributeRadar attrs={attrs} side="p1" name={name} />
             </div>
           </div>
-          <InsightColumn insights={profile.shape.insights} />
+          <InsightColumn insights={shape.insights} />
         </div>
       </Section>
 

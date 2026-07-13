@@ -13,3 +13,9 @@ export const MIN_MATCHES_FOR_TREND = 5
 
 /** Tagged errors needed before an error-composition rate is shown. */
 export const MIN_ERRORS_FOR_RATE = 15
+
+/** Serves from one box needed before the left/right split is compared. */
+export const MIN_BOX_SERVES = 15
+
+/** Tagged decisive shots needed before the shot mix is called a pattern. */
+export const MIN_DECISIVE_FOR_MIX = 15

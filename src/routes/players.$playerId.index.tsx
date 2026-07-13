@@ -11,6 +11,7 @@ import { ProfileHero } from "@/features/dashboard/components/profile-hero"
 import { ProfileStatsTab } from "@/features/dashboard/components/profile-stats-tab"
 import { ProfileSummaryTab } from "@/features/dashboard/components/profile-summary-tab"
 import { computeProfileHeader } from "@/features/dashboard/lib/profile-header"
+import { computeProfileShape } from "@/features/dashboard/lib/profile-shape"
 import { computeProfileStats } from "@/features/dashboard/lib/profile-stats"
 import { PROFILE_FIXTURE } from "@/features/dashboard/lib/profile-fixture"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -21,10 +22,12 @@ import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 // two tabs — Summary tells the story (radar, error wall, season strip,
 // match history), Stats is the dense bento for scanning before a match.
 //
-// WIRING IN PROGRESS. The header and the Stats tab's four RPC-backed cards
-// (rally curve, phase win rates, serve, errors given) read real data; the
-// Summary tab and the remaining Stats cards (point-enders, head-to-head,
-// recent, season) still render PROFILE_FIXTURE, wired one at a time.
+// WIRING IN PROGRESS. The header, the Summary tab's shape section (radar +
+// strength/weakness/pattern), and the Stats tab's five RPC-backed cards
+// (rally curve, phase win rates, serve, point-enders, errors given) read
+// real data; the rest of the Summary tab and the remaining Stats cards
+// (head-to-head, recent, season) still render PROFILE_FIXTURE, wired one
+// at a time.
 
 export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {
@@ -58,7 +61,8 @@ function PlayerProfilePage() {
 
   const header = computeProfileHeader(player, data)
   const stats = computeProfileStats(data)
-  // Summary tab + the not-yet-wired Stats cards still read the fixture.
+  const shape = computeProfileShape(data)
+  // The not-yet-wired sections still read the fixture.
   const profile = PROFILE_FIXTURE
 
   return (
@@ -71,7 +75,12 @@ function PlayerProfilePage() {
           <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>
         <TabsContent value="summary" className="pt-4">
-          <ProfileSummaryTab profile={profile} />
+          <ProfileSummaryTab
+            name={player.name}
+            attrs={header.attrs}
+            shape={shape}
+            profile={profile}
+          />
         </TabsContent>
         <TabsContent value="stats" className="pt-4">
           <ProfileStatsTab stats={stats} fixture={profile} />

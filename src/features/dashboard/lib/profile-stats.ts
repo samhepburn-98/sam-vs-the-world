@@ -7,13 +7,13 @@ import type {
 } from "@/features/dashboard/lib/profile-fixture"
 
 // Maps the insight payloads onto the Stats tab's RPC-backed cards — the seam
-// for the bento the way computeProfileHeader is for the header. Only the four
+// for the bento the way computeProfileHeader is for the header. The five
 // cards with an existing RPC live here: the rally-length curve (rally_lengths,
 // three buckets 1–3 / 4–8 / 9+), the phase win rates (momentum, replacing the
 // old game-ball "pressure record" the data can't back), serve boxes
-// (serve_stats), and errors given (error_profile). Point-enders needs a new
-// aggregate RPC and stays on the fixture until it lands. Every rate guards its
-// own denominator so an empty bucket reads as a dash, never a NaN.
+// (serve_stats), point-enders (decisive_shots), and errors given
+// (error_profile). Every rate guards its own denominator so an empty bucket
+// reads as a dash, never a NaN.
 
 export interface ProfileStatsData {
   curve: Array<CurveBucket>
