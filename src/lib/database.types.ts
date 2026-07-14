@@ -497,7 +497,6 @@ export type Database = {
         }
         Returns: {
           detail_untagged: number
-          double_bounce: number
           errors_total: number
           forced_errors: number
           games_played: number

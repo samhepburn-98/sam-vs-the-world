@@ -12,9 +12,11 @@ export const ballType = z.enum(E.ball_type)
 export const endReason = z.enum(E.end_reason)
 export const errorDetail = z.enum(E.error_detail)
 
-/** The error details the logger offers. `double_bounce` is retired — a ball the
- *  opponent never reached is a winner, not the loser's error — but the value
- *  stays in the DB enum so legacy rows still read. */
+/** The error details the logger offers. `double_bounce` is retired — a ball
+ *  the opponent never reached is a winner, and one they reached too late is
+ *  the textbook not_up. Legacy rows were folded into not_up and a CHECK keeps
+ *  the value out of new rows (20260714120000); the member only remains in the
+ *  DB enum because Postgres can't drop enum values. */
 export const LOGGABLE_ERROR_DETAILS = E.error_detail.filter(
   (d): d is Exclude<ErrorDetail, "double_bounce"> => d !== "double_bounce",
 )
