@@ -337,6 +337,7 @@ export type Database = {
       match_results: {
         Row: {
           ball_type: Database["public"]["Enums"]["ball_type"] | null
+          created_at: string | null
           date: string | null
           format: number | null
           games_won_p1: number | null
