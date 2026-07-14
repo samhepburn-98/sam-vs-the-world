@@ -20,7 +20,7 @@ export function PageStub({
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="default">
-            <CourtDiagram className="text-muted-foreground h-16 w-11" />
+            <CourtDiagram className="h-16 w-11 text-muted-foreground" />
           </EmptyMedia>
           <EmptyTitle className="font-heading">{title}</EmptyTitle>
           <EmptyDescription>{description}</EmptyDescription>

@@ -21,6 +21,6 @@ export function useMediaQuery(query: string, serverDefault = false): boolean {
       const mm = window.matchMedia as typeof window.matchMedia | undefined
       return mm ? mm(query).matches : serverDefault
     },
-    () => serverDefault,
+    () => serverDefault
   )
 }

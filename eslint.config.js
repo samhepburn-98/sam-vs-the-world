@@ -32,11 +32,30 @@ export default [
         "error",
         {
           zones: [
-            { target: "./src/features/auth", from: "./src/features", except: ["./auth"] },
-            { target: "./src/features/logger", from: "./src/features", except: ["./logger"] },
-            { target: "./src/features/manage", from: "./src/features", except: ["./manage"] },
-            { target: "./src/features/dashboard", from: "./src/features", except: ["./dashboard"] },
-            { target: ["./src/components", "./src/lib"], from: "./src/features" },
+            {
+              target: "./src/features/auth",
+              from: "./src/features",
+              except: ["./auth"],
+            },
+            {
+              target: "./src/features/logger",
+              from: "./src/features",
+              except: ["./logger"],
+            },
+            {
+              target: "./src/features/manage",
+              from: "./src/features",
+              except: ["./manage"],
+            },
+            {
+              target: "./src/features/dashboard",
+              from: "./src/features",
+              except: ["./dashboard"],
+            },
+            {
+              target: ["./src/components", "./src/lib"],
+              from: "./src/features",
+            },
             {
               target: ["./src/components", "./src/lib", "./src/features"],
               from: "./src/routes",

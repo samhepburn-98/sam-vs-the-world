@@ -63,7 +63,7 @@ describe("computeProfileHeader", () => {
   it("shows the games record as a count, not the win rate", () => {
     const header = computeProfileHeader(
       player(),
-      fx.player({ headline: fx.headline({ games_won: 8, games_decided: 19 }) }),
+      fx.player({ headline: fx.headline({ games_won: 8, games_decided: 19 }) })
     )
     // win rate lives on the card's hero — the row shows the raw record behind it
     expect(header.kpis.some((k) => k.label === "Win rate")).toBe(false)
@@ -75,7 +75,7 @@ describe("computeProfileHeader", () => {
   it("shows aces with double faults, and no errors-forced rate (the card's CON)", () => {
     const header = computeProfileHeader(
       player(),
-      fx.player({ serve: fx.serve({ aces: 6, double_faults: 4 }) }),
+      fx.player({ serve: fx.serve({ aces: 6, double_faults: 4 }) })
     )
     expect(header.kpis.some((k) => k.label === "Errors forced")).toBe(false)
     const a = kpi(header, "Aces")

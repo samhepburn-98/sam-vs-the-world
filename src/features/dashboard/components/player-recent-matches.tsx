@@ -44,7 +44,7 @@ export function PlayerRecentMatches({
         <Link
           to="/matches"
           search={{ page: 1 }}
-          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           View all
         </Link>
@@ -67,9 +67,9 @@ export function PlayerRecentMatches({
               <Link
                 to="/matches/$matchId"
                 params={{ matchId: m.match_id }}
-                className="hover:bg-muted/50 -mx-2 flex items-center gap-3 rounded-md px-2 py-2.5"
+                className="-mx-2 flex items-center gap-3 rounded-md px-2 py-2.5 hover:bg-muted/50"
               >
-                <span className="text-muted-foreground w-24 shrink-0 text-sm tabular-nums">
+                <span className="w-24 shrink-0 text-sm text-muted-foreground tabular-nums">
                   {formatDate(m.date)}
                 </span>
                 <span className="flex-1 truncate text-sm">
@@ -85,7 +85,7 @@ export function PlayerRecentMatches({
                   <span
                     className={cn(
                       "w-10 shrink-0 text-right text-xs font-medium",
-                      result === "won" ? "text-emerald-500" : "text-red-500",
+                      result === "won" ? "text-emerald-500" : "text-red-500"
                     )}
                   >
                     {result === "won" ? "Won" : "Lost"}

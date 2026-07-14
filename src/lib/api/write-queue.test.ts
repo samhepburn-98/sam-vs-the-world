@@ -49,7 +49,7 @@ describe("strict FIFO ordering", () => {
         await slow.promise
         active--
         finished.push("op-1")
-      }),
+      })
     )
     // enqueued while op-1 is in flight — a fast op that must still wait
     queue.enqueue(
@@ -59,7 +59,7 @@ describe("strict FIFO ordering", () => {
         maxActive = Math.max(maxActive, active)
         active--
         finished.push("op-2")
-      }),
+      })
     )
 
     await Promise.resolve()
@@ -80,12 +80,12 @@ describe("strict FIFO ordering", () => {
         events.push("insert:start")
         await insert.promise
         events.push("insert:done")
-      }),
+      })
     )
     queue.enqueue(
       op("delete-rally-7", async () => {
         events.push("delete:start")
-      }),
+      })
     )
 
     await Promise.resolve()
@@ -107,7 +107,7 @@ describe("retry semantics", () => {
           return Promise.reject(new TypeError("fetch failed"))
         }
         return Promise.resolve()
-      }),
+      })
     )
     await queue.flush()
     expect(attempts).toBe(3)
@@ -126,13 +126,13 @@ describe("retry semantics", () => {
         }
         // the retry hits the row the first attempt actually inserted
         return Promise.reject({ code: "23505", message: "duplicate key" })
-      }),
+      })
     )
     queue.enqueue(
       op("next", () => {
         order.push("next ran")
         return Promise.resolve()
-      }),
+      })
     )
     await queue.flush()
     expect(attempts).toBe(2)
@@ -145,14 +145,18 @@ describe("retry semantics", () => {
     let laterRan = false
     queue.enqueue(
       op("bad-row", () =>
-        Promise.reject({ code: "23514", status: 400, message: "check violation" }),
-      ),
+        Promise.reject({
+          code: "23514",
+          status: 400,
+          message: "check violation",
+        })
+      )
     )
     queue.enqueue(
       op("later", () => {
         laterRan = true
         return Promise.resolve()
-      }),
+      })
     )
     await queue.flush()
     expect(queue.state.status).toBe("paused")
@@ -174,13 +178,13 @@ describe("pause recovery", () => {
         }
         ran.push("head")
         return Promise.resolve()
-      }),
+      })
     )
     queue.enqueue(
       op("tail", () => {
         ran.push("tail")
         return Promise.resolve()
-      }),
+      })
     )
     return { queue, ran, fixHead: () => (fail = false) }
   }

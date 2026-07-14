@@ -72,7 +72,7 @@ function RouteFade({ children }: { children: React.ReactNode }) {
   return (
     <div
       key={pathname}
-      className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+      className="motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in"
     >
       {children}
     </div>

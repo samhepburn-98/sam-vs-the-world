@@ -15,10 +15,12 @@ import type { GameBrowserRow } from "@/lib/schemas/game"
 const SORTABLE = new Set(["game_number", "created_at", "updated_at"])
 
 export async function fetchManageGames(
-  params: ListParams,
+  params: ListParams
 ): Promise<ListPage<GameBrowserRow>> {
   const supabase = getSupabaseBrowserClient()
-  let query = supabase.from("games").select("*, matches(date, player1_id, player2_id)", { count: "exact" })
+  let query = supabase
+    .from("games")
+    .select("*, matches(date, player1_id, player2_id)", { count: "exact" })
 
   const search = classifyQuery(params.q)
   if (search.kind === "uuid") {
@@ -48,7 +50,7 @@ export async function fetchManageGames(
       .select("game_id, score_p1, score_p2, winner_id, is_undecided")
       .in(
         "game_id",
-        rows.map((r) => r.id),
+        rows.map((r) => r.id)
       )
     if (derived.error) throw derived.error
     for (const r of z.array(gameResultRow).parse(derived.data)) {

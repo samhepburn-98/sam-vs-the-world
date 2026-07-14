@@ -3,7 +3,10 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 import { playerHeadline } from "@/features/dashboard/schemas/insights"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
-import type { InsightFilters, PlayerHeadline } from "@/features/dashboard/schemas/insights"
+import type {
+  InsightFilters,
+  PlayerHeadline,
+} from "@/features/dashboard/schemas/insights"
 
 /** Maps the client-side filter object onto the RPC's p_* parameters —
  *  omitted filters fall through to the SQL defaults (no filter). */
@@ -18,7 +21,7 @@ export function toRpcFilters(filters: InsightFilters) {
 
 export async function fetchPlayerHeadline(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ): Promise<PlayerHeadline> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("player_headline", {
@@ -31,7 +34,7 @@ export async function fetchPlayerHeadline(
 
 export function playerHeadlineOptions(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "player-headline", playerId, filters],
@@ -41,7 +44,7 @@ export function playerHeadlineOptions(
 
 export function usePlayerHeadline(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return useQuery(playerHeadlineOptions(playerId, filters))
 }

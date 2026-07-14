@@ -23,7 +23,7 @@ export function ServeSidePreview({ serve }: { serve: ServeStats }) {
     <CourtDiagram
       leftShare={leftShare}
       rightShare={rightShare}
-      className="text-muted-foreground/50 h-16 w-11"
+      className="h-16 w-11 text-muted-foreground/50"
       label="Serve win rate by court side"
     />
   )
@@ -36,16 +36,25 @@ export function ErrorSplitPreview({ errors }: { errors: ErrorProfile }) {
   return (
     <div className="w-full">
       <div className="flex h-3 w-full overflow-hidden rounded-full">
-        <div className="bg-primary" style={{ width: seg(errors.unforced_errors) }} />
-        <div className="bg-muted-foreground/50" style={{ width: seg(errors.forced_errors) }} />
-        <div className="bg-muted" style={{ width: seg(errors.untagged_errors) }} />
+        <div
+          className="bg-primary"
+          style={{ width: seg(errors.unforced_errors) }}
+        />
+        <div
+          className="bg-muted-foreground/50"
+          style={{ width: seg(errors.forced_errors) }}
+        />
+        <div
+          className="bg-muted"
+          style={{ width: seg(errors.untagged_errors) }}
+        />
       </div>
-      <div className="text-muted-foreground mt-2 flex gap-3 text-xs">
+      <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
-          <span className="bg-primary size-2 rounded-full" /> Unforced
+          <span className="size-2 rounded-full bg-primary" /> Unforced
         </span>
         <span className="flex items-center gap-1">
-          <span className="bg-muted-foreground/50 size-2 rounded-full" /> Forced
+          <span className="size-2 rounded-full bg-muted-foreground/50" /> Forced
         </span>
       </div>
     </div>
@@ -66,11 +75,11 @@ export function RallyBucketsPreview({ lengths }: { lengths: RallyLengths }) {
         <div key={b.label} className="flex flex-1 flex-col items-center gap-1">
           <div className="flex h-12 w-full items-end">
             <div
-              className="bg-primary/80 w-full rounded-t"
+              className="w-full rounded-t bg-primary/80"
               style={{ height: `${Math.max(8, (b.n / max) * 100)}%` }}
             />
           </div>
-          <span className="text-muted-foreground text-xs">{b.label}</span>
+          <span className="text-xs text-muted-foreground">{b.label}</span>
         </div>
       ))}
     </div>
@@ -89,14 +98,17 @@ export function MomentumPhasePreview({ momentum: m }: { momentum: Momentum }) {
       {phases.map((p) => {
         const rate = p.n > 0 ? p.w / p.n : 0
         return (
-          <div key={p.label} className="flex flex-1 flex-col items-center gap-1">
+          <div
+            key={p.label}
+            className="flex flex-1 flex-col items-center gap-1"
+          >
             <div className="flex h-12 w-full items-end">
               <div
-                className="bg-primary/80 w-full rounded-t"
+                className="w-full rounded-t bg-primary/80"
                 style={{ height: `${Math.max(8, rate * 100)}%` }}
               />
             </div>
-            <span className="text-muted-foreground text-xs">{p.label}</span>
+            <span className="text-xs text-muted-foreground">{p.label}</span>
           </div>
         )
       })}
@@ -107,9 +119,14 @@ export function MomentumPhasePreview({ momentum: m }: { momentum: Momentum }) {
 /** Form: the last few decided games, oldest to newest. */
 export function FormDotsPreview({ games }: { games: Array<HeadlineGame> }) {
   // recent_games is newest-first; read a form line oldest-first, left to right
-  const form = games.filter((g) => g.won !== null).slice(0, 6).reverse()
+  const form = games
+    .filter((g) => g.won !== null)
+    .slice(0, 6)
+    .reverse()
   if (form.length === 0) {
-    return <p className="text-muted-foreground text-sm">No decided games yet.</p>
+    return (
+      <p className="text-sm text-muted-foreground">No decided games yet.</p>
+    )
   }
   return (
     <span
@@ -125,7 +142,7 @@ export function FormDotsPreview({ games }: { games: Array<HeadlineGame> }) {
           aria-hidden
           className={cn(
             "size-2.5 rounded-full",
-            g.won ? "bg-emerald-500" : "bg-red-500",
+            g.won ? "bg-emerald-500" : "bg-red-500"
           )}
         />
       ))}

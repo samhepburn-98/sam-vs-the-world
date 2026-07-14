@@ -12,7 +12,7 @@ interface InsertCapableClient {
 /** One rally insert as a queue op — id is the client uuid (idempotent retry). */
 export function insertRallyOp(
   row: RallyRow,
-  client: InsertCapableClient = getSupabaseBrowserClient(),
+  client: InsertCapableClient = getSupabaseBrowserClient()
 ): WriteOp {
   return {
     id: row.id,

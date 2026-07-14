@@ -18,7 +18,7 @@ export const errorDetail = z.enum(E.error_detail)
  *  the value out of new rows (20260714120000); the member only remains in the
  *  DB enum because Postgres can't drop enum values. */
 export const LOGGABLE_ERROR_DETAILS = E.error_detail.filter(
-  (d): d is Exclude<ErrorDetail, "double_bounce"> => d !== "double_bounce",
+  (d): d is Exclude<ErrorDetail, "double_bounce"> => d !== "double_bounce"
 )
 export const handedness = z.enum(E.handedness)
 export const serveSide = z.enum(E.serve_side)
@@ -31,7 +31,7 @@ export const shotType = z.enum(E.shot_type)
  *  out of new rows. */
 export const LOGGABLE_SHOT_TYPES = E.shot_type.filter(
   (s): s is Extract<ShotType, "drive" | "boast" | "drop"> =>
-    s === "drive" || s === "boast" || s === "drop",
+    s === "drive" || s === "boast" || s === "drop"
 )
 export const tiebreak = z.enum(E.tiebreak)
 

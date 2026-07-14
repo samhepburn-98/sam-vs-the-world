@@ -47,7 +47,7 @@ function EntryPage() {
   if (players.isError || recent.isError) {
     return (
       <main className="container mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-destructive text-sm">
+        <p className="text-sm text-destructive">
           Couldn't load players and matches — check your connection and reload.
         </p>
       </main>
@@ -79,7 +79,7 @@ function EntryPage() {
   return (
     <main className="container mx-auto flex max-w-2xl flex-col gap-10 px-4 py-10">
       <section>
-        <h1 className="font-heading mb-6 text-2xl font-bold tracking-tight">
+        <h1 className="mb-6 font-heading text-2xl font-bold tracking-tight">
           New match
         </h1>
         <MatchSetup
@@ -97,13 +97,16 @@ function EntryPage() {
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
             void queryClient.invalidateQueries({ queryKey: ["manage"] })
             void queryClient.invalidateQueries({ queryKey: ["home"] })
-            setSession({ matchId: plan.matchId, firstServerId: input.firstServerId })
+            setSession({
+              matchId: plan.matchId,
+              firstServerId: input.firstServerId,
+            })
             return null
           }}
         />
       </section>
       <section>
-        <h2 className="font-heading mb-4 text-lg font-bold tracking-tight">
+        <h2 className="mb-4 font-heading text-lg font-bold tracking-tight">
           Reopen a match
         </h2>
         <RecentMatches

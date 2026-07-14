@@ -21,7 +21,7 @@ export interface CreateMatchPlan {
 
 export function planCreateMatch(
   input: MatchSetupInput,
-  client: InsertCapableClient = getSupabaseBrowserClient(),
+  client: InsertCapableClient = getSupabaseBrowserClient()
 ): CreateMatchPlan {
   const matchId = crypto.randomUUID()
   const gameId = crypto.randomUUID()

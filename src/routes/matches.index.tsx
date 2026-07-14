@@ -24,10 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
@@ -50,7 +47,13 @@ const matchesSearch = z.object({
 type MatchesSearch = z.infer<typeof matchesSearch>
 
 function toParams(s: MatchesSearch): MatchesParams {
-  return { player: s.player, ball: s.ball, from: s.from, to: s.to, page: s.page }
+  return {
+    player: s.player,
+    ball: s.ball,
+    from: s.from,
+    to: s.to,
+    page: s.page,
+  }
 }
 
 export const Route = createFileRoute("/matches/")({
@@ -89,7 +92,7 @@ function MatchesPage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           Match history
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Every match, newest first.
         </p>
       </header>
@@ -97,9 +100,7 @@ function MatchesPage() {
       <div className="flex flex-wrap items-center gap-3">
         <Select
           value={search.player ?? "all"}
-          onValueChange={(v) =>
-            patch({ player: v === "all" ? undefined : v })
-          }
+          onValueChange={(v) => patch({ player: v === "all" ? undefined : v })}
         >
           <SelectTrigger className="w-48" aria-label="Player">
             <SelectValue />
@@ -141,7 +142,7 @@ function MatchesPage() {
           value={search.from ?? ""}
           onChange={(e) => patch({ from: e.target.value || undefined })}
         />
-        <span className="text-muted-foreground text-sm">to</span>
+        <span className="text-sm text-muted-foreground">to</span>
         <Input
           type="date"
           aria-label="To date"
@@ -176,11 +177,13 @@ function MatchesPage() {
             variant="outline"
             size="sm"
             disabled={search.page <= 1}
-            onClick={() => void navigate({ search: (p) => ({ ...p, page: p.page - 1 }) })}
+            onClick={() =>
+              void navigate({ search: (p) => ({ ...p, page: p.page - 1 }) })
+            }
           >
             Previous
           </Button>
-          <span className="text-muted-foreground text-sm tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             Page {search.page} of {pages}
           </span>
           <Button
@@ -188,7 +191,9 @@ function MatchesPage() {
             variant="outline"
             size="sm"
             disabled={search.page >= pages}
-            onClick={() => void navigate({ search: (p) => ({ ...p, page: p.page + 1 }) })}
+            onClick={() =>
+              void navigate({ search: (p) => ({ ...p, page: p.page + 1 }) })
+            }
           >
             Next
           </Button>
@@ -207,8 +212,7 @@ function MatchListItem({
 }) {
   const p1 = nameOf.get(match.player1_id) ?? "Unknown"
   const p2 = nameOf.get(match.player2_id) ?? "Unknown"
-  const hasScore =
-    match.games_won_p1 !== null && match.games_won_p2 !== null
+  const hasScore = match.games_won_p1 !== null && match.games_won_p2 !== null
 
   return (
     <li>
@@ -216,9 +220,9 @@ function MatchListItem({
         to="/matches/$matchId"
         params={{ matchId: match.match_id }}
         search={{ rally: undefined }}
-        className="hover:bg-muted/50 -mx-2 flex items-center gap-3 rounded-md px-2 py-3"
+        className="-mx-2 flex items-center gap-3 rounded-md px-2 py-3 hover:bg-muted/50"
       >
-        <span className="text-muted-foreground w-24 shrink-0 text-sm tabular-nums">
+        <span className="w-24 shrink-0 text-sm text-muted-foreground tabular-nums">
           {match.date}
         </span>
         <span className="flex-1 truncate text-sm">

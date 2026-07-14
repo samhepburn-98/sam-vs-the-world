@@ -85,7 +85,7 @@ describe("auto-rules (mirror the DB constraints — §8.7 #4)", () => {
     const draft = selectEndReason(
       draftWithWinner("sam"),
       "serve_fault",
-      singleServeCtx,
+      singleServeCtx
     )
     expect(draft.serveNumber).toBe(1)
   })
@@ -148,11 +148,16 @@ describe("decisive-shot mapping", () => {
 
   it("reopening a row recovers the tag from either column", () => {
     const base = buildRallyRow(
-      { ...selectEndReason(draftWithWinner("sam"), "winner", ctx), shotType: "drive" },
-      { id: "r", gameId: "g", rallyNumber: 4 },
+      {
+        ...selectEndReason(draftWithWinner("sam"), "winner", ctx),
+        shotType: "drive",
+      },
+      { id: "r", gameId: "g", rallyNumber: 4 }
     )
     expect(rowToDraft(base).shotType).toBe("drive")
-    expect(rowToDraft({ ...base, winning_shot: null, losing_shot: "drop" }).shotType).toBe("drop")
+    expect(
+      rowToDraft({ ...base, winning_shot: null, losing_shot: "drop" }).shotType
+    ).toBe("drop")
   })
 })
 
@@ -179,7 +184,9 @@ describe("serve context toggles", () => {
   it("q toggles serve number in a two-serve match", () => {
     const draft = createDraft(suggestion)
     expect(toggleServeNumber(draft, ctx).serveNumber).toBe(2)
-    expect(toggleServeNumber(toggleServeNumber(draft, ctx), ctx).serveNumber).toBe(1)
+    expect(
+      toggleServeNumber(toggleServeNumber(draft, ctx), ctx).serveNumber
+    ).toBe(1)
   })
 
   it("serve-number toggle is inert in a single-serve match", () => {
@@ -198,15 +205,15 @@ describe("saving", () => {
   it("cannot save without winner + end reason", () => {
     expect(canSave(createDraft(suggestion))).toBe(false)
     expect(canSave(draftWithWinner("sam"))).toBe(false)
-    expect(canSave(selectEndReason(draftWithWinner("sam"), "winner", ctx))).toBe(
-      true,
-    )
+    expect(
+      canSave(selectEndReason(draftWithWinner("sam"), "winner", ctx))
+    ).toBe(true)
     expect(() =>
       buildRallyRow(createDraft(suggestion), {
         id: "x",
         gameId: "g",
         rallyNumber: 1,
-      }),
+      })
     ).toThrow(/incomplete/)
   })
 

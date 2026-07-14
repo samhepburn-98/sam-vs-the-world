@@ -19,7 +19,9 @@ export function useUpdatePlayer() {
       // upload first, row second: a failed upload leaves the row untouched,
       // and a failed row update after a good upload is benign — the object
       // path is fixed, so avatar_url still points at the old ?v= version
-      const avatar_url = avatarBlob ? await uploadAvatar(id, avatarBlob) : undefined
+      const avatar_url = avatarBlob
+        ? await uploadAvatar(id, avatarBlob)
+        : undefined
       const { error } = await supabase
         .from("players")
         .update({

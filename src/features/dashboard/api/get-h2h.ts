@@ -4,7 +4,10 @@ import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
 import { h2hResult } from "@/features/dashboard/schemas/insights"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
-import type { H2hResult, InsightFilters } from "@/features/dashboard/schemas/insights"
+import type {
+  H2hResult,
+  InsightFilters,
+} from "@/features/dashboard/schemas/insights"
 
 /** The h2h filters are the cross-cutting set minus opponent — the second
  *  player IS the opponent. */
@@ -13,7 +16,7 @@ export type H2hFilters = Omit<InsightFilters, "opponentId">
 export async function fetchH2h(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ): Promise<H2hResult> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("h2h", {
@@ -28,7 +31,7 @@ export async function fetchH2h(
 export function h2hOptions(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "h2h", player1Id, player2Id, filters],
@@ -39,7 +42,7 @@ export function h2hOptions(
 export function useH2h(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ) {
   return useQuery(h2hOptions(player1Id, player2Id, filters))
 }

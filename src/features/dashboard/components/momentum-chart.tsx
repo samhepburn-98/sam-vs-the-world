@@ -26,16 +26,14 @@ export interface LeadPoint {
 /** Lead (player − opponent) after each rally of a single game, in order. */
 export function computeLeadSeries(
   rallies: Array<RallyScored>,
-  playerId: string,
+  playerId: string
 ): Array<LeadPoint> {
   return rallies
     .slice()
     .sort((a, b) => a.rally_number - b.rally_number)
     .map((r) => {
       const isP1 = r.player1_id === playerId
-      const lead = isP1
-        ? r.score_p1 - r.score_p2
-        : r.score_p2 - r.score_p1
+      const lead = isP1 ? r.score_p1 - r.score_p2 : r.score_p2 - r.score_p1
       return { rally: r.rally_number, lead }
     })
 }
@@ -88,7 +86,11 @@ export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
         <defs>
           <linearGradient id="momentum-fill" x1="0" y1="0" x2="0" y2="1">
             <stop offset={off} stopColor="var(--chart-3)" stopOpacity={0.5} />
-            <stop offset={off} stopColor="var(--muted-foreground)" stopOpacity={0.35} />
+            <stop
+              offset={off}
+              stopColor="var(--muted-foreground)"
+              stopOpacity={0.35}
+            />
           </linearGradient>
         </defs>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -98,7 +100,12 @@ export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
           axisLine={false}
           tickMargin={8}
         />
-        <YAxis width={28} tickLine={false} axisLine={false} allowDecimals={false} />
+        <YAxis
+          width={28}
+          tickLine={false}
+          axisLine={false}
+          allowDecimals={false}
+        />
         <ReferenceLine y={0} stroke="var(--border)" />
         <ChartTooltip />
         <Area

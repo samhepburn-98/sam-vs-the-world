@@ -34,12 +34,12 @@ export function AttributeGlossaryDialog() {
         <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           {ATTRIBUTE_META.map((g) => (
             <div key={g.key} className="flex gap-3">
-              <dt className="text-muted-foreground w-10 shrink-0 pt-0.5 text-xs font-semibold tracking-[0.06em]">
+              <dt className="w-10 shrink-0 pt-0.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground">
                 {g.code}
               </dt>
               <dd>
                 <p className="text-sm font-medium">{g.name}</p>
-                <p className="text-muted-foreground text-sm">{g.detail}</p>
+                <p className="text-sm text-muted-foreground">{g.detail}</p>
               </dd>
             </div>
           ))}

@@ -15,7 +15,7 @@ function loadMigration(nameFragment: string) {
   if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
   return readFileSync(join(MIGRATIONS, file), "utf8").replace(
     /^create extension if not exists pgcrypto;$/m,
-    "",
+    ""
   )
 }
 
@@ -34,16 +34,16 @@ beforeAll(async () => {
   await db.exec(loadMigration("insert_rally_at"))
 
   const players = await db.query<{ id: string }>(
-    `insert into players (name) values ('Sam'), ('Dave') returning id`,
+    `insert into players (name) values ('Sam'), ('Dave') returning id`
   )
   ;[p1, p2] = players.rows.map((r) => r.id)
   const match = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id) values ($1, $2) returning id`,
-    [p1, p2],
+    [p1, p2]
   )
   const game = await db.query<{ id: string }>(
     `insert into games (match_id, game_number) values ($1, 1) returning id`,
-    [match.rows[0].id],
+    [match.rows[0].id]
   )
   gameId = game.rows[0].id
 
@@ -56,7 +56,7 @@ beforeAll(async () => {
     await db.query(
       `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
        values ($1, $2, $3, 'left', 1, $4, 'winner')`,
-      [gameId, n, n === 1 ? p1 : winner, winner],
+      [gameId, n, n === 1 ? p1 : winner, winner]
     )
   }
 })
@@ -70,7 +70,7 @@ describe("insert_rally_at", () => {
     // the camera caught a missed let between rallies 1 and 2
     await db.query(
       `select insert_rally_at(gen_random_uuid(), $1, 2::smallint, $2, 'right', 1::smallint, null, 'let')`,
-      [gameId, p1],
+      [gameId, p1]
     )
 
     const rows = await db.query<{
@@ -81,12 +81,10 @@ describe("insert_rally_at", () => {
     }>(
       `select rally_number, end_reason, score_p1, score_p2
        from rallies_scored where game_id = $1 order by rally_number`,
-      [gameId],
+      [gameId]
     )
 
-    expect(
-      rows.rows.map((r) => [r.rally_number, r.end_reason]),
-    ).toEqual([
+    expect(rows.rows.map((r) => [r.rally_number, r.end_reason])).toEqual([
       [1, "winner"],
       [2, "let"], // the insert
       [3, "winner"], // was 2
@@ -104,12 +102,12 @@ describe("insert_rally_at", () => {
   it("appending at the end works (position = count + 1)", async () => {
     await db.query(
       `select insert_rally_at(gen_random_uuid(), $1, 5::smallint, $2, 'left', 1::smallint, $2, 'ace')`,
-      [gameId, p2],
+      [gameId, p2]
     )
     const last = await db.query<{ rally_number: number; end_reason: string }>(
       `select rally_number, end_reason from rallies
        where game_id = $1 order by rally_number desc limit 1`,
-      [gameId],
+      [gameId]
     )
     expect(last.rows[0]).toEqual({ rally_number: 5, end_reason: "ace" })
   })
@@ -119,15 +117,15 @@ describe("insert_rally_at", () => {
     await expect(
       db.query(
         `select insert_rally_at(gen_random_uuid(), $1, 2::smallint, $2, 'left', 1::smallint, null, 'winner')`,
-        [gameId, p1],
-      ),
+        [gameId, p1]
+      )
     ).rejects.toThrow(/rallies_let_null_winner/)
 
     // the failed call renumbered nothing
     const count = await db.query<{ n: number; max: number }>(
       `select count(*)::int as n, max(rally_number)::int as max
        from rallies where game_id = $1`,
-      [gameId],
+      [gameId]
     )
     expect(count.rows[0]).toEqual({ n: 5, max: 5 })
   })

@@ -40,13 +40,16 @@ describe("matchSetupSchema (the form's client-side validation, §8.4)", () => {
     expect(result.error?.issues[0].path).toEqual(["firstServerId"])
   })
 
-  it.each([2, 4, 11])("rejects even/out-of-range best-of format %i", (format) => {
-    const result = matchSetupSchema.safeParse({
-      ...valid,
-      houseRules: { ...valid.houseRules, format },
-    })
-    expect(result.success).toBe(false)
-  })
+  it.each([2, 4, 11])(
+    "rejects even/out-of-range best-of format %i",
+    (format) => {
+      const result = matchSetupSchema.safeParse({
+        ...valid,
+        houseRules: { ...valid.houseRules, format },
+      })
+      expect(result.success).toBe(false)
+    }
+  )
 
   it("accepts best-of 7 (house rules, §7.7)", () => {
     const result = matchSetupSchema.safeParse({

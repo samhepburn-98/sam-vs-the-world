@@ -57,8 +57,8 @@ describe("uploadAvatar", () => {
 
   it("throws on upload failure so the row is never touched", async () => {
     const { client } = fakeClient({ message: "Payload too large" })
-    await expect(uploadAvatar(PLAYER, new Blob(), client)).rejects.toMatchObject(
-      { message: "Payload too large" },
-    )
+    await expect(
+      uploadAvatar(PLAYER, new Blob(), client)
+    ).rejects.toMatchObject({ message: "Payload too large" })
   })
 })

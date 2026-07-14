@@ -39,7 +39,7 @@ describe("MatchSummary", () => {
           { gameNumber: 3, scoreline: "11–5", winnerName: "Sam" },
         ]}
         onDone={() => undefined}
-      />,
+      />
     )
 
     await waitFor(() => {
@@ -48,7 +48,7 @@ describe("MatchSummary", () => {
     expect(screen.getByText("11–9")).toBeDefined()
     expect(screen.getByText("7–11")).toBeDefined()
     expect(
-      screen.getByRole("link", { name: "View match page" }).getAttribute("href"),
+      screen.getByRole("link", { name: "View match page" }).getAttribute("href")
     ).toBe("/matches/m1")
   })
 })

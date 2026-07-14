@@ -25,7 +25,7 @@ export function PlayerMatchHistory({ playerId }: { playerId: string }) {
     playerId,
     history.data.matches,
     history.data.games,
-    nameOf,
+    nameOf
   )
 
   if (rows.length === 0) {
@@ -43,7 +43,7 @@ export function PlayerMatchHistory({ playerId }: { playerId: string }) {
           <Link
             to="/matches"
             search={{ player: playerId, page: 1 }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground transition-colors hover:text-foreground"
           >
             See all {history.data.total} matches
           </Link>

@@ -55,7 +55,7 @@ export function DataTable<T>({
   if (isError) {
     return (
       <div className="rounded-lg border py-12 text-center">
-        <p className="text-destructive text-sm">
+        <p className="text-sm text-destructive">
           Couldn't load this table — check your connection.
         </p>
         <Button
@@ -81,7 +81,7 @@ export function DataTable<T>({
         className={cn(
           "rounded-lg border",
           // keepPreviousData refresh: dim the stale page while the next loads
-          isPending && result && "opacity-60 transition-opacity",
+          isPending && result && "opacity-60 transition-opacity"
         )}
       >
         <Table>
@@ -92,7 +92,7 @@ export function DataTable<T>({
                   {col.sortable ? (
                     <button
                       type="button"
-                      className="hover:text-foreground group inline-flex cursor-pointer items-center gap-1"
+                      className="group inline-flex cursor-pointer items-center gap-1 hover:text-foreground"
                       onClick={() => onSort(col.key)}
                     >
                       {col.label}
@@ -131,7 +131,7 @@ export function DataTable<T>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-muted-foreground py-8 text-center"
+                  className="py-8 text-center text-muted-foreground"
                 >
                   No records match.
                 </TableCell>
@@ -151,7 +151,7 @@ export function DataTable<T>({
         </Table>
       </div>
 
-      <div className="text-muted-foreground flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="tabular-nums">
           {total === 0 ? "0" : `${start + 1}–${end}`} of {total}
         </span>

@@ -14,7 +14,7 @@ export interface AvatarStorageClient {
       upload: (
         path: string,
         body: Blob,
-        options: { upsert: boolean; contentType: string; cacheControl: string },
+        options: { upsert: boolean; contentType: string; cacheControl: string }
       ) => Promise<{ error: { message: string } | null }>
       getPublicUrl: (path: string) => { data: { publicUrl: string } }
     }
@@ -31,7 +31,7 @@ export function avatarObjectPath(playerId: string): string {
 export async function uploadAvatar(
   playerId: string,
   blob: Blob,
-  client: AvatarStorageClient = getSupabaseBrowserClient(),
+  client: AvatarStorageClient = getSupabaseBrowserClient()
 ): Promise<string> {
   const bucket = client.storage.from("avatars")
   const path = avatarObjectPath(playerId)

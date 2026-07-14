@@ -22,7 +22,7 @@ function loadMigration(nameFragment: string) {
   // extension isn't bundled in PGlite — drop that single line.
   return readFileSync(join(MIGRATIONS, file), "utf8").replace(
     /^create extension if not exists pgcrypto;$/m,
-    "",
+    ""
   )
 }
 
@@ -57,19 +57,19 @@ afterAll(async () => {
 async function insertGame(f: GameFixture) {
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ($1), ($2) returning id`,
-    [`${f.name}-p1`, `${f.name}-p2`],
+    [`${f.name}-p1`, `${f.name}-p2`]
   )
   const [p1, p2] = players.rows.map((r) => r.id)
   const ids = { p1: p1, p2: p2 }
   const match = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, target_score, tiebreak, serves_per_point)
      values ($1, $2, $3, $4, $5) returning id`,
-    [ids.p1, ids.p2, f.targetScore, f.tiebreak, f.servesPerPoint ?? 2],
+    [ids.p1, ids.p2, f.targetScore, f.tiebreak, f.servesPerPoint ?? 2]
   )
   const matchId = match.rows[0].id
   const game = await db.query<{ id: string }>(
     `insert into games (match_id, game_number) values ($1, 1) returning id`,
-    [matchId],
+    [matchId]
   )
   const gameId = game.rows[0].id
   for (const [i, r] of f.rallies.entries()) {
@@ -88,7 +88,7 @@ async function insertGame(f: GameFixture) {
         r.errorDetail ?? null,
         r.forced ?? null,
         r.shotCount ?? null,
-      ],
+      ]
     )
   }
   return { ids, matchId, gameId }
@@ -107,10 +107,10 @@ describe.each(gameFixtures.map((f) => [f.name, f] as const))(
       }>(
         `select rally_number, score_p1::int, score_p2::int, is_let
          from rallies_scored where game_id = $1 order by rally_number`,
-        [gameId],
+        [gameId]
       )
       expect(rows.rows.map((r) => [r.score_p1, r.score_p2])).toEqual(
-        f.expected.runningScores,
+        f.expected.runningScores
       )
       for (const [i, r] of rows.rows.entries()) {
         expect(r.is_let).toBe(f.rallies[i].endReason === "let")
@@ -124,21 +124,21 @@ describe.each(gameFixtures.map((f) => [f.name, f] as const))(
       }>(
         `select score_p1::int, score_p2::int, winner_id, is_undecided
          from game_results where game_id = $1`,
-        [gameId],
+        [gameId]
       )
       const got = result.rows[0]
       const { ids } = await (async () => {
         // map back: fetch the two players of this game's match
         const m = await db.query<{ player1_id: string; player2_id: string }>(
           `select m.player1_id, m.player2_id from games g join matches m on m.id = g.match_id where g.id = $1`,
-          [gameId],
+          [gameId]
         )
         return { ids: { p1: m.rows[0].player1_id, p2: m.rows[0].player2_id } }
       })()
       expect(got.score_p1).toBe(f.expected.result.scoreP1)
       expect(got.score_p2).toBe(f.expected.result.scoreP2)
       expect(got.winner_id).toBe(
-        f.expected.result.winner ? ids[f.expected.result.winner] : null,
+        f.expected.result.winner ? ids[f.expected.result.winner] : null
       )
       expect(got.is_undecided).toBe(f.expected.result.undecided)
 
@@ -150,36 +150,36 @@ describe.each(gameFixtures.map((f) => [f.name, f] as const))(
         }>(
           `select rally_number, error_maker_id, end_reason
            from errors_attributed where game_id = $1 order by rally_number`,
-          [gameId],
+          [gameId]
         )
         expect(
           errs.rows.map((e) => ({
             rallyNumber: e.rally_number,
             maker: e.error_maker_id === ids.p1 ? "p1" : "p2",
             endReason: e.end_reason,
-          })),
+          }))
         ).toEqual(f.expected.errors)
       }
     })
-  },
+  }
 )
 
 async function insertMatch(f: MatchFixture) {
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ($1), ($2) returning id`,
-    [`${f.name}-p1`, `${f.name}-p2`],
+    [`${f.name}-p1`, `${f.name}-p2`]
   )
   const [p1, p2] = players.rows.map((r) => r.id)
   const ids = { p1: p1, p2: p2 }
   const match = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, format) values ($1, $2, $3) returning id`,
-    [ids.p1, ids.p2, f.format],
+    [ids.p1, ids.p2, f.format]
   )
   const matchId = match.rows[0].id
   for (const [i, w] of f.gameWinners.entries()) {
     const game = await db.query<{ id: string }>(
       `insert into games (match_id, game_number) values ($1, $2) returning id`,
-      [matchId, i + 1],
+      [matchId, i + 1]
     )
     const gameId = game.rows[0].id
     if (w === "tie") {
@@ -187,13 +187,13 @@ async function insertMatch(f: MatchFixture) {
       await db.query(
         `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
          values ($1, 1, $2, 'left', 1, $2, 'winner'), ($1, 2, $2, 'left', 1, $3, 'winner')`,
-        [gameId, ids.p1, ids.p2],
+        [gameId, ids.p1, ids.p2]
       )
     } else {
       await db.query(
         `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
          values ($1, 1, $2, 'left', 1, $3, 'winner')`,
-        [gameId, ids.p1, ids[w]],
+        [gameId, ids.p1, ids[w]]
       )
     }
   }
@@ -213,16 +213,16 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
       }>(
         `select games_won_p1::int, games_won_p2::int, match_winner_id, created_at
          from match_results where match_id = $1`,
-        [matchId],
+        [matchId]
       )
       const got = rows.rows[0]
       expect(got.games_won_p1).toBe(f.expected.gamesWonP1)
       expect(got.games_won_p2).toBe(f.expected.gamesWonP2)
       expect(got.match_winner_id).toBe(
-        f.expected.matchWinner ? ids[f.expected.matchWinner] : null,
+        f.expected.matchWinner ? ids[f.expected.matchWinner] : null
       )
       // the recent-results read orders by this — the view must expose it
       expect(got.created_at).not.toBeNull()
     })
-  },
+  }
 )

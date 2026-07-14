@@ -60,10 +60,10 @@ export function StatCard({
 
   return (
     <Card className={cn("gap-2 px-6", className)}>
-      <p className="text-muted-foreground text-sm font-medium">{label}</p>
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
 
       {belowSample ? (
-        <p className="text-muted-foreground text-sm text-balance">
+        <p className="text-sm text-balance text-muted-foreground">
           Not enough data yet{" "}
           <span className="tabular-nums">(n={effectiveSample})</span>
         </p>
@@ -75,7 +75,7 @@ export function StatCard({
                 <span className="text-3xl font-bold">
                   <CountUp value={pct(rate)} suffix="%" />
                 </span>
-                <span className="text-muted-foreground text-sm tabular-nums">
+                <span className="text-sm text-muted-foreground tabular-nums">
                   · {rate.won} of {rate.of}
                 </span>
               </>
@@ -92,12 +92,12 @@ export function StatCard({
                   )}
                 </span>
                 {unit && (
-                  <span className="text-muted-foreground text-sm">{unit}</span>
+                  <span className="text-sm text-muted-foreground">{unit}</span>
                 )}
               </>
             )}
           </p>
-          {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </>
       )}
 

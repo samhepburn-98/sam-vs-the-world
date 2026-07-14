@@ -21,7 +21,7 @@ function rally(n: number, gameId = "g1"): RallyRow {
     error_detail: null,
     forced: null,
     winning_shot: null,
-  losing_shot: null,
+    losing_shot: null,
     shot_count: 1,
   }
 }

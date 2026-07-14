@@ -19,9 +19,18 @@ describe("hotkeyAction — the §5.3 map, exactly", () => {
 
   it("l = let, w/e/k/a/f = end reasons", () => {
     expect(hotkeyAction(key("l"))).toEqual({ type: "let" })
-    expect(hotkeyAction(key("w"))).toEqual({ type: "endReason", reason: "winner" })
-    expect(hotkeyAction(key("e"))).toEqual({ type: "endReason", reason: "error" })
-    expect(hotkeyAction(key("k"))).toEqual({ type: "endReason", reason: "stroke" })
+    expect(hotkeyAction(key("w"))).toEqual({
+      type: "endReason",
+      reason: "winner",
+    })
+    expect(hotkeyAction(key("e"))).toEqual({
+      type: "endReason",
+      reason: "error",
+    })
+    expect(hotkeyAction(key("k"))).toEqual({
+      type: "endReason",
+      reason: "stroke",
+    })
     expect(hotkeyAction(key("f"))).toEqual({
       type: "endReason",
       reason: "serve_fault",
@@ -29,11 +38,26 @@ describe("hotkeyAction — the §5.3 map, exactly", () => {
   })
 
   it("t/o/i/b/n = error details (x/double-bounce retired)", () => {
-    expect(hotkeyAction(key("t"))).toEqual({ type: "errorDetail", detail: "tin" })
-    expect(hotkeyAction(key("o"))).toEqual({ type: "errorDetail", detail: "out_top" })
-    expect(hotkeyAction(key("i"))).toEqual({ type: "errorDetail", detail: "out_side" })
-    expect(hotkeyAction(key("b"))).toEqual({ type: "errorDetail", detail: "out_back" })
-    expect(hotkeyAction(key("n"))).toEqual({ type: "errorDetail", detail: "not_up" })
+    expect(hotkeyAction(key("t"))).toEqual({
+      type: "errorDetail",
+      detail: "tin",
+    })
+    expect(hotkeyAction(key("o"))).toEqual({
+      type: "errorDetail",
+      detail: "out_top",
+    })
+    expect(hotkeyAction(key("i"))).toEqual({
+      type: "errorDetail",
+      detail: "out_side",
+    })
+    expect(hotkeyAction(key("b"))).toEqual({
+      type: "errorDetail",
+      detail: "out_back",
+    })
+    expect(hotkeyAction(key("n"))).toEqual({
+      type: "errorDetail",
+      detail: "not_up",
+    })
     expect(hotkeyAction(key("x"))).toBeNull()
   })
 

@@ -1,9 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router"
 
-import {
-  CATEGORY_KEYS,
-  categoryLabel,
-} from "@/features/dashboard/categories"
+import { CATEGORY_KEYS, categoryLabel } from "@/features/dashboard/categories"
 import { CategoryContent } from "@/features/dashboard/components/category-content"
 import { FilterBar } from "@/features/dashboard/components/filter-bar"
 import {
@@ -31,7 +28,8 @@ import type { CategoryKey } from "@/features/dashboard/categories"
 export const Route = createFileRoute("/players/$playerId/$category")({
   validateSearch: (search) => insightSearch.parse(search),
   loader: async ({ context, params }) => {
-    if (!CATEGORY_KEYS.includes(params.category as CategoryKey)) throw notFound()
+    if (!CATEGORY_KEYS.includes(params.category as CategoryKey))
+      throw notFound()
     await context.queryClient.ensureQueryData(playersQueryOptions())
   },
   component: CategoryDetailPage,

@@ -21,16 +21,13 @@ export function deleteRallyOp(
   // against this slice; eslint's checker resolves it and calls the cast
   // unnecessary — narrow through unknown and keep both satisfied
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  client: DeleteCapableClient = getSupabaseBrowserClient() as unknown as DeleteCapableClient,
+  client: DeleteCapableClient = getSupabaseBrowserClient() as unknown as DeleteCapableClient
 ): WriteOp {
   return {
     id: row.id,
     label: `undo rally ${row.rally_number}`,
     run: async () => {
-      const { error } = await client
-        .from("rallies")
-        .delete()
-        .eq("id", row.id)
+      const { error } = await client.from("rallies").delete().eq("id", row.id)
       if (error) throw error
     },
   }

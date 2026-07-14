@@ -33,16 +33,16 @@ export function InsightCard({
       to="/players/$playerId/$category"
       params={{ playerId, category }}
       className={cn(
-        "group bg-card text-card-foreground ring-foreground/10 flex flex-col gap-3 rounded-2xl p-5 ring-1 transition-shadow hover:shadow-md",
-        className,
+        "group flex flex-col gap-3 rounded-2xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10 transition-shadow hover:shadow-md",
+        className
       )}
     >
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-base font-bold">{label}</h3>
-        <ArrowRightIcon className="text-muted-foreground size-4 transition-transform group-hover:translate-x-0.5" />
+        <ArrowRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
       </div>
       <div className="flex min-h-16 items-center">{preview}</div>
-      <p className="text-muted-foreground text-sm text-balance">{stat}</p>
+      <p className="text-sm text-balance text-muted-foreground">{stat}</p>
     </Link>
   )
 }

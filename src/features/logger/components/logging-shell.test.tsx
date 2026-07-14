@@ -71,7 +71,7 @@ function renderShell() {
       queue={queue}
       firstServerId={SAM}
       onExit={() => undefined}
-    />,
+    />
   )
 }
 
@@ -110,15 +110,19 @@ describe("keyboard-first logging (§5.3)", () => {
   it("serve fault is hidden (and f inert) when the winner is the shown server", () => {
     renderShell()
     press("s") // Sam won — and Sam is the suggested server
-    expect(screen.queryByRole("radio", { name: /faulted the serve/i })).toBeNull()
+    expect(
+      screen.queryByRole("radio", { name: /faulted the serve/i })
+    ).toBeNull()
     press("f") // inert — nothing selected, save stays disabled
     expect(screen.getByRole("button", { name: /save/i })).toHaveProperty(
       "disabled",
-      true,
+      true
     )
 
     press("d") // switch to Dave — now a fault by server Sam fits
-    expect(screen.getByRole("radio", { name: /faulted the serve/i })).toBeDefined()
+    expect(
+      screen.getByRole("radio", { name: /faulted the serve/i })
+    ).toBeDefined()
   })
 
   it("the detail zone collapses via its toggle and the preference sticks", () => {
@@ -166,7 +170,7 @@ describe("keyboard-first logging (§5.3)", () => {
     // the open sheet still shows its keys — they're content, not hints
     expect(
       screen.getByRole("dialog", { name: "Hotkeys" }).querySelectorAll("kbd")
-        .length,
+        .length
     ).toBeGreaterThan(0)
     press("Escape")
 

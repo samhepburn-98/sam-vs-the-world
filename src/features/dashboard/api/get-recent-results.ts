@@ -16,7 +16,7 @@ export async function fetchRecentResults() {
   const { data, error } = await supabase
     .from("match_results")
     .select(
-      "match_id, date, player1_id, player2_id, games_won_p1, games_won_p2, match_winner_id, ball_type",
+      "match_id, date, player1_id, player2_id, games_won_p1, games_won_p2, match_winner_id, ball_type"
     )
     .order("created_at", { ascending: false })
     .limit(8)

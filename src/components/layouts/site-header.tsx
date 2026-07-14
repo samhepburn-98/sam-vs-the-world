@@ -49,7 +49,7 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
       <div className="container mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
         <Link
           to="/"
-          className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <CourtDiagram className="h-6 w-4" label="Sam vs the World" />
           <span className="font-heading text-sm font-bold tracking-tight whitespace-nowrap">
@@ -179,7 +179,7 @@ function MobileMenu({
           )}
           <div className="my-2 border-t" />
           <div className="flex items-center justify-between px-2 py-1">
-            <span className="text-muted-foreground text-base">Theme</span>
+            <span className="text-base text-muted-foreground">Theme</span>
             <ThemeToggle />
           </div>
         </nav>

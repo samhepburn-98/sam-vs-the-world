@@ -47,7 +47,7 @@ export function DuelAttributeRow({
         />
       </div>
       <span
-        className="text-muted-foreground w-10 shrink-0 text-center text-xs tracking-[0.06em]"
+        className="w-10 shrink-0 text-center text-xs tracking-[0.06em] text-muted-foreground"
         title={b.detail}
       >
         {a.code}

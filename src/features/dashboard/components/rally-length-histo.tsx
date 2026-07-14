@@ -52,7 +52,7 @@ export function RallyLengthHisto({ lengths }: { lengths: RallyLengths }) {
       (b) =>
         `${b.label} shots: ${b.rallies} rallies${
           b.winRate === null ? "" : `, ${b.winRate}% won`
-        }`,
+        }`
     )
     .join("; ")
 
@@ -65,8 +65,18 @@ export function RallyLengthHisto({ lengths }: { lengths: RallyLengths }) {
     >
       <BarChart data={data} margin={{ top: 20 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-        <YAxis width={28} tickLine={false} axisLine={false} allowDecimals={false} />
+        <XAxis
+          dataKey="label"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+        />
+        <YAxis
+          width={28}
+          tickLine={false}
+          axisLine={false}
+          allowDecimals={false}
+        />
         <ChartTooltip
           content={
             <ChartTooltipContent
@@ -79,12 +89,18 @@ export function RallyLengthHisto({ lengths }: { lengths: RallyLengths }) {
             />
           }
         />
-        <Bar dataKey="rallies" fill="var(--color-rallies)" radius={[4, 4, 0, 0]}>
+        <Bar
+          dataKey="rallies"
+          fill="var(--color-rallies)"
+          radius={[4, 4, 0, 0]}
+        >
           <LabelList
             dataKey="winRate"
             position="top"
             className="fill-muted-foreground text-xs tabular-nums"
-            formatter={(value) => (typeof value === "number" ? `${value}%` : "")}
+            formatter={(value) =>
+              typeof value === "number" ? `${value}%` : ""
+            }
           />
         </Bar>
       </BarChart>

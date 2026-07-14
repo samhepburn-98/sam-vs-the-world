@@ -47,7 +47,7 @@ describe("RallyEditor", () => {
         p2Name="Dave"
         onSave={onSave}
         onCancel={() => undefined}
-      />,
+      />
     )
 
     fireEvent.click(screen.getByRole("radio", { name: "Stroke" }))
@@ -61,8 +61,8 @@ describe("RallyEditor", () => {
         end_reason: "stroke",
         winner_id: SAM,
         winning_shot: null,
-  losing_shot: null, // auto-rule: shot type doesn't apply to a stroke
-      }),
+        losing_shot: null, // auto-rule: shot type doesn't apply to a stroke
+      })
     )
   })
 
@@ -76,7 +76,7 @@ describe("RallyEditor", () => {
         p2Name="Dave"
         onSave={onSave}
         onCancel={() => undefined}
-      />,
+      />
     )
 
     fireEvent.click(screen.getByRole("radio", { name: "Let" }))
@@ -87,7 +87,7 @@ describe("RallyEditor", () => {
         end_reason: "let",
         winner_id: null,
         shot_count: null,
-      }),
+      })
     )
   })
 
@@ -95,13 +95,18 @@ describe("RallyEditor", () => {
     const onSave = vi.fn()
     render(
       <RallyEditor
-        row={{ ...saved, winner_id: DAVE, server_id: SAM, end_reason: "serve_fault" }}
+        row={{
+          ...saved,
+          winner_id: DAVE,
+          server_id: SAM,
+          end_reason: "serve_fault",
+        }}
         ctx={ctx}
         p1Name="Sam"
         p2Name="Dave"
         onSave={onSave}
         onCancel={() => undefined}
-      />,
+      />
     )
 
     fireEvent.click(screen.getByRole("radio", { name: "Sam" }))
@@ -112,7 +117,7 @@ describe("RallyEditor", () => {
         winner_id: SAM,
         server_id: DAVE,
         end_reason: "serve_fault",
-      }),
+      })
     )
   })
 })

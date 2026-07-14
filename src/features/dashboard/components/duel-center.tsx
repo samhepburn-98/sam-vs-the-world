@@ -52,15 +52,15 @@ export function DuelCenter({
   return (
     <div className="flex flex-col">
       <div className="text-center">
-        <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+        <p className="text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
           {score.heading}
         </p>
         <p className="mt-1 text-6xl leading-none font-extrabold tabular-nums">
           <span style={{ color: P1_COLOR }}>{score.p1}</span>
-          <span className="text-muted-foreground mx-3 font-normal">–</span>
+          <span className="mx-3 font-normal text-muted-foreground">–</span>
           <span style={{ color: P2_TEXT }}>{score.p2}</span>
         </p>
-        <p className="text-muted-foreground mt-1.5 text-[11px] tracking-[0.12em] uppercase">
+        <p className="mt-1.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
           {score.caption}
         </p>
       </div>
@@ -71,7 +71,7 @@ export function DuelCenter({
             <span className="font-bold" style={{ color: P1_COLOR }}>
               {Math.round(dominance * 100)}%
             </span>
-            <span className="text-muted-foreground text-xs tracking-[0.16em] uppercase">
+            <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
               Dominance
             </span>
             <span className="font-bold" style={{ color: P2_TEXT }}>
@@ -80,7 +80,10 @@ export function DuelCenter({
           </div>
           <div className="flex h-2 overflow-hidden rounded-full">
             <div
-              style={{ width: `${dominance * 100}%`, backgroundColor: P1_COLOR }}
+              style={{
+                width: `${dominance * 100}%`,
+                backgroundColor: P1_COLOR,
+              }}
             />
             <div className="flex-1" style={{ backgroundColor: P2_COLOR }} />
           </div>
@@ -94,17 +97,17 @@ export function DuelCenter({
       </div>
 
       <div className="mt-10 text-center md:mt-14">
-        <p className="text-muted-foreground text-[11px] tracking-[0.2em] uppercase">
+        <p className="text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
           On the stats
         </p>
-        <p className="font-heading mt-1.5 text-3xl leading-tight">
+        <p className="mt-1.5 font-heading text-3xl leading-tight">
           {leader ?? "All square"}
         </p>
-        <p className="text-muted-foreground mt-0.5 text-sm">{tallyLine}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{tallyLine}</p>
       </div>
 
-      <div className="ring-border mt-8 overflow-hidden rounded-xl ring-1">
-        <p className="text-muted-foreground py-2.5 text-center text-[11px] tracking-[0.18em] uppercase">
+      <div className="mt-8 overflow-hidden rounded-xl ring-1 ring-border">
+        <p className="py-2.5 text-center text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
           The receipts
         </p>
         {receipts.map((r, i) => (
@@ -113,7 +116,7 @@ export function DuelCenter({
             className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 === 0 ? "bg-muted/40" : ""}`}
           >
             <span className="font-bold tabular-nums">{r.v1}</span>
-            <span className="text-muted-foreground text-xs">{r.label}</span>
+            <span className="text-xs text-muted-foreground">{r.label}</span>
             <span className="font-bold tabular-nums">{r.v2}</span>
           </div>
         ))}

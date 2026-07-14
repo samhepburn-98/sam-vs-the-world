@@ -37,7 +37,10 @@ export const matchSetupSchema = z
   })
   .refine(
     (v) => v.firstServerId === v.player1Id || v.firstServerId === v.player2Id,
-    { message: "First server must be one of the players", path: ["firstServerId"] },
+    {
+      message: "First server must be one of the players",
+      path: ["firstServerId"],
+    }
   )
 
 export type HouseRulesInput = z.infer<typeof houseRulesSchema>

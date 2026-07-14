@@ -25,7 +25,7 @@ export function GameOverBanner({
   return (
     <div
       role="status"
-      className="border-primary/40 bg-primary/5 flex flex-wrap items-center gap-3 rounded-lg border px-4 py-3"
+      className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3"
     >
       <p className="flex-1 text-sm">
         <span className="font-bold">
@@ -37,7 +37,7 @@ export function GameOverBanner({
             {matchWinnerName} takes the match
           </span>
         ) : (
-          <span className="text-muted-foreground block text-xs">
+          <span className="block text-xs text-muted-foreground">
             Played on? Just keep logging rallies.
           </span>
         )}

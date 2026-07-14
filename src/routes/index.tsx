@@ -13,7 +13,10 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { homeCountsQueryOptions, useHomeCounts } from "@/features/dashboard/api/get-home-counts"
+import {
+  homeCountsQueryOptions,
+  useHomeCounts,
+} from "@/features/dashboard/api/get-home-counts"
 import {
   playersHeadlineOptions,
   usePlayersHeadline,
@@ -59,7 +62,7 @@ function HomePage() {
   const [selected, setSelected] = useState<Array<string>>([])
   const toggleSelect = (id: string) =>
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
 
   const players = roster.data ?? []
@@ -69,12 +72,12 @@ function HomePage() {
     <main className="container mx-auto max-w-5xl px-4 pb-16">
       {/* hero */}
       <section className="flex items-center gap-6 py-12">
-        <CourtDiagram className="text-muted-foreground h-24 w-16 shrink-0" />
+        <CourtDiagram className="h-24 w-16 shrink-0 text-muted-foreground" />
         <div>
           <h1 className="font-heading text-3xl font-bold tracking-tight">
             Every rally, counted.
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm text-balance">
+          <p className="mt-2 text-sm text-balance text-muted-foreground">
             {counts.data && counts.data.matches > 0 ? (
               <>
                 <CountUp value={counts.data.rallies} /> rallies logged across{" "}
@@ -169,17 +172,16 @@ function RecentMatchRow({
 }) {
   const p1 = nameOf.get(match.player1_id) ?? "Unknown"
   const p2 = nameOf.get(match.player2_id) ?? "Unknown"
-  const hasScore =
-    match.games_won_p1 !== null && match.games_won_p2 !== null
+  const hasScore = match.games_won_p1 !== null && match.games_won_p2 !== null
 
   return (
     <li>
       <Link
         to="/matches/$matchId"
         params={{ matchId: match.match_id }}
-        className="hover:bg-muted/50 -mx-2 flex items-center gap-3 rounded-md px-2 py-2.5"
+        className="-mx-2 flex items-center gap-3 rounded-md px-2 py-2.5 hover:bg-muted/50"
       >
-        <span className="text-muted-foreground w-24 shrink-0 text-sm tabular-nums">
+        <span className="w-24 shrink-0 text-sm text-muted-foreground tabular-nums">
           {formatDate(match.date)}
         </span>
         <span className="flex-1 truncate text-sm">

@@ -34,10 +34,10 @@ const base = {
 describe("DataTable (§5.4 states)", () => {
   it("skeleton rows while the first page loads", () => {
     const { container } = render(
-      <DataTable {...base} result={undefined} isPending />,
+      <DataTable {...base} result={undefined} isPending />
     )
     expect(
-      container.querySelectorAll('[data-slot="skeleton"]').length,
+      container.querySelectorAll('[data-slot="skeleton"]').length
     ).toBeGreaterThan(0)
   })
 
@@ -55,15 +55,15 @@ describe("DataTable (§5.4 states)", () => {
         {...base}
         onSort={onSort}
         result={{ rows: [{ id: "a", name: "Sam" }], total: 51 }}
-      />,
+      />
     )
     expect(screen.getByText("Sam")).toBeDefined()
     expect(screen.getByText("1–25 of 51")).toBeDefined()
     expect(
-      screen.getByRole("button", { name: "Prev" }).hasAttribute("disabled"),
+      screen.getByRole("button", { name: "Prev" }).hasAttribute("disabled")
     ).toBe(true)
     expect(
-      screen.getByRole("button", { name: "Next" }).hasAttribute("disabled"),
+      screen.getByRole("button", { name: "Next" }).hasAttribute("disabled")
     ).toBe(false)
 
     fireEvent.click(screen.getByRole("button", { name: /name/ }))

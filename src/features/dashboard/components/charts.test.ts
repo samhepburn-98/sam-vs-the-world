@@ -5,7 +5,10 @@ import { computeLeadSeries, zeroOffset } from "./momentum-chart"
 import { toHistoBuckets } from "./rally-length-histo"
 import { shouldPlotLine } from "./win-rate-trend"
 
-import type { ErrorProfile, RallyLengths } from "@/features/dashboard/schemas/insights"
+import type {
+  ErrorProfile,
+  RallyLengths,
+} from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
 
 const P1 = "11111111-1111-1111-1111-111111111111"
@@ -48,7 +51,7 @@ describe("zeroOffset", () => {
       zeroOffset([
         { rally: 1, lead: 2 },
         { rally: 2, lead: -2 },
-      ]),
+      ])
     ).toBeCloseTo(0.5, 5)
   })
 })

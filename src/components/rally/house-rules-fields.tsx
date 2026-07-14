@@ -86,7 +86,9 @@ export function HouseRulesFields({
               </Field>
             )}
           />
-          <Field data-invalid={errors.houseRules?.targetScore ? true : undefined}>
+          <Field
+            data-invalid={errors.houseRules?.targetScore ? true : undefined}
+          >
             <FieldLabel htmlFor="target">Points per game</FieldLabel>
             <Input
               id="target"

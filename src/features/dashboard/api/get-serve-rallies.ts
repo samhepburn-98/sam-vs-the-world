@@ -12,7 +12,7 @@ import type { RallyScored } from "@/lib/schemas/rally"
  *  the player served, filtered by the same SQL the aggregate used. */
 export async function fetchServeRallies(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ): Promise<Array<RallyScored>> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("serve_rallies", {
@@ -25,7 +25,7 @@ export async function fetchServeRallies(
 
 export function serveRalliesOptions(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "serve-rallies", playerId, filters],
@@ -35,7 +35,7 @@ export function serveRalliesOptions(
 
 export function useServeRallies(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return useQuery(serveRalliesOptions(playerId, filters))
 }

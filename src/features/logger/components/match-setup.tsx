@@ -55,7 +55,7 @@ export function MatchSetup({
   const rootError = errors.root?.message
   const [player1Id, player2Id] = form.watch(["player1Id", "player2Id"])
   const selectedPlayers = players.filter(
-    (p) => p.id === player1Id || p.id === player2Id,
+    (p) => p.id === player1Id || p.id === player2Id
   )
 
   const submit = form.handleSubmit(async (input) => {
@@ -114,7 +114,7 @@ export function MatchSetup({
             <Field data-invalid={errors.firstServerId ? true : undefined}>
               <FieldLabel>Who serves first?</FieldLabel>
               {selectedPlayers.length < 2 ? (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   Pick both players first.
                 </p>
               ) : (
@@ -156,7 +156,7 @@ export function MatchSetup({
         />
 
         {rootError && (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {rootError}
           </p>
         )}

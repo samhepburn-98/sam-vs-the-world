@@ -45,7 +45,7 @@ export const gameFixture = z.object({
           rallyNumber: z.number().int(),
           maker: playerRef,
           endReason: z.enum(["error", "serve_fault"]),
-        }),
+        })
       )
       .optional(),
   }),

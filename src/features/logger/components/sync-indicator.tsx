@@ -19,9 +19,9 @@ export function SyncIndicator({ queue }: { queue: WriteQueue }) {
     return (
       <div
         role="alert"
-        className="border-destructive/50 bg-destructive/5 flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm"
+        className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/5 px-4 py-2.5 text-sm"
       >
-        <span className="text-destructive flex-1">
+        <span className="flex-1 text-destructive">
           A save failed ({state.failure?.op.label ?? "unknown"}) — logging is
           paused so nothing lands out of order.
         </span>
@@ -38,7 +38,7 @@ export function SyncIndicator({ queue }: { queue: WriteQueue }) {
   }
 
   return (
-    <p className="text-muted-foreground text-right text-xs" aria-live="polite">
+    <p className="text-right text-xs text-muted-foreground" aria-live="polite">
       {state.pending > 0 ? `Syncing ${state.pending}…` : "Synced ✓"}
     </p>
   )

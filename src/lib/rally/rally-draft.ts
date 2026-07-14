@@ -58,7 +58,7 @@ export function createDraft(suggestion: Suggestion): RallyDraft {
 export function tapWinner(
   draft: RallyDraft,
   winnerId: string,
-  ctx: DraftContext,
+  ctx: DraftContext
 ): RallyDraft {
   // a winner contradicts a let (DB: let ⇔ null winner) — the newer tap wins
   const next: RallyDraft = {
@@ -75,7 +75,7 @@ export function tapWinner(
 export function selectEndReason(
   draft: RallyDraft,
   endReason: EndReason,
-  ctx: DraftContext,
+  ctx: DraftContext
 ): RallyDraft {
   let next: RallyDraft = { ...draft, endReason }
 
@@ -124,10 +124,13 @@ export function showsShotType(endReason: EndReason | null): boolean {
  *  retires the tagged value rather than silently reassigning it. */
 export function setForced(
   draft: RallyDraft,
-  forced: boolean | null,
+  forced: boolean | null
 ): RallyDraft {
   const next = { ...draft, forced }
-  if (draft.endReason === "error" && (draft.forced === true) !== (forced === true)) {
+  if (
+    draft.endReason === "error" &&
+    (draft.forced === true) !== (forced === true)
+  ) {
     next.shotType = null
   }
   return applyAutoRules(next)
@@ -141,7 +144,7 @@ export function showsServeFault(draft: RallyDraft): boolean {
 
 export function toggleServeNumber(
   draft: RallyDraft,
-  ctx: DraftContext,
+  ctx: DraftContext
 ): RallyDraft {
   if (ctx.rules.servesPerPoint === 1) return draft
   return { ...draft, serveNumber: draft.serveNumber === 1 ? 2 : 1 }
@@ -190,7 +193,7 @@ export interface RallyRow {
 
 export function buildRallyRow(
   draft: RallyDraft,
-  meta: { id: string; gameId: string; rallyNumber: number },
+  meta: { id: string; gameId: string; rallyNumber: number }
 ): RallyRow {
   if (!canSave(draft)) {
     throw new Error("rally draft is incomplete (winner + end reason required)")
@@ -223,7 +226,7 @@ export function buildRallyRow(
 
 export function buildLetRow(
   draft: RallyDraft,
-  meta: { id: string; gameId: string; rallyNumber: number },
+  meta: { id: string; gameId: string; rallyNumber: number }
 ): RallyRow {
   return {
     id: meta.id,

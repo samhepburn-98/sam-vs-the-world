@@ -45,7 +45,7 @@ export function classifyQuery(raw: string): QueryKind {
 export function sanitizeSort(
   sort: SortSpec,
   allowed: ReadonlySet<string>,
-  fallback: string,
+  fallback: string
 ): SortSpec {
   return allowed.has(sort.column) ? sort : { column: fallback, dir: "desc" }
 }

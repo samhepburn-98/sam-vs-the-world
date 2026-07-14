@@ -55,8 +55,7 @@ function serveGap(d: PlayerData): number | null {
     return null
   }
   return (
-    pct(s.serve_wins, s.rallies_served) -
-    pct(s.return_wins, s.rallies_returned)
+    pct(s.serve_wins, s.rallies_served) - pct(s.return_wins, s.rallies_returned)
   )
 }
 
@@ -281,15 +280,8 @@ function fallbackPattern(d: PlayerData): ProfileInsight {
   }
 }
 
-function pickPattern(
-  d: PlayerData,
-  taken: Set<AttributeKey>
-): ProfileInsight {
-  const candidates = [
-    boxGapPattern(d),
-    shotMixPattern(d),
-    phaseSwingPattern(d),
-  ]
+function pickPattern(d: PlayerData, taken: Set<AttributeKey>): ProfileInsight {
+  const candidates = [boxGapPattern(d), shotMixPattern(d), phaseSwingPattern(d)]
     .filter((c): c is PatternCandidate => c !== null)
     .filter((c) => c.root === null || !taken.has(c.root))
     .sort((a, b) => b.salience - a.salience)

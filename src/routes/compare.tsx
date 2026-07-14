@@ -84,7 +84,7 @@ function ComparePage() {
           <h1 className="font-heading text-2xl font-bold tracking-tight">
             Compare players
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Pick two players to see them go head to head.
           </p>
         </div>

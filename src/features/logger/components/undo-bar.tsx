@@ -12,7 +12,12 @@ interface UndoBarProps {
   onRedo: () => void
 }
 
-export function UndoBar({ undoLabel, redoLabel, onUndo, onRedo }: UndoBarProps) {
+export function UndoBar({
+  undoLabel,
+  redoLabel,
+  onUndo,
+  onRedo,
+}: UndoBarProps) {
   if (!undoLabel && !redoLabel) return null
   return (
     <div className="flex justify-end gap-2">

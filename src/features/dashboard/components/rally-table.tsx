@@ -99,7 +99,7 @@ export function RallyTable({
         onPrev={() => setSelected((i) => (i === null ? i : Math.max(0, i - 1)))}
         onNext={() =>
           setSelected((i) =>
-            i === null ? i : Math.min(rallies.length - 1, i + 1),
+            i === null ? i : Math.min(rallies.length - 1, i + 1)
           )
         }
         hasPrev={selected !== null && selected > 0}

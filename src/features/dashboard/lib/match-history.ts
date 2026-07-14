@@ -36,7 +36,7 @@ export function toHistoryMatches(
   playerId: string,
   matches: Array<MatchResultSummary>,
   games: Array<GameResultInMatch>,
-  nameOf: (id: string) => string,
+  nameOf: (id: string) => string
 ): Array<HistoryMatch> {
   return matches.map((m) => {
     const isP1 = m.player1_id === playerId
@@ -46,9 +46,7 @@ export function toHistoryMatches(
       .filter((g) => g.match_id === m.match_id)
       .sort((a, b) => a.game_number - b.game_number)
       .map((g) =>
-        isP1
-          ? `${g.score_p1}-${g.score_p2}`
-          : `${g.score_p2}-${g.score_p1}`,
+        isP1 ? `${g.score_p1}-${g.score_p2}` : `${g.score_p2}-${g.score_p1}`
       )
     return {
       id: m.match_id,

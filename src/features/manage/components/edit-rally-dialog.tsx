@@ -22,7 +22,11 @@ interface EditRallyDialogProps {
   onClose: () => void
 }
 
-export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) {
+export function EditRallyDialog({
+  rally,
+  mode,
+  onClose,
+}: EditRallyDialogProps) {
   const players = usePlayers()
   const update = useUpdateRally()
   const insertAt = useInsertRallyAt()
@@ -62,7 +66,7 @@ export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) 
           winning_shot: null,
           losing_shot: null,
           shot_count: null,
-        },
+        }
   )
 
   const gameLabel = `G${rally.games.game_number} · ${nameOf(match.player1_id)} vs ${nameOf(match.player2_id)}`
@@ -95,7 +99,7 @@ export function EditRallyDialog({ rally, mode, onClose }: EditRallyDialogProps) 
           onCancel={onClose}
         />
         {mutation.isError && (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {friendlyWriteError(mutation.error)}
           </p>
         )}

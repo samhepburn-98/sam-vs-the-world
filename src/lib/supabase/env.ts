@@ -4,7 +4,7 @@ export function getSupabaseEnv() {
 
   if (!url || !key) {
     throw new Error(
-      "Missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY — copy .env.example to .env and fill in the values from the Supabase dashboard.",
+      "Missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY — copy .env.example to .env and fill in the values from the Supabase dashboard."
     )
   }
 

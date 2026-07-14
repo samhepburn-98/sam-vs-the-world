@@ -56,12 +56,18 @@ export function CourtDiagram({
           fillOpacity={boxOpacity(rightShare)}
         />
       )}
-      <g stroke="currentColor" strokeWidth={28} vectorEffect="non-scaling-stroke">
+      <g
+        stroke="currentColor"
+        strokeWidth={28}
+        vectorEffect="non-scaling-stroke"
+      >
         <rect x={14} y={14} width={w - 28} height={h - 28} rx={8} />
         <line x1={0} y1={shortLine} x2={w} y2={shortLine} />
         <line x1={w / 2} y1={shortLine} x2={w / 2} y2={h - 14} />
         <path d={`M ${boxSize} ${shortLine} v ${boxSize} h -${boxSize - 14}`} />
-        <path d={`M ${w - boxSize} ${shortLine} v ${boxSize} h ${boxSize - 14}`} />
+        <path
+          d={`M ${w - boxSize} ${shortLine} v ${boxSize} h ${boxSize - 14}`}
+        />
       </g>
     </svg>
   )

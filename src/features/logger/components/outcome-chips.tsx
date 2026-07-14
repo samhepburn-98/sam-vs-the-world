@@ -14,7 +14,10 @@ import {
   showsServeFault,
   showsShotType,
 } from "@/lib/rally/rally-draft"
-import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
+import {
+  LOGGABLE_ERROR_DETAILS,
+  LOGGABLE_SHOT_TYPES,
+} from "@/lib/schemas/enums"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
 import type { EndReason, ErrorDetail, ShotType } from "@/lib/schemas/enums"
@@ -74,7 +77,7 @@ function OutcomeCard({
         <Kbd>{hint}</Kbd>
         {headline}
       </span>
-      <span className="text-muted-foreground group-data-[state=on]/card:text-primary-foreground/85 text-xs font-normal">
+      <span className="text-xs font-normal text-muted-foreground group-data-[state=on]/card:text-primary-foreground/85">
         {rule}
       </span>
     </ToggleGroupItem>
@@ -95,7 +98,7 @@ function RareOutcome({
     <ToggleGroupItem
       value={value}
       size="sm"
-      className="text-muted-foreground h-7 px-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+      className="h-7 px-2 text-muted-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
     >
       <Kbd>{hint}</Kbd>
       {label}
@@ -131,7 +134,7 @@ export function OutcomeChips({
   onOpenGlossary,
 }: OutcomeChipsProps) {
   const [showDetail, setShowDetail] = useState(
-    () => window.localStorage.getItem(DETAIL_PREF_KEY) !== "0",
+    () => window.localStorage.getItem(DETAIL_PREF_KEY) !== "0"
   )
   const toggleDetail = () => {
     const next = !showDetail
@@ -142,7 +145,7 @@ export function OutcomeChips({
   return (
     <section
       aria-label="How the rally ended"
-      className="bg-card flex flex-col gap-3 rounded-lg border p-4"
+      className="flex flex-col gap-3 rounded-lg border bg-card p-4"
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm">
@@ -153,7 +156,7 @@ export function OutcomeChips({
           variant="ghost"
           size="sm"
           aria-label="What do these mean?"
-          className="text-muted-foreground size-7 rounded-full p-0"
+          className="size-7 rounded-full p-0 text-muted-foreground"
           onClick={onOpenGlossary}
         >
           ?
@@ -204,7 +207,7 @@ export function OutcomeChips({
           disabled={!canSave(draft)}
           onClick={onSave}
         >
-          <Kbd className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+          <Kbd className="border-primary-foreground/30 bg-primary-foreground/20 text-primary-foreground">
             {HOTKEY_HINTS.save}
           </Kbd>
           Save
@@ -212,7 +215,7 @@ export function OutcomeChips({
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <span className="text-muted-foreground flex-1 text-right text-xs">
+        <span className="flex-1 text-right text-xs text-muted-foreground">
           saves as-is — detail is optional
         </span>
         <Button
@@ -232,100 +235,108 @@ export function OutcomeChips({
       </div>
 
       {showDetail && (
-      <div className="bg-muted/30 flex flex-col gap-3 rounded-lg border p-3">
-      {showsErrorDetail(draft.endReason) && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Where
-          </span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            aria-label="Where the error went"
-            className="flex-wrap"
-            value={draft.errorDetail ?? ""}
-            onValueChange={(v) => onErrorDetail(v === "" ? null : (v as ErrorDetail))}
-          >
-            {LOGGABLE_ERROR_DETAILS.map((d) => (
-              <ToggleGroupItem key={d} value={d} title={ERROR_DETAIL_HELP[d]}>
-                <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
-                {ERROR_DETAIL_LABELS[d]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
-      )}
+        <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3">
+          {showsErrorDetail(draft.endReason) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-12 shrink-0 text-xs text-muted-foreground">
+                Where
+              </span>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                aria-label="Where the error went"
+                className="flex-wrap"
+                value={draft.errorDetail ?? ""}
+                onValueChange={(v) =>
+                  onErrorDetail(v === "" ? null : (v as ErrorDetail))
+                }
+              >
+                {LOGGABLE_ERROR_DETAILS.map((d) => (
+                  <ToggleGroupItem
+                    key={d}
+                    value={d}
+                    title={ERROR_DETAIL_HELP[d]}
+                  >
+                    <Kbd>{HOTKEY_HINTS.errorDetail[d]}</Kbd>
+                    {ERROR_DETAIL_LABELS[d]}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+          )}
 
-      {showsForced(draft.endReason) && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Why
-          </span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            aria-label="Forced or unforced"
-            className="flex-wrap"
-            value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
-            onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
-          >
-            <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
-            <ToggleGroupItem value="yes">
-              <Kbd>{HOTKEY_HINTS.forced}</Kbd>
-              {winnerName} forced it
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-      )}
+          {showsForced(draft.endReason) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-12 shrink-0 text-xs text-muted-foreground">
+                Why
+              </span>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                aria-label="Forced or unforced"
+                className="flex-wrap"
+                value={draft.forced === null ? "" : draft.forced ? "yes" : "no"}
+                onValueChange={(v) => onForced(v === "" ? null : v === "yes")}
+              >
+                <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
+                <ToggleGroupItem value="yes">
+                  <Kbd>{HOTKEY_HINTS.forced}</Kbd>
+                  {winnerName} forced it
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
 
-      {showsShotType(draft.endReason) && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground w-12 shrink-0 text-xs">
-            Shot
-          </span>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            aria-label="Shot type"
-            className="flex-wrap"
-            value={draft.shotType ?? ""}
-            onValueChange={(v) => onShotType(v === "" ? null : (v as ShotType))}
-          >
-            {LOGGABLE_SHOT_TYPES.map((s) => (
-              <ToggleGroupItem key={s} value={s}>
-                {SHOT_TYPE_LABELS[s]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          <span className="text-muted-foreground text-xs">
-            {draft.endReason === "winner"
-              ? `${winnerName}'s winning shot`
-              : draft.forced === true
-                ? `${winnerName}'s forcing shot`
-                : `the shot ${loserName} was playing`}
-          </span>
-        </div>
-      )}
+          {showsShotType(draft.endReason) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-12 shrink-0 text-xs text-muted-foreground">
+                Shot
+              </span>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="sm"
+                aria-label="Shot type"
+                className="flex-wrap"
+                value={draft.shotType ?? ""}
+                onValueChange={(v) =>
+                  onShotType(v === "" ? null : (v as ShotType))
+                }
+              >
+                {LOGGABLE_SHOT_TYPES.map((s) => (
+                  <ToggleGroupItem key={s} value={s}>
+                    {SHOT_TYPE_LABELS[s]}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              <span className="text-xs text-muted-foreground">
+                {draft.endReason === "winner"
+                  ? `${winnerName}'s winning shot`
+                  : draft.forced === true
+                    ? `${winnerName}'s forcing shot`
+                    : `the shot ${loserName} was playing`}
+              </span>
+            </div>
+          )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground w-12 shrink-0 text-xs">
-          Shots
-        </span>
-        <NumberStepper
-          value={draft.shotCount}
-          onChange={onShotCount}
-          min={0}
-          max={999}
-          ariaLabel="shot count"
-        />
-        <span className="text-muted-foreground text-xs">
-          every racket touch counts, including the last
-        </span>
-      </div>
-      </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-12 shrink-0 text-xs text-muted-foreground">
+              Shots
+            </span>
+            <NumberStepper
+              value={draft.shotCount}
+              onChange={onShotCount}
+              min={0}
+              max={999}
+              ariaLabel="shot count"
+            />
+            <span className="text-xs text-muted-foreground">
+              every racket touch counts, including the last
+            </span>
+          </div>
+        </div>
       )}
     </section>
   )

@@ -43,7 +43,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
           ) : (
             <span
               aria-hidden
-              className="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+              className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground"
             >
               {p.name.charAt(0)}
             </span>
