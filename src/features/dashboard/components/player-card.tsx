@@ -92,29 +92,20 @@ function CardOverlay({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string
           <stop offset="0.5" stopColor={t.divider} />
           <stop offset="1" stopColor={t.divider} stopOpacity="0" />
         </linearGradient>
-        {/* a light feather, so a non-cutout photo doesn't end in a hard
-            rectangle while a real cutout keeps its full subject */}
-        <radialGradient id={id("photo-fade")} cx="0.58" cy="0.5" r="0.72">
-          <stop offset="0.84" stopColor="#fff" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
-        <mask id={id("photo-mask")}>
-          <rect x="118" y="12" width="266" height="282" fill={url("photo-fade")} />
-        </mask>
       </defs>
 
-      {/* portrait: right-aligned bust, clipped to the shield and ending at the
-          panel's top edge (y=294) so it meets the panel with no overlap;
-          nudged right so it clears the hero number on the left */}
+      {/* portrait: the whole cutout fit inside a box on the right half of the
+          card (so it can never reach the hero number on the left), centred in
+          the box and anchored to its bottom — the panel line (y=294) — with
+          `meet` so nothing is cropped. Clipped to the shield for the corners. */}
       <g clipPath={url("shield")}>
         <image
           href={avatarSrc}
-          x="118"
-          y="12"
-          width="266"
-          height="282"
-          preserveAspectRatio="xMaxYMid slice"
-          mask={url("photo-mask")}
+          x="140"
+          y="14"
+          width="244"
+          height="280"
+          preserveAspectRatio="xMidYMax meet"
         />
       </g>
 
@@ -225,18 +216,19 @@ export function PlayerCard({
           </div>
 
           {/* name band, centred in the panel-top-to-rule band (y≈294→360) */}
-          <p className="absolute top-[79.5cqi] right-[9cqi] left-[9cqi] truncate text-center text-[11.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
+          <p className="absolute top-[82cqi] right-[9cqi] left-[9cqi] truncate text-center text-[11.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
             {name}
           </p>
 
-          {/* the six attributes, two columns split by the divider — numbers
-              right-aligned toward the centre rule, codes fanning outward */}
+          {/* the six attributes, two columns hugging the centre rule
+              symmetrically — the left column right-aligned, the right column
+              left-aligned, so the gaps either side of the divider match */}
           <TooltipProvider>
-            <div className="absolute top-[97.5cqi] right-[13cqi] left-[13cqi] grid grid-cols-2 gap-[5cqi]">
-              <dl className="flex flex-col gap-[1.7cqi]">
+            <div className="absolute top-[98cqi] right-[13cqi] left-[13cqi] grid grid-cols-2 gap-[8cqi]">
+              <dl className="flex flex-col items-end gap-[1.7cqi]">
                 {[attrs[0], attrs[2], attrs[4]].map(stat)}
               </dl>
-              <dl className="flex flex-col gap-[1.7cqi]">
+              <dl className="flex flex-col items-start gap-[1.7cqi]">
                 {[attrs[1], attrs[3], attrs[5]].map(stat)}
               </dl>
             </div>
