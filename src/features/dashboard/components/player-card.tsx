@@ -99,18 +99,19 @@ function CardOverlay({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id={id("photo-mask")}>
-          <rect x="104" y="12" width="280" height="282" fill={url("photo-fade")} />
+          <rect x="118" y="12" width="266" height="282" fill={url("photo-fade")} />
         </mask>
       </defs>
 
       {/* portrait: right-aligned bust, clipped to the shield and ending at the
-          panel's top edge (y=294) so it meets the panel with no overlap */}
+          panel's top edge (y=294) so it meets the panel with no overlap;
+          nudged right so it clears the hero number on the left */}
       <g clipPath={url("shield")}>
         <image
           href={avatarSrc}
-          x="104"
+          x="118"
           y="12"
-          width="280"
+          width="266"
           height="282"
           preserveAspectRatio="xMaxYMid slice"
           mask={url("photo-mask")}
@@ -193,7 +194,7 @@ export function PlayerCard({
         {/* the data layer, positioned in container units over the frame */}
         <div className="absolute inset-0">
           {/* hero number + handedness, stacked top-left */}
-          <div className="absolute top-[13cqi] left-[13cqi] flex flex-col">
+          <div className="absolute top-[16cqi] left-[14cqi] flex flex-col">
             <span className="text-[11cqi] leading-none font-extrabold text-white">
               {hero.display}
             </span>
@@ -223,18 +224,19 @@ export function PlayerCard({
             )}
           </div>
 
-          {/* name band, centred just above the stat rule */}
-          <p className="absolute top-[81.5cqi] right-[9cqi] left-[9cqi] truncate text-center text-[10.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
+          {/* name band, centred in the panel-top-to-rule band (y≈294→360) */}
+          <p className="absolute top-[79.5cqi] right-[9cqi] left-[9cqi] truncate text-center text-[11.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
             {name}
           </p>
 
-          {/* the six attributes, two columns split by the divider */}
+          {/* the six attributes, two columns split by the divider — numbers
+              right-aligned toward the centre rule, codes fanning outward */}
           <TooltipProvider>
-            <div className="absolute top-[96cqi] right-[15cqi] left-[15cqi] grid grid-cols-2 gap-[7cqi]">
-              <dl className="flex flex-col gap-[2.2cqi]">
+            <div className="absolute top-[97.5cqi] right-[13cqi] left-[13cqi] grid grid-cols-2 gap-[5cqi]">
+              <dl className="flex flex-col gap-[1.7cqi]">
                 {[attrs[0], attrs[2], attrs[4]].map(stat)}
               </dl>
-              <dl className="flex flex-col gap-[2.2cqi] pl-[4cqi]">
+              <dl className="flex flex-col gap-[1.7cqi]">
                 {[attrs[1], attrs[3], attrs[5]].map(stat)}
               </dl>
             </div>
@@ -243,7 +245,7 @@ export function PlayerCard({
           {/* trait footer under the short rule */}
           {trait && (
             <p
-              className="absolute top-[135cqi] right-[10cqi] left-[10cqi] text-center text-[5.2cqi] font-bold tracking-[0.14em] uppercase"
+              className="absolute top-[137.5cqi] right-[10cqi] left-[10cqi] text-center text-[5.2cqi] font-bold tracking-[0.14em] uppercase"
               style={{ color: t.muted }}
             >
               {TRAIT_LABELS[trait]}
