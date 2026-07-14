@@ -90,17 +90,20 @@ export function PlayerCard({
   const t = THEMES[side]
   const clipId = useId()
 
+  // one stat, as a pair that spans its column's two subgrid tracks — the
+  // number right-aligned in the shared number track, the code left-aligned in
+  // the code track — so every number and code lines up without a fixed width
   const stat = (a: PlayerAttribute) => {
-    const row = (
+    const pair = (
       <div
         key={a.key}
         tabIndex={statTooltips ? 0 : undefined}
         className={cn(
-          "flex items-baseline gap-[2.5cqi]",
+          "col-span-2 grid grid-cols-subgrid items-baseline gap-x-[2.5cqi]",
           statTooltips && "cursor-help rounded-sm"
         )}
       >
-        <dd className="w-[10cqi] text-right text-[7.8cqi] font-extrabold tabular-nums text-white">
+        <dd className="text-right text-[7.8cqi] font-extrabold tabular-nums text-white">
           {a.display}
         </dd>
         <dt className="text-[7.8cqi] font-medium" style={{ color: t.muted }}>
@@ -112,16 +115,22 @@ export function PlayerCard({
         </dt>
       </div>
     )
-    if (!statTooltips) return row
+    if (!statTooltips) return pair
     return (
       <Tooltip key={a.key}>
-        <TooltipTrigger asChild>{row}</TooltipTrigger>
+        <TooltipTrigger asChild>{pair}</TooltipTrigger>
         <TooltipContent>
           {a.detail}: {a.sr}
         </TooltipContent>
       </Tooltip>
     )
   }
+
+  const statColumn = (picks: Array<number>) => (
+    <dl className="grid grid-cols-[auto_auto] items-baseline gap-y-[1.9cqi]">
+      {picks.map((i) => stat(attrs[i]))}
+    </dl>
+  )
 
   return (
     <div className="@container">
@@ -195,20 +204,17 @@ export function PlayerCard({
               className="mt-[3cqi] h-[0.4cqi] w-[70%]"
             />
 
-            <div className="relative mt-[3.5cqi] grid w-full grid-cols-2 px-[13cqi]">
-              <dl className="flex flex-col items-end gap-[1.7cqi] pr-[4cqi]">
-                {[attrs[0], attrs[2], attrs[4]].map(stat)}
-              </dl>
-              <dl className="flex flex-col items-start gap-[1.7cqi] pl-[4cqi]">
-                {[attrs[1], attrs[3], attrs[5]].map(stat)}
-              </dl>
-              {/* column divider: centred on the grid, spanning its rows, so it
-                  tracks the stats automatically */}
+            {/* two stat columns, each aligning its numbers and codes via
+                subgrid, with the divider as a flex sibling between them so it
+                stretches to the columns' height and stays centred on them */}
+            <div className="mt-[3.5cqi] flex items-stretch justify-center gap-[6cqi]">
+              {statColumn([0, 2, 4])}
               <FadeRule
                 axis="y"
                 colour={t.divider}
-                className="absolute inset-y-[2cqi] left-1/2 w-[0.4cqi] -translate-x-1/2"
+                className="w-[0.4cqi] self-stretch"
               />
+              {statColumn([1, 3, 5])}
             </div>
 
             <FadeRule
