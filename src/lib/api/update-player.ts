@@ -33,6 +33,10 @@ export function useUpdatePlayer() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["players"] })
+      // players_headline embeds the name and handedness this edits
+      void queryClient.invalidateQueries({
+        queryKey: ["insights", "players-headline"],
+      })
     },
   })
 }

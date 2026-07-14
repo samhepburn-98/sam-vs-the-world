@@ -33,6 +33,10 @@ export function useInsertRallyAt() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // every insight aggregate is derived from rally rows
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
+      // the home hub counts rallies
+      void queryClient.invalidateQueries({ queryKey: ["home"] })
     },
   })
 }

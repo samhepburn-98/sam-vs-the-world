@@ -46,6 +46,10 @@ export function useDeleteGame() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // every insight aggregate is derived from rally rows
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
+      // the cascade deletes the game's rallies — the home hub counts them
+      void queryClient.invalidateQueries({ queryKey: ["home"] })
     },
   })
 }
