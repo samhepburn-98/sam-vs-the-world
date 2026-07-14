@@ -23,7 +23,7 @@ export interface PlayerMatchHistoryData {
 }
 
 export async function fetchPlayerMatchHistory(
-  playerId: string,
+  playerId: string
 ): Promise<PlayerMatchHistoryData> {
   const page = await fetchMatches({ player: playerId, page: 1 })
   const matches = page.rows.slice(0, HISTORY_LIMIT)
@@ -35,11 +35,11 @@ export async function fetchPlayerMatchHistory(
   const { data, error } = await supabase
     .from("game_results")
     .select(
-      "game_id, match_id, game_number, score_p1, score_p2, winner_id, is_undecided",
+      "game_id, match_id, game_number, score_p1, score_p2, winner_id, is_undecided"
     )
     .in(
       "match_id",
-      matches.map((m) => m.match_id),
+      matches.map((m) => m.match_id)
     )
   if (error) throw error
   return {

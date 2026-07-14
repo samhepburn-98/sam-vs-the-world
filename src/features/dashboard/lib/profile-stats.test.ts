@@ -148,10 +148,10 @@ describe("buildServePressure", () => {
           serve2_served: 9,
           serve2_wins: 6,
         }),
-      }),
+      })
     )
     expect(servePressure.read).toBe(
-      "The first serve rarely misses — 9 faults in 170 serves.",
+      "The first serve rarely misses — 9 faults in 170 serves."
     )
     expect(servePressure.first).toEqual({
       label: "First serve",
@@ -176,10 +176,10 @@ describe("buildServePressure", () => {
           serve2_served: 12,
           serve2_wins: 6,
         }),
-      }),
+      })
     )
     expect(servePressure.read).toBe(
-      "When the first serve misses, the second has won 6 of 12.",
+      "When the first serve misses, the second has won 6 of 12."
     )
   })
 
@@ -194,10 +194,10 @@ describe("buildServePressure", () => {
           serve2_served: 40,
           serve2_wins: 18, // 45%
         }),
-      }),
+      })
     )
     expect(servePressure.read).toBe(
-      "The second serve is a liability — a 25-point drop when the first one misses.",
+      "The second serve is a liability — a 25-point drop when the first one misses."
     )
   })
 
@@ -212,10 +212,10 @@ describe("buildServePressure", () => {
           serve2_served: 40,
           serve2_wins: 22, // 55%
         }),
-      }),
+      })
     )
     expect(servePressure.read).toBe(
-      "The second serve holds — 55% won against 60% behind the first.",
+      "The second serve holds — 55% won against 60% behind the first."
     )
   })
 })

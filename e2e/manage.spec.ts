@@ -15,7 +15,7 @@ test("all four manage tabs are browsable logged-out", async ({ page }) => {
     await page.getByRole("tab", { name: tab }).click()
     await expect(page.getByRole("tab", { name: tab })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "true"
     )
     // the table shell renders: headers now, rows/empty-state once loaded
     await expect(page.getByRole("table")).toBeVisible()
@@ -26,6 +26,6 @@ test("all four manage tabs are browsable logged-out", async ({ page }) => {
 
   // write affordances are owner-only — logged out there are none (§5.4)
   await expect(
-    page.getByRole("button", { name: /^(Edit|Delete|Insert) / }),
+    page.getByRole("button", { name: /^(Edit|Delete|Insert) / })
   ).toHaveCount(0)
 })

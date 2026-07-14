@@ -19,7 +19,11 @@ interface RosterCardProps {
   onToggleSelect: () => void
 }
 
-export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps) {
+export function RosterCard({
+  player,
+  selected,
+  onToggleSelect,
+}: RosterCardProps) {
   const { games_won, games_decided } = player
   const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
   const losses = games_decided - games_won
@@ -30,14 +34,18 @@ export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps
     <div
       className={cn(
         "relative rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/10 transition-shadow hover:shadow-md",
-        selected && "ring-2 ring-primary",
+        selected && "ring-2 ring-primary"
       )}
     >
       <Button
         type="button"
         variant={selected ? "default" : "outline"}
         size="icon-sm"
-        aria-label={selected ? `Deselect ${player.name}` : `Select ${player.name} to compare`}
+        aria-label={
+          selected
+            ? `Deselect ${player.name}`
+            : `Select ${player.name} to compare`
+        }
         aria-pressed={selected}
         className="absolute top-3 right-3 z-10 rounded-full"
         onClick={onToggleSelect}
@@ -51,12 +59,12 @@ export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps
         className="flex flex-col gap-3 p-6"
       >
         <div className="flex items-center gap-2 pr-8">
-          <h3 className="font-heading truncate text-lg font-bold">
+          <h3 className="truncate font-heading text-lg font-bold">
             {player.name}
           </h3>
           {player.handedness && (
             <span
-              className="text-muted-foreground text-xs"
+              className="text-xs text-muted-foreground"
               title={`${player.handedness === "left" ? "Left" : "Right"}-handed`}
             >
               {player.handedness === "left" ? "LH" : "RH"}
@@ -74,19 +82,19 @@ export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps
             />
           </p>
         ) : (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Not enough data yet{" "}
             <span className="tabular-nums">(n={games_decided})</span>
           </p>
         )}
 
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-sm tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {games_won} W · {losses} L
           </span>
           {form.length > 0 && (
             <span className="flex items-center gap-1.5">
-              <span className="text-muted-foreground text-xs" aria-hidden>
+              <span className="text-xs text-muted-foreground" aria-hidden>
                 Form
               </span>
               <span
@@ -94,7 +102,7 @@ export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps
                 role="img"
                 aria-label={`Recent form, oldest to newest: ${form
                   .map((g) =>
-                    g.won === null ? "undecided" : g.won ? "won" : "lost",
+                    g.won === null ? "undecided" : g.won ? "won" : "lost"
                   )
                   .join(", ")}`}
               >
@@ -108,7 +116,7 @@ export function RosterCard({ player, selected, onToggleSelect }: RosterCardProps
                         ? "bg-muted-foreground/40"
                         : g.won
                           ? "bg-emerald-500"
-                          : "bg-red-500",
+                          : "bg-red-500"
                     )}
                   />
                 ))}

@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { RallyTimeline } from "./rally-timeline"
@@ -12,7 +18,9 @@ afterEach(cleanup)
 const SAM = "11111111-1111-4111-8111-111111111111"
 const DAVE = "22222222-2222-4222-8222-222222222222"
 
-function row(overrides: Partial<RallyRow> & { rally_number: number }): RallyRow {
+function row(
+  overrides: Partial<RallyRow> & { rally_number: number }
+): RallyRow {
   return {
     id: `id-${overrides.rally_number}`,
     game_id: "g1",
@@ -24,7 +32,7 @@ function row(overrides: Partial<RallyRow> & { rally_number: number }): RallyRow 
     error_detail: null,
     forced: null,
     winning_shot: null,
-  losing_shot: null,
+    losing_shot: null,
     shot_count: null,
     ...overrides,
   }
@@ -52,7 +60,7 @@ function renderTimeline(extra?: Partial<Parameters<typeof RallyTimeline>[0]>) {
       p2Name="Dave"
       servesPerPoint={2}
       {...extra}
-    />,
+    />
   )
 }
 
@@ -71,7 +79,9 @@ describe("RallyTimeline", () => {
   it("full outcome + serve context on each decided rally", () => {
     renderTimeline()
     expect(screen.getByText("error · tin · unforced")).toBeDefined()
-    expect(screen.getByText(/#3 · Sam served · left box · 1st serve/)).toBeDefined()
+    expect(
+      screen.getByText(/#3 · Sam served · left box · 1st serve/)
+    ).toBeDefined()
   })
 
   it("read-only by default; editable rows are buttons that surface the row", () => {
@@ -83,7 +93,7 @@ describe("RallyTimeline", () => {
     renderTimeline({ editable: true, onRowClick })
     fireEvent.click(screen.getAllByRole("button")[0])
     expect(onRowClick).toHaveBeenCalledWith(
-      expect.objectContaining({ rally_number: 3 }),
+      expect.objectContaining({ rally_number: 3 })
     )
   })
 

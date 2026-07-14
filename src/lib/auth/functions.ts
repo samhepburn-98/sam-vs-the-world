@@ -18,7 +18,7 @@ export const fetchUser = createServerFn({ method: "GET" }).handler(
     const { data } = await supabase.auth.getUser()
     if (!data.user) return null
     return { id: data.user.id, email: data.user.email ?? null }
-  },
+  }
 )
 
 export const signIn = createServerFn({ method: "POST" })
@@ -38,10 +38,8 @@ export const signIn = createServerFn({ method: "POST" })
     return { error: null }
   })
 
-export const signOut = createServerFn({ method: "POST" }).handler(
-  async () => {
-    const supabase = getSupabaseServerClient()
-    await supabase.auth.signOut()
-    return { ok: true }
-  },
-)
+export const signOut = createServerFn({ method: "POST" }).handler(async () => {
+  const supabase = getSupabaseServerClient()
+  await supabase.auth.signOut()
+  return { ok: true }
+})

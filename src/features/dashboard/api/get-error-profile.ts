@@ -4,11 +4,14 @@ import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
 import { errorProfile } from "@/features/dashboard/schemas/insights"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
-import type { ErrorProfile, InsightFilters } from "@/features/dashboard/schemas/insights"
+import type {
+  ErrorProfile,
+  InsightFilters,
+} from "@/features/dashboard/schemas/insights"
 
 export async function fetchErrorProfile(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ): Promise<ErrorProfile> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("error_profile", {
@@ -21,7 +24,7 @@ export async function fetchErrorProfile(
 
 export function errorProfileOptions(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "error-profile", playerId, filters],
@@ -31,7 +34,7 @@ export function errorProfileOptions(
 
 export function useErrorProfile(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return useQuery(errorProfileOptions(playerId, filters))
 }

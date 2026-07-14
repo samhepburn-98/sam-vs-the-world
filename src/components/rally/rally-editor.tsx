@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Constants } from "@/lib/database.types"
-import { LOGGABLE_ERROR_DETAILS, LOGGABLE_SHOT_TYPES } from "@/lib/schemas/enums"
+import {
+  LOGGABLE_ERROR_DETAILS,
+  LOGGABLE_SHOT_TYPES,
+} from "@/lib/schemas/enums"
 import {
   buildRallyRow,
   canSave,
@@ -73,7 +76,7 @@ export function RallyEditor({
 
   const fieldRow = (label: string, control: React.ReactNode) => (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-muted-foreground w-12 shrink-0 text-xs">
+      <span className="w-12 shrink-0 text-xs text-muted-foreground">
         {label}
       </span>
       {control}
@@ -83,9 +86,11 @@ export function RallyEditor({
   return (
     <section
       aria-label={`Edit rally ${row.rally_number}`}
-      className="border-primary/40 bg-card flex flex-col gap-3 rounded-lg border p-4"
+      className="flex flex-col gap-3 rounded-lg border border-primary/40 bg-card p-4"
     >
-      <p className="text-sm font-semibold">{title ?? `Editing rally #${row.rally_number}`}</p>
+      <p className="text-sm font-semibold">
+        {title ?? `Editing rally #${row.rally_number}`}
+      </p>
 
       {fieldRow(
         "Winner",
@@ -100,7 +105,7 @@ export function RallyEditor({
         >
           <ToggleGroupItem value={ctx.player1Id}>{p1Name}</ToggleGroupItem>
           <ToggleGroupItem value={ctx.player2Id}>{p2Name}</ToggleGroupItem>
-        </ToggleGroup>,
+        </ToggleGroup>
       )}
 
       {fieldRow(
@@ -122,7 +127,7 @@ export function RallyEditor({
                 {END_REASON_LABELS[r]}
               </ToggleGroupItem>
             ))}
-        </ToggleGroup>,
+        </ToggleGroup>
       )}
 
       {fieldRow(
@@ -154,7 +159,7 @@ export function RallyEditor({
               {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}
             </Button>
           )}
-        </>,
+        </>
       )}
 
       {showsErrorDetail(draft.endReason) &&
@@ -177,7 +182,7 @@ export function RallyEditor({
                 {ERROR_DETAIL_LABELS[d]}
               </ToggleGroupItem>
             ))}
-          </ToggleGroup>,
+          </ToggleGroup>
         )}
 
       {showsForced(draft.endReason) &&
@@ -194,13 +199,13 @@ export function RallyEditor({
           >
             <ToggleGroupItem value="no">Unforced</ToggleGroupItem>
             <ToggleGroupItem value="yes">Forced</ToggleGroupItem>
-          </ToggleGroup>,
+          </ToggleGroup>
         )}
 
       <div className="flex flex-wrap items-center gap-2">
         {showsShotType(draft.endReason) && (
           <>
-            <span className="text-muted-foreground w-12 shrink-0 text-xs">
+            <span className="w-12 shrink-0 text-xs text-muted-foreground">
               Shot
             </span>
             <ToggleGroup
@@ -226,7 +231,7 @@ export function RallyEditor({
         )}
         {draft.endReason !== "let" && (
           <>
-            <span className="text-muted-foreground shrink-0 text-xs">
+            <span className="shrink-0 text-xs text-muted-foreground">
               Shots
             </span>
             <Input
@@ -259,7 +264,7 @@ export function RallyEditor({
                   id: row.id,
                   gameId: row.game_id,
                   rallyNumber: row.rally_number,
-                }),
+                })
               )
             }
           >

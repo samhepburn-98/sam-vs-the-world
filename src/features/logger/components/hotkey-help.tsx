@@ -69,7 +69,7 @@ export function HotkeyHelp({
         <div className="grid gap-6 sm:grid-cols-2">
           {GROUPS.map((group) => (
             <section key={group.title}>
-              <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
+              <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
                 {group.title}
               </h3>
               <ul className="flex flex-col gap-1.5">
@@ -84,7 +84,7 @@ export function HotkeyHelp({
           ))}
         </div>
         <footer className="mt-4 flex items-center justify-between gap-4">
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Keys are inert while a text field is focused. Buttons always work —
             hotkeys are the fast path, not the only path.
           </p>

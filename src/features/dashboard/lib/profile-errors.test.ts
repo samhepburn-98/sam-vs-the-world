@@ -9,12 +9,24 @@ import { error, player } from "@/features/dashboard/lib/player-data.fixtures"
 describe("the wall", () => {
   it("maps the five zones straight off the payload", () => {
     const { wall } = computeProfileErrors(player())
-    expect(wall).toEqual({ tin: 20, outTop: 10, outSide: 8, outBack: 6, notUp: 10 })
+    expect(wall).toEqual({
+      tin: 20,
+      outTop: 10,
+      outSide: 8,
+      outBack: 6,
+      notUp: 10,
+    })
   })
 
   it("is all zeros before any payload arrives", () => {
     const { wall } = computeProfileErrors({})
-    expect(wall).toEqual({ tin: 0, outTop: 0, outSide: 0, outBack: 0, notUp: 0 })
+    expect(wall).toEqual({
+      tin: 0,
+      outTop: 0,
+      outSide: 0,
+      outBack: 0,
+      notUp: 0,
+    })
   })
 })
 
@@ -32,7 +44,13 @@ describe("the biggest leak", () => {
   it("follows the leak when it isn't the tin", () => {
     // Sam-shaped: not up dominates
     const data = player({
-      error: error({ tin: 19, out_top: 7, out_side: 5, out_back: 2, not_up: 55 }),
+      error: error({
+        tin: 19,
+        out_top: 7,
+        out_side: 5,
+        out_back: 2,
+        not_up: 55,
+      }),
     })
     const [leak] = computeProfileErrors(data).insights
     expect(leak.title).toBe("The ball isn't getting there.")
@@ -82,12 +100,20 @@ describe("the third card", () => {
     const pattern = computeProfileErrors(player()).insights[2]
     expect(pattern.title).toBe("Out, three ways.")
     expect(pattern.body).toContain("24 balls flew out")
-    expect(pattern.body).toContain("10 over the front wall, 8 off the sides, 6 past the back")
+    expect(pattern.body).toContain(
+      "10 over the front wall, 8 off the sides, 6 past the back"
+    )
   })
 
   it("skips the out family when an out zone is already the leak", () => {
     const data = player({
-      error: error({ tin: 5, out_top: 30, out_side: 4, out_back: 2, not_up: 6 }),
+      error: error({
+        tin: 5,
+        out_top: 30,
+        out_side: 4,
+        out_back: 2,
+        not_up: 6,
+      }),
     })
     const { insights } = computeProfileErrors(data)
     expect(insights[0].title).toBe("Too much air.")

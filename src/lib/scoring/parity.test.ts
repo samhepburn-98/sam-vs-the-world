@@ -45,9 +45,9 @@ describe.each(gameFixtures.map((f) => [f.name, f] as const))(
     const rallies = toRallies(f)
 
     it("derives the identical running score for every rally", () => {
-      expect(
-        runningScores(rallies, ctx).map((s) => [s.p1, s.p2]),
-      ).toEqual(f.expected.runningScores)
+      expect(runningScores(rallies, ctx).map((s) => [s.p1, s.p2])).toEqual(
+        f.expected.runningScores
+      )
     })
 
     it("derives the identical game result", () => {
@@ -55,11 +55,11 @@ describe.each(gameFixtures.map((f) => [f.name, f] as const))(
       expect(got.score.p1).toBe(f.expected.result.scoreP1)
       expect(got.score.p2).toBe(f.expected.result.scoreP2)
       expect(got.winnerId).toBe(
-        f.expected.result.winner ? IDS[f.expected.result.winner] : null,
+        f.expected.result.winner ? IDS[f.expected.result.winner] : null
       )
       expect(got.undecided).toBe(f.expected.result.undecided)
     })
-  },
+  }
 )
 
 describe.each(matchFixtures.map((f) => [f.name, f] as const))(
@@ -67,7 +67,12 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
   (_name, f: MatchFixture) => {
     it("derives the identical match tally", () => {
       const games: Array<GameResult> = f.gameWinners.map((w) => ({
-        score: w === "p1" ? { p1: 1, p2: 0 } : w === "p2" ? { p1: 0, p2: 1 } : { p1: 1, p2: 1 },
+        score:
+          w === "p1"
+            ? { p1: 1, p2: 0 }
+            : w === "p2"
+              ? { p1: 0, p2: 1 }
+              : { p1: 1, p2: 1 },
         winnerId: w === "tie" ? null : IDS[w],
         undecided: w === "tie",
       }))
@@ -75,8 +80,8 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
       expect(got.gamesWonP1).toBe(f.expected.gamesWonP1)
       expect(got.gamesWonP2).toBe(f.expected.gamesWonP2)
       expect(got.matchWinnerId).toBe(
-        f.expected.matchWinner ? IDS[f.expected.matchWinner] : null,
+        f.expected.matchWinner ? IDS[f.expected.matchWinner] : null
       )
     })
-  },
+  }
 )

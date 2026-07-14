@@ -45,7 +45,7 @@ export function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 export function hotkeyAction(
-  e: Pick<KeyboardEvent, "key" | "metaKey" | "ctrlKey" | "altKey">,
+  e: Pick<KeyboardEvent, "key" | "metaKey" | "ctrlKey" | "altKey">
 ): HotkeyAction | null {
   if (e.altKey) return null
   if (e.metaKey || e.ctrlKey) {

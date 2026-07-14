@@ -12,7 +12,7 @@ import type { RallyScored } from "@/lib/schemas/rally"
  *  behind every count, filtered by the same SQL the aggregate used. */
 export async function fetchErrorRallies(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ): Promise<Array<RallyScored>> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("error_rallies", {
@@ -25,7 +25,7 @@ export async function fetchErrorRallies(
 
 export function errorRalliesOptions(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "error-rallies", playerId, filters],
@@ -35,7 +35,7 @@ export function errorRalliesOptions(
 
 export function useErrorRallies(
   playerId: string,
-  filters: InsightFilters = {},
+  filters: InsightFilters = {}
 ) {
   return useQuery(errorRalliesOptions(playerId, filters))
 }

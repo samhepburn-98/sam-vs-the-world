@@ -5,7 +5,7 @@ import type { GameContext, GameResult, RallyInput, Score } from "./types"
 
 export function runningScores(
   rallies: ReadonlyArray<RallyInput>,
-  ctx: Pick<GameContext, "player1Id" | "player2Id">,
+  ctx: Pick<GameContext, "player1Id" | "player2Id">
 ): Array<Score> {
   const scores: Array<Score> = []
   let p1 = 0
@@ -20,7 +20,7 @@ export function runningScores(
 
 export function scoreAfter(
   rallies: ReadonlyArray<RallyInput>,
-  ctx: Pick<GameContext, "player1Id" | "player2Id">,
+  ctx: Pick<GameContext, "player1Id" | "player2Id">
 ): Score {
   const all = runningScores(rallies, ctx)
   return all.length > 0 ? all[all.length - 1] : { p1: 0, p2: 0 }
@@ -30,7 +30,7 @@ export function scoreAfter(
 // played — deliberately rule-agnostic (§7.1).
 export function gameResult(
   rallies: ReadonlyArray<RallyInput>,
-  ctx: Pick<GameContext, "player1Id" | "player2Id">,
+  ctx: Pick<GameContext, "player1Id" | "player2Id">
 ): GameResult {
   const score = scoreAfter(rallies, ctx)
   const winnerId =

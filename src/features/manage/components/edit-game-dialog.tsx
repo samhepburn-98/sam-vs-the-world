@@ -56,7 +56,7 @@ export function EditGameDialog({ game, onClose }: EditGameDialogProps) {
             )}
           </Field>
           {update.isError && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {friendlyWriteError(update.error)}
             </p>
           )}

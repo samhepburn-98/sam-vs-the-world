@@ -12,7 +12,7 @@ export default async function globalSetup() {
     throw new Error(
       "Local Supabase stack is not running — start it with `supabase start` " +
         "(the golden path never touches the cloud project).",
-      { cause },
+      { cause }
     )
   }
 
@@ -29,7 +29,8 @@ export default async function globalSetup() {
     const { data, error } = await admin.auth.admin.listUsers()
     if (error) throw error
     userId = data.users.find((u) => u.email === GOLDEN_USER.email)?.id
-    if (!userId) throw new Error("could not create or find the golden test user")
+    if (!userId)
+      throw new Error("could not create or find the golden test user")
   }
 
   const seeded = await admin

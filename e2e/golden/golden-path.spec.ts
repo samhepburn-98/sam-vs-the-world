@@ -44,7 +44,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   const rally = async (keys: Array<string>, expectRallies: number) => {
     for (const k of keys) await page.keyboard.press(k)
     await expect(
-      page.getByRole("list", { name: "Rally timeline" }).getByRole("listitem"),
+      page.getByRole("list", { name: "Rally timeline" }).getByRole("listitem")
     ).toHaveCount(expectRallies)
   }
 
@@ -65,7 +65,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   await page.getByRole("button", { name: "Finish match" }).click()
   await expect(page.getByText("Golden Sam wins 1–0")).toBeVisible()
   await expect(
-    page.getByRole("listitem").filter({ hasText: "Game 1" }),
+    page.getByRole("listitem").filter({ hasText: "Game 1" })
   ).toContainText("3–1")
 
   // ---- DB state: rows landed exactly as logged -------------------------
@@ -98,7 +98,9 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
 
   const rallies = await db
     .from("rallies")
-    .select("rally_number, server_id, serve_number, winner_id, end_reason, error_detail, forced")
+    .select(
+      "rally_number, server_id, serve_number, winner_id, end_reason, error_detail, forced"
+    )
     .order("rally_number")
   expect(rallies.error).toBeNull()
   expect(rallies.data).toEqual([

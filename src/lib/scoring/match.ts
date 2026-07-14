@@ -12,7 +12,7 @@ export interface MatchTally {
 
 export function tallyMatch(
   games: ReadonlyArray<GameResult>,
-  ctx: { player1Id: string; player2Id: string; format: number | null },
+  ctx: { player1Id: string; player2Id: string; format: number | null }
 ): MatchTally {
   let gamesWonP1 = 0
   let gamesWonP2 = 0

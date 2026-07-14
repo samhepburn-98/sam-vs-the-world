@@ -56,7 +56,12 @@ export function GameScoreChart({
           axisLine={false}
           tickMargin={8}
         />
-        <YAxis width={28} tickLine={false} axisLine={false} allowDecimals={false} />
+        <YAxis
+          width={28}
+          tickLine={false}
+          axisLine={false}
+          allowDecimals={false}
+        />
         <ChartTooltip
           content={
             <ChartTooltipContent

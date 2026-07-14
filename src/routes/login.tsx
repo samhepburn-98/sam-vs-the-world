@@ -27,7 +27,7 @@ function LoginPage() {
     <main className="container mx-auto flex max-w-sm flex-col px-4 py-16">
       <Card>
         <CardHeader className="items-center text-center">
-          <CourtDiagram className="text-muted-foreground mx-auto mb-2 h-14 w-9" />
+          <CourtDiagram className="mx-auto mb-2 h-14 w-9 text-muted-foreground" />
           <CardTitle className="font-heading">Owner sign in</CardTitle>
           <CardDescription>
             Logging and editing are owner-only; everything else is public.

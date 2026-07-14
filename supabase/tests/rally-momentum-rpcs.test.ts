@@ -17,7 +17,7 @@ function loadMigration(nameFragment: string) {
   if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
   return readFileSync(join(MIGRATIONS, file), "utf8").replace(
     /^create extension if not exists pgcrypto;$/m,
-    "",
+    ""
   )
 }
 
@@ -41,7 +41,7 @@ interface RallySpec {
 async function seedMatch(date: string) {
   const res = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, date) values ($1, $2, $3) returning id`,
-    [sam, dave, date],
+    [sam, dave, date]
   )
   return res.rows[0].id
 }
@@ -49,7 +49,7 @@ async function seedMatch(date: string) {
 async function seedGame(matchId: string, rallies: Array<RallySpec>) {
   const game = await db.query<{ id: string }>(
     `insert into games (match_id, game_number) values ($1, 1) returning id`,
-    [matchId],
+    [matchId]
   )
   let n = 0
   for (const r of rallies) {
@@ -65,7 +65,7 @@ async function seedGame(matchId: string, rallies: Array<RallySpec>) {
         r.winner,
         r.reason ?? (r.winner === null ? "let" : "winner"),
         r.shotCount ?? null,
-      ],
+      ]
     )
   }
   return game.rows[0].id
@@ -86,13 +86,16 @@ beforeAll(async () => {
   await db.exec(loadMigration("rally_lengths_momentum"))
 
   const players = await db.query<{ id: string }>(
-    `insert into players (name) values ('Sam'), ('Dave') returning id`,
+    `insert into players (name) values ('Sam'), ('Dave') returning id`
   )
   ;[sam, dave] = players.rows.map((r) => r.id)
 
   // A — Dave wins the first 4 (Sam trails 0–4, deficit exactly 4), then Sam
   //     wins 7 straight to take it 7–4. Comeback at 4; a Sam streak of 7.
-  gameA = await seedGame(await seedMatch(DATE_A), [...wins(dave, 4), ...wins(sam, 7)])
+  gameA = await seedGame(await seedMatch(DATE_A), [
+    ...wins(dave, 4),
+    ...wins(sam, 7),
+  ])
 
   // B — Sam trails 0–3 then wins 4–3. Not a comeback at deficit 4; is one at 3.
   await seedGame(await seedMatch(DATE_B), [...wins(dave, 3), ...wins(sam, 4)])
@@ -137,20 +140,22 @@ afterAll(async () => {
 async function rallyLengths(dateFrom?: string, dateTo?: string) {
   const res = await db.query<Record<string, number>>(
     `select * from rally_lengths($1, p_date_from => $2, p_date_to => $3)`,
-    [sam, dateFrom ?? null, dateTo ?? null],
+    [sam, dateFrom ?? null, dateTo ?? null]
   )
   expect(res.rows).toHaveLength(1)
   return res.rows[0]
 }
 
-async function momentum(opts: { from?: string; to?: string; deficit?: number } = {}) {
+async function momentum(
+  opts: { from?: string; to?: string; deficit?: number } = {}
+) {
   const res = await db.query<
     Record<string, number | string | null> & {
       comeback_games: Array<Record<string, unknown>>
     }
   >(
     `select * from momentum($1, p_date_from => $2, p_date_to => $3, p_deficit => coalesce($4, 4))`,
-    [sam, opts.from ?? null, opts.to ?? null, opts.deficit ?? null],
+    [sam, opts.from ?? null, opts.to ?? null, opts.deficit ?? null]
   )
   expect(res.rows).toHaveLength(1)
   return res.rows[0]
@@ -171,19 +176,23 @@ describe("rally_lengths", () => {
       long_wins: 1,
     })
     // the three buckets sum to the average's denominator
-    expect(l.short_rallies + l.medium_rallies + l.long_rallies).toBe(l.total_rallies)
+    expect(l.short_rallies + l.medium_rallies + l.long_rallies).toBe(
+      l.total_rallies
+    )
   })
 
   it("companion returns exactly one bucket's rallies", async () => {
     const long = await db.query<{ shot_count: number }>(
       `select shot_count from rally_length_rallies($1, p_date_from => $2, p_date_to => $3, p_bucket => 'long')`,
-      [sam, DATE_E, DATE_E],
+      [sam, DATE_E, DATE_E]
     )
-    expect(long.rows.map((r) => r.shot_count).sort((a, b) => a - b)).toEqual([9, 12])
+    expect(long.rows.map((r) => r.shot_count).sort((a, b) => a - b)).toEqual([
+      9, 12,
+    ])
     // null bucket = every counted rally (== total_rallies, 0-shot excluded)
     const all = await db.query<{ n: number }>(
       `select count(*)::int as n from rally_length_rallies($1, p_date_from => $2, p_date_to => $3)`,
-      [sam, DATE_E, DATE_E],
+      [sam, DATE_E, DATE_E]
     )
     expect(all.rows[0].n).toBe(6)
   })
@@ -210,12 +219,12 @@ describe("momentum — comebacks", () => {
   it("companion returns every rally of the comeback games", async () => {
     const def4 = await db.query<{ n: number }>(
       `select count(*)::int as n from comeback_rallies($1)`,
-      [sam],
+      [sam]
     )
     expect(def4.rows[0].n).toBe(11) // game A only
     const def3 = await db.query<{ n: number }>(
       `select count(*)::int as n from comeback_rallies($1, p_deficit => 3)`,
-      [sam],
+      [sam]
     )
     expect(def3.rows[0].n).toBe(11 + 7) // games A + B
   })
@@ -244,7 +253,7 @@ describe("momentum — phase bands", () => {
     expect(m.early_rallies).toBe(8) // leadings 1–4
     expect(m.mid_rallies).toBe(8) //   leadings 5–8
     expect(
-      Number(m.early_rallies) + Number(m.mid_rallies) + Number(m.close_rallies),
+      Number(m.early_rallies) + Number(m.mid_rallies) + Number(m.close_rallies)
     ).toBe(22)
   })
 })
@@ -257,7 +266,7 @@ describe("API exposure", () => {
     "comeback_rallies(uuid, uuid, ball_type, date, date, integer)",
   ])("anon can execute %s", async (signature) => {
     const res = await db.query<{ ok: boolean }>(
-      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`,
+      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`
     )
     expect(res.rows[0].ok).toBe(true)
   })

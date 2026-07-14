@@ -43,7 +43,7 @@ export function ScoreHeader({
       <button
         type="button"
         onClick={onToggleSide}
-        className="border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors"
+        className="cursor-pointer rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
       >
         {draft.serveSide === "left" ? "Left" : "Right"} box{" "}
         <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
@@ -52,7 +52,7 @@ export function ScoreHeader({
         <button
           type="button"
           onClick={onToggleServeNumber}
-          className="text-muted-foreground hover:text-foreground cursor-pointer rounded-full border px-2 py-0.5 text-[11px] transition-colors"
+          className="cursor-pointer rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
         >
           {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}{" "}
           <Kbd>{HOTKEY_HINTS.serveNumber}</Kbd>
@@ -69,29 +69,29 @@ export function ScoreHeader({
         title="Tap to change the server"
         className={cn(
           "cursor-pointer text-sm font-bold tracking-wide uppercase transition-colors",
-          serving ? "" : "text-muted-foreground",
+          serving ? "" : "text-muted-foreground"
         )}
       >
         {name}
-        {serving && <span className="text-primary ml-1.5">●</span>}
+        {serving && <span className="ml-1.5 text-primary">●</span>}
       </button>
       <p
         className={cn(
           "mt-1 text-6xl font-bold tabular-nums sm:text-7xl",
-          serving ? "" : "text-muted-foreground",
+          serving ? "" : "text-muted-foreground"
         )}
       >
         {points}
       </p>
       {serving ? (
         <>
-          <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
+          <span className="mt-1.5 block text-[11px] text-muted-foreground/60">
             Serving
           </span>
           {chips}
         </>
       ) : (
-        <span className="text-muted-foreground/60 mt-1.5 block text-[11px]">
+        <span className="mt-1.5 block text-[11px] text-muted-foreground/60">
           Receiving
         </span>
       )}
@@ -100,12 +100,12 @@ export function ScoreHeader({
 
   return (
     <section aria-label="Score">
-      <p className="text-muted-foreground mb-3 text-center text-xs tracking-widest uppercase">
+      <p className="mb-3 text-center text-xs tracking-widest text-muted-foreground uppercase">
         Game {gameNumber} · {rulesLine}
       </p>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
         {side(p1Name, score.p1, p1Serving)}
-        <span className="text-muted-foreground/50 pb-4 text-3xl">–</span>
+        <span className="pb-4 text-3xl text-muted-foreground/50">–</span>
         {side(p2Name, score.p2, !p1Serving)}
       </div>
     </section>

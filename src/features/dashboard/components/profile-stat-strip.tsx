@@ -23,12 +23,7 @@ interface Tile {
   decimals?: number
 }
 
-function rateTile(
-  label: string,
-  won: number,
-  of: number,
-  min: number,
-): Tile {
+function rateTile(label: string, won: number, of: number, min: number): Tile {
   return {
     label,
     value: of >= min ? Math.round((won / of) * 100) : null,
@@ -48,8 +43,18 @@ export function ProfileStatStrip({
   momentum: Momentum
 }) {
   const tiles: Array<Tile> = [
-    rateTile("Serve won", serve.serve_wins, serve.rallies_served, MIN_RALLIES_FOR_RATE),
-    rateTile("Return won", serve.return_wins, serve.rallies_returned, MIN_RALLIES_FOR_RATE),
+    rateTile(
+      "Serve won",
+      serve.serve_wins,
+      serve.rallies_served,
+      MIN_RALLIES_FOR_RATE
+    ),
+    rateTile(
+      "Return won",
+      serve.return_wins,
+      serve.rallies_returned,
+      MIN_RALLIES_FOR_RATE
+    ),
     { label: "Aces", value: serve.aces },
     {
       label: "Unforced / game",
@@ -61,7 +66,10 @@ export function ProfileStatStrip({
     },
     {
       label: "Avg rally",
-      value: lengths.total_rallies >= MIN_RALLIES_FOR_RATE ? lengths.avg_length : null,
+      value:
+        lengths.total_rallies >= MIN_RALLIES_FOR_RATE
+          ? lengths.avg_length
+          : null,
       decimals: 1,
     },
     { label: "Comebacks", value: momentum.comebacks },
@@ -69,20 +77,27 @@ export function ProfileStatStrip({
 
   return (
     <section aria-label="At a glance">
-      <h2 className="text-muted-foreground mb-2 text-xs font-medium tracking-widest uppercase">
+      <h2 className="mb-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
         At a glance
       </h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
-          <div key={t.label} className="bg-card rounded-xl p-3 ring-1 ring-foreground/10">
+          <div
+            key={t.label}
+            className="rounded-xl bg-card p-3 ring-1 ring-foreground/10"
+          >
             <p className="text-2xl font-bold tabular-nums">
               {t.value === null ? (
                 <span className="text-muted-foreground">—</span>
               ) : (
-                <CountUp value={t.value} decimals={t.decimals ?? 0} suffix={t.suffix ?? ""} />
+                <CountUp
+                  value={t.value}
+                  decimals={t.decimals ?? 0}
+                  suffix={t.suffix ?? ""}
+                />
               )}
             </p>
-            <p className="text-muted-foreground mt-0.5 text-xs">{t.label}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t.label}</p>
           </div>
         ))}
       </div>

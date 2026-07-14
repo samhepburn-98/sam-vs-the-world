@@ -15,7 +15,14 @@ describe("computePlayerAttributes", () => {
   it("derives the six rates from the payloads", () => {
     const attrs = computePlayerAttributes(player())
     const byKey = Object.fromEntries(attrs.map((a) => [a.key, a]))
-    expect(attrs.map((a) => a.key)).toEqual(["srv", "ret", "att", "con", "grd", "clu"])
+    expect(attrs.map((a) => a.key)).toEqual([
+      "srv",
+      "ret",
+      "att",
+      "con",
+      "grd",
+      "clu",
+    ])
     expect(byKey.srv.value).toBe(58)
     expect(byKey.ret.value).toBe(47)
     expect(byKey.att.value).toBe(44) // 35/80
@@ -37,7 +44,7 @@ describe("computePlayerAttributes", () => {
           long_wins: 6,
         }),
         error: error({ forced_errors: 4, unforced_errors: 3 }),
-      }),
+      })
     )
     const byKey = Object.fromEntries(attrs.map((a) => [a.key, a]))
     expect(byKey.grd.value).toBeNull() // 18 extended rallies < 30
@@ -58,7 +65,8 @@ describe("heroStat", () => {
     expect(heroStat(player())).toEqual({ display: "60%", label: "Win rate" }) // 24/40
     expect(heroStat({}).display).toBe("—")
     expect(
-      heroStat({ headline: headline({ games_won: 2, games_decided: 3 }) }).display,
+      heroStat({ headline: headline({ games_won: 2, games_decided: 3 }) })
+        .display
     ).toBe("—") // under threshold
   })
 })

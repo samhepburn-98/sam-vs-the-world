@@ -1,4 +1,8 @@
-import { BetweenHorizontalStartIcon, PencilIcon, Trash2Icon } from "lucide-react"
+import {
+  BetweenHorizontalStartIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useState } from "react"
 
 import {
@@ -210,7 +214,7 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
           if (!deleting) return
           del.mutate(
             { ...deleting, serve_number: deleting.serve_number === 2 ? 2 : 1 },
-            { onSuccess: () => setDeleting(null) },
+            { onSuccess: () => setDeleting(null) }
           )
         }}
       />

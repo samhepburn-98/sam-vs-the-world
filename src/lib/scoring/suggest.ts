@@ -14,7 +14,7 @@ const NEW_SERVER_SIDE: ServeSide = "left"
 
 export function suggestNext(
   rallies: ReadonlyArray<RallyInput>,
-  ctx: GameContext,
+  ctx: GameContext
 ): Suggestion {
   const last = rallies.length > 0 ? rallies[rallies.length - 1] : undefined
 
@@ -48,7 +48,7 @@ export function suggestNext(
 /** Each game's first server defaults to the previous game's winner (§7.2). */
 export function suggestNextGameFirstServer(
   previousGameWinnerId: string | null,
-  ctx: Pick<GameContext, "firstServerId">,
+  ctx: Pick<GameContext, "firstServerId">
 ): string {
   return previousGameWinnerId ?? ctx.firstServerId
 }

@@ -8,7 +8,7 @@ import { EmptyMedia } from "@/components/ui/empty"
 export function CourtEmptyMedia() {
   return (
     <EmptyMedia variant="default">
-      <CourtDiagram className="text-muted-foreground/60 h-16 w-11" />
+      <CourtDiagram className="h-16 w-11 text-muted-foreground/60" />
     </EmptyMedia>
   )
 }

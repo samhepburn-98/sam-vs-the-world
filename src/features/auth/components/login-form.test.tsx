@@ -41,7 +41,7 @@ describe("LoginForm", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("alert").textContent).toBe(
-        "Wrong email or password.",
+        "Wrong email or password."
       )
     })
     expect(onSubmit).toHaveBeenCalledWith({

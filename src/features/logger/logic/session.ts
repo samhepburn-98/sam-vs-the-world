@@ -25,8 +25,7 @@ export interface GameState {
 }
 
 export type UndoEntry =
-  | { kind: "rally"; row: RallyRow }
-  | { kind: "game"; game: GameRef }
+  { kind: "rally"; row: RallyRow } | { kind: "game"; game: GameRef }
 
 export interface SessionState {
   matchId: string
@@ -48,7 +47,7 @@ export function currentGame(state: SessionState): GameState {
 
 function replaceLastGame(
   state: SessionState,
-  game: GameState,
+  game: GameState
 ): Array<GameState> {
   return [...state.games.slice(0, -1), game]
 }
@@ -74,7 +73,7 @@ export function editRally(state: SessionState, row: RallyRow): Transition {
       games: state.games.map((g) =>
         g.id === row.game_id
           ? { ...g, rows: g.rows.map((r) => (r.id === row.id ? row : r)) }
-          : g,
+          : g
       ),
       undoable: null,
       redoable: null,

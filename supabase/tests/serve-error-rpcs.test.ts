@@ -17,7 +17,7 @@ function loadMigration(nameFragment: string) {
   if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
   return readFileSync(join(MIGRATIONS, file), "utf8").replace(
     /^create extension if not exists pgcrypto;$/m,
-    "",
+    ""
   )
 }
 
@@ -41,10 +41,14 @@ interface RallySpec {
   forced?: boolean | null
 }
 
-async function seedGame(matchId: string, gameNumber: number, rallies: Array<RallySpec>) {
+async function seedGame(
+  matchId: string,
+  gameNumber: number,
+  rallies: Array<RallySpec>
+) {
   const game = await db.query<{ id: string }>(
     `insert into games (match_id, game_number) values ($1, $2) returning id`,
-    [matchId, gameNumber],
+    [matchId, gameNumber]
   )
   let n = 0
   for (const r of rallies) {
@@ -62,7 +66,7 @@ async function seedGame(matchId: string, gameNumber: number, rallies: Array<Rall
         r.reason ?? (r.winner === null ? "let" : "winner"),
         r.detail ?? null,
         r.forced ?? null,
-      ],
+      ]
     )
   }
   return game.rows[0].id
@@ -78,14 +82,14 @@ beforeAll(async () => {
   await db.exec(loadMigration("serve_stats_error_profile"))
 
   const players = await db.query<{ id: string }>(
-    `insert into players (name) values ('Sam'), ('Dave') returning id`,
+    `insert into players (name) values ('Sam'), ('Dave') returning id`
   )
   ;[sam, dave] = players.rows.map((r) => r.id)
 
   // Match 1 — two serves per point (the default), blue ball.
   const m1 = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, date, ball_type) values ($1, $2, '2026-06-01', 'blue') returning id`,
-    [sam, dave],
+    [sam, dave]
   )
   matchTwoServe = m1.rows[0].id
   await seedGame(matchTwoServe, 1, [
@@ -93,7 +97,15 @@ beforeAll(async () => {
     { server: sam, side: "left", serveNo: 1, winner: sam },
     // 2: Sam's first serve faulted (implicit) → point played on serve 2,
     //    Sam tins it — an unforced error on the right box
-    { server: sam, side: "right", serveNo: 2, winner: dave, reason: "error", detail: "tin", forced: false },
+    {
+      server: sam,
+      side: "right",
+      serveNo: 2,
+      winner: dave,
+      reason: "error",
+      detail: "tin",
+      forced: false,
+    },
     // 3+4: THE TRAP — first serve faults, then a LET interrupts the serve-2
     //      point; the replay (still serve 2) is the only decided row. The
     //      pair must count as ONE served rally and ONE first-serve fault.
@@ -102,9 +114,23 @@ beforeAll(async () => {
     // 5: Dave aces Sam
     { server: dave, side: "left", serveNo: 1, winner: dave, reason: "ace" },
     // 6: Dave double-faults (second-serve fault → receiver wins, by CHECK)
-    { server: dave, side: "left", serveNo: 2, winner: sam, reason: "serve_fault" },
+    {
+      server: dave,
+      side: "left",
+      serveNo: 2,
+      winner: sam,
+      reason: "serve_fault",
+    },
     // 7: Sam's forced error (out over the front-wall line)
-    { server: sam, side: "left", serveNo: 1, winner: dave, reason: "error", detail: "out_top", forced: true },
+    {
+      server: sam,
+      side: "left",
+      serveNo: 1,
+      winner: dave,
+      reason: "error",
+      detail: "out_top",
+      forced: true,
+    },
     // 8: Sam errs again, nothing tagged — forced NULL, detail NULL
     { server: sam, side: "left", serveNo: 1, winner: dave, reason: "error" },
   ])
@@ -113,28 +139,40 @@ beforeAll(async () => {
   // win % but must stay out of every serve-number stat.
   const m2 = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, date, ball_type, serves_per_point) values ($1, $2, '2026-06-10', 'yellow', 1) returning id`,
-    [sam, dave],
+    [sam, dave]
   )
   matchSingleServe = m2.rows[0].id
   await seedGame(matchSingleServe, 1, [
     { server: sam, winner: sam },
     { server: sam, winner: sam },
-    { server: sam, winner: dave, reason: "error", detail: "not_up", forced: false },
+    {
+      server: sam,
+      winner: dave,
+      reason: "error",
+      detail: "not_up",
+      forced: false,
+    },
   ])
 
   // Match 3 — a LEGACY double_bounce error, inserted while the value was
   // still live, then the retire migration runs over it: the row must fold
   // into not_up and the value must be locked out of new rows.
   const p2 = await db.query<{ id: string }>(
-    `insert into players (name) values ('Pat'), ('Quinn') returning id`,
+    `insert into players (name) values ('Pat'), ('Quinn') returning id`
   )
   ;[pat, quinn] = p2.rows.map((r) => r.id)
   const m3 = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, date) values ($1, $2, '2026-06-20') returning id`,
-    [pat, quinn],
+    [pat, quinn]
   )
   await seedGame(m3.rows[0].id, 1, [
-    { server: pat, winner: quinn, reason: "error", detail: "double_bounce", forced: false },
+    {
+      server: pat,
+      winner: quinn,
+      reason: "error",
+      detail: "double_bounce",
+      forced: false,
+    },
   ])
   await db.exec(loadMigration("retire_double_bounce"))
 })
@@ -146,7 +184,7 @@ afterAll(async () => {
 async function serveStats(playerId: string, filters = "") {
   const res = await db.query<Record<string, number>>(
     `select * from serve_stats($1${filters})`,
-    [playerId],
+    [playerId]
   )
   expect(res.rows).toHaveLength(1)
   return res.rows[0]
@@ -207,9 +245,12 @@ describe("serve_stats", () => {
   })
 
   it("applies the cross-cutting filters", async () => {
-    const yellow = await db.query<{ rallies_served: number; two_serve_rallies_served: number }>(
+    const yellow = await db.query<{
+      rallies_served: number
+      two_serve_rallies_served: number
+    }>(
       `select rallies_served, two_serve_rallies_served from serve_stats($1, p_ball_type => 'yellow')`,
-      [sam],
+      [sam]
     )
     expect(yellow.rows[0]).toMatchObject({
       rallies_served: 3,
@@ -217,7 +258,7 @@ describe("serve_stats", () => {
     })
     const dated = await db.query<{ rallies_served: number }>(
       `select rallies_served from serve_stats($1, p_date_to => '2026-06-05')`,
-      [sam],
+      [sam]
     )
     expect(dated.rows[0].rallies_served).toBe(5)
   })
@@ -225,7 +266,7 @@ describe("serve_stats", () => {
   it("serve_rallies returns exactly the rows the aggregate counted", async () => {
     const rows = await db.query<{ is_let: boolean; server_id: string }>(
       `select is_let, server_id from serve_rallies($1)`,
-      [sam],
+      [sam]
     )
     expect(rows.rows).toHaveLength(8) // == rallies_served
     expect(rows.rows.every((r) => !r.is_let && r.server_id === sam)).toBe(true)
@@ -283,8 +324,8 @@ describe("error_profile", () => {
         `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, error_detail)
          select game_id, 99, server_id, 'left', 1, $1, 'error', 'double_bounce'
          from rallies where server_id = $2 limit 1`,
-        [quinn, pat],
-      ),
+        [quinn, pat]
+      )
     ).rejects.toThrow(/rallies_error_detail_current/)
   })
 
@@ -299,7 +340,7 @@ describe("error_profile", () => {
   it("error_rallies returns exactly the rows the aggregate counted", async () => {
     const rows = await db.query<{ end_reason: string; winner_id: string }>(
       `select end_reason, winner_id from error_rallies($1)`,
-      [sam],
+      [sam]
     )
     expect(rows.rows).toHaveLength(4) // == errors_total
     expect(rows.rows.every((r) => r.winner_id !== sam)).toBe(true)
@@ -314,7 +355,7 @@ describe("API exposure", () => {
     "error_rallies(uuid, uuid, ball_type, date, date)",
   ])("anon can execute %s", async (signature) => {
     const res = await db.query<{ ok: boolean }>(
-      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`,
+      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`
     )
     expect(res.rows[0].ok).toBe(true)
   })

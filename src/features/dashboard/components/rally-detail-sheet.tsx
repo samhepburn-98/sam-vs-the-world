@@ -31,10 +31,16 @@ interface RallyDetailSheetProps {
   hasNext: boolean
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
   return (
     <div className="grid grid-cols-[8rem_1fr] items-baseline gap-2 py-1.5">
-      <dt className="text-muted-foreground text-sm">{label}</dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="text-sm">{children}</dd>
     </div>
   )
@@ -71,7 +77,7 @@ export function RallyDetailSheet({
               </SheetDescription>
             </SheetHeader>
 
-            <dl className="divide-border divide-y px-4">
+            <dl className="divide-y divide-border px-4">
               <Field label="Outcome">
                 {rally.is_let ? "Let (replayed)" : humanise(rally.end_reason)}
               </Field>
@@ -79,7 +85,9 @@ export function RallyDetailSheet({
                 <Field label="Detail">{humanise(rally.error_detail)}</Field>
               )}
               {rally.forced !== null && (
-                <Field label="Forced">{rally.forced ? "Forced" : "Unforced"}</Field>
+                <Field label="Forced">
+                  {rally.forced ? "Forced" : "Unforced"}
+                </Field>
               )}
               <Field label="Serve">
                 {humanise(rally.serve_side)} box · serve {rally.serve_number}

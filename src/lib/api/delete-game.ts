@@ -22,16 +22,13 @@ export function deleteGameOp(
   // against this slice; eslint's checker resolves it and calls the cast
   // unnecessary — narrow through unknown and keep both satisfied
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  client: DeleteCapableClient = getSupabaseBrowserClient() as unknown as DeleteCapableClient,
+  client: DeleteCapableClient = getSupabaseBrowserClient() as unknown as DeleteCapableClient
 ): WriteOp {
   return {
     id: game.id,
     label: `undo game ${game.gameNumber}`,
     run: async () => {
-      const { error } = await client
-        .from("games")
-        .delete()
-        .eq("id", game.id)
+      const { error } = await client.from("games").delete().eq("id", game.id)
       if (error) throw error
     },
   }

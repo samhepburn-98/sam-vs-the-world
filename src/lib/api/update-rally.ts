@@ -21,7 +21,7 @@ export function updateRallyOp(
   // against this slice; eslint's checker resolves it and calls the cast
   // unnecessary — narrow through unknown and keep both satisfied
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  client: UpdateCapableClient = getSupabaseBrowserClient() as unknown as UpdateCapableClient,
+  client: UpdateCapableClient = getSupabaseBrowserClient() as unknown as UpdateCapableClient
 ): WriteOp {
   const fields = {
     server_id: row.server_id,

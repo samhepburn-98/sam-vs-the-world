@@ -5,12 +5,7 @@
 export type ServeSide = "left" | "right"
 
 export type EndReason =
-  | "winner"
-  | "error"
-  | "stroke"
-  | "let"
-  | "ace"
-  | "serve_fault"
+  "winner" | "error" | "stroke" | "let" | "ace" | "serve_fault"
 
 export interface HouseRules {
   targetScore: number

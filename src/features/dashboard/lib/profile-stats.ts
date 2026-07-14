@@ -169,7 +169,11 @@ function buildServePressure(data: PlayerData): ServePressureData {
     const secondRate = winRate(second.won, second.of)
     if (faultPct <= 10) {
       read = `The first serve rarely misses — ${faults.won} faults in ${two} serves.`
-    } else if (second.of >= MIN_RALLIES_FOR_RATE && firstRate != null && secondRate != null) {
+    } else if (
+      second.of >= MIN_RALLIES_FOR_RATE &&
+      firstRate != null &&
+      secondRate != null
+    ) {
       read =
         firstRate - secondRate >= 10
           ? `The second serve is a liability — a ${firstRate - secondRate}-point drop when the first one misses.`

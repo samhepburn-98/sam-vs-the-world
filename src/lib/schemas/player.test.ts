@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  PLAYER_SUMMARY_COLUMNS,
-  playerSummary,
-} from "@/lib/schemas/player"
+import { PLAYER_SUMMARY_COLUMNS, playerSummary } from "@/lib/schemas/player"
 
 describe("PLAYER_SUMMARY_COLUMNS", () => {
   it("names every column playerSummary parses", () => {

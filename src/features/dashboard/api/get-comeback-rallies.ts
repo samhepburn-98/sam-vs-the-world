@@ -14,7 +14,7 @@ import type { RallyScored } from "@/lib/schemas/rally"
 export async function fetchComebackRallies(
   playerId: string,
   filters: InsightFilters = {},
-  deficit?: number,
+  deficit?: number
 ): Promise<Array<RallyScored>> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("comeback_rallies", {
@@ -29,10 +29,16 @@ export async function fetchComebackRallies(
 export function comebackRalliesOptions(
   playerId: string,
   filters: InsightFilters = {},
-  deficit?: number,
+  deficit?: number
 ) {
   return queryOptions({
-    queryKey: ["insights", "comeback-rallies", playerId, filters, deficit ?? null],
+    queryKey: [
+      "insights",
+      "comeback-rallies",
+      playerId,
+      filters,
+      deficit ?? null,
+    ],
     queryFn: () => fetchComebackRallies(playerId, filters, deficit),
   })
 }
@@ -40,7 +46,7 @@ export function comebackRalliesOptions(
 export function useComebackRallies(
   playerId: string,
   filters: InsightFilters = {},
-  deficit?: number,
+  deficit?: number
 ) {
   return useQuery(comebackRalliesOptions(playerId, filters, deficit))
 }

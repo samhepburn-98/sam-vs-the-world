@@ -9,7 +9,7 @@
 export function fitWithin(
   width: number,
   height: number,
-  maxEdge: number,
+  maxEdge: number
 ): { width: number; height: number } {
   const longest = Math.max(width, height)
   if (longest <= maxEdge) return { width, height }
@@ -32,7 +32,7 @@ export class NotAnImageError extends Error {
  *  logic lives in {@link fitWithin} so it stays unit-testable. */
 export async function downscaleImage(
   file: Blob,
-  { maxEdge = 800, quality = 0.85 } = {},
+  { maxEdge = 800, quality = 0.85 } = {}
 ): Promise<Blob> {
   const bitmap = await createImageBitmap(file).catch(() => {
     throw new NotAnImageError()

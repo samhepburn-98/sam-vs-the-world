@@ -24,10 +24,12 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
     const winnerItem = (side: "p1" | "p2", name: string) => (
       <ToggleGroupItem
         value={side}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-primary/50 h-16 min-w-0 px-2 text-sm leading-tight tracking-wide whitespace-normal uppercase data-[state=on]:ring-2 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base"
+        className="h-16 min-w-0 bg-primary px-2 text-sm leading-tight tracking-wide whitespace-normal text-primary-foreground uppercase hover:bg-primary/90 hover:text-primary-foreground group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-2 data-[state=on]:ring-primary/50 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base"
         onClick={() => onWinner(side)}
       >
-        <Kbd>{side === "p1" ? HOTKEY_HINTS.winnerP1 : HOTKEY_HINTS.winnerP2}</Kbd>
+        <Kbd>
+          {side === "p1" ? HOTKEY_HINTS.winnerP1 : HOTKEY_HINTS.winnerP2}
+        </Kbd>
         {name} won
         {selected === side && <span aria-hidden>✓</span>}
       </ToggleGroupItem>
@@ -55,5 +57,5 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
         {winnerItem("p2", p2Name)}
       </ToggleGroup>
     )
-  },
+  }
 )

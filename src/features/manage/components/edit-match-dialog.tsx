@@ -66,10 +66,7 @@ export function EditMatchDialog({
     update.mutate({ id: match.id, ...input }, { onSuccess: onClose })
   })
 
-  const playerSelect = (
-    name: "player1Id" | "player2Id",
-    label: string,
-  ) => (
+  const playerSelect = (name: "player1Id" | "player2Id", label: string) => (
     <Controller
       control={form.control}
       name={name}
@@ -132,7 +129,7 @@ export function EditMatchDialog({
           />
 
           {update.isError && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {friendlyWriteError(update.error)}
             </p>
           )}

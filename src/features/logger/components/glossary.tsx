@@ -15,7 +15,8 @@ export const END_REASON_HELP: Record<EndReason, string> = {
   stroke: "Point awarded for interference; nobody hit an error.",
   let: "Rally replayed — no point either way.",
   ace: "Unreturnable serve; the server wins the point outright.",
-  serve_fault: "The serve itself ended the point (a 2nd-serve fault = double fault).",
+  serve_fault:
+    "The serve itself ended the point (a 2nd-serve fault = double fault).",
 }
 
 export const ERROR_DETAIL_HELP: Record<ErrorDetail, string> = {
@@ -55,29 +56,33 @@ export function Glossary({ open, onClose }: GlossaryProps) {
     <LoggerDialog open={open} title="What the chips mean" onClose={onClose}>
       <div className="grid gap-6 sm:grid-cols-2">
         <section>
-          <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
+          <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
             How the rally ended
           </h3>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {Constants.public.Enums.end_reason
               .filter((r) => r !== "ace")
               .map((r) => (
-              <Fragment key={r}>
-                <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
-                <dd className="text-muted-foreground">{END_REASON_HELP[r]}</dd>
-              </Fragment>
-            ))}
+                <Fragment key={r}>
+                  <dt className="font-medium">{END_REASON_LABELS[r]}</dt>
+                  <dd className="text-muted-foreground">
+                    {END_REASON_HELP[r]}
+                  </dd>
+                </Fragment>
+              ))}
           </dl>
         </section>
         <section>
-          <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
+          <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
             Error detail
           </h3>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {LOGGABLE_ERROR_DETAILS.map((d) => (
               <Fragment key={d}>
                 <dt className="font-medium">{ERROR_DETAIL_LABELS[d]}</dt>
-                <dd className="text-muted-foreground">{ERROR_DETAIL_HELP[d]}</dd>
+                <dd className="text-muted-foreground">
+                  {ERROR_DETAIL_HELP[d]}
+                </dd>
               </Fragment>
             ))}
           </dl>
@@ -85,16 +90,16 @@ export function Glossary({ open, onClose }: GlossaryProps) {
       </div>
 
       <section className="mt-6 border-t pt-4">
-        <h3 className="text-muted-foreground mb-2 text-xs tracking-widest uppercase">
+        <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
           Good to know
         </h3>
         <dl className="grid gap-x-3 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
           <dt className="font-medium">Forced / unforced</dt>
           <dd className="text-muted-foreground">
-            Only on errors, and optional — leave it blank when unsure. Ask: would
-            they make that shot nine times out of ten with no pressure? If yes,
-            it&rsquo;s unforced; if the opponent&rsquo;s shot forced the miss,
-            it&rsquo;s forced.
+            Only on errors, and optional — leave it blank when unsure. Ask:
+            would they make that shot nine times out of ten with no pressure? If
+            yes, it&rsquo;s unforced; if the opponent&rsquo;s shot forced the
+            miss, it&rsquo;s forced.
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shot</dt>
           <dd className="text-muted-foreground">
@@ -105,8 +110,8 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Aces</dt>
           <dd className="text-muted-foreground">
-            There&rsquo;s no ace button — a winner with the rally length left
-            at 1 is an ace, counted automatically.
+            There&rsquo;s no ace button — a winner with the rally length left at
+            1 is an ace, counted automatically.
           </dd>
           <dt className="mt-2 font-medium sm:mt-0">Shots</dt>
           <dd className="text-muted-foreground">

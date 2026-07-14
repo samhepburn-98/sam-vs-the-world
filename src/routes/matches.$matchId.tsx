@@ -43,7 +43,7 @@ export const Route = createFileRoute("/matches/$matchId")({
   loader: async ({ context, params }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(
-        matchDetailQueryOptions(params.matchId),
+        matchDetailQueryOptions(params.matchId)
       ),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
@@ -118,11 +118,7 @@ function MatchDetailPage() {
     const scoreP1 = last?.score_p1 ?? 0
     const scoreP2 = last?.score_p2 ?? 0
     const winner =
-      scoreP1 > scoreP2
-        ? m.player1_id
-        : scoreP2 > scoreP1
-          ? m.player2_id
-          : null
+      scoreP1 > scoreP2 ? m.player1_id : scoreP2 > scoreP1 ? m.player2_id : null
     return { ...g, scoreP1, scoreP2, winner }
   })
   const gamesWonP1 = results.filter((r) => r.winner === m.player1_id).length
@@ -157,11 +153,11 @@ function MatchDetailPage() {
       {/* header */}
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground text-sm tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {m.date}
           </span>
           {m.venue && (
-            <span className="text-muted-foreground text-sm">· {m.venue}</span>
+            <span className="text-sm text-muted-foreground">· {m.venue}</span>
           )}
           <Badge variant="outline">{formatBadge(m.format)}</Badge>
           {m.ball_type && (
@@ -171,7 +167,7 @@ function MatchDetailPage() {
             </span>
           )}
         </div>
-        <h1 className="font-heading flex items-baseline gap-3 text-3xl font-bold tracking-tight">
+        <h1 className="flex items-baseline gap-3 font-heading text-3xl font-bold tracking-tight">
           <span className={cn(matchWinner === m.player1_id && "text-primary")}>
             {p1Name}
           </span>
@@ -183,12 +179,21 @@ function MatchDetailPage() {
           </span>
         </h1>
         {matchWinner === null && (
-          <p className="text-muted-foreground text-sm">Casual session.</p>
+          <p className="text-sm text-muted-foreground">Casual session.</p>
         )}
         {user && (
           <div className="pt-1">
             <Button asChild variant="outline" size="sm">
-              <Link to="/manage" search={{ tab: "rallies", q: matchId, page: 1, sort: "", dir: "desc" }}>
+              <Link
+                to="/manage"
+                search={{
+                  tab: "rallies",
+                  q: matchId,
+                  page: 1,
+                  sort: "",
+                  dir: "desc",
+                }}
+              >
                 Edit in manage
               </Link>
             </Button>
@@ -211,10 +216,10 @@ function MatchDetailPage() {
             className={cn(
               "rounded-lg px-4 py-2 text-sm font-medium tabular-nums ring-1 ring-foreground/10 transition-colors hover:bg-muted/60",
               g.winner === m.player1_id && "bg-primary/10",
-              g.winner === m.player2_id && "bg-primary/10",
+              g.winner === m.player2_id && "bg-primary/10"
             )}
           >
-            <span className="text-muted-foreground mr-2 text-xs">
+            <span className="mr-2 text-xs text-muted-foreground">
               G{g.gameNumber}
             </span>
             {g.scoreP1}–{g.scoreP2}
@@ -229,9 +234,11 @@ function MatchDetailPage() {
           ref={(el) => {
             gameRefs.current[g.gameId] = el
           }}
-          className="flex flex-col gap-3 scroll-mt-4"
+          className="flex scroll-mt-4 flex-col gap-3"
         >
-          <h2 className="font-heading text-lg font-bold">Game {g.gameNumber}</h2>
+          <h2 className="font-heading text-lg font-bold">
+            Game {g.gameNumber}
+          </h2>
           <GameScoreChart rows={g.rows} p1Name={p1Name} p2Name={p2Name} />
           <RallyTimeline
             rows={g.rows.map(toRallyRow)}
@@ -256,7 +263,7 @@ function MatchDetailPage() {
         onPrev={() => setSelected((i) => (i === null ? i : Math.max(0, i - 1)))}
         onNext={() =>
           setSelected((i) =>
-            i === null ? i : Math.min(allRows.length - 1, i + 1),
+            i === null ? i : Math.min(allRows.length - 1, i + 1)
           )
         }
         hasPrev={selected !== null && selected > 0}

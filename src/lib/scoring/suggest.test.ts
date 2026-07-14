@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { oppositeSide, suggestNext, suggestNextGameFirstServer } from "./suggest"
+import {
+  oppositeSide,
+  suggestNext,
+  suggestNextGameFirstServer,
+} from "./suggest"
 import { DEFAULT_HOUSE_RULES } from "./types"
 
 import type { GameContext, RallyInput } from "./types"
@@ -41,7 +45,7 @@ describe("suggestNext", () => {
   it("serve changes hands when the receiver wins", () => {
     const next = suggestNext(
       [rally({ winnerId: "dave", endReason: "stroke" })],
-      ctx,
+      ctx
     )
     expect(next.serverId).toBe("dave")
     expect(next.serveNumber).toBe(1)
@@ -50,7 +54,7 @@ describe("suggestNext", () => {
   it("let: same server, same box, serve number KEPT (Sam's rule)", () => {
     const next = suggestNext(
       [rally({ serveNumber: 2, winnerId: null, endReason: "let" })],
-      ctx,
+      ctx
     )
     expect(next).toEqual({
       serverId: "sam",
@@ -66,7 +70,7 @@ describe("suggestNext", () => {
     }
     const next = suggestNext(
       [rally({ serveNumber: 2, winnerId: null, endReason: "let" })],
-      resetCtx,
+      resetCtx
     )
     expect(next.serveNumber).toBe(1)
   })
@@ -74,7 +78,7 @@ describe("suggestNext", () => {
   it("after a decided rally the serve number resets to 1 (fault state is per-point)", () => {
     const next = suggestNext(
       [rally({ serveNumber: 2, winnerId: "dave", endReason: "serve_fault" })],
-      ctx,
+      ctx
     )
     expect(next.serveNumber).toBe(1)
   })

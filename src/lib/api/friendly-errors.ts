@@ -20,8 +20,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   rallies_end_reason_current:
     "Ace was retired — log it as a winner with rally length 1.",
   rallies_fault_receiver_wins: "A serve fault is lost by the server.",
-  rallies_game_number_uniq:
-    "That rally number is already taken in this game.",
+  rallies_game_number_uniq: "That rally number is already taken in this game.",
   games_match_number_uniq: "That game number already exists in this match.",
   matches_distinct_players: "A match needs two different players.",
   matches_format_check: "Best-of must be an odd number between 1 and 9.",
@@ -45,7 +44,11 @@ const STORAGE_MESSAGES: Array<[string, string]> = [
 ]
 
 export function friendlyWriteError(error: unknown): string {
-  const e = error as { message?: string; details?: string; code?: string } | null
+  const e = error as {
+    message?: string
+    details?: string
+    code?: string
+  } | null
   const haystack = `${e?.message ?? ""} ${e?.details ?? ""}`
 
   for (const [constraint, message] of Object.entries(CONSTRAINT_MESSAGES)) {

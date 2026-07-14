@@ -37,7 +37,7 @@ export function MatchSummary({
     <Card>
       <CardHeader>
         <CardTitle className="font-heading text-2xl">{headline}</CardTitle>
-        <p className="text-muted-foreground text-sm">{subline}</p>
+        <p className="text-sm text-muted-foreground">{subline}</p>
       </CardHeader>
       <CardContent>
         <ol className="flex flex-col gap-1.5">
@@ -49,7 +49,9 @@ export function MatchSummary({
               <span className="text-muted-foreground">Game {g.gameNumber}</span>
               <span className="font-semibold tabular-nums">{g.scoreline}</span>
               <span className="w-28 text-right">
-                {g.winnerName ?? <span className="text-muted-foreground">tied</span>}
+                {g.winnerName ?? (
+                  <span className="text-muted-foreground">tied</span>
+                )}
               </span>
             </li>
           ))}

@@ -92,7 +92,7 @@ export function LoggingShell({
   if (detail.isError) {
     return (
       <div className="py-16 text-center">
-        <p className="text-destructive text-sm">Couldn't load the match.</p>
+        <p className="text-sm text-destructive">Couldn't load the match.</p>
         <Button
           type="button"
           variant="outline"
@@ -108,7 +108,7 @@ export function LoggingShell({
 
   if (detail.data.games.length === 0) {
     return (
-      <p className="text-destructive py-16 text-center text-sm">
+      <p className="py-16 text-center text-sm text-destructive">
         This match has no games — reopen it after checking /manage.
       </p>
     )
@@ -193,7 +193,7 @@ function MatchLogger({
   const [showHints, setShowHints] = useState(
     () =>
       typeof window === "undefined" ||
-      window.localStorage.getItem(HINTS_PREF_KEY) !== "0",
+      window.localStorage.getItem(HINTS_PREF_KEY) !== "0"
   )
   // hotkeys need a physical keyboard, so the keycap hints are dead weight on a
   // phone — hide them below tablet width, whatever the stored preference (§10)
@@ -228,7 +228,7 @@ function MatchLogger({
         ? matchFirstServer
         : suggestNextGameFirstServer(
             priorGames.at(-1)?.r.winnerId ?? null,
-            baseCtx,
+            baseCtx
           )),
   }
   const draftCtx: DraftContext = {
@@ -243,10 +243,11 @@ function MatchLogger({
   const draft = draftState ?? createDraft(suggestNext(inputs, gameCtx))
 
   const over = gameOver(score, rules)
-  const tally = tallyMatch(
-    [...priorGames.map((g) => g.r), result],
-    { player1Id: match.player1_id, player2Id: match.player2_id, format: match.format },
-  )
+  const tally = tallyMatch([...priorGames.map((g) => g.r), result], {
+    player1Id: match.player1_id,
+    player2Id: match.player2_id,
+    format: match.format,
+  })
   const matchWinnerName =
     match.format !== null && tally.matchWinnerId !== null
       ? nameOf(tally.matchWinnerId)
@@ -287,8 +288,8 @@ function MatchLogger({
       tapWinner(
         draft,
         side === "p1" ? match.player1_id : match.player2_id,
-        draftCtx,
-      ),
+        draftCtx
+      )
     )
   }
 
@@ -298,7 +299,7 @@ function MatchLogger({
         id: crypto.randomUUID(),
         gameId: game.id,
         rallyNumber: game.rows.length + 1,
-      }),
+      })
     )
   }
 
@@ -308,7 +309,7 @@ function MatchLogger({
         id: crypto.randomUUID(),
         gameId: game.id,
         rallyNumber: game.rows.length + 1,
-      }),
+      })
     )
   }
 
@@ -358,7 +359,9 @@ function MatchLogger({
           const appended = (draft.shotCount ?? 0) * 10 + action.digit
           setDraftState({
             ...draft,
-            shotCount: digitTyped.current ? Math.min(appended, 999) : action.digit,
+            shotCount: digitTyped.current
+              ? Math.min(appended, 999)
+              : action.digit,
           })
           digitTyped.current = true
         }
@@ -416,7 +419,7 @@ function MatchLogger({
 
   if (finished) {
     const decided = [...priorGames, { n: game.gameNumber, r: result }].filter(
-      ({ r }) => r.score.p1 > 0 || r.score.p2 > 0,
+      ({ r }) => r.score.p1 > 0 || r.score.p2 > 0
     )
     return (
       <div className="flex flex-col gap-4">
@@ -442,143 +445,145 @@ function MatchLogger({
 
   return (
     <KbdHintsContext.Provider value={showHints && hintsWide}>
-    <div className="flex flex-col gap-6">
-      <header className="flex items-center justify-between">
-        <p className="text-muted-foreground text-sm">
-          {nameOf(match.player1_id)} vs {nameOf(match.player2_id)} ·{" "}
-          {match.date}
-        </p>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            onClick={() => setHelpOpen(true)}
-          >
-            ? Hotkeys
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={onExit}>
-            Pause & exit
-          </Button>
-        </div>
-      </header>
+      <div className="flex flex-col gap-6">
+        <header className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {nameOf(match.player1_id)} vs {nameOf(match.player2_id)} ·{" "}
+            {match.date}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={() => setHelpOpen(true)}
+            >
+              ? Hotkeys
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={onExit}>
+              Pause & exit
+            </Button>
+          </div>
+        </header>
 
-      <HotkeyHelp
-        open={helpOpen}
-        onClose={() => setHelpOpen(false)}
-        hintsVisible={showHints}
-        onToggleHints={toggleHints}
-      />
-      <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
+        <HotkeyHelp
+          open={helpOpen}
+          onClose={() => setHelpOpen(false)}
+          hintsVisible={showHints}
+          onToggleHints={toggleHints}
+        />
+        <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
 
-      <ScoreHeader
-        p1Name={nameOf(match.player1_id)}
-        p2Name={nameOf(match.player2_id)}
-        p1Id={match.player1_id}
-        score={score}
-        gameNumber={game.gameNumber}
-        rulesLine={rulesLine}
-        draft={draft}
-        servesPerPoint={rules.servesPerPoint}
-        onToggleServer={() => setDraftState(toggleServer(draft, draftCtx))}
-        onToggleSide={() => setDraftState(toggleServeSide(draft))}
-        onToggleServeNumber={() =>
-          setDraftState(toggleServeNumber(draft, draftCtx))
-        }
-      />
-
-      {over.over && (
-        <GameOverBanner
+        <ScoreHeader
+          p1Name={nameOf(match.player1_id)}
+          p2Name={nameOf(match.player2_id)}
+          p1Id={match.player1_id}
+          score={score}
           gameNumber={game.gameNumber}
-          gameWinnerName={nameOf(
-            over.leader === "p1" ? match.player1_id : match.player2_id,
-          )}
-          scoreline={`${score.p1}–${score.p2}`}
-          matchWinnerName={matchWinnerName}
-          onStartNextGame={() =>
-            apply(startGame(session, crypto.randomUUID()))
-          }
-          onFinishMatch={() => setFinished(true)}
-        />
-      )}
-
-      <WinnerButtons
-        ref={winnerRef}
-        p1Name={nameOf(match.player1_id)}
-        p2Name={nameOf(match.player2_id)}
-        selected={
-          draft.winnerId === null
-            ? null
-            : draft.winnerId === match.player1_id
-              ? "p1"
-              : "p2"
-        }
-        onWinner={pickWinner}
-        onLet={saveLet}
-      />
-
-      {draft.winnerId !== null && (
-        <OutcomeChips
+          rulesLine={rulesLine}
           draft={draft}
-          winnerName={nameOf(draft.winnerId)}
-          loserName={nameOf(
-            draft.winnerId === match.player1_id
-              ? match.player2_id
-              : match.player1_id,
-          )}
-          onEndReason={(r) => setDraftState(selectEndReason(draft, r, draftCtx))}
-          onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
-          onForced={(v) => setDraftState(setForced(draft, v))}
-          onShotType={(v) => setDraftState({ ...draft, shotType: v })}
-          onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
-          onSave={saveDraftRally}
-          onCancel={() => setDraftState(null)}
-          onOpenGlossary={() => setGlossaryOpen(true)}
+          servesPerPoint={rules.servesPerPoint}
+          onToggleServer={() => setDraftState(toggleServer(draft, draftCtx))}
+          onToggleSide={() => setDraftState(toggleServeSide(draft))}
+          onToggleServeNumber={() =>
+            setDraftState(toggleServeNumber(draft, draftCtx))
+          }
         />
-      )}
 
-      <UndoBar
-        undoLabel={undoLabel}
-        redoLabel={redoLabel}
-        onUndo={() => apply(undo(session))}
-        onRedo={() => apply(redo(session, crypto.randomUUID()))}
-      />
-
-      <RallyTimeline
-        rows={game.rows}
-        p1Id={match.player1_id}
-        p1Name={nameOf(match.player1_id)}
-        p2Name={nameOf(match.player2_id)}
-        servesPerPoint={rules.servesPerPoint}
-        editable
-        editingId={editingId}
-        onRowClick={(row) => setEditingId(row.id)}
-        renderEditor={(row) => (
-          <RallyEditor
-            row={row}
-            ctx={draftCtx}
-            p1Name={nameOf(match.player1_id)}
-            p2Name={nameOf(match.player2_id)}
-            onSave={commitEdit}
-            onCancel={() => setEditingId(null)}
+        {over.over && (
+          <GameOverBanner
+            gameNumber={game.gameNumber}
+            gameWinnerName={nameOf(
+              over.leader === "p1" ? match.player1_id : match.player2_id
+            )}
+            scoreline={`${score.p1}–${score.p2}`}
+            matchWinnerName={matchWinnerName}
+            onStartNextGame={() =>
+              apply(startGame(session, crypto.randomUUID()))
+            }
+            onFinishMatch={() => setFinished(true)}
           />
         )}
-      />
 
-      <footer className="flex flex-col gap-2">
-        {priorGames.length > 0 && (
-          <ul className="text-muted-foreground flex justify-center gap-3 text-xs tabular-nums">
-            {priorGames.map(({ n, r }) => (
-              <li key={n} className="rounded-md border px-2 py-0.5">
-                G{n}: {r.score.p1}–{r.score.p2}
-              </li>
-            ))}
-          </ul>
+        <WinnerButtons
+          ref={winnerRef}
+          p1Name={nameOf(match.player1_id)}
+          p2Name={nameOf(match.player2_id)}
+          selected={
+            draft.winnerId === null
+              ? null
+              : draft.winnerId === match.player1_id
+                ? "p1"
+                : "p2"
+          }
+          onWinner={pickWinner}
+          onLet={saveLet}
+        />
+
+        {draft.winnerId !== null && (
+          <OutcomeChips
+            draft={draft}
+            winnerName={nameOf(draft.winnerId)}
+            loserName={nameOf(
+              draft.winnerId === match.player1_id
+                ? match.player2_id
+                : match.player1_id
+            )}
+            onEndReason={(r) =>
+              setDraftState(selectEndReason(draft, r, draftCtx))
+            }
+            onErrorDetail={(v) => setDraftState({ ...draft, errorDetail: v })}
+            onForced={(v) => setDraftState(setForced(draft, v))}
+            onShotType={(v) => setDraftState({ ...draft, shotType: v })}
+            onShotCount={(v) => setDraftState({ ...draft, shotCount: v })}
+            onSave={saveDraftRally}
+            onCancel={() => setDraftState(null)}
+            onOpenGlossary={() => setGlossaryOpen(true)}
+          />
         )}
-        <SyncIndicator queue={queue} />
-      </footer>
-    </div>
+
+        <UndoBar
+          undoLabel={undoLabel}
+          redoLabel={redoLabel}
+          onUndo={() => apply(undo(session))}
+          onRedo={() => apply(redo(session, crypto.randomUUID()))}
+        />
+
+        <RallyTimeline
+          rows={game.rows}
+          p1Id={match.player1_id}
+          p1Name={nameOf(match.player1_id)}
+          p2Name={nameOf(match.player2_id)}
+          servesPerPoint={rules.servesPerPoint}
+          editable
+          editingId={editingId}
+          onRowClick={(row) => setEditingId(row.id)}
+          renderEditor={(row) => (
+            <RallyEditor
+              row={row}
+              ctx={draftCtx}
+              p1Name={nameOf(match.player1_id)}
+              p2Name={nameOf(match.player2_id)}
+              onSave={commitEdit}
+              onCancel={() => setEditingId(null)}
+            />
+          )}
+        />
+
+        <footer className="flex flex-col gap-2">
+          {priorGames.length > 0 && (
+            <ul className="flex justify-center gap-3 text-xs text-muted-foreground tabular-nums">
+              {priorGames.map(({ n, r }) => (
+                <li key={n} className="rounded-md border px-2 py-0.5">
+                  G{n}: {r.score.p1}–{r.score.p2}
+                </li>
+              ))}
+            </ul>
+          )}
+          <SyncIndicator queue={queue} />
+        </footer>
+      </div>
     </KbdHintsContext.Provider>
   )
 }

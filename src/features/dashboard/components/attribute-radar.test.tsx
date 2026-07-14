@@ -21,7 +21,7 @@ beforeAll(() => {
         observe() {}
         unobserve() {}
         disconnect() {}
-      },
+      }
     )
   }
 })
@@ -78,7 +78,7 @@ describe("AttributeRadar", () => {
         attrs={computePlayerAttributes(player())}
         side="p1"
         name="Alex"
-      />,
+      />
     )
     const img = screen.getByRole("img")
     expect(img.getAttribute("aria-label")).toContain("Alex's attribute radar")
@@ -91,10 +91,10 @@ describe("AttributeRadar", () => {
         attrs={computePlayerAttributes(player())}
         side="p2"
         name="Ormond"
-      />,
+      />
     )
     expect(
-      screen.getByRole("img", { name: /Ormond's attribute radar/ }),
+      screen.getByRole("img", { name: /Ormond's attribute radar/ })
     ).toBeDefined()
   })
 })

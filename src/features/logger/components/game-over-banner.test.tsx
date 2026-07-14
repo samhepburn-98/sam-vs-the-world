@@ -17,13 +17,13 @@ describe("GameOverBanner", () => {
         scoreline="11–9"
         onStartNextGame={onStartNextGame}
         onFinishMatch={() => undefined}
-      />,
+      />
     )
 
     expect(screen.getByText(/Game 2 to Sam/)).toBeDefined()
     expect(screen.getByText(/keep logging/)).toBeDefined()
     fireEvent.click(
-      screen.getByRole("button", { name: "Start game 3 — Sam serves" }),
+      screen.getByRole("button", { name: "Start game 3 — Sam serves" })
     )
     expect(onStartNextGame).toHaveBeenCalledOnce()
   })
@@ -38,7 +38,7 @@ describe("GameOverBanner", () => {
         matchWinnerName="Sam"
         onStartNextGame={() => undefined}
         onFinishMatch={onFinishMatch}
-      />,
+      />
     )
 
     expect(screen.getByText("Sam takes the match")).toBeDefined()

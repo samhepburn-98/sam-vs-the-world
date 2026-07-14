@@ -60,7 +60,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
           )}
         </Field>
         {rootError && (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-sm text-destructive">
             {rootError}
           </p>
         )}

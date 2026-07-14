@@ -13,7 +13,7 @@ import type { RallyScored } from "@/lib/schemas/rally"
 export async function fetchH2hRallies(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ): Promise<Array<RallyScored>> {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("h2h_rallies", {
@@ -28,7 +28,7 @@ export async function fetchH2hRallies(
 export function h2hRalliesOptions(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ) {
   return queryOptions({
     queryKey: ["insights", "h2h-rallies", player1Id, player2Id, filters],
@@ -39,7 +39,7 @@ export function h2hRalliesOptions(
 export function useH2hRallies(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {},
+  filters: H2hFilters = {}
 ) {
   return useQuery(h2hRalliesOptions(player1Id, player2Id, filters))
 }

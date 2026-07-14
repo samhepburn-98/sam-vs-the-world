@@ -21,7 +21,7 @@ function rally(n: number, winner: string | null): RallySummary {
     error_detail: null,
     forced: null,
     winning_shot: null,
-  losing_shot: null,
+    losing_shot: null,
     shot_count: null,
   }
 }

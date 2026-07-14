@@ -4,7 +4,10 @@ import { gameOver } from "./game-over"
 import { DEFAULT_HOUSE_RULES } from "./types"
 
 const winBy2 = DEFAULT_HOUSE_RULES
-const suddenDeath = { ...DEFAULT_HOUSE_RULES, tiebreak: "sudden_death" as const }
+const suddenDeath = {
+  ...DEFAULT_HOUSE_RULES,
+  tiebreak: "sudden_death" as const,
+}
 
 describe("gameOver — win_by_2 (default)", () => {
   it.each([

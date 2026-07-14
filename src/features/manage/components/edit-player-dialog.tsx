@@ -44,7 +44,7 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
   const [photoError, setPhotoError] = useState<string | null>(null)
   const preview = useMemo(
     () => (photo ? URL.createObjectURL(photo) : null),
-    [photo],
+    [photo]
   )
   useEffect(() => {
     return () => {
@@ -56,7 +56,7 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
     setPhotoError(
       file && file.size > MAX_PICKED_BYTES
         ? "That photo is too large — try one under 10 MB."
-        : null,
+        : null
     )
     setPhoto(file && file.size <= MAX_PICKED_BYTES ? file : null)
   }
@@ -68,11 +68,16 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
         avatarBlob = await downscaleImage(photo)
       } catch (err) {
         // NotAnImageError carries a friendly sentence already
-        setPhotoError(err instanceof Error ? err.message : "That photo couldn't be read.")
+        setPhotoError(
+          err instanceof Error ? err.message : "That photo couldn't be read."
+        )
         return
       }
     }
-    update.mutate({ id: player.id, avatarBlob, ...input }, { onSuccess: onClose })
+    update.mutate(
+      { id: player.id, avatarBlob, ...input },
+      { onSuccess: onClose }
+    )
   })
 
   const shownAvatar = preview ?? player.avatar_url
@@ -121,7 +126,7 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
               ) : (
                 <span
                   aria-hidden
-                  className="bg-muted text-muted-foreground flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold"
+                  className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-muted-foreground"
                 >
                   {player.name.charAt(0)}
                 </span>
@@ -139,7 +144,7 @@ export function EditPlayerDialog({ player, onClose }: EditPlayerDialogProps) {
             {photoError && <FieldError>{photoError}</FieldError>}
           </Field>
           {update.isError && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {friendlyWriteError(update.error)}
             </p>
           )}

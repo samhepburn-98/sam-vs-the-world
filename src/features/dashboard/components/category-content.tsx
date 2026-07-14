@@ -35,7 +35,13 @@ interface ContentProps {
   filters: InsightFilters
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="font-heading text-lg font-bold">{title}</h2>
@@ -45,7 +51,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function KeyStats({ children }: { children: React.ReactNode }) {
-  return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
+  )
 }
 
 function Loading() {
@@ -102,9 +110,9 @@ function HeadToHead({ playerId, filters }: ContentProps) {
                 to="/matches/$matchId"
                 params={{ matchId: g.match_id }}
                 search={{ rally: undefined }}
-                className="hover:bg-muted/50 -mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-2"
+                className="-mx-2 flex items-center justify-between gap-3 rounded-md px-2 py-2 hover:bg-muted/50"
               >
-                <span className="text-muted-foreground text-sm tabular-nums">
+                <span className="text-sm text-muted-foreground tabular-nums">
                   {g.date}
                 </span>
                 <span className="text-sm tabular-nums">
@@ -113,10 +121,10 @@ function HeadToHead({ playerId, filters }: ContentProps) {
                 <span
                   className={
                     g.won === null
-                      ? "text-muted-foreground text-sm"
+                      ? "text-sm text-muted-foreground"
                       : g.won
                         ? "text-sm font-semibold"
-                        : "text-muted-foreground text-sm"
+                        : "text-sm text-muted-foreground"
                   }
                 >
                   {g.won === null ? "Undecided" : g.won ? "Won" : "Lost"}
@@ -158,15 +166,17 @@ function Serve({ playerId, filters }: ContentProps) {
       <Section title="Win rate by serve side">
         <div className="flex items-end gap-8">
           <CourtDiagram
-            className="text-muted-foreground h-56 w-36"
-            leftShare={s.left_served > 0 ? s.left_wins / s.left_served : undefined}
+            className="h-56 w-36 text-muted-foreground"
+            leftShare={
+              s.left_served > 0 ? s.left_wins / s.left_served : undefined
+            }
             rightShare={
               s.right_served > 0 ? s.right_wins / s.right_served : undefined
             }
           />
           <dl className="text-sm">
             <div className="flex gap-2 py-1">
-              <dt className="text-muted-foreground w-24">Left box</dt>
+              <dt className="w-24 text-muted-foreground">Left box</dt>
               <dd className="tabular-nums">
                 {s.left_served > 0
                   ? `${Math.round((s.left_wins / s.left_served) * 100)}% · ${s.left_wins} of ${s.left_served}`
@@ -174,7 +184,7 @@ function Serve({ playerId, filters }: ContentProps) {
               </dd>
             </div>
             <div className="flex gap-2 py-1">
-              <dt className="text-muted-foreground w-24">Right box</dt>
+              <dt className="w-24 text-muted-foreground">Right box</dt>
               <dd className="tabular-nums">
                 {s.right_served > 0
                   ? `${Math.round((s.right_wins / s.right_served) * 100)}% · ${s.right_wins} of ${s.right_served}`
@@ -279,8 +289,15 @@ function Momentum({ playerId, filters }: ContentProps) {
     <div className="flex flex-col gap-8">
       <KeyStats>
         <StatCard label="Comebacks" value={m.comebacks} />
-        <StatCard label="Longest win streak" value={m.longest_streak} unit="rallies" />
-        <StatCard label="Won when close" value={phaseRate(m.close_wins, m.close_rallies)} />
+        <StatCard
+          label="Longest win streak"
+          value={m.longest_streak}
+          unit="rallies"
+        />
+        <StatCard
+          label="Won when close"
+          value={phaseRate(m.close_wins, m.close_rallies)}
+        />
       </KeyStats>
 
       <Section title="Points won by phase of game">
@@ -292,12 +309,15 @@ function Momentum({ playerId, filters }: ContentProps) {
               ["Close", m.close_wins, m.close_rallies],
             ] as const
           ).map(([label, wins, total]) => (
-            <div key={label} className="rounded-lg bg-card p-4 ring-1 ring-foreground/10">
+            <div
+              key={label}
+              className="rounded-lg bg-card p-4 ring-1 ring-foreground/10"
+            >
               <dt className="text-muted-foreground">{label}</dt>
               <dd className="text-2xl font-bold tabular-nums">
                 {phaseRate(wins, total)}
               </dd>
-              <dd className="text-muted-foreground text-xs tabular-nums">
+              <dd className="text-xs text-muted-foreground tabular-nums">
                 {wins} of {total}
               </dd>
             </div>
@@ -307,7 +327,7 @@ function Momentum({ playerId, filters }: ContentProps) {
 
       <Section title="Comebacks">
         {m.comeback_games.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No comebacks yet.</p>
+          <p className="text-sm text-muted-foreground">No comebacks yet.</p>
         ) : (
           <div className="flex flex-col gap-6">
             {m.comeback_games.map((g) => (

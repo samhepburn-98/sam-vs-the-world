@@ -15,7 +15,7 @@ import type { PlayerRow } from "@/lib/schemas/player"
 const SORTABLE = new Set(["name", "handedness", "created_at", "updated_at"])
 
 export async function fetchManagePlayers(
-  params: ListParams,
+  params: ListParams
 ): Promise<ListPage<PlayerRow>> {
   const supabase = getSupabaseBrowserClient()
   let query = supabase.from("players").select("*", { count: "exact" })

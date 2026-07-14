@@ -45,7 +45,7 @@ export function RallyTimeline({
 }: RallyTimelineProps) {
   if (rows.length === 0) {
     return (
-      <p className="text-muted-foreground/60 py-6 text-center text-xs">
+      <p className="py-6 text-center text-xs text-muted-foreground/60">
         Rallies appear here as you log them.
       </p>
     )
@@ -85,50 +85,59 @@ export function RallyTimeline({
 
   return (
     <ol aria-label="Rally timeline" className="flex flex-col gap-1">
-      {scored.slice().reverse().map(({ row, score }) => {
-        if (editingId === row.id && renderEditor) {
-          return <li key={row.id}>{renderEditor(row)}</li>
-        }
+      {scored
+        .slice()
+        .reverse()
+        .map(({ row, score }) => {
+          if (editingId === row.id && renderEditor) {
+            return <li key={row.id}>{renderEditor(row)}</li>
+          }
 
-        const isLet = row.end_reason === "let"
-        const p1Won = row.winner_id === p1Id
-        const cell = (
-          <>
-            <span className="font-medium">{outcomeLine(row)}</span>
-            <span className="text-muted-foreground block text-[11px]">
-              #{row.rally_number} · {serveLine(row)}
-            </span>
-          </>
-        )
+          const isLet = row.end_reason === "let"
+          const p1Won = row.winner_id === p1Id
+          const cell = (
+            <>
+              <span className="font-medium">{outcomeLine(row)}</span>
+              <span className="block text-[11px] text-muted-foreground">
+                #{row.rally_number} · {serveLine(row)}
+              </span>
+            </>
+          )
 
-        return (
-          <li key={row.id}>
-            <RowShell
-              editable={editable}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-            >
-              {isLet ? (
-                <span className="col-span-3 flex items-center gap-3">
-                  <span aria-hidden className="flex-1 border-t border-dashed" />
-                  <span className="text-muted-foreground shrink-0 text-center text-[11px]">
-                    #{row.rally_number} · let (replayed)
-                    <span className="block">{serveLine(row)}</span>
+          return (
+            <li key={row.id}>
+              <RowShell
+                editable={editable}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {isLet ? (
+                  <span className="col-span-3 flex items-center gap-3">
+                    <span
+                      aria-hidden
+                      className="flex-1 border-t border-dashed"
+                    />
+                    <span className="shrink-0 text-center text-[11px] text-muted-foreground">
+                      #{row.rally_number} · let (replayed)
+                      <span className="block">{serveLine(row)}</span>
+                    </span>
+                    <span
+                      aria-hidden
+                      className="flex-1 border-t border-dashed"
+                    />
                   </span>
-                  <span aria-hidden className="flex-1 border-t border-dashed" />
-                </span>
-              ) : (
-                <>
-                  <span className="text-right">{p1Won && cell}</span>
-                  <span className="text-muted-foreground self-center text-center text-xs font-semibold tabular-nums">
-                    {score.p1}–{score.p2}
-                  </span>
-                  <span>{!p1Won && cell}</span>
-                </>
-              )}
-            </RowShell>
-          </li>
-        )
-      })}
+                ) : (
+                  <>
+                    <span className="text-right">{p1Won && cell}</span>
+                    <span className="self-center text-center text-xs font-semibold text-muted-foreground tabular-nums">
+                      {score.p1}–{score.p2}
+                    </span>
+                    <span>{!p1Won && cell}</span>
+                  </>
+                )}
+              </RowShell>
+            </li>
+          )
+        })}
     </ol>
   )
 }
@@ -152,7 +161,10 @@ function RowShell({
       type="button"
       onClick={onClick}
       title="Tap to edit this rally"
-      className={cn(layout, "hover:bg-muted/60 cursor-pointer transition-colors")}
+      className={cn(
+        layout,
+        "cursor-pointer transition-colors hover:bg-muted/60"
+      )}
     >
       {children}
     </button>

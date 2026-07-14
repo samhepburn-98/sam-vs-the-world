@@ -12,7 +12,7 @@ interface InsertCapableClient {
 /** Next-game insert as a queue op — id is the client uuid (idempotent retry). */
 export function insertGameOp(
   game: GameRef,
-  client: InsertCapableClient = getSupabaseBrowserClient(),
+  client: InsertCapableClient = getSupabaseBrowserClient()
 ): WriteOp {
   return {
     id: game.id,

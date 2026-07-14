@@ -16,7 +16,9 @@ export type PlayerSummary = z.infer<typeof playerSummary>
 /** The columns a `select()` must fetch to satisfy `playerSummary` — derived
  *  from the schema so a query can never drift from it (a select that omits a
  *  key parses to a throw, not a type error). */
-export const PLAYER_SUMMARY_COLUMNS = Object.keys(playerSummary.shape).join(", ")
+export const PLAYER_SUMMARY_COLUMNS = Object.keys(playerSummary.shape).join(
+  ", "
+)
 
 /** Every stored column — the /manage raw browser's row. */
 export const playerRow = playerSummary.extend({

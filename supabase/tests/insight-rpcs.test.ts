@@ -16,7 +16,7 @@ function loadMigration(nameFragment: string) {
   if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
   return readFileSync(join(MIGRATIONS, file), "utf8").replace(
     /^create extension if not exists pgcrypto;$/m,
-    "",
+    ""
   )
 }
 
@@ -27,7 +27,7 @@ async function seedPlayers(...names: Array<string>) {
   for (const name of names) {
     const res = await db.query<{ id: string }>(
       `insert into players (name) values ($1) returning id`,
-      [name],
+      [name]
     )
     out.push(res.rows[0].id)
   }
@@ -38,11 +38,11 @@ async function seedMatch(
   p1: string,
   p2: string,
   date: string,
-  ball: string | null = null,
+  ball: string | null = null
 ) {
   const res = await db.query<{ id: string }>(
     `insert into matches (player1_id, player2_id, date, ball_type) values ($1, $2, $3, $4) returning id`,
-    [p1, p2, date, ball],
+    [p1, p2, date, ball]
   )
   return res.rows[0].id
 }
@@ -50,7 +50,7 @@ async function seedMatch(
 async function seedGame(matchId: string, gameNumber: number) {
   const res = await db.query<{ id: string }>(
     `insert into games (match_id, game_number) values ($1, $2) returning id`,
-    [matchId, gameNumber],
+    [matchId, gameNumber]
   )
   return res.rows[0].id
 }
@@ -59,7 +59,7 @@ async function seedGame(matchId: string, gameNumber: number) {
 async function seedRallies(
   gameId: string,
   server: string,
-  rallies: Array<{ winner: string | null; shotCount?: number | null }>,
+  rallies: Array<{ winner: string | null; shotCount?: number | null }>
 ) {
   let n = 0
   for (const r of rallies) {
@@ -67,7 +67,14 @@ async function seedRallies(
     await db.query(
       `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
        values ($1, $2, $3, 'left', 1, $4, $5, $6)`,
-      [gameId, n, server, r.winner, r.winner === null ? "let" : "winner", r.shotCount ?? null],
+      [
+        gameId,
+        n,
+        server,
+        r.winner,
+        r.winner === null ? "let" : "winner",
+        r.shotCount ?? null,
+      ]
     )
   }
 }
@@ -78,7 +85,7 @@ function bucket(
   other: string,
   n: number,
   wins: number,
-  shotCount: number,
+  shotCount: number
 ) {
   return Array.from({ length: n }, (_, i) => ({
     winner: i < wins ? player : other,
@@ -175,14 +182,24 @@ describe("player_headline", () => {
       opponent_score: 1,
       won: null,
     })
-    expect(g2).toMatchObject({ game_number: 2, player_score: 2, opponent_score: 0, won: true })
-    expect(g1).toMatchObject({ game_number: 1, player_score: 1, opponent_score: 3, won: false })
+    expect(g2).toMatchObject({
+      game_number: 2,
+      player_score: 2,
+      opponent_score: 0,
+      won: true,
+    })
+    expect(g1).toMatchObject({
+      game_number: 1,
+      player_score: 1,
+      opponent_score: 3,
+      won: false,
+    })
   })
 
   it("filters by opponent", async () => {
     const res = await db.query<{ games_won: number; games_decided: number }>(
       `select * from player_headline($1, p_opponent_id => $2)`,
-      [sam, dave],
+      [sam, dave]
     )
     expect(res.rows[0]).toMatchObject({ games_won: 1, games_decided: 2 })
   })
@@ -190,7 +207,7 @@ describe("player_headline", () => {
   it("filters by ball type", async () => {
     const res = await db.query<{ games_won: number; games_decided: number }>(
       `select * from player_headline($1, p_ball_type => 'double_yellow')`,
-      [sam],
+      [sam]
     )
     expect(res.rows[0]).toMatchObject({ games_won: 2, games_decided: 2 })
   })
@@ -198,12 +215,12 @@ describe("player_headline", () => {
   it("filters by date range", async () => {
     const before = await db.query<{ games_decided: number }>(
       `select * from player_headline($1, p_date_to => '2026-06-05')`,
-      [sam],
+      [sam]
     )
     expect(before.rows[0].games_decided).toBe(2) // match A only
     const after = await db.query<{ games_decided: number }>(
       `select * from player_headline($1, p_date_from => '2026-06-10')`,
-      [sam],
+      [sam]
     )
     expect(after.rows[0].games_decided).toBe(2) // match B only
   })
@@ -258,7 +275,7 @@ describe("players_headline", () => {
       games_decided: number
     }>(`select * from players_headline()`)
     const count = await db.query<{ n: number }>(
-      `select count(*)::int as n from players`,
+      `select count(*)::int as n from players`
     )
     expect(all.rows).toHaveLength(count.rows[0].n)
     const samRow = all.rows.find((r) => r.player_id === sam)!
@@ -304,7 +321,7 @@ describe("h2h", () => {
   it("flips cleanly when the arguments swap", async () => {
     const res = await db.query<{ games_won_p1: number; games_won_p2: number }>(
       `select * from h2h($1, $2)`,
-      [alex, sam],
+      [alex, sam]
     )
     expect(res.rows[0]).toMatchObject({ games_won_p1: 0, games_won_p2: 2 })
   })
@@ -312,7 +329,7 @@ describe("h2h", () => {
   it("h2h_rallies returns the same rally set the aggregate counted", async () => {
     const res = await db.query<{ rally_number: number; is_let: boolean }>(
       `select rally_number, is_let from h2h_rallies($1, $2)`,
-      [sam, dave],
+      [sam, dave]
     )
     expect(res.rows).toHaveLength(9) // 5 + 2 + 2, the let included as a row
     expect(res.rows.filter((r) => r.is_let)).toHaveLength(1)
@@ -330,7 +347,7 @@ describe("API exposure", () => {
     "h2h_rallies(uuid, uuid, ball_type, date, date)",
   ])("anon can execute %s", async (signature) => {
     const res = await db.query<{ ok: boolean }>(
-      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`,
+      `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`
     )
     expect(res.rows[0].ok).toBe(true)
   })

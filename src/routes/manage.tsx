@@ -69,7 +69,7 @@ function ManagePage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight">
           Manage
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Every stored record, raw. Ids link across tabs.
         </p>
       </header>

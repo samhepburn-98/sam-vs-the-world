@@ -161,7 +161,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
               matchId: deleting.match_id,
               gameNumber: deleting.game_number,
             },
-            { onSuccess: () => setDeleting(null) },
+            { onSuccess: () => setDeleting(null) }
           )
         }}
       />

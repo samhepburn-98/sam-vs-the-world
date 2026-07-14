@@ -22,7 +22,7 @@ const SORTABLE = new Set([
 ])
 
 export async function fetchManageMatches(
-  params: ListParams,
+  params: ListParams
 ): Promise<ListPage<MatchRow>> {
   const supabase = getSupabaseBrowserClient()
   let query = supabase.from("matches").select("*", { count: "exact" })
@@ -31,7 +31,7 @@ export async function fetchManageMatches(
   if (search.kind === "uuid") query = query.eq("id", search.value)
   else if (search.kind === "text") {
     query = query.or(
-      `venue.ilike.%${search.value}%,notes.ilike.%${search.value}%`,
+      `venue.ilike.%${search.value}%,notes.ilike.%${search.value}%`
     )
   } else if (search.kind === "number") {
     query = query.eq("format", search.value)

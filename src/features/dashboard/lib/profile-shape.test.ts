@@ -135,7 +135,12 @@ describe("pattern", () => {
 
   it("stays quiet about patterns until the samples are real", () => {
     const data = player({
-      serve: serve({ left_served: 10, left_wins: 9, right_served: 10, right_wins: 2 }),
+      serve: serve({
+        left_served: 10,
+        left_wins: 9,
+        right_served: 10,
+        right_wins: 2,
+      }),
       decisive: decisive(), // 12 tagged < threshold
       momentum: momentum({ close_rallies: 20, close_wins: 13 }),
       headline: headline({ signature_trait: "balanced" }),

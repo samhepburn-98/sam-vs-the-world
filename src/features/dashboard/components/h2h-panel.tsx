@@ -30,7 +30,7 @@ export function H2hPanel({
       </h2>
 
       {!played ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           They haven&rsquo;t played each other yet.
         </p>
       ) : (

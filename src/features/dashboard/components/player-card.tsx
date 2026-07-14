@@ -116,7 +116,7 @@ export function PlayerCard({
           statTooltips && "cursor-help rounded-sm"
         )}
       >
-        <dd className="text-[6.4cqi] font-extrabold tabular-nums text-white">
+        <dd className="text-[6.4cqi] font-extrabold text-white tabular-nums">
           {a.display}
         </dd>
         {/* label matches the number's size (so they scale identically) but is
@@ -195,7 +195,13 @@ export function PlayerCard({
     // also be a cqi value — otherwise the shell can't query its own width and
     // the border would be the one thing that isn't proportional to the card
     <div className="@container">
-      <svg width="0" height="0" aria-hidden focusable="false" className="absolute">
+      <svg
+        width="0"
+        height="0"
+        aria-hidden
+        focusable="false"
+        className="absolute"
+      >
         <defs>
           <clipPath id={clipId} clipPathUnits="objectBoundingBox">
             <path d={SHIELD_PATH} />
@@ -204,72 +210,76 @@ export function PlayerCard({
       </svg>
       <div
         className="relative"
-        style={{ clipPath: shield, backgroundColor: t.border, padding: "0.8cqi" }}
+        style={{
+          clipPath: shield,
+          backgroundColor: t.border,
+          padding: "0.8cqi",
+        }}
       >
         <div
           className="relative"
           style={{ clipPath: shield, backgroundColor: t.bg }}
         >
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(120% 62% at ${t.glowAt}, ${t.glow}, transparent 62%)`,
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
-          }}
-        />
-        <div className="relative pb-[13cqi]">
-        <div className="flex items-start gap-[6cqi]">
-          <div className="shrink-0 pt-[8cqi] pl-[8cqi]">{stats}</div>
-          {avatar}
-        </div>
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(120% 62% at ${t.glowAt}, ${t.glow}, transparent 62%)`,
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(116deg, transparent 44%, rgba(255,255,255,0.09) 50%, transparent 56%)",
+            }}
+          />
+          <div className="relative pb-[13cqi]">
+            <div className="flex items-start gap-[6cqi]">
+              <div className="shrink-0 pt-[8cqi] pl-[8cqi]">{stats}</div>
+              {avatar}
+            </div>
 
-        <div className="px-[7cqi]">
-        <div className="mt-[2cqi] text-center">
-          <p className="truncate text-[10cqi] font-extrabold tracking-wide text-white uppercase">
-            {name}
-          </p>
-        </div>
+            <div className="px-[7cqi]">
+              <div className="mt-[2cqi] text-center">
+                <p className="truncate text-[10cqi] font-extrabold tracking-wide text-white uppercase">
+                  {name}
+                </p>
+              </div>
 
-        <div
-          className="mx-[2cqi] mt-[4cqi] mb-[3cqi] h-[0.8cqi]"
-          style={{
-            background: `linear-gradient(90deg, transparent, rgba(${t.rule},0.9) 50%, transparent)`,
-          }}
-        />
+              <div
+                className="mx-[2cqi] mt-[4cqi] mb-[3cqi] h-[0.8cqi]"
+                style={{
+                  background: `linear-gradient(90deg, transparent, rgba(${t.rule},0.9) 50%, transparent)`,
+                }}
+              />
 
-        {trait && (
-          <p
-            className="mb-[4cqi] text-center text-[4.2cqi] font-bold tracking-[0.08em] uppercase"
-            style={{ color: t.accentSoft }}
-          >
-            {TRAIT_LABELS[trait]}
-          </p>
-        )}
+              {trait && (
+                <p
+                  className="mb-[4cqi] text-center text-[4.2cqi] font-bold tracking-[0.08em] uppercase"
+                  style={{ color: t.accentSoft }}
+                >
+                  {TRAIT_LABELS[trait]}
+                </p>
+              )}
 
-        <TooltipProvider>
-          <div className="flex justify-center gap-[8cqi]">
-            <dl className="flex flex-col gap-[3.5cqi]">
-              {[attrs[0], attrs[2], attrs[4]].map(stat)}
-            </dl>
-            <div
-              className="w-px self-stretch"
-              style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
-            />
-            <dl className="flex flex-col gap-[3.5cqi]">
-              {[attrs[1], attrs[3], attrs[5]].map(stat)}
-            </dl>
+              <TooltipProvider>
+                <div className="flex justify-center gap-[8cqi]">
+                  <dl className="flex flex-col gap-[3.5cqi]">
+                    {[attrs[0], attrs[2], attrs[4]].map(stat)}
+                  </dl>
+                  <div
+                    className="w-px self-stretch"
+                    style={{ backgroundColor: `rgba(${t.rule},0.35)` }}
+                  />
+                  <dl className="flex flex-col gap-[3.5cqi]">
+                    {[attrs[1], attrs[3], attrs[5]].map(stat)}
+                  </dl>
+                </div>
+              </TooltipProvider>
+            </div>
           </div>
-        </TooltipProvider>
-        </div>
-        </div>
         </div>
       </div>
     </div>

@@ -67,7 +67,7 @@ export function NumberStepper({
         onChange={(e) =>
           onChange(e.target.value === "" ? null : clamp(Number(e.target.value)))
         }
-        className="text-center tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="[appearance:textfield] text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <InputGroupAddon align="inline-end">
         <InputGroupButton

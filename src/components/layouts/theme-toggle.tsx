@@ -17,7 +17,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   useEffect(() => {
     setResolved(
-      document.documentElement.classList.contains("dark") ? "dark" : "light",
+      document.documentElement.classList.contains("dark") ? "dark" : "light"
     )
     const mql = window.matchMedia("(prefers-color-scheme: dark)")
     const onChange = () => {

@@ -25,16 +25,21 @@ const SORTABLE = new Set([
 const END_REASONS = new Set<string>(Constants.public.Enums.end_reason)
 
 export async function fetchManageRallies(
-  params: ListParams,
+  params: ListParams
 ): Promise<ListPage<RallyDbRowWithGame>> {
   const supabase = getSupabaseBrowserClient()
-  let query = supabase.from("rallies").select("*, games(game_number, matches(date, player1_id, player2_id, target_score, tiebreak, serves_per_point, let_resets_serve))", { count: "exact" })
+  let query = supabase
+    .from("rallies")
+    .select(
+      "*, games(game_number, matches(date, player1_id, player2_id, target_score, tiebreak, serves_per_point, let_resets_serve))",
+      { count: "exact" }
+    )
 
   const search = classifyQuery(params.q)
   if (search.kind === "uuid") {
     // a pasted id finds the rally, a game's rallies, or a player's rallies
     query = query.or(
-      `id.eq.${search.value},game_id.eq.${search.value},server_id.eq.${search.value},winner_id.eq.${search.value}`,
+      `id.eq.${search.value},game_id.eq.${search.value},server_id.eq.${search.value},winner_id.eq.${search.value}`
     )
   } else if (search.kind === "number") {
     query = query.eq("rally_number", search.value)
@@ -43,7 +48,7 @@ export async function fetchManageRallies(
     if (!END_REASONS.has(wanted)) return { rows: [], total: 0 }
     query = query.eq(
       "end_reason",
-      wanted as (typeof Constants.public.Enums.end_reason)[number],
+      wanted as (typeof Constants.public.Enums.end_reason)[number]
     )
   }
 

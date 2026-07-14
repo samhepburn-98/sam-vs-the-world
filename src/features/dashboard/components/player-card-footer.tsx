@@ -14,7 +14,7 @@ export function PlayerCardFooter({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <p className="text-muted-foreground text-center text-xs">
+      <p className="text-center text-xs text-muted-foreground">
         {name}
         {trait && (
           <>
@@ -29,7 +29,7 @@ export function PlayerCardFooter({
           {pills.map((pill) => (
             <li
               key={pill}
-              className="text-muted-foreground ring-border rounded-full px-2.5 py-0.5 text-[10px] ring-1"
+              className="rounded-full px-2.5 py-0.5 text-[10px] text-muted-foreground ring-1 ring-border"
             >
               {pill}
             </li>

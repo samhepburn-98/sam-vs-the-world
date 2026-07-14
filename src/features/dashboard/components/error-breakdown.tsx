@@ -87,11 +87,7 @@ function StackedRow<TConfig extends ChartConfig>({
             stackId="a"
             fill={`var(--color-${key})`}
             radius={
-              i === 0
-                ? [4, 0, 0, 4]
-                : i === keys.length - 1
-                  ? [0, 4, 4, 0]
-                  : 0
+              i === 0 ? [4, 0, 0, 4] : i === keys.length - 1 ? [0, 4, 4, 0] : 0
             }
           />
         ))}
@@ -104,7 +100,7 @@ function StackedRow<TConfig extends ChartConfig>({
  *  Out (top) 2, …" — only the segments that actually have a count. */
 function summarise<TConfig extends ChartConfig>(
   config: TConfig,
-  row: Record<string, number | string>,
+  row: Record<string, number | string>
 ): string {
   return Object.keys(config)
     .map((key) => ({ label: config[key].label, n: row[key] }))
@@ -119,7 +115,9 @@ export function ErrorBreakdown({ profile }: { profile: ErrorProfile }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-muted-foreground mb-2 text-sm font-medium">By type</p>
+        <p className="mb-2 text-sm font-medium text-muted-foreground">
+          By type
+        </p>
         <StackedRow
           config={TYPE_CONFIG}
           data={typeData}
@@ -127,7 +125,9 @@ export function ErrorBreakdown({ profile }: { profile: ErrorProfile }) {
         />
       </div>
       <div>
-        <p className="text-muted-foreground mb-2 text-sm font-medium">By cause</p>
+        <p className="mb-2 text-sm font-medium text-muted-foreground">
+          By cause
+        </p>
         <StackedRow
           config={CAUSE_CONFIG}
           data={causeData}

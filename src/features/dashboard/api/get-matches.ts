@@ -27,19 +27,19 @@ export interface MatchesPage {
 }
 
 export async function fetchMatches(
-  params: MatchesParams,
+  params: MatchesParams
 ): Promise<MatchesPage> {
   const supabase = getSupabaseBrowserClient()
   let query = supabase
     .from("match_results")
     .select(
       "match_id, date, player1_id, player2_id, games_won_p1, games_won_p2, match_winner_id, ball_type, venue, format, target_score",
-      { count: "exact" },
+      { count: "exact" }
     )
 
   if (params.player) {
     query = query.or(
-      `player1_id.eq.${params.player},player2_id.eq.${params.player}`,
+      `player1_id.eq.${params.player},player2_id.eq.${params.player}`
     )
   }
   if (params.ball) query = query.eq("ball_type", params.ball)

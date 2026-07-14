@@ -92,7 +92,7 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
                   to="/matches/$matchId"
                   params={{ matchId: m.id }}
                   aria-label={`Open the ${m.date} match against ${m.opponent}`}
-                  className="absolute inset-0 rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none"
+                  className="absolute inset-0 rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
                 />
                 {m.date}
               </td>
@@ -142,29 +142,29 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
             params={{ matchId: m.id }}
             aria-label={`Open the ${m.date} match against ${m.opponent}`}
           >
-          <ItemMedia>
-            <ResultBadge won={m.won} />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>
-              {m.opponent}
-              <span className="font-normal text-muted-foreground tabular-nums">
-                · {m.result}
-              </span>
-              {m.ball && <BallDots ball={m.ball} />}
-            </ItemTitle>
-            <div className="flex flex-wrap gap-1">
-              {m.games.map((score, i) => (
-                <ScorePill key={i} score={score} />
-              ))}
-            </div>
-            {m.note && (
-              <ItemDescription className="text-xs">{m.note}</ItemDescription>
-            )}
-          </ItemContent>
-          <ItemActions className="self-start text-xs whitespace-nowrap text-muted-foreground tabular-nums">
-            {m.date}
-          </ItemActions>
+            <ItemMedia>
+              <ResultBadge won={m.won} />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>
+                {m.opponent}
+                <span className="font-normal text-muted-foreground tabular-nums">
+                  · {m.result}
+                </span>
+                {m.ball && <BallDots ball={m.ball} />}
+              </ItemTitle>
+              <div className="flex flex-wrap gap-1">
+                {m.games.map((score, i) => (
+                  <ScorePill key={i} score={score} />
+                ))}
+              </div>
+              {m.note && (
+                <ItemDescription className="text-xs">{m.note}</ItemDescription>
+              )}
+            </ItemContent>
+            <ItemActions className="self-start text-xs whitespace-nowrap text-muted-foreground tabular-nums">
+              {m.date}
+            </ItemActions>
           </Link>
         </Item>
       ))}

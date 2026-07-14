@@ -32,11 +32,13 @@ interface FilterBarProps {
   excludePlayerId?: string
 }
 
-export function FilterBar({ value, onChange, excludePlayerId }: FilterBarProps) {
+export function FilterBar({
+  value,
+  onChange,
+  excludePlayerId,
+}: FilterBarProps) {
   const players = usePlayers()
-  const opponents = (players.data ?? []).filter(
-    (p) => p.id !== excludePlayerId,
-  )
+  const opponents = (players.data ?? []).filter((p) => p.id !== excludePlayerId)
 
   const patch = (next: Partial<InsightSearch>) =>
     onChange({ ...value, ...next })
@@ -70,7 +72,11 @@ export function FilterBar({ value, onChange, excludePlayerId }: FilterBarProps) 
         }
       >
         {BALLS.map((ball) => (
-          <ToggleGroupItem key={ball} value={ball} aria-label={ball.replace("_", " ")}>
+          <ToggleGroupItem
+            key={ball}
+            value={ball}
+            aria-label={ball.replace("_", " ")}
+          >
             <BallDots ball={ball} />
           </ToggleGroupItem>
         ))}
@@ -84,7 +90,7 @@ export function FilterBar({ value, onChange, excludePlayerId }: FilterBarProps) 
           value={value.from ?? ""}
           onChange={(e) => patch({ from: e.target.value || undefined })}
         />
-        <span className="text-muted-foreground text-sm">to</span>
+        <span className="text-sm text-muted-foreground">to</span>
         <Input
           type="date"
           aria-label="To date"
