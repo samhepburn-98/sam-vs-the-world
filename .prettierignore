@@ -1,3 +1,5 @@
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
+# generated files — the router plugin and Supabase typegen write these in
+# their own style; formatting them just guarantees the next regeneration
+# fails the check
+src/routeTree.gen.ts
+src/lib/database.types.ts
