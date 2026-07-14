@@ -26,6 +26,10 @@ let sam: string
 let dave: string
 let matchTwoServe: string
 let matchSingleServe: string
+// an isolated pair for the double_bounce retirement — their legacy match is
+// seeded BEFORE the retire migration runs, so it never touches Sam and Dave
+let pat: string
+let quinn: string
 
 interface RallySpec {
   server: string
@@ -117,6 +121,22 @@ beforeAll(async () => {
     { server: sam, winner: sam },
     { server: sam, winner: dave, reason: "error", detail: "not_up", forced: false },
   ])
+
+  // Match 3 — a LEGACY double_bounce error, inserted while the value was
+  // still live, then the retire migration runs over it: the row must fold
+  // into not_up and the value must be locked out of new rows.
+  const p2 = await db.query<{ id: string }>(
+    `insert into players (name) values ('Pat'), ('Quinn') returning id`,
+  )
+  ;[pat, quinn] = p2.rows.map((r) => r.id)
+  const m3 = await db.query<{ id: string }>(
+    `insert into matches (player1_id, player2_id, date) values ($1, $2, '2026-06-20') returning id`,
+    [pat, quinn],
+  )
+  await seedGame(m3.rows[0].id, 1, [
+    { server: pat, winner: quinn, reason: "error", detail: "double_bounce", forced: false },
+  ])
+  await db.exec(loadMigration("retire_double_bounce"))
 })
 
 afterAll(async () => {
@@ -242,9 +262,30 @@ describe("error_profile", () => {
       not_up: 1,
       out_side: 0,
       out_back: 0,
-      double_bounce: 0,
       detail_untagged: 1,
     })
+  })
+
+  it("retires double_bounce — legacy rows fold into not_up, the column is gone", async () => {
+    // Pat's pre-retirement double_bounce error now reads as not_up, so it
+    // lands in a visible bucket instead of vanishing from the breakdown
+    const e = await errorProfile(pat)
+    expect(e.errors_total).toBe(1)
+    expect(e.not_up).toBe(1)
+    expect(e.detail_untagged).toBe(0)
+    // the RPC no longer returns the dead column at all
+    expect("double_bounce" in e).toBe(false)
+  })
+
+  it("rejects new double_bounce rows at the DB", async () => {
+    await expect(
+      db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, error_detail)
+         select game_id, 99, server_id, 'left', 1, $1, 'error', 'double_bounce'
+         from rallies where server_id = $2 limit 1`,
+        [quinn, pat],
+      ),
+    ).rejects.toThrow(/rallies_error_detail_current/)
   })
 
   it("returns a date-ascending per-match trend", async () => {
