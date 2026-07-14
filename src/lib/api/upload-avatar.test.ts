@@ -46,6 +46,19 @@ describe("uploadAvatar", () => {
     })
   })
 
+  it("keeps a PNG a png so a transparent cutout survives", async () => {
+    const { client, uploads } = fakeClient()
+    const url = await uploadAvatar(
+      PLAYER,
+      new Blob([], { type: "image/png" }),
+      client,
+    )
+
+    expect(uploads[0].path).toBe(`${PLAYER}.png`)
+    expect(uploads[0].options).toMatchObject({ contentType: "image/png" })
+    expect(url.split("?")[0]).toBe(`https://cdn.test/avatars/${PLAYER}.png`)
+  })
+
   it("returns the public URL with a numeric cache-buster", async () => {
     const { client } = fakeClient()
     const url = await uploadAvatar(PLAYER, new Blob(), client)

@@ -138,19 +138,20 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
           <stop offset="0.5" stopColor={t.divider} />
           <stop offset="1" stopColor={t.divider} stopOpacity="0" />
         </linearGradient>
-        {/* the design's portraits are transparent cutouts; ours are plain
-            photos, so a feather mask dissolves the photo's edges into the
-            card instead of a hard rectangle over the hero number */}
-        <radialGradient id={id("photo-fade")} cx="0.55" cy="0.42" r="0.62">
-          <stop offset="0.45" stopColor="#fff" />
+        {/* portraits are transparent PNG cutouts, so only a light feather
+            is needed — a large solid core with the outer edge softened, so
+            a non-cutout photo doesn't end in a hard rectangle but a real
+            cutout keeps its full subject */}
+        <radialGradient id={id("photo-fade")} cx="0.58" cy="0.46" r="0.72">
+          <stop offset="0.82" stopColor="#fff" />
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id={id("photo-mask")}>
           <rect
-            x="60"
-            y="18"
-            width="292"
-            height="282"
+            x="104"
+            y="14"
+            width="280"
+            height="286"
             fill={url("photo-fade")}
           />
         </mask>
@@ -223,15 +224,29 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
           <path d={BOLT_B} fill={t.bolt} fillRule="evenodd" />
         </g>
 
-        {/* the portrait: slice-cropped bust, feathered at the edges, and
-            hard-stopped by the panel drawn over it */}
+        {/* brushed-metal sheen — drawn before the panel so the opaque panel
+            covers it and the texture lands on the top half only, matching
+            the design; under the portrait so the subject stays clean */}
+        <image
+          href="/card-texture.jpg"
+          x="0"
+          y="0"
+          width="384"
+          height="612"
+          preserveAspectRatio="xMidYMid slice"
+          opacity="0.45"
+          style={{ mixBlendMode: "overlay" }}
+        />
+
+        {/* the portrait: right-aligned bust, lightly feathered, its lower
+            edge hard-stopped by the panel drawn over it next */}
         <image
           href={avatarSrc}
-          x="60"
-          y="18"
-          width="292"
-          height="282"
-          preserveAspectRatio="xMidYMid slice"
+          x="104"
+          y="14"
+          width="280"
+          height="286"
+          preserveAspectRatio="xMaxYMid slice"
           mask={url("photo-mask")}
         />
 
@@ -242,18 +257,6 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
         <Divider x={58} y={360} width={268} height={2} gradientId={id("div-h")} />
         <Divider x={191} y={376} width={2} height={118} gradientId={id("div-v")} />
         <Divider x={163} y={508} width={58} height={2} gradientId={id("div-h")} />
-
-        {/* brushed-metal texture over everything, as in the design */}
-        <image
-          href="/card-texture.jpg"
-          x="0"
-          y="0"
-          width="384"
-          height="612"
-          preserveAspectRatio="xMidYMid slice"
-          opacity="0.5"
-          style={{ mixBlendMode: "overlay" }}
-        />
       </g>
     </svg>
   )
