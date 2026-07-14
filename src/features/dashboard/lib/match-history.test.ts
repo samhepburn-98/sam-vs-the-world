@@ -20,6 +20,7 @@ const match = (over: Partial<MatchResultSummary> = {}): MatchResultSummary => ({
   games_won_p2: 1,
   match_winner_id: SAM,
   ball_type: null,
+  outcome: "p1",
   ...over,
 })
 
@@ -46,7 +47,7 @@ describe("toHistoryMatches", () => {
       id: MATCH,
       date: "9 Jul",
       opponent: "Woody",
-      won: true,
+      outcome: "won",
       result: "3–1",
       ball: "double_yellow",
       games: ["11-7"],
@@ -62,7 +63,7 @@ describe("toHistoryMatches", () => {
     const [row] = toHistoryMatches(WOODY, [match()], [game()], nameOf)
     expect(row).toMatchObject({
       opponent: "Sam",
-      won: false,
+      outcome: "lost",
       result: "1–3",
       games: ["7-11"],
     })
@@ -78,14 +79,27 @@ describe("toHistoryMatches", () => {
     expect(row.games).toEqual(["11-7", "8-11", "11-9"])
   })
 
-  it("keeps an in-play match visible with no verdict", () => {
-    const inPlay = match({
+  it("renders a drawn session as drawn — the backend's verdict, not a guess", () => {
+    const drawn = match({
       match_winner_id: null,
       games_won_p1: 1,
       games_won_p2: 1,
+      outcome: "draw",
     })
-    const [row] = toHistoryMatches(SAM, [inPlay], [game()], nameOf)
-    expect(row.won).toBeNull()
+    const [row] = toHistoryMatches(SAM, [drawn], [game()], nameOf)
+    expect(row.outcome).toBe("drawn")
+    expect(row.result).toBe("1–1")
+  })
+
+  it("keeps a pending match visible with no verdict", () => {
+    const pending = match({
+      match_winner_id: null,
+      games_won_p1: 1,
+      games_won_p2: 1,
+      outcome: "pending",
+    })
+    const [row] = toHistoryMatches(SAM, [pending], [game()], nameOf)
+    expect(row.outcome).toBe("pending")
     expect(row.result).toBe("1–1")
   })
 

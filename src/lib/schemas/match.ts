@@ -77,6 +77,16 @@ export const matchSummary = z.object({
 
 export type MatchSummary = z.infer<typeof matchSummary>
 
+/** What the backend says happened to a match — the single source of truth
+ *  for every verdict a component renders. 'p1'/'p2' name the winning side,
+ *  'draw' is a casual session standing level with at least one decided game,
+ *  'pending' is an unclinched best-of or a session with nothing decided yet.
+ *  Components orient it to a player (lib/scoring's orientOutcome); they never
+ *  re-derive it. */
+export const matchOutcome = z.enum(["p1", "p2", "draw", "pending"])
+
+export type MatchOutcome = z.infer<typeof matchOutcome>
+
 /** The recent-matches list on the home hub (§5.1): the derived result of a
  *  match, names resolved separately from the roster. From `match_results`. */
 export const matchResultSummary = z.object({
@@ -88,6 +98,7 @@ export const matchResultSummary = z.object({
   games_won_p2: z.number().int().nullable(),
   match_winner_id: z.string().uuid().nullable(),
   ball_type: ballType.nullable(),
+  outcome: matchOutcome,
 })
 
 export type MatchResultSummary = z.infer<typeof matchResultSummary>
@@ -101,6 +112,13 @@ export const matchListRow = matchResultSummary.extend({
 })
 
 export type MatchListRow = z.infer<typeof matchListRow>
+
+/** Select strings derived from the schemas, so a fetch can never drift from
+ *  the shape it parses into (the players API set the pattern). */
+export const MATCH_RESULT_COLUMNS = Object.keys(matchResultSummary.shape).join(
+  ", "
+)
+export const MATCH_LIST_COLUMNS = Object.keys(matchListRow.shape).join(", ")
 
 /** Every stored column — the /manage raw browser's row (§5.4). */
 export const matchRow = matchSummary.extend({

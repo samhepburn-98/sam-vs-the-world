@@ -1,19 +1,22 @@
+import { orientOutcome } from "@/lib/scoring/match"
+
+import type { PlayerOutcome } from "@/lib/scoring/match"
 import type { BallType } from "@/lib/schemas/enums"
 import type { GameResultInMatch } from "@/lib/schemas/game"
 import type { MatchResultSummary } from "@/lib/schemas/match"
 
 // One row of the profile's match history, oriented to the profiled player:
-// their games first in every score, W/L from their side of the net. Assembled
-// pure from the two views the API fetches, so the shape is testable without
-// a client.
+// their games first in every score, the verdict from their side of the net.
+// Assembled pure from the two views the API fetches, so the shape is
+// testable without a client.
 
 export interface HistoryMatch {
   /** stable row key — the match id */
   id: string
   date: string
   opponent: string
-  /** null while the match is still in play */
-  won: boolean | null
+  /** the backend's verdict, oriented to the profiled player */
+  outcome: PlayerOutcome
   result: string
   /** the ball the match was played with, or null when it wasn't recorded */
   ball: BallType | null
@@ -52,7 +55,7 @@ export function toHistoryMatches(
       id: m.match_id,
       date: formatDate(m.date),
       opponent: nameOf(isP1 ? m.player2_id : m.player1_id),
-      won: m.match_winner_id === null ? null : m.match_winner_id === playerId,
+      outcome: orientOutcome(m.outcome, isP1),
       result: `${mine}–${theirs}`,
       ball: m.ball_type,
       games: pills,

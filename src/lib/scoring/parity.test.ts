@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 
 import { gameFixture, matchFixture } from "../../../fixtures/schema"
 import { gameResult, runningScores } from "./score"
-import { tallyMatch } from "./match"
+import { deriveOutcome, tallyMatch } from "./match"
 
 import type { GameFixture, MatchFixture } from "../../../fixtures/schema"
 import type { GameResult, RallyInput } from "./types"
@@ -82,6 +82,12 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
       expect(got.matchWinnerId).toBe(
         f.expected.matchWinner ? IDS[f.expected.matchWinner] : null
       )
+    })
+
+    it("derives the identical outcome", () => {
+      expect(
+        deriveOutcome(f.expected.gamesWonP1, f.expected.gamesWonP2, f.format)
+      ).toBe(f.expected.outcome)
     })
   }
 )

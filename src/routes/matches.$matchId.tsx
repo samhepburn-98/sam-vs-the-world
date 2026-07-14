@@ -6,6 +6,10 @@ import {
   matchDetailQueryOptions,
   useMatchDetail,
 } from "@/lib/api/get-match-detail"
+import {
+  matchResultQueryOptions,
+  useMatchResult,
+} from "@/lib/api/get-match-result"
 import { GameScoreChart } from "@/features/dashboard/components/game-score-chart"
 import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
@@ -32,7 +36,9 @@ import type { RallyScored } from "@/lib/schemas/rally"
 // Match detail (§5.2): the deep-drill target — one match told in full. The
 // rallies are folded into the scored shape client-side (§8.4 exception), so
 // the two-sided timeline, the momentum strip, and the rally sheet all read
-// one consistent structure. `?rally=<id>` opens and scrolls to a rally.
+// one consistent structure. The match-level verdict is NOT recomputed here:
+// match_results owns the clinch/draw/pending rule, and the header renders
+// whatever the view says. `?rally=<id>` opens and scrolls to a rally.
 
 const matchSearch = z.object({
   rally: z.string().optional().catch(undefined),
@@ -44,6 +50,9 @@ export const Route = createFileRoute("/matches/$matchId")({
     await Promise.all([
       context.queryClient.ensureQueryData(
         matchDetailQueryOptions(params.matchId)
+      ),
+      context.queryClient.ensureQueryData(
+        matchResultQueryOptions(params.matchId)
       ),
       context.queryClient.ensureQueryData(playersQueryOptions()),
     ])
@@ -78,6 +87,7 @@ function MatchDetailPage() {
   const search = Route.useSearch()
   const { user } = Route.useRouteContext()
   const match = useMatchDetail(matchId)
+  const result = useMatchResult(matchId)
   const players = usePlayers()
 
   const [selected, setSelected] = useState<number | null>(null)
@@ -99,7 +109,7 @@ function MatchDetailPage() {
     gameRefs.current[rows[idx].game_id]?.scrollIntoView({ block: "center" })
   }, [search.rally, matchData])
 
-  if (!match.data || !players.data) {
+  if (!match.data || !result.data || !players.data) {
     return (
       <main className="container mx-auto max-w-4xl px-4 py-10">
         <Skeleton className="h-64 w-full rounded-2xl" />
@@ -121,14 +131,11 @@ function MatchDetailPage() {
       scoreP1 > scoreP2 ? m.player1_id : scoreP2 > scoreP1 ? m.player2_id : null
     return { ...g, scoreP1, scoreP2, winner }
   })
-  const gamesWonP1 = results.filter((r) => r.winner === m.player1_id).length
-  const gamesWonP2 = results.filter((r) => r.winner === m.player2_id).length
-  const matchWinner =
-    gamesWonP1 > gamesWonP2
-      ? m.player1_id
-      : gamesWonP2 > gamesWonP1
-        ? m.player2_id
-        : null
+  // the match-level verdict is the view's, never recomputed here — the
+  // clinch rule lives in match_results (and lib/scoring for the logger)
+  const verdict = result.data
+  const gamesWonP1 = verdict.games_won_p1 ?? 0
+  const gamesWonP2 = verdict.games_won_p2 ?? 0
 
   return (
     <main className="container mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10">
@@ -168,18 +175,21 @@ function MatchDetailPage() {
           )}
         </div>
         <h1 className="flex items-baseline gap-3 font-heading text-3xl font-bold tracking-tight">
-          <span className={cn(matchWinner === m.player1_id && "text-primary")}>
+          <span className={cn(verdict.outcome === "p1" && "text-primary")}>
             {p1Name}
           </span>
           <span className="tabular-nums">
             {gamesWonP1}–{gamesWonP2}
           </span>
-          <span className={cn(matchWinner === m.player2_id && "text-primary")}>
+          <span className={cn(verdict.outcome === "p2" && "text-primary")}>
             {p2Name}
           </span>
         </h1>
-        {matchWinner === null && (
-          <p className="text-sm text-muted-foreground">Casual session.</p>
+        {verdict.outcome === "draw" && (
+          <p className="text-sm text-muted-foreground">Drawn.</p>
+        )}
+        {verdict.outcome === "pending" && (
+          <p className="text-sm text-muted-foreground">In play.</p>
         )}
         {user && (
           <div className="pt-1">

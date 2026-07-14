@@ -3,5 +3,5 @@
   "description": "Casual session: whoever won more games wins the session (2-1).",
   "format": null,
   "gameWinners": ["p2", "p1", "p2"],
-  "expected": { "gamesWonP1": 1, "gamesWonP2": 2, "matchWinner": "p2" }
+  "expected": { "gamesWonP1": 1, "gamesWonP2": 2, "matchWinner": "p2", "outcome": "p2" }
 }

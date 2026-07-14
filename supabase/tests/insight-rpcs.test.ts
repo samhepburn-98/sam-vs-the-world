@@ -106,6 +106,11 @@ beforeAll(async () => {
   await db.exec(loadMigration("views"))
   await db.exec(loadMigration("house_rules"))
   await db.exec(loadMigration("insights_headline_h2h"))
+  // match_outcome adds the verdict column to match_results; h2h_outcome
+  // recreates h2h to pass it through match_history — load both so the
+  // tested RPC is the live one
+  await db.exec(loadMigration("match_outcome"))
+  await db.exec(loadMigration("h2h_outcome"))
   ;[sam, dave, alex] = await seedPlayers("Sam", "Dave", "Alex")
 
   // Match A — Sam vs Dave, blue ball, 2026-06-01. Drawn 1–1 with a third
@@ -314,6 +319,9 @@ describe("h2h", () => {
         games_won_p1: 1,
         games_won_p2: 1,
         winner_id: null,
+        // a level casual session IS a draw — the RPC says so itself, so no
+        // panel ever has to guess what a null winner means
+        outcome: "draw",
       },
     ])
   })

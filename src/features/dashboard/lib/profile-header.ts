@@ -77,16 +77,27 @@ function buildMeta(handedness: Handedness | null, data: PlayerData): string {
  *  attributes its grid). Each is honest about its own sample: a tile with no
  *  payload yet shows a dash. Records and counts show from the first game —
  *  they're not rates, so there's no small-sample lie to guard against. */
-function buildKpis(data: PlayerData): Array<ProfileKpi> {
+function buildKpis(data: PlayerData, drawnMatches: number): Array<ProfileKpi> {
   const { headline: h, rally: r, momentum: m, serve: s } = data
 
+  // the record reads W–L over decided matches, growing a third figure once
+  // draws exist — a drawn session is a result, not a gap in the ledger
   const matches: ProfileKpi = {
     value:
-      h && h.matches_decided > 0
-        ? `${h.matches_won}–${h.matches_decided - h.matches_won}`
+      h && (h.matches_decided > 0 || drawnMatches > 0)
+        ? `${h.matches_won}–${h.matches_decided - h.matches_won}` +
+          (drawnMatches > 0 ? `–${drawnMatches}` : "")
         : DASH,
     label: "Matches",
-    detail: h && h.matches_decided > 0 ? `${h.matches_decided} decided` : "",
+    detail:
+      h && (h.matches_decided > 0 || drawnMatches > 0)
+        ? [
+            h.matches_decided > 0 ? `${h.matches_decided} decided` : null,
+            drawnMatches > 0 ? `${drawnMatches} drawn` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : "",
   }
 
   const games: ProfileKpi = {
@@ -127,7 +138,10 @@ function buildKpis(data: PlayerData): Array<ProfileKpi> {
 
 export function computeProfileHeader(
   player: PlayerSummary,
-  data: PlayerData
+  data: PlayerData,
+  /** Drawn matches, counted from the backend's outcome column — the headline
+   *  RPC speaks in decided matches only, so draws arrive separately. */
+  drawnMatches = 0
 ): ProfileHeaderData {
   return {
     name: player.name,
@@ -138,6 +152,6 @@ export function computeProfileHeader(
     avatarSrc: player.avatar_url ?? "/avatars/default.svg",
     hero: heroStat(data),
     attrs: computePlayerAttributes(data),
-    kpis: buildKpis(data),
+    kpis: buildKpis(data, drawnMatches),
   }
 }

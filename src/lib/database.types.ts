@@ -344,6 +344,7 @@ export type Database = {
           games_won_p2: number | null
           match_id: string | null
           match_winner_id: string | null
+          outcome: string | null
           player1_id: string | null
           player2_id: string | null
           target_score: number | null

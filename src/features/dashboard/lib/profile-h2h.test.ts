@@ -23,6 +23,7 @@ function match(over: Partial<MatchResultSummary>): MatchResultSummary {
     games_won_p2: 1,
     match_winner_id: ME,
     ball_type: null,
+    outcome: "p1",
     ...over,
   }
 }
@@ -51,12 +52,12 @@ describe("computeH2h", () => {
         matches: "1–1",
         games: "5–4",
         share: 56,
-        lastWon: true,
+        last: "won",
       },
     ])
   })
 
-  it("takes the last result from the newest decided match", () => {
+  it("takes the last result from the newest concluded match", () => {
     const { rows } = computeH2h(
       ME,
       [
@@ -66,14 +67,15 @@ describe("computeH2h", () => {
           games_won_p1: 1,
           games_won_p2: 3,
           match_winner_id: RIVAL_A,
+          outcome: "p2",
         }),
       ],
       nameOf
     )
-    expect(rows[0].lastWon).toBe(false)
+    expect(rows[0].last).toBe("lost")
   })
 
-  it("keeps an undecided match out of the match record but counts its games", () => {
+  it("counts a draw as the record's third figure and as a last result", () => {
     const { rows } = computeH2h(
       ME,
       [
@@ -83,23 +85,75 @@ describe("computeH2h", () => {
           games_won_p1: 1,
           games_won_p2: 1,
           match_winner_id: null,
+          outcome: "draw",
+        }),
+      ],
+      nameOf
+    )
+    expect(rows[0].matches).toBe("1–0–1")
+    expect(rows[0].games).toBe("4–2")
+    expect(rows[0].last).toBe("drawn")
+  })
+
+  it("keeps a pending match out of the record but counts its games", () => {
+    const { rows } = computeH2h(
+      ME,
+      [
+        match({ date: "2026-07-01" }),
+        match({
+          date: "2026-07-08",
+          games_won_p1: 1,
+          games_won_p2: 1,
+          match_winner_id: null,
+          outcome: "pending",
         }),
       ],
       nameOf
     )
     expect(rows[0].matches).toBe("1–0")
     expect(rows[0].games).toBe("4–2")
-    expect(rows[0].lastWon).toBe(true) // the in-play match decides nothing
+    expect(rows[0].last).toBe("won") // a pending match decides nothing
   })
 
-  it("hides a rival with no decided match yet", () => {
+  it("hides a rival whose only match is still pending", () => {
     const { rows, read } = computeH2h(
       ME,
-      [match({ match_winner_id: null, games_won_p1: 1, games_won_p2: 0 })],
+      [
+        match({
+          match_winner_id: null,
+          games_won_p1: 1,
+          games_won_p2: 0,
+          outcome: "pending",
+        }),
+      ],
       nameOf
     )
     expect(rows).toEqual([])
-    expect(read).toContain("after the first decided match")
+    expect(read).toContain("once a match has a result")
+  })
+
+  it("shows a rival you have only ever drawn with", () => {
+    const { rows } = computeH2h(
+      ME,
+      [
+        match({
+          games_won_p1: 1,
+          games_won_p2: 1,
+          match_winner_id: null,
+          outcome: "draw",
+        }),
+      ],
+      nameOf
+    )
+    expect(rows).toEqual([
+      {
+        rival: "Ormond",
+        matches: "0–0–1",
+        games: "1–1",
+        share: 50,
+        last: "drawn",
+      },
+    ])
   })
 
   it("orders rivals by the size of the rivalry", () => {
@@ -117,6 +171,7 @@ describe("computeH2h", () => {
           games_won_p1: 2,
           games_won_p2: 3,
           match_winner_id: RIVAL_B,
+          outcome: "p2",
         }), // Alex: 10 games
       ],
       nameOf
@@ -134,6 +189,7 @@ describe("computeH2h", () => {
           games_won_p1: 1,
           games_won_p2: 3,
           match_winner_id: RIVAL_B,
+          outcome: "p2",
         }),
       ],
       nameOf

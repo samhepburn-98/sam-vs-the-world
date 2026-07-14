@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { matchListRow } from "@/lib/schemas/match"
+import { MATCH_LIST_COLUMNS, matchListRow } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { BallType } from "@/lib/schemas/enums"
@@ -32,10 +32,7 @@ export async function fetchMatches(
   const supabase = getSupabaseBrowserClient()
   let query = supabase
     .from("match_results")
-    .select(
-      "match_id, date, player1_id, player2_id, games_won_p1, games_won_p2, match_winner_id, ball_type, venue, format, target_score",
-      { count: "exact" }
-    )
+    .select(MATCH_LIST_COLUMNS, { count: "exact" })
 
   if (params.player) {
     query = query.or(

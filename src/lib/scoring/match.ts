@@ -1,4 +1,5 @@
 import type { GameResult } from "./types"
+import type { MatchOutcome } from "@/lib/schemas/match"
 
 // Mirrors match_results: only decided games count; best-of clinches at
 // floor(format/2)+1; casual (null format) is a simple majority; null = no
@@ -33,4 +34,36 @@ export function tallyMatch(
   }
 
   return { gamesWonP1, gamesWonP2, matchWinnerId }
+}
+
+/** The view's outcome column, mirrored for the logger's live tally (parity
+ *  is pinned by the same golden fixtures as tallyMatch): a best-of clinches
+ *  or stays pending; a casual session goes to the majority, stands as a draw
+ *  once level with anything decided, and is pending before that. */
+export function deriveOutcome(
+  gamesWonP1: number,
+  gamesWonP2: number,
+  format: number | null
+): MatchOutcome {
+  if (format !== null) {
+    const needed = Math.floor(format / 2) + 1
+    if (gamesWonP1 >= needed) return "p1"
+    if (gamesWonP2 >= needed) return "p2"
+    return "pending"
+  }
+  if (gamesWonP1 > gamesWonP2) return "p1"
+  if (gamesWonP2 > gamesWonP1) return "p2"
+  return gamesWonP1 + gamesWonP2 > 0 ? "draw" : "pending"
+}
+
+/** The backend's neutral outcome, seen from one side of the net. */
+export type PlayerOutcome = "won" | "lost" | "drawn" | "pending"
+
+export function orientOutcome(
+  outcome: MatchOutcome,
+  isP1: boolean
+): PlayerOutcome {
+  if (outcome === "p1") return isP1 ? "won" : "lost"
+  if (outcome === "p2") return isP1 ? "lost" : "won"
+  return outcome === "draw" ? "drawn" : "pending"
 }
