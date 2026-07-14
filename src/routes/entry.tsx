@@ -64,7 +64,12 @@ function EntryPage() {
           players={players.data}
           onExit={() => {
             setSession(null)
+            // a session's rally writes land through the queue, which never
+            // touches the cache — settle every derived read on the way out
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
+            void queryClient.invalidateQueries({ queryKey: ["manage"] })
+            void queryClient.invalidateQueries({ queryKey: ["insights"] })
+            void queryClient.invalidateQueries({ queryKey: ["home"] })
           }}
         />
       </main>
@@ -88,7 +93,10 @@ function EntryPage() {
               queue.discardFailed()
               return "Couldn't save the match — check your connection and try again."
             }
+            // the match row now exists: lists, manage browsers, home count
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
+            void queryClient.invalidateQueries({ queryKey: ["manage"] })
+            void queryClient.invalidateQueries({ queryKey: ["home"] })
             setSession({ matchId: plan.matchId, firstServerId: input.firstServerId })
             return null
           }}

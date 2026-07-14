@@ -57,6 +57,9 @@ export function useUpdateRally() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // every insight aggregate is derived from rally rows (no count change,
+      // so the home tallies stay put)
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
     },
   })
 }

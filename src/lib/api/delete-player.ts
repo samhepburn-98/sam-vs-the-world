@@ -15,6 +15,10 @@ export function useDeletePlayer() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["players"] })
+      // the roster headline is one RPC row per player — this removes one
+      void queryClient.invalidateQueries({
+        queryKey: ["insights", "players-headline"],
+      })
     },
   })
 }

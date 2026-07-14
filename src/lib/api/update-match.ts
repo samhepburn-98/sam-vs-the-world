@@ -32,6 +32,9 @@ export function useUpdateMatch() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // the insight RPCs filter on date and ball type, and format moves the
+      // clinch threshold — all editable here
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
     },
   })
 }

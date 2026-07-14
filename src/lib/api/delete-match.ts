@@ -14,6 +14,10 @@ export function useDeleteMatch() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // every insight aggregate is derived from rally rows
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
+      // the home hub counts matches and rallies — this removes both
+      void queryClient.invalidateQueries({ queryKey: ["home"] })
     },
   })
 }

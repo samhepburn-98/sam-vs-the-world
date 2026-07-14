@@ -25,6 +25,10 @@ export function useCreatePlayer() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["players"] })
+      // the roster headline is one RPC row per player — a new player adds one
+      void queryClient.invalidateQueries({
+        queryKey: ["insights", "players-headline"],
+      })
     },
   })
 }

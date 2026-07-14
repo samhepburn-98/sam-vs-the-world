@@ -20,6 +20,8 @@ export function useUpdateGame() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
+      // game numbering orders the derived views the insight RPCs read
+      void queryClient.invalidateQueries({ queryKey: ["insights"] })
     },
   })
 }
