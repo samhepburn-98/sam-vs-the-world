@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import type { HistoryMatch } from "@/features/dashboard/lib/match-history"
+import type { PlayerOutcome } from "@/lib/scoring/match"
 
 // Match history in two renderings of the same rows: a table from sm up
 // (date, opponent, result, score pills, the night's one remembered moment),
@@ -44,20 +45,25 @@ function ScorePill({ score }: { score: string }) {
   )
 }
 
-function ResultBadge({ won }: { won: boolean | null }) {
-  // null: the match is still in play — a quiet dot, not a false verdict
+// pending: the match is still in play — a quiet dot, not a false verdict.
+// The verdicts come oriented from the backend's outcome column; this maps
+// them to glyphs, nothing more.
+const BADGE: Record<PlayerOutcome, { glyph: string; className: string }> = {
+  won: { glyph: "W", className: "bg-emerald-500/15 text-emerald-500" },
+  lost: { glyph: "L", className: "bg-red-500/15 text-red-500" },
+  drawn: { glyph: "D", className: "bg-muted text-foreground" },
+  pending: { glyph: "·", className: "bg-muted text-muted-foreground" },
+}
+
+function ResultBadge({ outcome }: { outcome: PlayerOutcome }) {
   return (
     <span
       className={cn(
         "inline-flex size-6 items-center justify-center rounded-md text-xs font-bold",
-        won === null
-          ? "bg-muted text-muted-foreground"
-          : won
-            ? "bg-emerald-500/15 text-emerald-500"
-            : "bg-red-500/15 text-red-500"
+        BADGE[outcome].className
       )}
     >
-      {won === null ? "·" : won ? "W" : "L"}
+      {BADGE[outcome].glyph}
     </span>
   )
 }
@@ -71,7 +77,7 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
             <th className="py-2 pr-3 font-medium">Date</th>
             <th className="py-2 pr-3 font-medium">Opponent</th>
             <th className="py-2 pr-3 font-medium">
-              <span className="sr-only">Won or lost</span>
+              <span className="sr-only">Won, lost, or drawn</span>
             </th>
             <th className="py-2 pr-3 font-medium">Result</th>
             <th className="py-2 pr-3 font-medium">Ball</th>
@@ -98,7 +104,7 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
               </td>
               <td className="py-2.5 pr-3 font-medium">{m.opponent}</td>
               <td className="py-2.5 pr-3">
-                <ResultBadge won={m.won} />
+                <ResultBadge outcome={m.outcome} />
               </td>
               <td className="py-2.5 pr-3 tabular-nums">{m.result}</td>
               <td className="py-2.5 pr-3">
@@ -143,7 +149,7 @@ function HistoryItems({ matches }: { matches: Array<HistoryMatch> }) {
             aria-label={`Open the ${m.date} match against ${m.opponent}`}
           >
             <ItemMedia>
-              <ResultBadge won={m.won} />
+              <ResultBadge outcome={m.outcome} />
             </ItemMedia>
             <ItemContent>
               <ItemTitle>

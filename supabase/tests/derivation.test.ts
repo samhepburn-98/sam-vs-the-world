@@ -48,6 +48,7 @@ beforeAll(async () => {
   await db.exec(loadMigration("house_rules"))
   // keeps the tested match_results shape identical to the live view
   await db.exec(loadMigration("match_results_created_at"))
+  await db.exec(loadMigration("match_outcome"))
 })
 
 afterAll(async () => {
@@ -210,8 +211,9 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
         games_won_p2: number
         match_winner_id: string | null
         created_at: string | null
+        outcome: string
       }>(
-        `select games_won_p1::int, games_won_p2::int, match_winner_id, created_at
+        `select games_won_p1::int, games_won_p2::int, match_winner_id, created_at, outcome
          from match_results where match_id = $1`,
         [matchId]
       )
@@ -223,6 +225,8 @@ describe.each(matchFixtures.map((f) => [f.name, f] as const))(
       )
       // the recent-results read orders by this — the view must expose it
       expect(got.created_at).not.toBeNull()
+      // the verdict every component renders — draw and pending included
+      expect(got.outcome).toBe(f.expected.outcome)
     })
   }
 )

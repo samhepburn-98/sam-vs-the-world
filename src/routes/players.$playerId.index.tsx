@@ -64,7 +64,12 @@ function PlayerProfilePage() {
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? "Unknown"
 
-  const header = computeProfileHeader(player, data)
+  // draws come straight off the backend's outcome column; the headline RPC
+  // speaks in decided matches only, so the record's third figure rides here
+  const drawnMatches = (h2hMatches.data ?? []).filter(
+    (m) => m.outcome === "draw"
+  ).length
+  const header = computeProfileHeader(player, data, drawnMatches)
   const stats = computeProfileStats(data)
   const shape = computeProfileShape(data)
   const errors = computeProfileErrors(data)

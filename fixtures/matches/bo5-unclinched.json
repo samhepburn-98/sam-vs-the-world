@@ -1,0 +1,7 @@
+{
+  "name": "bo5-unclinched",
+  "description": "Best-of-5 abandoned at 2-1: nobody clinched, so the match is pending — never a draw, never a majority win.",
+  "format": 5,
+  "gameWinners": ["p1", "p1", "p2"],
+  "expected": { "gamesWonP1": 2, "gamesWonP2": 1, "matchWinner": null, "outcome": "pending" }
+}

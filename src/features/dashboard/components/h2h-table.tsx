@@ -4,7 +4,14 @@ import type { H2hRow } from "@/features/dashboard/lib/profile-h2h"
 
 // Head-to-head per rival: the match and game records as numbers, the games
 // share as a bar so the balance of each rivalry reads without arithmetic,
-// and the last result as the "right now" signal.
+// and the last result as the "right now" signal — W, L, or D, straight from
+// the backend's verdict.
+
+const LAST_CHIP = {
+  won: { glyph: "W", className: "bg-emerald-500/15 text-emerald-500" },
+  lost: { glyph: "L", className: "bg-red-500/15 text-red-500" },
+  drawn: { glyph: "D", className: "bg-muted text-foreground" },
+} as const
 
 export function H2hTable({ rows }: { rows: Array<H2hRow> }) {
   return (
@@ -41,12 +48,10 @@ export function H2hTable({ rows }: { rows: Array<H2hRow> }) {
                 <span
                   className={cn(
                     "inline-flex size-6 items-center justify-center rounded-md text-xs font-bold",
-                    row.lastWon
-                      ? "bg-emerald-500/15 text-emerald-500"
-                      : "bg-red-500/15 text-red-500"
+                    LAST_CHIP[row.last].className
                   )}
                 >
-                  {row.lastWon ? "W" : "L"}
+                  {LAST_CHIP[row.last].glyph}
                 </span>
               </td>
             </tr>

@@ -1,7 +1,7 @@
 {
   "name": "casual-tie",
-  "description": "Casual session (no format): one game each plus a tied game — no match winner, tied game excluded from the tally.",
+  "description": "Casual session (no format): one game each plus a tied game — no match winner; the session stands as a draw.",
   "format": null,
   "gameWinners": ["p1", "p2", "tie"],
-  "expected": { "gamesWonP1": 1, "gamesWonP2": 1, "matchWinner": null }
+  "expected": { "gamesWonP1": 1, "gamesWonP2": 1, "matchWinner": null, "outcome": "draw" }
 }

@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { ballType, handedness } from "@/lib/schemas/enums"
+import { matchOutcome } from "@/lib/schemas/match"
 
 // Schemas for the 0004a insight RPCs (§8.4). The generated DB types say
 // `Json` for the jsonb payloads — these schemas pin the actual shapes at the
@@ -56,6 +57,7 @@ export const h2hMatch = z.object({
   games_won_p1: z.number().int(),
   games_won_p2: z.number().int(),
   winner_id: z.string().uuid().nullable(),
+  outcome: matchOutcome,
 })
 
 export type H2hMatch = z.infer<typeof h2hMatch>

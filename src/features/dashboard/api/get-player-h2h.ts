@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { matchResultSummary } from "@/lib/schemas/match"
+import { MATCH_RESULT_COLUMNS, matchResultSummary } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { MatchResultSummary } from "@/lib/schemas/match"
@@ -17,9 +17,7 @@ export async function fetchPlayerH2h(
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
     .from("match_results")
-    .select(
-      "match_id, date, player1_id, player2_id, games_won_p1, games_won_p2, match_winner_id, ball_type"
-    )
+    .select(MATCH_RESULT_COLUMNS)
     .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
     .order("date", { ascending: false })
     .order("match_id", { ascending: true })

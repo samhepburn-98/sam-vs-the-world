@@ -185,25 +185,22 @@ function RecentMatchRow({
           {formatDate(match.date)}
         </span>
         <span className="flex-1 truncate text-sm">
-          <span
-            className={
-              match.match_winner_id === match.player1_id ? "font-semibold" : ""
-            }
-          >
+          <span className={match.outcome === "p1" ? "font-semibold" : ""}>
             {p1}
           </span>{" "}
           <span className="text-muted-foreground">vs</span>{" "}
-          <span
-            className={
-              match.match_winner_id === match.player2_id ? "font-semibold" : ""
-            }
-          >
+          <span className={match.outcome === "p2" ? "font-semibold" : ""}>
             {p2}
           </span>
         </span>
         {hasScore && (
           <span className="shrink-0 text-sm font-medium tabular-nums">
             {match.games_won_p1}–{match.games_won_p2}
+          </span>
+        )}
+        {(match.outcome === "draw" || match.outcome === "pending") && (
+          <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+            {match.outcome === "draw" ? "Draw" : "In play"}
           </span>
         )}
         {match.ball_type && <BallDots ball={match.ball_type} />}

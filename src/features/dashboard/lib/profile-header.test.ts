@@ -72,6 +72,31 @@ describe("computeProfileHeader", () => {
     expect(g.detail).toBe("19 decided")
   })
 
+  it("grows the match record's third figure from drawn sessions", () => {
+    const header = computeProfileHeader(
+      player(),
+      fx.player({
+        headline: fx.headline({ matches_won: 12, matches_decided: 17 }),
+      }),
+      2
+    )
+    const m = kpi(header, "Matches")
+    expect(m.value).toBe("12–5–2")
+    expect(m.detail).toBe("17 decided · 2 drawn")
+  })
+
+  it("keeps the match record two-figured while no session has been drawn", () => {
+    const header = computeProfileHeader(
+      player(),
+      fx.player({
+        headline: fx.headline({ matches_won: 12, matches_decided: 17 }),
+      })
+    )
+    const m = kpi(header, "Matches")
+    expect(m.value).toBe("12–5")
+    expect(m.detail).toBe("17 decided")
+  })
+
   it("shows aces with double faults, and no errors-forced rate (the card's CON)", () => {
     const header = computeProfileHeader(
       player(),

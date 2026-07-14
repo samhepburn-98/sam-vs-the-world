@@ -43,6 +43,7 @@ import { useMatchDetail } from "@/lib/api/get-match-detail"
 import { intentToOp } from "@/lib/api/session-ops"
 import { useMediaQuery } from "@/lib/use-media-query"
 import {
+  deriveOutcome,
   gameOver,
   gameResult,
   suggestNext,
@@ -421,6 +422,13 @@ function MatchLogger({
     const decided = [...priorGames, { n: game.gameNumber, r: result }].filter(
       ({ r }) => r.score.p1 > 0 || r.score.p2 > 0
     )
+    // the same outcome rule the match_results view applies — a level casual
+    // session is a draw, and the summary says so in as many words
+    const outcome = deriveOutcome(
+      tally.gamesWonP1,
+      tally.gamesWonP2,
+      match.format
+    )
     return (
       <div className="flex flex-col gap-4">
         <MatchSummary
@@ -428,7 +436,9 @@ function MatchLogger({
           headline={
             tally.matchWinnerId
               ? `${nameOf(tally.matchWinnerId)} wins ${tally.gamesWonP1}–${tally.gamesWonP2}`
-              : `Session logged — games ${tally.gamesWonP1}–${tally.gamesWonP2}`
+              : outcome === "draw"
+                ? `Drawn ${tally.gamesWonP1}–${tally.gamesWonP2}`
+                : `Session logged — games ${tally.gamesWonP1}–${tally.gamesWonP2}`
           }
           subline={`${nameOf(match.player1_id)} vs ${nameOf(match.player2_id)} · ${match.date} · ${rulesLine}`}
           games={decided.map(({ n, r }) => ({

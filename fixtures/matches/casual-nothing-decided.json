@@ -1,0 +1,7 @@
+{
+  "name": "casual-nothing-decided",
+  "description": "Casual session whose only game is left tied: nothing decided yet, so the session is pending, not drawn.",
+  "format": null,
+  "gameWinners": ["tie"],
+  "expected": { "gamesWonP1": 0, "gamesWonP2": 0, "matchWinner": null, "outcome": "pending" }
+}

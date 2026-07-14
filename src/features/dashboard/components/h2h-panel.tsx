@@ -56,20 +56,22 @@ export function H2hPanel({
                   <span className="tabular-nums">
                     {m.games_won_p1}–{m.games_won_p2}
                   </span>
+                  {/* the verdict comes from the backend's outcome column —
+                      a draw and a match still in play are different things */}
                   <span
                     className={
-                      m.winner_id === player1Id
+                      m.outcome === "p1" || m.outcome === "p2"
                         ? "font-semibold"
-                        : m.winner_id === player2Id
-                          ? "font-semibold"
-                          : "text-muted-foreground"
+                        : "text-muted-foreground"
                     }
                   >
-                    {m.winner_id === player1Id
+                    {m.outcome === "p1"
                       ? name1
-                      : m.winner_id === player2Id
+                      : m.outcome === "p2"
                         ? name2
-                        : "Drawn"}
+                        : m.outcome === "draw"
+                          ? "Drawn"
+                          : "In play"}
                   </span>
                 </li>
               ))}

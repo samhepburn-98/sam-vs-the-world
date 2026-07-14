@@ -62,6 +62,8 @@ export const matchFixture = z.object({
     gamesWonP1: z.number().int(),
     gamesWonP2: z.number().int(),
     matchWinner: playerRef.nullable(),
+    /** the view's verdict column, mirrored by lib/scoring's deriveOutcome */
+    outcome: z.enum(["p1", "p2", "draw", "pending"]),
   }),
 })
 
