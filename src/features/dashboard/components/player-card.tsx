@@ -25,7 +25,10 @@ import type { Handedness } from "@/lib/schemas/enums"
 // Architecture: all art lives in one background SVG that scales off its
 // viewBox; the data (win rate, handedness, name, stats, trait) is an HTML
 // layer on top in container units, so text keeps truncation, sr-only copy,
-// and the opt-in tooltips.
+// and the opt-in tooltips. The bevel is a single inner-shadow overlay drawn
+// last, so it lights every edge — over the portrait and the panel alike —
+// where the export split it across two filters that a full-bleed photo or
+// the panel would each crop.
 
 const THEMES = {
   p1: {
@@ -65,6 +68,34 @@ const BOLT_A =
   "M567.346 115.729C530.254 127.998 492.201 144.713 457.882 164.948L457.811 130.381C404.181 157.907 349.627 200.014 304.71 244.931L304.603 195.533C296.175 203.037 294.752 204.957 286.644 213.066C228.213 271.497 183.865 339.743 154.881 411.902L216.121 473.142C235.112 408.63 272.311 338.783 316.552 284.086L316.659 342.161C334.654 315.916 349.804 299.343 373.098 276.049C400.02 249.127 427.155 227.469 457.953 207.625L458.024 243.828C500.096 204.531 549.422 169.643 599.603 147.985L567.346 115.729Z"
 const BOLT_B =
   "M447.106 38.3067C410.013 50.5761 371.96 67.291 337.642 87.5266L337.57 52.9589C283.941 80.4851 229.386 122.592 184.469 167.509L184.363 118.111C175.934 125.615 174.512 127.536 166.403 135.644C107.972 194.075 63.6246 262.321 34.6403 334.48L95.8807 395.72C114.872 331.208 152.071 261.361 196.312 206.664L196.419 264.74C214.414 238.494 229.564 221.921 252.858 198.627C279.78 171.705 306.915 150.047 337.713 130.203L337.784 166.407C379.855 127.18 429.146 92.2566 479.362 70.634L447.106 38.3067Z"
+
+const INVERT_ALPHA = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1 1"
+const tint = (c: string, a: number) => `0 0 0 0 ${c} 0 0 0 0 ${c} 0 0 0 0 ${c} 0 0 0 ${a} 0`
+
+/** One directional band of the inner-shadow bevel: the inverted shield alpha,
+ *  nudged one way, kept only where it overlaps the shield, and tinted. */
+function BevelBand({
+  dx = 0,
+  dy = 0,
+  colour,
+  alpha,
+  result,
+}: {
+  dx?: number
+  dy?: number
+  colour: string
+  alpha: number
+  result: string
+}) {
+  return (
+    <>
+      <feOffset in="inv" dx={dx} dy={dy} />
+      <feGaussianBlur stdDeviation="1.5" />
+      <feComposite in2="SourceAlpha" operator="in" />
+      <feColorMatrix type="matrix" values={tint(colour, alpha)} result={result} />
+    </>
+  )
+}
 
 /** A hairline divider that fades out at both ends, as in the design. */
 function Divider({
@@ -147,13 +178,7 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id={id("photo-mask")}>
-          <rect
-            x="104"
-            y="14"
-            width="280"
-            height="286"
-            fill={url("photo-fade")}
-          />
+          <rect x="104" y="14" width="280" height="286" fill={url("photo-fade")} />
         </mask>
         {/* the bolts carry a hard offset shadow, straight from the export */}
         <filter
@@ -163,60 +188,39 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
           width="140%"
           height="140%"
         >
-          <feDropShadow
-            dx="0"
-            dy="4"
-            stdDeviation="0"
-            floodColor={t.boltShadow}
-          />
+          <feDropShadow dx="0" dy="4" stdDeviation="0" floodColor={t.boltShadow} />
         </filter>
-        {/* edge lighting: soft white top/right, dark left */}
+        {/* the bevel, as an inner-shadow-only overlay: lit top and right,
+            shaded left and bottom, transparent interior so it lays over the
+            finished card and lights every edge at once */}
         <filter
-          id={id("edges")}
+          id={id("bevel")}
           x="-3"
-          y="0"
+          y="-3"
           width="390"
-          height="615"
+          height="618"
           filterUnits="userSpaceOnUse"
         >
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
           <feColorMatrix
             in="SourceAlpha"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
+            type="matrix"
+            values={INVERT_ALPHA}
+            result="inv"
           />
-          <feOffset dy="3" />
-          <feGaussianBlur stdDeviation="1.5" />
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
-          <feBlend in2="shape" result="inner1" />
-          <feColorMatrix
-            in="SourceAlpha"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dx="3" />
-          <feGaussianBlur stdDeviation="1.5" />
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0" />
-          <feBlend in2="inner1" result="inner2" />
-          <feColorMatrix
-            in="SourceAlpha"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-            result="hardAlpha"
-          />
-          <feOffset dx="-3" />
-          <feGaussianBlur stdDeviation="1.5" />
-          <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" />
-          <feBlend in2="inner2" />
+          <BevelBand dy={3} colour="1" alpha={0.6} result="top" />
+          <BevelBand dx={-3} colour="1" alpha={0.5} result="right" />
+          <BevelBand dx={3} colour="0" alpha={0.32} result="left" />
+          <BevelBand dy={-3} colour="0" alpha={0.22} result="bottom" />
+          <feMerge>
+            <feMergeNode in="left" />
+            <feMergeNode in="bottom" />
+            <feMergeNode in="top" />
+            <feMergeNode in="right" />
+          </feMerge>
         </filter>
       </defs>
 
-      <g filter={url("edges")}>
-        <path d={SHIELD} fill={url("body")} />
-      </g>
+      <path d={SHIELD} fill={url("body")} />
 
       <g clipPath={url("shield")}>
         <g filter={url("bolt-shadow")}>
@@ -225,14 +229,16 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
         </g>
 
         {/* brushed-metal sheen — drawn before the panel so the opaque panel
-            covers it and the texture lands on the top half only, matching
-            the design; under the portrait so the subject stays clean */}
+            covers it and the texture lands on the top half only; inset from
+            the shield edge so it never meets the clip boundary (that seam is
+            what speckled the border); under the portrait so the face stays
+            clean */}
         <image
           href="/card-texture.jpg"
-          x="0"
-          y="0"
-          width="384"
-          height="612"
+          x="6"
+          y="6"
+          width="372"
+          height="600"
           preserveAspectRatio="xMidYMid slice"
           opacity="0.45"
           style={{ mixBlendMode: "overlay" }}
@@ -258,6 +264,9 @@ function CardArt({ side, avatarSrc }: { side: "p1" | "p2"; avatarSrc: string }) 
         <Divider x={191} y={376} width={2} height={118} gradientId={id("div-v")} />
         <Divider x={163} y={508} width={58} height={2} gradientId={id("div-h")} />
       </g>
+
+      {/* bevel last, over everything */}
+      <path d={SHIELD} fill="#000" filter={url("bevel")} />
     </svg>
   )
 }
@@ -296,10 +305,10 @@ export function PlayerCard({
           statTooltips && "cursor-help rounded-sm"
         )}
       >
-        <dd className="w-[9cqi] text-right text-[6.8cqi] font-extrabold tabular-nums text-white">
+        <dd className="w-[10cqi] text-right text-[7.8cqi] font-extrabold tabular-nums text-white">
           {a.display}
         </dd>
-        <dt className="text-[6.8cqi] font-medium" style={{ color: t.muted }}>
+        <dt className="text-[7.8cqi] font-medium" style={{ color: t.muted }}>
           {a.code}
           <span className="sr-only">
             {" "}
@@ -328,11 +337,11 @@ export function PlayerCard({
         <div className="absolute inset-0">
           {/* hero number + handedness, stacked top-left */}
           <div className="absolute top-[13cqi] left-[13cqi] flex flex-col">
-            <span className="text-[13cqi] leading-none font-extrabold text-white">
+            <span className="text-[11cqi] leading-none font-extrabold text-white">
               {hero.display}
             </span>
             <span
-              className="mt-[1.5cqi] text-[3.1cqi] font-semibold tracking-[0.14em] uppercase"
+              className="mt-[1.5cqi] text-[3.4cqi] font-semibold tracking-[0.14em] uppercase"
               style={{ color: t.muted }}
             >
               {hero.label}
@@ -348,7 +357,7 @@ export function PlayerCard({
                       : undefined
                   }
                 />
-                {handedness === "left" ? "LH" : "RH"}
+                {handedness === "left" ? "L" : "R"}
                 <span className="sr-only">
                   {" "}
                   ({HANDEDNESS_LABELS[handedness]})
@@ -357,18 +366,18 @@ export function PlayerCard({
             )}
           </div>
 
-          {/* name band */}
-          <p className="absolute top-[80.5cqi] right-[10cqi] left-[10cqi] truncate text-center text-[9cqi] leading-none font-extrabold tracking-wide text-white uppercase">
+          {/* name band, centred just above the stat rule */}
+          <p className="absolute top-[81.5cqi] right-[9cqi] left-[9cqi] truncate text-center text-[10.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
             {name}
           </p>
 
           {/* the six attributes, two columns split by the art's divider */}
           <TooltipProvider>
-            <div className="absolute top-[97cqi] right-[15cqi] left-[15cqi] grid grid-cols-2 gap-[8cqi]">
-              <dl className="flex flex-col gap-[3.2cqi]">
+            <div className="absolute top-[96cqi] right-[15cqi] left-[15cqi] grid grid-cols-2 gap-[7cqi]">
+              <dl className="flex flex-col gap-[2.2cqi]">
                 {[attrs[0], attrs[2], attrs[4]].map(stat)}
               </dl>
-              <dl className="flex flex-col gap-[3.2cqi] pl-[4cqi]">
+              <dl className="flex flex-col gap-[2.2cqi] pl-[4cqi]">
                 {[attrs[1], attrs[3], attrs[5]].map(stat)}
               </dl>
             </div>
@@ -377,7 +386,7 @@ export function PlayerCard({
           {/* trait footer under the short rule */}
           {trait && (
             <p
-              className="absolute top-[135.5cqi] right-[10cqi] left-[10cqi] text-center text-[4.4cqi] font-bold tracking-[0.14em] uppercase"
+              className="absolute top-[135cqi] right-[10cqi] left-[10cqi] text-center text-[5.2cqi] font-bold tracking-[0.14em] uppercase"
               style={{ color: t.muted }}
             >
               {TRAIT_LABELS[trait]}
