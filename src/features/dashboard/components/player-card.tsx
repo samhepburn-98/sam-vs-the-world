@@ -248,7 +248,7 @@ export function PlayerCard({
           >
             <p
               className="max-w-[82%] truncate leading-none font-extrabold tracking-wide text-white uppercase"
-              style={{ fontSize: u(11) }}
+              style={{ fontSize: u(9.5) }}
             >
               {name}
             </p>
@@ -287,7 +287,7 @@ export function PlayerCard({
             {trait && (
               <p
                 className="font-bold tracking-[0.14em] uppercase"
-                style={{ marginTop: u(2), fontSize: u(5.2), color: t.muted }}
+                style={{ marginTop: u(2), fontSize: u(5), color: t.muted }}
               >
                 {TRAIT_LABELS[trait]}
               </p>
