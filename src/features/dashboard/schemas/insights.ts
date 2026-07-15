@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { ballType, handedness } from "@/lib/schemas/enums"
+import { ballType } from "@/lib/schemas/enums"
 
 // Schemas for the 0004a insight RPCs (§8.4). The generated DB types say
 // `Json` for the jsonb payloads — these schemas pin the actual shapes at the
@@ -39,14 +39,6 @@ export const playerHeadline = z.object({
 })
 
 export type PlayerHeadline = z.infer<typeof playerHeadline>
-
-/** One row of `players_headline()` — the roster batch: headline + identity. */
-export const rosterHeadline = playerHeadline.extend({
-  name: z.string(),
-  handedness: handedness.nullable(),
-})
-
-export type RosterHeadline = z.infer<typeof rosterHeadline>
 
 /** One entry of `h2h.match_history`, date-ascending. `_p1` means the first
  *  argument of the h2h call, matching the aggregate's columns. */

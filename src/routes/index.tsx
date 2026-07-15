@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute, Link } from "@tanstack/react-router"
 
 import { BallDots } from "@/components/ball-dots"
 import { CountUp } from "@/components/count-up"
@@ -14,14 +13,12 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { homeCountsQueryOptions, useHomeCounts } from "@/features/dashboard/api/get-home-counts"
-import {
-  playersHeadlineOptions,
-  usePlayersHeadline,
-} from "@/features/dashboard/api/get-players-headline"
+import { prefetchPlayerInsights } from "@/features/dashboard/api/use-player-insights"
 import {
   recentResultsQueryOptions,
   useRecentResults,
 } from "@/features/dashboard/api/get-recent-results"
+import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 import type { MatchResultSummary } from "@/lib/schemas/match"
 
@@ -31,10 +28,13 @@ import type { MatchResultSummary } from "@/lib/schemas/match"
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
+    const { queryClient } = context
+    const players = await queryClient.ensureQueryData(playersQueryOptions())
     await Promise.all([
-      context.queryClient.ensureQueryData(playersHeadlineOptions()),
-      context.queryClient.ensureQueryData(recentResultsQueryOptions()),
-      context.queryClient.ensureQueryData(homeCountsQueryOptions()),
+      queryClient.ensureQueryData(recentResultsQueryOptions()),
+      queryClient.ensureQueryData(homeCountsQueryOptions()),
+      // warm each card's stats so the roster is complete in the SSR markup
+      ...players.map((p) => prefetchPlayerInsights(queryClient, p.id)),
     ])
   },
   component: HomePage,
@@ -50,20 +50,13 @@ function formatDate(iso: string) {
 function HomePage() {
   const { user } = Route.useRouteContext()
   const owner = user !== null
-  const navigate = useNavigate()
 
-  const roster = usePlayersHeadline()
+  const roster = usePlayers()
   const results = useRecentResults()
   const counts = useHomeCounts()
 
-  const [selected, setSelected] = useState<Array<string>>([])
-  const toggleSelect = (id: string) =>
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    )
-
   const players = roster.data ?? []
-  const nameOf = new Map(players.map((p) => [p.player_id, p.name]))
+  const nameOf = new Map(players.map((p) => [p.id, p.name]))
 
   return (
     <main className="container mx-auto max-w-5xl px-4 pb-16">
@@ -92,19 +85,11 @@ function HomePage() {
       <section className="flex flex-col gap-4 border-t pt-8">
         <div className="flex items-center justify-between">
           <h2 className="font-heading text-xl font-bold">Players</h2>
-          {selected.length >= 2 && (
-            <Button
-              type="button"
-              onClick={() =>
-                void navigate({
-                  to: "/compare",
-                  search: { players: selected.join(","), mode: "all" },
-                })
-              }
-            >
-              Compare {selected.length} players
-            </Button>
-          )}
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/compare" search={{ mode: "all" }}>
+              Compare
+            </Link>
+          </Button>
         </div>
 
         {players.length === 0 ? (
@@ -125,13 +110,12 @@ function HomePage() {
             )}
           </Empty>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {players.map((p) => (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
+            {players.map((p, i) => (
               <RosterCard
-                key={p.player_id}
+                key={p.id}
                 player={p}
-                selected={selected.includes(p.player_id)}
-                onToggleSelect={() => toggleSelect(p.player_id)}
+                side={i % 2 === 0 ? "p1" : "p2"}
               />
             ))}
           </div>
