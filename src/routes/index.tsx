@@ -110,7 +110,7 @@ function HomePage() {
             )}
           </Empty>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5 sm:gap-6">
             {players.map((p, i) => (
               <RosterCard
                 key={p.id}
