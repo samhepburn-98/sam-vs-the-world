@@ -16,7 +16,7 @@ import type { Handedness } from "@/lib/schemas/enums"
 
 // The FUT-style player card. The whole frame — shield, gradient, brushed
 // texture, lightning bolts, bevel, and stat panel — is a single transparent
-// PNG designed in Figma, one per side (p1 blue, p2 orange); the component
+// PNG designed in Figma, one per side (p1 orange, p2 blue); the component
 // only lays the live data over it. The one thing that must clip to the shield
 // shape (the portrait) lives in a tiny SVG; everything else — the win rate,
 // the name, the stats and their dividers, the trait — is one HTML flow scaled
@@ -29,8 +29,8 @@ const FRAMES: Record<"p1" | "p2", string> = {
 }
 
 const THEMES = {
-  p1: { muted: "#A9BEDF", divider: "#6387C0" },
-  p2: { muted: "#E3BCAB", divider: "#C07C63" },
+  p1: { muted: "#E3BCAB", divider: "#C07C63" },
+  p2: { muted: "#A9BEDF", divider: "#6387C0" },
 } as const
 
 const HANDEDNESS_LABELS: Record<Handedness, string> = {
@@ -152,9 +152,9 @@ export function PlayerCard({
           </clipPath>
           <image
             href={avatarSrc}
-            x="140"
+            x="100"
             y="14"
-            width="244"
+            width="284"
             height="280"
             preserveAspectRatio="xMidYMax meet"
             clipPath={`url(#${clipId})`}
@@ -162,12 +162,12 @@ export function PlayerCard({
         </svg>
 
         {/* hero number + handedness, in the top-left of the upper half */}
-        <div className="absolute top-[16cqi] left-[14cqi] flex flex-col">
+        <div className="absolute top-[20cqi] left-[14cqi] flex flex-col items-center">
           <span className="text-[11cqi] leading-none font-extrabold text-white">
             {hero.display}
           </span>
           <span
-            className="mt-[1.5cqi] text-[3.4cqi] font-semibold tracking-[0.14em] uppercase"
+            className="mt-[1.5cqi] text-[3.8cqi] font-semibold tracking-[0.14em] uppercase"
             style={{ color: t.muted }}
           >
             {hero.label}
@@ -193,7 +193,7 @@ export function PlayerCard({
             the column divider inside the grid), rule, trait. Aligning the
             stats now moves their divider with them. */}
         <TooltipProvider>
-          <div className="absolute inset-x-0 top-[79cqi] flex flex-col items-center">
+          <div className="absolute inset-x-0 top-[82cqi] flex flex-col items-center">
             <p className="max-w-[82%] truncate text-[11.5cqi] leading-none font-extrabold tracking-wide text-white uppercase">
               {name}
             </p>
@@ -207,7 +207,7 @@ export function PlayerCard({
             {/* two stat columns, each aligning its numbers and codes via
                 subgrid, with the divider as a flex sibling between them so it
                 stretches to the columns' height and stays centred on them */}
-            <div className="mt-[3.5cqi] flex items-stretch justify-center gap-[6cqi]">
+            <div className="mt-[3cqi] flex items-stretch justify-center gap-[6cqi]">
               {statColumn([0, 2, 4])}
               <FadeRule
                 axis="y"
@@ -220,7 +220,7 @@ export function PlayerCard({
             <FadeRule
               axis="x"
               colour={t.divider}
-              className="mt-[3.5cqi] h-[0.4cqi] w-[16%]"
+              className="mt-[3cqi] h-[0.4cqi] w-[16%]"
             />
 
             {trait && (
