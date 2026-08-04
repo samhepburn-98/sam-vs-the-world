@@ -1,9 +1,10 @@
 // Client-side avatar downscaling: a phone photo is 3–12 MB but the card
 // renders at well under 800px, so shrinking before upload keeps the bucket
 // small and the upload quick — the bucket's 2 MiB server cap is a backstop,
-// not something a normal save should ever meet. Always re-encodes as JPEG:
-// Safari's canvas.toBlob can't reliably produce WebP, and a constant output
-// format keeps the storage path/content-type fixed.
+// not something a normal save should ever meet. A PNG is re-encoded as PNG
+// so a transparent cutout portrait keeps its alpha (JPEG has none, and the
+// card composites the portrait over the shield); everything else becomes a
+// JPEG, which is far smaller for a photograph.
 
 /** Aspect-preserving fit inside a square of `maxEdge`. Never upscales. */
 export function fitWithin(
@@ -28,8 +29,9 @@ export class NotAnImageError extends Error {
   }
 }
 
-/** Decode → shrink → re-encode as JPEG. Browser-only (canvas); the sizing
- *  logic lives in {@link fitWithin} so it stays unit-testable. */
+/** Decode → shrink → re-encode. A PNG stays a PNG (alpha preserved); anything
+ *  else becomes a JPEG. Browser-only (canvas); the sizing logic lives in
+ *  {@link fitWithin} so it stays unit-testable. */
 export async function downscaleImage(
   file: Blob,
   { maxEdge = 800, quality = 0.85 } = {}
@@ -43,8 +45,10 @@ export async function downscaleImage(
   canvas.height = size.height
   canvas.getContext("2d")?.drawImage(bitmap, 0, 0, size.width, size.height)
   bitmap.close()
+  // keep PNG alpha; a JPEG would flatten a transparent portrait to black
+  const type = file.type === "image/png" ? "image/png" : "image/jpeg"
   const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, "image/jpeg", quality)
+    canvas.toBlob(resolve, type, quality)
   })
   if (!blob) throw new NotAnImageError()
   return blob

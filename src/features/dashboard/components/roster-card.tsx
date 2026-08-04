@@ -1,130 +1,63 @@
 import { Link } from "@tanstack/react-router"
-import { CheckIcon } from "lucide-react"
 
-import { CountUp } from "@/components/count-up"
-import { Button } from "@/components/ui/button"
-import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
-import { cn } from "@/lib/utils"
+import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { PlayerCard } from "@/features/dashboard/components/player-card"
+import {
+  computePlayerAttributes,
+  heroStat,
+  playerTrait,
+} from "@/features/dashboard/lib/player-attributes"
 
-import type { RosterHeadline } from "@/features/dashboard/schemas/insights"
+import type { PlayerSummary } from "@/lib/schemas/player"
+import type { CSSProperties } from "react"
 
-// The roster card: win rate with its denominator, a form line of the
-// last few game results, and the games record — all game-level, decided
-// games only. The card links to the player page; the corner control selects
-// it for a side-by-side compare without navigating.
+// The roster card is the full FUT player card, made into a link to the
+// player's page. Identity — frame, photo, name, handedness — comes straight
+// from the players list, so it's in the server-rendered markup; the six
+// attributes, win rate, and trait are computed from the same insight payloads
+// the compare and profile pages use (warmed in the home loader). The frame PNG
+// fixes the card's height, so those numbers fill in without shifting anything.
+//
+// Hover/focus lifts the card with a glow behind it, tinted to the frame. The
+// link (the hover target) stays put — the inner div moves — so the card can't
+// slide out from under the cursor at the edges, and the hovered link is
+// raised in the stacking order so neighbours can't crop the glow. The glow is
+// a drop-shadow, so it follows the shield's alpha, and it transitions from a
+// transparent shadow rather than from no filter so it fades instead of pops.
 
-interface RosterCardProps {
-  player: RosterHeadline
-  selected: boolean
-  onToggleSelect: () => void
+const GLOW: Record<"p1" | "p2", string> = {
+  p1: "rgba(224, 120, 66, 0.6)",
+  p2: "rgba(92, 142, 232, 0.6)",
 }
 
 export function RosterCard({
   player,
-  selected,
-  onToggleSelect,
-}: RosterCardProps) {
-  const { games_won, games_decided } = player
-  const enough = games_decided >= MIN_GAMES_FOR_WIN_RATE
-  const losses = games_decided - games_won
-  // recent_games is newest-first; a form line reads left-to-right, oldest-first
-  const form = player.recent_games.slice(0, 5).reverse()
+  side,
+}: {
+  player: PlayerSummary
+  side: "p1" | "p2"
+}) {
+  const data = usePlayerInsights(player.id)
 
   return (
-    <div
-      className={cn(
-        "relative rounded-2xl bg-card text-card-foreground ring-1 ring-foreground/10 transition-shadow hover:shadow-md",
-        selected && "ring-2 ring-primary"
-      )}
+    <Link
+      to="/players/$playerId"
+      params={{ playerId: player.id }}
+      aria-label={`${player.name} — view profile`}
+      style={{ "--glow": GLOW[side] } as CSSProperties}
+      className="group relative block outline-none hover:z-10 focus-visible:z-10"
     >
-      <Button
-        type="button"
-        variant={selected ? "default" : "outline"}
-        size="icon-sm"
-        aria-label={
-          selected
-            ? `Deselect ${player.name}`
-            : `Select ${player.name} to compare`
-        }
-        aria-pressed={selected}
-        className="absolute top-3 right-3 z-10 rounded-full"
-        onClick={onToggleSelect}
-      >
-        {selected && <CheckIcon />}
-      </Button>
-
-      <Link
-        to="/players/$playerId"
-        params={{ playerId: player.player_id }}
-        className="flex flex-col gap-3 p-6"
-      >
-        <div className="flex items-center gap-2 pr-8">
-          <h3 className="truncate font-heading text-lg font-bold">
-            {player.name}
-          </h3>
-          {player.handedness && (
-            <span
-              className="text-xs text-muted-foreground"
-              title={`${player.handedness === "left" ? "Left" : "Right"}-handed`}
-            >
-              {player.handedness === "left" ? "LH" : "RH"}
-            </span>
-          )}
-        </div>
-
-        {enough ? (
-          // the denominator is carried by the W–L record below, so the rate
-          // stands alone here without repeating "of N"
-          <p className="text-3xl font-bold">
-            <CountUp
-              value={Math.round((games_won / games_decided) * 100)}
-              suffix="%"
-            />
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Not enough data yet{" "}
-            <span className="tabular-nums">(n={games_decided})</span>
-          </p>
-        )}
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground tabular-nums">
-            {games_won} W · {losses} L
-          </span>
-          {form.length > 0 && (
-            <span className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground" aria-hidden>
-                Form
-              </span>
-              <span
-                className="flex items-center gap-1"
-                role="img"
-                aria-label={`Recent form, oldest to newest: ${form
-                  .map((g) =>
-                    g.won === null ? "undecided" : g.won ? "won" : "lost"
-                  )
-                  .join(", ")}`}
-              >
-                {form.map((g, i) => (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className={cn(
-                      "size-2 rounded-full",
-                      g.won === null
-                        ? "bg-muted-foreground/40"
-                        : g.won
-                          ? "bg-emerald-500"
-                          : "bg-red-500"
-                    )}
-                  />
-                ))}
-              </span>
-            </span>
-          )}
-        </div>
-      </Link>
-    </div>
+      <div className="[filter:drop-shadow(0_0_1.25rem_transparent)] transition-[transform,filter] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:[filter:drop-shadow(0_0_1.25rem_var(--glow))] group-focus-visible:-translate-y-1.5 group-focus-visible:[filter:drop-shadow(0_0_1.25rem_var(--glow))] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+        <PlayerCard
+          name={player.name}
+          side={side}
+          avatarSrc={player.avatar_url ?? "/avatars/default.svg"}
+          trait={playerTrait(data)}
+          handedness={player.handedness}
+          hero={heroStat(data)}
+          attrs={computePlayerAttributes(data)}
+        />
+      </div>
+    </Link>
   )
 }

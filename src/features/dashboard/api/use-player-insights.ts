@@ -9,6 +9,27 @@ import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
+import type { QueryClient } from "@tanstack/react-query"
+
+/** Warm every insight query for a player into the cache — call it from a
+ *  route loader (once per roster player) so the cards come back in the
+ *  server-rendered markup instead of painting in after hydration. Mirrors the
+ *  six queries the hook below runs (each payload's type differs, so they're
+ *  spelled out rather than mapped). */
+export function prefetchPlayerInsights(
+  queryClient: QueryClient,
+  playerId: string,
+  filters: InsightFilters = {}
+): Promise<unknown> {
+  return Promise.all([
+    queryClient.ensureQueryData(playerHeadlineOptions(playerId, filters)),
+    queryClient.ensureQueryData(serveStatsOptions(playerId, filters)),
+    queryClient.ensureQueryData(errorProfileOptions(playerId, filters)),
+    queryClient.ensureQueryData(rallyLengthsOptions(playerId, filters)),
+    queryClient.ensureQueryData(momentumOptions(playerId, filters)),
+    queryClient.ensureQueryData(decisiveShotsOptions(playerId, filters)),
+  ])
+}
 
 /** The insight payloads behind one player's profile, fetched as a unit. Each
  *  payload arrives independently — PlayerData's fields are all optional, so
