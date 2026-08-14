@@ -25,6 +25,26 @@ Player profiles and match pages (the app ships light and dark themes):
 | :---------------------------------------------------------: | :-----------------------------------------------------------------: |
 | ![A player profile: headline stats and a radar of attribute ratings](docs/screenshots/player.png) | ![A match page: per-game score progression charted rally by rally](docs/screenshots/match.png) |
 
+## Highlights
+
+- **Rallies are the only facts.** The database stores the ordered rally sequence and nothing else.
+  Scores, game and match winners, head-to-head records, streaks, and comebacks are all derived from
+  it in Postgres — recomputable at any time, impossible to drift out of sync
+  ([the database explained](docs/database.md)).
+- **RPC-per-insight.** Every dashboard insight is a dedicated SQL function behind a typed client
+  wrapper; RLS makes the whole dataset public-read while writes stay owner-only.
+- **House rules as data.** Scoring variants — serves per point, win-by-two, sudden death — live in
+  the schema, and [fixture-driven tests](fixtures/) prove the derivation under each ruleset,
+  including the awkward ones (abandoned best-of-5s, ties, lets mid-game).
+- **Enforced architecture.** A feature-based tree whose `shared → features → routes` layering is
+  enforced by lint rules, not convention ([the architecture](docs/architecture.md)).
+- **A golden-path e2e.** One Playwright test drives the real pipeline — log in, create players,
+  hotkey rally entry, finish the match — against a local Supabase stack, then asserts the raw rows,
+  the derived views, and the re-rendered scores.
+- **A written trail.** The [70k-word spec](PROJECT_PLAN.md) came first; a
+  [decision log](docs/decisions.md) and a [codebase audit](docs/codebase-audit-2026-07-14.md) came
+  after. Work runs as one issue = one PR.
+
 ## Stack
 
 - [TanStack Start](https://tanstack.com/start) (React 19 + TypeScript) — SSR'd public dashboard,
