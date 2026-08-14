@@ -1,5 +1,7 @@
 # Sam vs the World
 
+[![CI](https://github.com/samhepburn-98/sam-vs-the-world/actions/workflows/ci.yml/badge.svg)](https://github.com/samhepburn-98/sam-vs-the-world/actions/workflows/ci.yml)
+
 A personal squash analytics app. Matches are recorded on video, reviewed afterwards, and logged
 **rally-by-rally** — one row per point, capturing how every rally ended (winner, tin, stroke, ace,
 serve fault…), serve side and number, and rally length. The footage itself is never stored; the
