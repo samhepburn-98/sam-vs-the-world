@@ -6,6 +6,25 @@ serve fault…), serve side and number, and rally length. The footage itself is 
 ordered rally sequence is the single source of truth, and everything else — running scores, game and
 match winners, head-to-head records, serve stats, comebacks, streaks — is derived from it.
 
+**Live demo:** https://sam-vs-the-world.samhepburn98.workers.dev
+
+## Screenshots
+
+The roster — every player is a card, with six attribute ratings derived from their real rallies:
+
+![The home page: player cards with win rates and attribute ratings](docs/screenshots/home.png)
+
+Compare — two players go head to head, cards on the outer edges and the comparison engine down the
+centre:
+
+![The compare page: two player cards either side of a head-to-head stat comparison](docs/screenshots/compare.png)
+
+Player profiles and match pages (the app ships light and dark themes):
+
+|                       Player profile                        |                            Match detail                             |
+| :---------------------------------------------------------: | :-----------------------------------------------------------------: |
+| ![A player profile: headline stats and a radar of attribute ratings](docs/screenshots/player.png) | ![A match page: per-game score progression charted rally by rally](docs/screenshots/match.png) |
+
 ## Stack
 
 - [TanStack Start](https://tanstack.com/start) (React 19 + TypeScript) — SSR'd public dashboard,
@@ -48,5 +67,7 @@ the re-rendered score. It runs **only against the local Supabase stack**
 supabase start     # local stack on 54321; applies all migrations
 pnpm test:golden   # boots its own app server on 3211
 ```
+
+## Deployment
 
 Deployed on Cloudflare Workers: https://sam-vs-the-world.samhepburn98.workers.dev
