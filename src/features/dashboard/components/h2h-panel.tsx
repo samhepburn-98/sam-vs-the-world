@@ -1,4 +1,5 @@
 import { useH2h } from "@/features/dashboard/api/get-h2h"
+import { SectionTitle } from "@/components/typography"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // The head-to-head panel on compare (§5.1): shown only when exactly two
@@ -25,9 +26,9 @@ export function H2hPanel({
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl bg-card p-6 ring-1 ring-foreground/10">
-      <h2 className="font-heading text-lg font-bold">
+      <SectionTitle>
         {name1} vs {name2}
-      </h2>
+      </SectionTitle>
 
       {!played ? (
         <p className="text-sm text-muted-foreground">

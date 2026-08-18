@@ -54,7 +54,7 @@ export function WinRateTrend({ data }: { data: Array<TrendPoint> }) {
         />
         <YAxis
           domain={[0, 100]}
-          width={32}
+          width={40}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => `${v}%`}

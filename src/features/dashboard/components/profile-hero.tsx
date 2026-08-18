@@ -1,4 +1,5 @@
 import { PlayerCard } from "@/features/dashboard/components/player-card"
+import { PageTitle } from "@/components/typography"
 import { cn } from "@/lib/utils"
 
 import type { ProfileKpi } from "@/features/dashboard/lib/profile-types"
@@ -50,9 +51,7 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">
-            {header.name}
-          </h1>
+          <PageTitle>{header.name}</PageTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             {header.signature ? (
               <>

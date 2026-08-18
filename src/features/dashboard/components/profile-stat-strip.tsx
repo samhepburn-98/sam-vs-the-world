@@ -1,4 +1,5 @@
 import { CountUp } from "@/components/count-up"
+import { Overline } from "@/components/typography"
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
@@ -77,9 +78,9 @@ export function ProfileStatStrip({
 
   return (
     <section aria-label="At a glance">
-      <h2 className="mb-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+      <Overline as="h2" className="mb-2">
         At a glance
-      </h2>
+      </Overline>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
           <div

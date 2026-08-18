@@ -8,8 +8,8 @@ import type { H2hRow } from "@/features/dashboard/lib/profile-h2h"
 // the backend's verdict.
 
 const LAST_CHIP = {
-  won: { glyph: "W", className: "bg-emerald-500/15 text-emerald-500" },
-  lost: { glyph: "L", className: "bg-red-500/15 text-red-500" },
+  won: { glyph: "W", className: "bg-success/15 text-success" },
+  lost: { glyph: "L", className: "bg-error/15 text-error" },
   drawn: { glyph: "D", className: "bg-muted text-foreground" },
 } as const
 
@@ -39,7 +39,7 @@ export function H2hTable({ rows }: { rows: Array<H2hRow> }) {
               <td className="py-2.5 pr-3">
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-emerald-500/80"
+                    className="h-full rounded-full bg-success/80"
                     style={{ width: `${row.share}%` }}
                   />
                 </div>

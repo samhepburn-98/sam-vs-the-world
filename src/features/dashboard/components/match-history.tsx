@@ -49,8 +49,8 @@ function ScorePill({ score }: { score: string }) {
 // The verdicts come oriented from the backend's outcome column; this maps
 // them to glyphs, nothing more.
 const BADGE: Record<PlayerOutcome, { glyph: string; className: string }> = {
-  won: { glyph: "W", className: "bg-emerald-500/15 text-emerald-500" },
-  lost: { glyph: "L", className: "bg-red-500/15 text-red-500" },
+  won: { glyph: "W", className: "bg-success/15 text-success" },
+  lost: { glyph: "L", className: "bg-error/15 text-error" },
   drawn: { glyph: "D", className: "bg-muted text-foreground" },
   pending: { glyph: "·", className: "bg-muted text-muted-foreground" },
 }

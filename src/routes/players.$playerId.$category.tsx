@@ -7,6 +7,7 @@ import {
   insightSearch,
   searchToFilters,
 } from "@/features/dashboard/utils/insight-filters"
+import { PageTitle } from "@/components/typography"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -72,9 +73,9 @@ function CategoryDetailPage() {
       </Breadcrumb>
 
       <header>
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
+        <PageTitle>
           {player.name} · {categoryLabel(key)}
-        </h1>
+        </PageTitle>
       </header>
 
       <FilterBar

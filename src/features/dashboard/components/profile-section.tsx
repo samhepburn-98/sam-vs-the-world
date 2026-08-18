@@ -1,3 +1,5 @@
+import { Overline } from "@/components/typography"
+
 import type { ReactNode } from "react"
 
 // One titled band of a profile tab: the uppercase primary heading, a
@@ -17,9 +19,9 @@ export function ProfileSection({
   return (
     <section aria-label={title} className="flex flex-col gap-4">
       <div>
-        <h2 className="text-sm font-semibold tracking-widest text-primary uppercase">
+        <Overline as="h2" tone="primary">
           {title}
-        </h2>
+        </Overline>
         <p className="mt-1.5 text-sm text-muted-foreground">{lede}</p>
       </div>
       {children}
