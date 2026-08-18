@@ -25,7 +25,7 @@ export function StatBarRow({
         <div
           className={cn(
             "h-full rounded-full",
-            tone === "loss" ? "bg-red-500/80" : "bg-primary"
+            tone === "loss" ? "bg-error/80" : "bg-primary"
           )}
           style={{ width: `${pct}%` }}
         />

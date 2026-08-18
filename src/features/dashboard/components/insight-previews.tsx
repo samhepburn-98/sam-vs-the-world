@@ -142,7 +142,7 @@ export function FormDotsPreview({ games }: { games: Array<HeadlineGame> }) {
           aria-hidden
           className={cn(
             "size-2.5 rounded-full",
-            g.won ? "bg-emerald-500" : "bg-red-500"
+            g.won ? "bg-success" : "bg-error"
           )}
         />
       ))}
