@@ -1,3 +1,4 @@
+import { useId } from "react"
 import {
   Area,
   AreaChart,
@@ -66,6 +67,9 @@ export function MomentumChart({
  *  caller that already has the lead (e.g. match detail, folding rallies
  *  client-side) can draw it without a RallyScored shape. */
 export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
+  // The gradient's flip offset is data-dependent, so the id must be unique
+  // per instance — the category page renders one of these per game.
+  const fillId = useId()
   const off = zeroOffset(data)
   const endLead = data.at(-1)?.lead ?? 0
   const ending =
@@ -84,7 +88,7 @@ export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
     >
       <AreaChart data={data} margin={{ left: 4, right: 8, top: 8, bottom: 4 }}>
         <defs>
-          <linearGradient id="momentum-fill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
             <stop offset={off} stopColor="var(--chart-3)" stopOpacity={0.5} />
             <stop
               offset={off}
@@ -113,7 +117,7 @@ export function MomentumArea({ data }: { data: Array<LeadPoint> }) {
           type="monotone"
           stroke="var(--color-lead)"
           strokeWidth={1.5}
-          fill="url(#momentum-fill)"
+          fill={`url(#${fillId})`}
           isAnimationActive={false}
         />
       </AreaChart>
