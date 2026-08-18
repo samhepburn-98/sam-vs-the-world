@@ -8,6 +8,7 @@ import {
 } from "@/features/dashboard/api/get-matches"
 import { BallDots } from "@/components/ball-dots"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
+import { PageTitle } from "@/components/typography"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -89,9 +90,7 @@ function MatchesPage() {
   return (
     <main className="container mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10">
       <header>
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
-          Match history
-        </h1>
+        <PageTitle>Match history</PageTitle>
         <p className="text-sm text-muted-foreground">
           Every match, newest first.
         </p>

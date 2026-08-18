@@ -1,6 +1,7 @@
 import { Fragment } from "react"
 
 import { LoggerDialog } from "@/features/logger/components/logger-dialog"
+import { Overline } from "@/components/typography"
 import { Constants } from "@/lib/database.types"
 import { LOGGABLE_ERROR_DETAILS } from "@/lib/schemas/enums"
 
@@ -56,9 +57,7 @@ export function Glossary({ open, onClose }: GlossaryProps) {
     <LoggerDialog open={open} title="What the chips mean" onClose={onClose}>
       <div className="grid gap-6 sm:grid-cols-2">
         <section>
-          <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
-            How the rally ended
-          </h3>
+          <Overline className="mb-2">How the rally ended</Overline>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {Constants.public.Enums.end_reason
               .filter((r) => r !== "ace")
@@ -73,9 +72,7 @@ export function Glossary({ open, onClose }: GlossaryProps) {
           </dl>
         </section>
         <section>
-          <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
-            Error detail
-          </h3>
+          <Overline className="mb-2">Error detail</Overline>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
             {LOGGABLE_ERROR_DETAILS.map((d) => (
               <Fragment key={d}>
@@ -90,9 +87,7 @@ export function Glossary({ open, onClose }: GlossaryProps) {
       </div>
 
       <section className="mt-6 border-t pt-4">
-        <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
-          Good to know
-        </h3>
+        <Overline className="mb-2">Good to know</Overline>
         <dl className="grid gap-x-3 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
           <dt className="font-medium">Forced / unforced</dt>
           <dd className="text-muted-foreground">

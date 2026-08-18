@@ -4,6 +4,7 @@ import { BallDots } from "@/components/ball-dots"
 import { CountUp } from "@/components/count-up"
 import { CourtDiagram } from "@/components/court/court-diagram"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
+import { PageTitle, SectionTitle } from "@/components/typography"
 import { RosterCard } from "@/features/dashboard/components/roster-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -67,9 +68,7 @@ function HomePage() {
       <section className="flex items-center gap-6 py-12">
         <CourtDiagram className="h-24 w-16 shrink-0 text-muted-foreground" />
         <div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">
-            Every rally, counted.
-          </h1>
+          <PageTitle>Every rally, counted.</PageTitle>
           <p className="mt-2 text-sm text-balance text-muted-foreground">
             {counts.data && counts.data.matches > 0 ? (
               <>
@@ -87,7 +86,7 @@ function HomePage() {
       {/* roster */}
       <section className="flex flex-col gap-4 border-t pt-8">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-xl font-bold">Players</h2>
+          <SectionTitle>Players</SectionTitle>
           <Button asChild variant="ghost" size="sm">
             <Link to="/compare" search={{ mode: "all" }}>
               Compare
@@ -129,7 +128,7 @@ function HomePage() {
       {(results.data ?? []).length > 0 && (
         <section className="mt-12 flex flex-col gap-4 border-t pt-8">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-xl font-bold">Recent matches</h2>
+            <SectionTitle>Recent matches</SectionTitle>
             <Button asChild variant="ghost" size="sm">
               <Link to="/matches" search={{ page: 1 }}>
                 View all

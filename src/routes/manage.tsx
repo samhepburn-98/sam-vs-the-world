@@ -6,6 +6,7 @@ import { GamesTab } from "@/features/manage/components/games-tab"
 import { MatchesTab } from "@/features/manage/components/matches-tab"
 import { PlayersTab } from "@/features/manage/components/players-tab"
 import { RalliesTab } from "@/features/manage/components/rallies-tab"
+import { PageTitle } from "@/components/typography"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -66,9 +67,7 @@ function ManagePage() {
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-4 px-4 py-10">
       <header>
-        <h1 className="font-heading text-2xl font-bold tracking-tight">
-          Manage
-        </h1>
+        <PageTitle>Manage</PageTitle>
         <p className="text-sm text-muted-foreground">
           Every stored record, raw. Ids link across tabs.
         </p>

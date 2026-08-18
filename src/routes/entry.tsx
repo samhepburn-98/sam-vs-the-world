@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 
+import { PageTitle, SectionTitle } from "@/components/typography"
 import { LoggingShell } from "@/features/logger/components/logging-shell"
 import { MatchSetup } from "@/features/logger/components/match-setup"
 import { RecentMatches } from "@/features/logger/components/recent-matches"
@@ -79,9 +80,7 @@ function EntryPage() {
   return (
     <main className="container mx-auto flex max-w-2xl flex-col gap-10 px-4 py-10">
       <section>
-        <h1 className="mb-6 font-heading text-2xl font-bold tracking-tight">
-          New match
-        </h1>
+        <PageTitle className="mb-6">New match</PageTitle>
         <MatchSetup
           players={players.data}
           onCreatePlayer={(name) => createPlayer.mutateAsync({ name })}
@@ -106,9 +105,7 @@ function EntryPage() {
         />
       </section>
       <section>
-        <h2 className="mb-4 font-heading text-lg font-bold tracking-tight">
-          Reopen a match
-        </h2>
+        <SectionTitle className="mb-4">Reopen a match</SectionTitle>
         <RecentMatches
           matches={recent.data}
           players={players.data}

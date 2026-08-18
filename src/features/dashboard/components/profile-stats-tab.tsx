@@ -2,6 +2,7 @@ import { H2hTable } from "@/features/dashboard/components/h2h-table"
 import { RallyLengthCurve } from "@/features/dashboard/components/rally-length-curve"
 import { ServeBoxes } from "@/features/dashboard/components/serve-boxes"
 import { StatBarRow } from "@/features/dashboard/components/stat-bar-row"
+import { Overline } from "@/components/typography"
 import { cn } from "@/lib/utils"
 
 import type { H2hData } from "@/features/dashboard/lib/profile-h2h"
@@ -35,14 +36,14 @@ function Panel({
         className
       )}
     >
-      <h3 className="flex items-baseline justify-between gap-2 text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
+      <Overline className="flex items-baseline justify-between gap-2">
         {title}
         {sub && (
-          <span className="truncate text-[11px] font-normal tracking-normal text-muted-foreground/70 normal-case">
+          <span className="truncate text-xs font-normal tracking-normal text-muted-foreground/70 normal-case">
             {sub}
           </span>
         )}
-      </h3>
+      </Overline>
       <div className="flex-1">{children}</div>
       {read && <p className="text-xs text-muted-foreground">{read}</p>}
     </section>

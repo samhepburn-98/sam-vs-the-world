@@ -16,6 +16,7 @@ import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
 import { BallDots } from "@/components/ball-dots"
+import { PageTitle, SectionTitle } from "@/components/typography"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -174,7 +175,7 @@ function MatchDetailPage() {
             </span>
           )}
         </div>
-        <h1 className="flex items-baseline gap-3 font-heading text-3xl font-bold tracking-tight">
+        <PageTitle className="flex items-baseline gap-3">
           <span className={cn(verdict.outcome === "p1" && "text-primary")}>
             {p1Name}
           </span>
@@ -184,7 +185,7 @@ function MatchDetailPage() {
           <span className={cn(verdict.outcome === "p2" && "text-primary")}>
             {p2Name}
           </span>
-        </h1>
+        </PageTitle>
         {verdict.outcome === "draw" && (
           <p className="text-sm text-muted-foreground">Drawn.</p>
         )}
@@ -246,9 +247,7 @@ function MatchDetailPage() {
           }}
           className="flex scroll-mt-4 flex-col gap-3"
         >
-          <h2 className="font-heading text-lg font-bold">
-            Game {g.gameNumber}
-          </h2>
+          <SectionTitle>Game {g.gameNumber}</SectionTitle>
           <GameScoreChart rows={g.rows} p1Name={p1Name} p2Name={p2Name} />
           <RallyTimeline
             rows={g.rows.map(toRallyRow)}

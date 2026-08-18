@@ -20,6 +20,7 @@ import {
   MIN_RALLIES_FOR_RATE,
 } from "@/features/dashboard/utils/insight-thresholds"
 import { CourtDiagram } from "@/components/court/court-diagram"
+import { SectionTitle } from "@/components/typography"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import type { CategoryKey } from "@/features/dashboard/categories"
@@ -44,7 +45,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-heading text-lg font-bold">{title}</h2>
+      <SectionTitle>{title}</SectionTitle>
       {children}
     </section>
   )

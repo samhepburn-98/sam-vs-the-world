@@ -1,4 +1,5 @@
 import { LoggerDialog } from "@/features/logger/components/logger-dialog"
+import { Overline } from "@/components/typography"
 import { Kbd, KbdHintsContext } from "@/components/ui/kbd"
 import { Toggle } from "@/components/ui/toggle"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
@@ -69,9 +70,7 @@ export function HotkeyHelp({
         <div className="grid gap-6 sm:grid-cols-2">
           {GROUPS.map((group) => (
             <section key={group.title}>
-              <h3 className="mb-2 text-xs tracking-widest text-muted-foreground uppercase">
-                {group.title}
-              </h3>
+              <Overline className="mb-2">{group.title}</Overline>
               <ul className="flex flex-col gap-1.5">
                 {group.rows.map(([keys, label]) => (
                   <li key={label} className="flex items-center gap-3 text-sm">
