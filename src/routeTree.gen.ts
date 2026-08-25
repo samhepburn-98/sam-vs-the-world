@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TraitsRouteImport } from './routes/traits'
 import { Route as ManageRouteImport } from './routes/manage'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EntryRouteImport } from './routes/entry'
@@ -19,6 +20,11 @@ import { Route as MatchesMatchIdRouteImport } from './routes/matches.$matchId'
 import { Route as PlayersPlayerIdIndexRouteImport } from './routes/players.$playerId.index'
 import { Route as PlayersPlayerIdCategoryRouteImport } from './routes/players.$playerId.$category'
 
+const TraitsRoute = TraitsRouteImport.update({
+  id: '/traits',
+  path: '/traits',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ManageRoute = ManageRouteImport.update({
   id: '/manage',
   path: '/manage',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/traits': typeof TraitsRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/matches/': typeof MatchesIndexRoute
   '/players/$playerId/$category': typeof PlayersPlayerIdCategoryRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/traits': typeof TraitsRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/matches': typeof MatchesIndexRoute
   '/players/$playerId/$category': typeof PlayersPlayerIdCategoryRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/manage': typeof ManageRoute
+  '/traits': typeof TraitsRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/matches/': typeof MatchesIndexRoute
   '/players/$playerId/$category': typeof PlayersPlayerIdCategoryRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/manage'
+    | '/traits'
     | '/matches/$matchId'
     | '/matches/'
     | '/players/$playerId/$category'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/manage'
+    | '/traits'
     | '/matches/$matchId'
     | '/matches'
     | '/players/$playerId/$category'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/manage'
+    | '/traits'
     | '/matches/$matchId'
     | '/matches/'
     | '/players/$playerId/$category'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   EntryRoute: typeof EntryRoute
   LoginRoute: typeof LoginRoute
   ManageRoute: typeof ManageRoute
+  TraitsRoute: typeof TraitsRoute
   MatchesMatchIdRoute: typeof MatchesMatchIdRoute
   MatchesIndexRoute: typeof MatchesIndexRoute
   PlayersPlayerIdCategoryRoute: typeof PlayersPlayerIdCategoryRoute
@@ -149,6 +162,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/traits': {
+      id: '/traits'
+      path: '/traits'
+      fullPath: '/traits'
+      preLoaderRoute: typeof TraitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manage': {
       id: '/manage'
       path: '/manage'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntryRoute: EntryRoute,
   LoginRoute: LoginRoute,
   ManageRoute: ManageRoute,
+  TraitsRoute: TraitsRoute,
   MatchesMatchIdRoute: MatchesMatchIdRoute,
   MatchesIndexRoute: MatchesIndexRoute,
   PlayersPlayerIdCategoryRoute: PlayersPlayerIdCategoryRoute,

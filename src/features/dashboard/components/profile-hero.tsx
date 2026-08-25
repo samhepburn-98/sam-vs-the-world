@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router"
+
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { PageTitle } from "@/components/typography"
 import { cn } from "@/lib/utils"
@@ -58,7 +60,13 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
                 <span className="font-medium text-foreground">
                   {header.signature}
                 </span>{" "}
-                {header.meta}
+                {header.meta} ·{" "}
+                <Link
+                  to="/traits"
+                  className="underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  Traits explained
+                </Link>
               </>
             ) : (
               header.meta
