@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 
 import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
-import { PlayerCard } from "@/features/dashboard/components/player-card"
+import { FRAMES, PlayerCard } from "@/features/dashboard/components/player-card"
 import {
   computePlayerAttributes,
   heroStat,
@@ -21,9 +21,12 @@ import type { CSSProperties } from "react"
 // Hover/focus lifts the card with a glow behind it, tinted to the frame. The
 // link (the hover target) stays put — the inner div moves — so the card can't
 // slide out from under the cursor at the edges, and the hovered link is
-// raised in the stacking order so neighbours can't crop the glow. The glow is
-// a drop-shadow, so it follows the shield's alpha, and it transitions from a
-// transparent shadow rather than from no filter so it fades instead of pops.
+// raised in the stacking order so neighbours can't crop the glow. The glow
+// must follow the shield's alpha, but transitioning a drop-shadow filter
+// re-rasterizes it every frame (janky, worst in WebKit) and browsers clip
+// the animating filter's region. So the glow is its own layer — a copy of
+// the frame PNG with a static drop-shadow — and only compositor-friendly
+// properties animate: transform for the lift, opacity for the fade.
 
 const GLOW: Record<"p1" | "p2", string> = {
   p1: "rgba(224, 120, 66, 0.6)",
@@ -47,7 +50,13 @@ export function RosterCard({
       style={{ "--glow": GLOW[side] } as CSSProperties}
       className="group relative block outline-none hover:z-10 focus-visible:z-10"
     >
-      <div className="[filter:drop-shadow(0_0_1.25rem_transparent)] transition-[transform,filter] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:[filter:drop-shadow(0_0_1.25rem_var(--glow))] group-focus-visible:-translate-y-1.5 group-focus-visible:[filter:drop-shadow(0_0_1.25rem_var(--glow))] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+      <div className="relative isolate transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+        <img
+          src={FRAMES[side]}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-300 ease-out [filter:drop-shadow(0_0_1.25rem_var(--glow))] group-hover:opacity-100 group-focus-visible:opacity-100"
+        />
         <PlayerCard
           name={player.name}
           side={side}
