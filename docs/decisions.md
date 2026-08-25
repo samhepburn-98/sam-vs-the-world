@@ -112,3 +112,18 @@ shared kernel instead of letting it hide as a cross-feature import. The one carv
 which stays put because TanStack Start generates its route tree from that path; route files are the
 composition layer where features are allowed to meet. Full guide in
 [architecture.md](architecture.md); lands in the restructure PR (#61).
+
+## 15. Cross-engine visual effects are baked assets, not runtime filters
+
+The roster cards' hover glow is a pre-rendered webp sprite (tinted, blurred frame silhouette)
+faded in with `opacity`, not a transitioned `filter: drop-shadow`. The filter version failed in
+ways that couldn't be styled around: animating a filter re-rasterizes every frame (the hover
+jank), engines disagree about drop-shadow spread (Chromium wide, WebKit tight), and WebKit clips
+the filter's paint region outright — the recurring Safari crop. **What it buys:** identical
+rendering in every engine, hover animation that never leaves the compositor, and a bug class
+retired rather than patched. **What it costs:** an offline generation step
+(`scripts/generate-card-glow.mjs`) and a geometric coupling between the sprite's padding ratios
+and the consumer's CSS insets, both documented in [card-glow.md](card-glow.md). The general rule
+this sets: when a purely decorative effect depends on engine-divergent rendering, bake it into an
+asset instead of fighting the divergence at runtime — this app is developed against Chromium
+tooling but used in Safari.
