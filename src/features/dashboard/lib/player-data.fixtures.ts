@@ -83,6 +83,8 @@ export const headline = (
   matches_won: 7,
   matches_decided: 12,
   signature_trait: "grinder",
+  clean_finish_wins: 45,
+  points_won: 100,
   recent_games: [],
   ...over,
 })

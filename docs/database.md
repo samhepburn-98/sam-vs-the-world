@@ -172,7 +172,7 @@ can never drift from the number above it.
 
 | function | returns |
 |---|---|
-| `player_headline(player_id, …filters)` | win rate inputs over **decided** games (`games_won` / `games_decided`), match record, last-10 game results (jsonb, newest first), signature trait (`grinder` / `shotmaker` / `balanced`, null under §3.2's ≥30-per-bucket threshold) |
+| `player_headline(player_id, …filters)` | win rate inputs over **decided** games (`games_won` / `games_decided`), match record, last-10 game results (jsonb, newest first), signature trait (one of §3.2's nine tempo×agency matrix cells, null under the ≥30 sample guards) plus its agency receipts (`clean_finish_wins` / `points_won`) |
 | `players_headline()` | the batch variant — every player's headline in one call for the home roster |
 | `h2h(p1, p2, …filters)` | the pair's game & match record from `p1`'s perspective + date-ascending match history (jsonb) |
 | `h2h_rallies(p1, p2, …filters)` | the rally rows behind those numbers (`rallies_scored` shape) |

@@ -127,3 +127,18 @@ and the consumer's CSS insets, both documented in [card-glow.md](card-glow.md). 
 this sets: when a purely decorative effect depends on engine-divergent rendering, bake it into an
 asset instead of fighting the divergence at runtime — this app is developed against Chromium
 tooling but used in Safari.
+
+## 16. Traits are a two-axis matrix, and an uncallable trait shows nothing
+
+The signature trait is a 3×3 classification matrix — tempo (short/all/long-court, from the
+short-vs-extended win-rate differential) × agency (finisher/mixed/pressure, from the share of won
+points ended by the player's own clean winner) — replacing the single rally-length differential.
+**What it buys:** nine identities that describe *how* someone plays on two independent style axes,
+neither recoverable from skill alone; each row and column reads as a progression (left→right the
+winning racket shifts from yours to theirs, top→bottom the points live longer); and every trait
+cites its receipts. **What it costs:** two thresholds per axis to calibrate (checked against live
+data, all three players landed in different cells) and a 9-key enum through the schema. The old
+client-side average-rally-length fallback was removed rather than extended: on this club's fast
+games it labelled everyone "shotmaker", and a missing trait is more honest than an invented one —
+under-sampled players simply carry no class line. Spec in PROJECT_PLAN §3.2; player-facing
+reference at `/traits`, single-sourced from `TRAIT_META` so the page can't drift from the cards.

@@ -758,11 +758,13 @@ export type Database = {
           p_player_id: string
         }
         Returns: {
+          clean_finish_wins: number
           games_decided: number
           games_won: number
           matches_decided: number
           matches_won: number
           player_id: string
+          points_won: number
           recent_games: Json
           signature_trait: string
         }[]
@@ -770,6 +772,7 @@ export type Database = {
       players_headline: {
         Args: never
         Returns: {
+          clean_finish_wins: number
           games_decided: number
           games_won: number
           handedness: Database["public"]["Enums"]["handedness"]
@@ -777,6 +780,7 @@ export type Database = {
           matches_won: number
           name: string
           player_id: string
+          points_won: number
           recent_games: Json
           signature_trait: string
         }[]

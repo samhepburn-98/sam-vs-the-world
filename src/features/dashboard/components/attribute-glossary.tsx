@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router"
+
 import { ATTRIBUTE_META } from "@/features/dashboard/lib/player-attributes"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,6 +46,15 @@ export function AttributeGlossaryDialog() {
             </div>
           ))}
         </dl>
+        <p className="text-sm text-muted-foreground">
+          Wondering about the class line — Sniper, Grafter, Wall?{" "}
+          <Link
+            to="/traits"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            The traits, explained.
+          </Link>
+        </p>
       </DialogContent>
     </Dialog>
   )

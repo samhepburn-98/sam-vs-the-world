@@ -44,13 +44,13 @@ function handednessLabel(h: Handedness | null): string | null {
 }
 
 /** signatureLine with the "Trait — " prefix removed and the remainder
- *  sentence-cased, since the header shows the trait as its own chip. Driven by
- *  the same resolved trait as that chip (playerTrait's avg-length fallback
- *  included), so the two never disagree. */
+ *  sentence-cased, since the header shows the trait as its own chip. Reads
+ *  straight off the headline payload, so the chip and the line can't
+ *  disagree. */
 function headerSignature(data: PlayerData): string | null {
   const trait = playerTrait(data)
-  if (!trait || !data.rally) return null
-  const full = signatureLine({ signature_trait: trait }, data.rally)
+  if (!trait || !data.headline || !data.rally) return null
+  const full = signatureLine(data.headline, data.rally)
   if (!full) return null
   const body = full.replace(/^.*?—\s*/, "")
   return body.charAt(0).toUpperCase() + body.slice(1)

@@ -143,7 +143,7 @@ describe("pattern", () => {
       }),
       decisive: decisive(), // 12 tagged < threshold
       momentum: momentum({ close_rallies: 20, close_wins: 13 }),
-      headline: headline({ signature_trait: "balanced" }),
+      headline: headline({ signature_trait: "all_rounder" }),
     })
     const pattern = computeProfileShape(data).insights[2]
     expect(pattern.title).toBe("No single habit dominates.")
