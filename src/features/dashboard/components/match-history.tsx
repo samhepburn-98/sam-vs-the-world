@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 
 import { BallDots } from "@/components/ball-dots"
 import {
@@ -21,12 +21,15 @@ import type { PlayerOutcome } from "@/lib/scoring/match"
 // layouts are always rendered, so there's no matchMedia hook to drift from
 // SSR or fall over in jsdom.
 //
-// Every row opens its match. The table uses a stretched link (an anchor
-// positioned over the whole row) so the click target is the row while the
-// markup stays one accessible link per match; the mobile Item is rendered
-// as that link directly. The mobile rows are flat — no per-row background
-// or side padding — so the enclosing panel is the only card and each match
-// reads as a hairline-ruled row of it, not a card floating inside another.
+// Every row opens its match. The table can't use a stretched link (an
+// anchor absolutely positioned over the row): `position: relative` on a
+// table row is undefined as a containing block, and Safari resolves the
+// anchor's inset against the page — an invisible link over the whole
+// document. So the anchor sits on the date text and a row click handler
+// widens the target; the mobile Item is rendered as the link directly.
+// The mobile rows are flat — no per-row background or side padding — so
+// the enclosing panel is the only card and each match reads as a
+// hairline-ruled row of it, not a card floating inside another.
 
 function ScorePill({ score }: { score: string }) {
   const [mine, theirs] = score.split("-").map(Number)
@@ -69,6 +72,7 @@ function ResultBadge({ outcome }: { outcome: PlayerOutcome }) {
 }
 
 function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
+  const navigate = useNavigate()
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -89,18 +93,29 @@ function HistoryTable({ matches }: { matches: Array<HistoryMatch> }) {
           {matches.map((m) => (
             <tr
               key={m.id}
-              className="relative border-b transition-colors last:border-b-0 hover:bg-muted/40"
+              onClick={(e) => {
+                // widen the click target to the row, but stay out of the way
+                // of the real link, text selection, and modified clicks
+                if (e.defaultPrevented) return
+                if (e.target instanceof Element && e.target.closest("a")) return
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+                if (window.getSelection()?.toString()) return
+                void navigate({
+                  to: "/matches/$matchId",
+                  params: { matchId: m.id },
+                })
+              }}
+              className="cursor-pointer border-b transition-colors last:border-b-0 hover:bg-muted/40"
             >
               <td className="py-2.5 pr-3 whitespace-nowrap text-muted-foreground tabular-nums">
-                {/* stretched link: covers the whole row (nearest positioned
-                    ancestor is the tr) so a click anywhere opens the match */}
                 <Link
                   to="/matches/$matchId"
                   params={{ matchId: m.id }}
                   aria-label={`Open the ${m.date} match against ${m.opponent}`}
-                  className="absolute inset-0 rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
-                />
-                {m.date}
+                  className="rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                >
+                  {m.date}
+                </Link>
               </td>
               <td className="py-2.5 pr-3 font-medium">{m.opponent}</td>
               <td className="py-2.5 pr-3">
