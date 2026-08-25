@@ -9,7 +9,6 @@ import {
 } from "@/features/dashboard/lib/player-attributes"
 
 import type { PlayerSummary } from "@/lib/schemas/player"
-import type { CSSProperties } from "react"
 
 // The roster card is the full FUT player card, made into a link to the
 // player's page. Identity — frame, photo, name, handedness — comes straight
@@ -22,12 +21,16 @@ import type { CSSProperties } from "react"
 // link (the hover target) stays put — the inner div moves — so the card can't
 // slide out from under the cursor at the edges, and the hovered link is
 // raised in the stacking order so neighbours can't crop the glow. The glow is
-// a drop-shadow, so it follows the shield's alpha, and it transitions from a
-// transparent shadow rather than from no filter so it fades instead of pops.
+// a pre-rendered sprite (the frame silhouette, tinted and blurred, baked by
+// scripts/generate-card-glow.mjs) rather than a runtime drop-shadow filter:
+// engines disagree wildly on filter spread, WebKit clips the filter region,
+// and transitioning a filter re-rasterizes every frame. A sprite renders
+// identically everywhere, and only compositor-friendly properties animate —
+// transform for the lift, opacity for the fade.
 
-const GLOW: Record<"p1" | "p2", string> = {
-  p1: "rgba(224, 120, 66, 0.6)",
-  p2: "rgba(92, 142, 232, 0.6)",
+const GLOW_SPRITES: Record<"p1" | "p2", string> = {
+  p1: "/card-glow-p1.webp",
+  p2: "/card-glow-p2.webp",
 }
 
 export function RosterCard({
@@ -44,10 +47,18 @@ export function RosterCard({
       to="/players/$playerId"
       params={{ playerId: player.id }}
       aria-label={`${player.name} — view profile`}
-      style={{ "--glow": GLOW[side] } as CSSProperties}
       className="group relative block outline-none hover:z-10 focus-visible:z-10"
     >
-      <div className="[filter:drop-shadow(0_0_1.25rem_transparent)] transition-[transform,filter] duration-300 ease-out group-hover:-translate-y-1.5 group-hover:[filter:drop-shadow(0_0_1.25rem_var(--glow))] group-focus-visible:-translate-y-1.5 group-focus-visible:[filter:drop-shadow(0_0_1.25rem_var(--glow))] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+      <div className="relative isolate transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-focus-visible:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+        {/* sprite geometry: the baked padding is 20% of the frame width per
+            side and 12.53% of its height, so those insets land the shield in
+            the sprite exactly over the card */}
+        <img
+          src={GLOW_SPRITES[side]}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute top-[-12.53%] left-[-20%] -z-10 h-[125.06%] w-[140%] max-w-none opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+        />
         <PlayerCard
           name={player.name}
           side={side}
