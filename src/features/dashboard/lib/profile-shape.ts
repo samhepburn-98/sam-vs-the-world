@@ -2,6 +2,7 @@ import {
   ATTRIBUTE_META,
   computePlayerAttributes,
   playerTrait,
+  TRAIT_META,
 } from "@/features/dashboard/lib/player-attributes"
 import {
   MIN_BOX_SERVES,
@@ -252,20 +253,22 @@ function phaseSwingPattern(d: PlayerData): PatternCandidate | null {
 function fallbackPattern(d: PlayerData): ProfileInsight {
   const trait = playerTrait(d)
   const avg = d.rally?.avg_length
-  switch (trait) {
-    case "grinder":
+  // the copy keys off the trait's tempo row — the agency column has its own
+  // reads elsewhere, and this fallback is about the shape of the rally
+  switch (trait === null ? null : TRAIT_META[trait].tempo) {
+    case "long":
       return {
         eyebrow: "Pattern",
         title: "Built for the long game.",
         body: `Rallies average ${avg?.toFixed(1)} shots and the longest ran ${d.rally?.longest} — this game leans on patience.`,
       }
-    case "shotmaker":
+    case "short":
       return {
         eyebrow: "Pattern",
         title: "The rallies stay short.",
         body: `An average rally runs ${avg?.toFixed(1)} shots — the point tends to be decided early, one way or the other.`,
       }
-    case "balanced":
+    case "all":
       return {
         eyebrow: "Pattern",
         title: "No single habit dominates.",

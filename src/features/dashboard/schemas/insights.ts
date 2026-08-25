@@ -8,7 +8,20 @@ import { matchOutcome } from "@/lib/schemas/match"
 // query boundary, so a malformed payload fails loudly there, not as a
 // rendering bug three components deep.
 
-export const signatureTrait = z.enum(["grinder", "shotmaker", "balanced"])
+/** The 3×3 trait matrix (§3.2): tempo band (short / all-court / long) ×
+ *  agency band (finisher / mixed / pressure). Computed in `player_headline`;
+ *  the client only maps keys to labels and copy. */
+export const signatureTrait = z.enum([
+  "sniper",
+  "shotmaker",
+  "enforcer",
+  "marksman",
+  "all_rounder",
+  "grafter",
+  "hunter",
+  "grinder",
+  "wall",
+])
 export type SignatureTrait = z.infer<typeof signatureTrait>
 
 /** One entry of `player_headline.recent_games` — a game result seen from the
@@ -35,7 +48,15 @@ export const playerHeadline = z.object({
   games_decided: z.number().int(),
   matches_won: z.number().int(),
   matches_decided: z.number().int(),
-  signature_trait: signatureTrait.nullable(),
+  /** catch(null): deploy bridge — a client running ahead of the trait-matrix
+   *  migration sees the old grinder/shotmaker/balanced keys and shows no
+   *  trait rather than failing the whole headline parse. */
+  signature_trait: signatureTrait.nullable().catch(null),
+  /** Points won that ended with this player's own winner or ace — the agency
+   *  axis numerator, cited by the signature line (§3.5). Defaulted so the
+   *  pre-migration payload (which lacks them) still parses. */
+  clean_finish_wins: z.number().int().default(0),
+  points_won: z.number().int().default(0),
   recent_games: z.array(headlineGame),
 })
 

@@ -198,52 +198,160 @@ export function heroStat(d: PlayerData): { display: string; label: string } {
   }
 }
 
-export const TRAIT_LABELS: Record<SignatureTrait, string> = {
-  grinder: "Grinder",
-  shotmaker: "Shotmaker",
-  balanced: "Balanced",
+export type TraitTempo = "short" | "all" | "long"
+export type TraitAgency = "finisher" | "mixed" | "pressure"
+
+/** The 3×3 trait matrix (§3.2), one entry per cell — the single source for
+ *  the card banner label, the signature line, the glossary, and the /traits
+ *  reference page. Rows are tempo (where the game lives), columns are agency
+ *  (whose racket ends the points you win). */
+export const TRAIT_META: Record<
+  SignatureTrait,
+  {
+    label: string
+    tempo: TraitTempo
+    agency: TraitAgency
+    /** One-line meaning for the glossary and the traits page. */
+    blurb: string
+  }
+> = {
+  sniper: {
+    label: "Sniper",
+    tempo: "short",
+    agency: "finisher",
+    blurb: "Points end fast, on this player's own clean winner.",
+  },
+  shotmaker: {
+    label: "Shotmaker",
+    tempo: "short",
+    agency: "mixed",
+    blurb: "Lives in short rallies, with points ending every which way.",
+  },
+  enforcer: {
+    label: "Enforcer",
+    tempo: "short",
+    agency: "pressure",
+    blurb: "Points end fast — and it's the opponent's racket that cracks.",
+  },
+  marksman: {
+    label: "Marksman",
+    tempo: "all",
+    agency: "finisher",
+    blurb: "Any rally length, but the finish is this player's own winner.",
+  },
+  all_rounder: {
+    label: "All-Rounder",
+    tempo: "all",
+    agency: "mixed",
+    blurb: "No lean either way — comfortable at every length and finish.",
+  },
+  grafter: {
+    label: "Grafter",
+    tempo: "all",
+    agency: "pressure",
+    blurb: "Works the opponent into errors, point after point.",
+  },
+  hunter: {
+    label: "Hunter",
+    tempo: "long",
+    agency: "finisher",
+    blurb: "Stalks the long rally, then takes the kill personally.",
+  },
+  grinder: {
+    label: "Grinder",
+    tempo: "long",
+    agency: "mixed",
+    blurb: "Wins the wars of attrition — the longer, the better.",
+  },
+  wall: {
+    label: "Wall",
+    tempo: "long",
+    agency: "pressure",
+    blurb: "Everything comes back, until the opponent breaks.",
+  },
 }
+
+export const TRAIT_LABELS = Object.fromEntries(
+  Object.entries(TRAIT_META).map(([key, meta]) => [key, meta.label])
+) as Record<SignatureTrait, string>
 
 function bucketRate(wins: number, rallies: number): number | null {
   return rallies > 0 ? Math.round((wins / rallies) * 100) : null
 }
 
-/** The card's one-line signature read (§3.2): "Grinder — wins 61% of 9+ shot
- *  rallies", etc. Null when the trait can't be called (too few rallies in a
- *  bucket) — the headline RPC already gates that. */
+/** The card's one-line signature read (§3.2): the trait plus the numbers
+ *  that earned it — the tempo bucket's win rate and/or the clean-finish
+ *  share. Null when the trait can't be called; the headline RPC gates that. */
 export function signatureLine(
-  headline: Pick<PlayerHeadline, "signature_trait">,
+  headline: Pick<
+    PlayerHeadline,
+    "signature_trait" | "clean_finish_wins" | "points_won"
+  >,
   lengths: Pick<
     RallyLengths,
-    "long_wins" | "long_rallies" | "short_wins" | "short_rallies"
+    | "short_wins"
+    | "short_rallies"
+    | "medium_wins"
+    | "medium_rallies"
+    | "long_wins"
+    | "long_rallies"
   >
 ) {
-  const long = bucketRate(lengths.long_wins, lengths.long_rallies)
   const short = bucketRate(lengths.short_wins, lengths.short_rallies)
+  const ext = bucketRate(
+    lengths.medium_wins + lengths.long_wins,
+    lengths.medium_rallies + lengths.long_rallies
+  )
+  const clean =
+    headline.points_won > 0
+      ? Math.round((headline.clean_finish_wins / headline.points_won) * 100)
+      : null
+  const given = clean === null ? null : 100 - clean
+
   switch (headline.signature_trait) {
-    case "grinder":
-      return long === null
-        ? "Grinder — stronger the longer the rally"
-        : `Grinder — wins ${long}% of 9+ shot rallies`
+    case "sniper":
+      return short !== null && clean !== null
+        ? `Sniper — wins ${short}% of 1–3 shot rallies, ${clean}% on clean winners`
+        : "Sniper — short points, finished personally"
     case "shotmaker":
-      return short === null
-        ? "Shotmaker — stronger in short rallies"
-        : `Shotmaker — wins ${short}% of 1–3 shot rallies`
-    case "balanced":
-      return "Balanced — no clear long- or short-rally edge"
+      return short !== null
+        ? `Shotmaker — wins ${short}% of 1–3 shot rallies`
+        : "Shotmaker — stronger in short rallies"
+    case "enforcer":
+      return short !== null && given !== null
+        ? `Enforcer — wins ${short}% of 1–3 shot rallies, ${given}% by forcing the error`
+        : "Enforcer — short points, won on pressure"
+    case "marksman":
+      return clean !== null
+        ? `Marksman — ends ${clean}% of won points with a clean winner`
+        : "Marksman — finishes points personally at any length"
+    case "all_rounder":
+      return "All-Rounder — no clear lean by rally length or finish"
+    case "grafter":
+      return given !== null
+        ? `Grafter — ${given}% of points won come from opponent errors`
+        : "Grafter — wins by working the opponent into errors"
+    case "hunter":
+      return ext !== null && clean !== null
+        ? `Hunter — wins ${ext}% of 5+ shot rallies, ${clean}% on clean winners`
+        : "Hunter — long rallies, finished personally"
+    case "grinder":
+      return ext !== null
+        ? `Grinder — wins ${ext}% of 5+ shot rallies`
+        : "Grinder — stronger the longer the rally"
+    case "wall":
+      return ext !== null && given !== null
+        ? `Wall — wins ${ext}% of 5+ shot rallies, ${given}% off opponent errors`
+        : "Wall — outlasts everything until the error comes"
     default:
       return null
   }
 }
 
-/** The card's class line. Prefers the SQL-computed signature_trait; until
- *  there's enough tagged play for that, falls back to the shape of the
- *  average rally — long rallies mark a grinder, short ones a shotmaker. */
+/** The card's class line — a passthrough of the SQL-computed matrix cell.
+ *  The old average-rally-length fallback is gone deliberately: on this
+ *  club's fast games it labelled everyone "shotmaker", and a missing trait
+ *  is more honest than an invented one. */
 export function playerTrait(d: PlayerData): SignatureTrait | null {
-  if (d.headline?.signature_trait) return d.headline.signature_trait
-  const avg = d.rally?.avg_length
-  if (avg == null) return null
-  if (avg >= 6.5) return "grinder"
-  if (avg <= 4.5) return "shotmaker"
-  return "balanced"
+  return d.headline?.signature_trait ?? null
 }
