@@ -134,9 +134,23 @@ The single hero stat on every roster card and player-page header is **win rate**
 **decided** games (games whose last rally left them tied/`is_undecided` are excluded from the
 denominator). All opponents by default; always shown with its denominator (§3.5). Source: `game_results`.
 
-**Signature trait** (the one-liner on the player header): *grinder* if win rate on long rallies (9+
-shots) beats win rate on short rallies (1–3) by ≥10 points; *shotmaker* if the reverse; otherwise
-*balanced*. Requires ≥30 rallies in each bucket, else omitted. Computed in `player_headline`.
+**Signature trait** (the class line on every card): a 3×3 matrix over two measured style axes,
+computed in `player_headline`. **Tempo** (rows) — short-rally (1–3 shot) win rate minus extended
+(5+ shot) win rate; a lean of ≥8 points marks a short- or long-court player. **Agency** (columns) —
+of the points a player wins, the share ended by their own clean winner or ace (vs the opponent's
+error/stroke/fault); ≥55% marks a finisher, ≤43% a pressure player.
+
+|  | finisher | mixed | pressure |
+|---|---|---|---|
+| **short-court** | Sniper | Shotmaker | Enforcer |
+| **all-court** | Marksman | All-Rounder | Grafter |
+| **long-court** | Hunter | Grinder | Wall |
+
+Guards: ≥30 rallies in each tempo bucket and ≥30 points won, else the trait is omitted — there is
+deliberately no fallback (an average-length fallback used to label every player "shotmaker" on this
+club's fast games). Band cutoffs were calibrated against live data on 2026-08-25 so real players
+spread across cells. The in-app reference is the `/traits` page; both it and the card labels are
+single-sourced from `TRAIT_META`.
 
 ### 3.3 The five categories
 
