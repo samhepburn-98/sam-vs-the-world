@@ -30,7 +30,7 @@ import type { CSSProperties } from "react"
 // `1cqi` fallback keeps the server-rendered markup and first paint correct
 // (identical to the px value at 100% zoom, so hydration is seamless).
 
-export const FRAMES: Record<"p1" | "p2", string> = {
+const FRAMES: Record<"p1" | "p2", string> = {
   p1: "/card-frame-p1.png",
   p2: "/card-frame-p2.png",
 }
