@@ -31,7 +31,7 @@ export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
           "h-16 min-w-0 px-2 font-heading text-sm leading-tight tracking-wide whitespace-normal uppercase group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:ring-2 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base",
           side === "p1"
             ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-primary/50"
-            : "bg-p2 text-foreground hover:bg-p2/90 hover:text-foreground data-[state=on]:bg-p2 data-[state=on]:text-foreground data-[state=on]:ring-p2/50"
+            : "bg-p2 text-white hover:bg-p2/90 hover:text-white data-[state=on]:bg-p2 data-[state=on]:text-white data-[state=on]:ring-p2/50"
         )}
         onClick={() => onWinner(side)}
       >

@@ -4,8 +4,9 @@ import type { ReactNode } from "react"
 
 // The ticker: a full-bleed strip in the player-one fill with dark condensed
 // text, straight off a sports broadcast. One line of truth — a result, a
-// status, a headline — never navigation. Items render with generous gaps;
-// give it few, short items.
+// status, a headline — never navigation. The strip runs edge to edge but the
+// text sits in the page column. Items render with generous gaps; give it
+// few, short items.
 
 export function Ticker({
   items,
@@ -17,15 +18,17 @@ export function Ticker({
   return (
     <div
       className={cn(
-        "flex items-center gap-5 overflow-x-auto bg-primary px-4 py-1.5 font-heading text-sm font-bold tracking-[0.1em] whitespace-nowrap text-primary-foreground uppercase",
+        "bg-primary font-heading text-sm font-bold tracking-[0.1em] whitespace-nowrap text-primary-foreground uppercase",
         className
       )}
     >
-      {items.map((item, i) => (
-        <span key={i} className="shrink-0">
-          {item}
-        </span>
-      ))}
+      <div className="container mx-auto flex max-w-5xl items-center gap-5 overflow-x-auto px-4 py-1.5">
+        {items.map((item, i) => (
+          <span key={i} className="shrink-0">
+            {item}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

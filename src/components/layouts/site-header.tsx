@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start"
 import { MenuIcon } from "lucide-react"
 import { useState } from "react"
 
+import { ThemeToggle } from "@/components/layouts/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -92,6 +93,7 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
               Log in
             </Link>
           )}
+          <ThemeToggle />
         </div>
 
         {/* mobile: everything behind one button */}
@@ -175,6 +177,12 @@ function MobileMenu({
             </SheetClose>
           )}
           <div className="my-2 border-t" />
+          <div className="flex items-center justify-between px-2 py-1">
+            <span className="font-heading text-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
+              Theme
+            </span>
+            <ThemeToggle />
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

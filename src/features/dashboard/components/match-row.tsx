@@ -1,16 +1,17 @@
 import { Link } from "@tanstack/react-router"
 
 import { BallDots } from "@/components/ball-dots"
-import { ResultChip } from "@/components/result-chip"
 import { cn } from "@/lib/utils"
 
 import type { BallType } from "@/lib/schemas/enums"
 
 // The match row: one broadcast result graphic per match — names in the
-// display face with the result chip beside them (always read from the
-// first-named player's perspective), the meta line beneath, the score on
-// the right. The home recent-matches list and the full history render the
-// same row, so a match never looks different in two places.
+// display face with the winner's name in their side colour (the same colour
+// law as the score), the meta line beneath, the score on the right. No
+// W/L/D chip here: a neutral list has no "this player" to read it from, so
+// perspective chips live only where one exists (form guides, profiles).
+// The home recent-matches list and the full history render the same row,
+// so a match never looks different in two places.
 
 const MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
 
@@ -64,17 +65,23 @@ export function MatchRow({
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="flex items-baseline gap-2">
           <span className="truncate font-heading text-lg leading-none font-extrabold uppercase">
-            {name1} <span className="font-bold text-muted-foreground">v</span>{" "}
-            {name2}
+            <span className={cn(outcome === "p1" && "text-primary-strong")}>
+              {name1}
+            </span>{" "}
+            <span className="font-bold text-muted-foreground">v</span>{" "}
+            <span className={cn(outcome === "p2" && "text-p2-strong")}>
+              {name2}
+            </span>
           </span>
-          {outcome === "pending" ? (
+          {outcome === "pending" && (
             <span className="font-heading text-[11px] font-bold tracking-[0.1em] text-warning uppercase">
               In play
             </span>
-          ) : (
-            <ResultChip
-              result={outcome === "p1" ? "w" : outcome === "p2" ? "l" : "d"}
-            />
+          )}
+          {outcome === "draw" && (
+            <span className="font-heading text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+              Drawn
+            </span>
           )}
         </span>
         <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
