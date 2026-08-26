@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
 import {
@@ -9,7 +9,7 @@ import {
 import { BallDots } from "@/components/ball-dots"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
-import { Badge } from "@/components/ui/badge"
+import { MatchRow } from "@/features/dashboard/components/match-row"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -31,7 +31,6 @@ import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 import type { MatchesParams } from "@/features/dashboard/api/get-matches"
 import type { BallType } from "@/lib/schemas/enums"
-import type { MatchListRow } from "@/lib/schemas/match"
 
 // Match history (§5.2): every match, newest first — the archive entry point
 // and the drill target where every insight lands. Filters and page live in the
@@ -68,10 +67,6 @@ export const Route = createFileRoute("/matches/")({
   },
   component: MatchesPage,
 })
-
-function formatBadge(format: number | null) {
-  return format === null ? "Casual" : `Best of ${format}`
-}
 
 function MatchesPage() {
   const search = Route.useSearch()
@@ -162,9 +157,22 @@ function MatchesPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <ul className="flex flex-col divide-y">
+        <ul className="flex flex-col gap-1.5">
           {rows.map((m) => (
-            <MatchListItem key={m.match_id} match={m} nameOf={nameOf} />
+            <li key={m.match_id}>
+              <MatchRow
+                matchId={m.match_id}
+                date={m.date}
+                name1={nameOf.get(m.player1_id) ?? "Unknown"}
+                name2={nameOf.get(m.player2_id) ?? "Unknown"}
+                score1={m.games_won_p1}
+                score2={m.games_won_p2}
+                outcome={m.outcome}
+                venue={m.venue}
+                format={m.format}
+                ball={m.ball_type}
+              />
+            </li>
           ))}
         </ul>
       )}
@@ -199,58 +207,5 @@ function MatchesPage() {
         </div>
       )}
     </main>
-  )
-}
-
-function MatchListItem({
-  match,
-  nameOf,
-}: {
-  match: MatchListRow
-  nameOf: Map<string, string>
-}) {
-  const p1 = nameOf.get(match.player1_id) ?? "Unknown"
-  const p2 = nameOf.get(match.player2_id) ?? "Unknown"
-  const hasScore = match.games_won_p1 !== null && match.games_won_p2 !== null
-
-  return (
-    <li>
-      <Link
-        to="/matches/$matchId"
-        params={{ matchId: match.match_id }}
-        search={{ rally: undefined }}
-        className="-mx-2 flex items-center gap-3 rounded-md px-2 py-3 hover:bg-muted/50"
-      >
-        <span className="w-24 shrink-0 text-sm text-muted-foreground tabular-nums">
-          {match.date}
-        </span>
-        <span className="flex-1 truncate text-sm">
-          <span className={match.outcome === "p1" ? "font-semibold" : ""}>
-            {p1}
-          </span>{" "}
-          <span className="text-muted-foreground">vs</span>{" "}
-          <span className={match.outcome === "p2" ? "font-semibold" : ""}>
-            {p2}
-          </span>
-          {match.venue && (
-            <span className="text-muted-foreground"> · {match.venue}</span>
-          )}
-        </span>
-        {hasScore && (
-          <span className="shrink-0 text-sm font-medium tabular-nums">
-            {match.games_won_p1}–{match.games_won_p2}
-          </span>
-        )}
-        {(match.outcome === "draw" || match.outcome === "pending") && (
-          <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-            {match.outcome === "draw" ? "Draw" : "In play"}
-          </span>
-        )}
-        <Badge variant="outline" className="shrink-0">
-          {formatBadge(match.format)}
-        </Badge>
-        {match.ball_type && <BallDots ball={match.ball_type} />}
-      </Link>
-    </li>
   )
 }

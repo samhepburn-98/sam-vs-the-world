@@ -142,3 +142,19 @@ client-side average-rally-length fallback was removed rather than extended: on t
 games it labelled everyone "shotmaker", and a missing trait is more honest than an invented one —
 under-sampled players simply carry no class line. Spec in PROJECT_PLAN §3.2; player-facing
 reference at `/traits`, single-sourced from `TRAIT_META` so the page can't drift from the cards.
+
+## 17. Broadcast is the design language
+
+The app's visual direction is **Broadcast** — sports-TV information graphics — replacing the
+short-lived Ultimate (stadium/prestige) system after a full evaluation of both directions on the
+design canvas. Flat graphite-navy studio surfaces in three steps (deep 0.14 / floor 0.16 / panel
+0.21), **square corners everywhere** (`--radius: 0`), Barlow Condensed as the display voice with
+skewed lozenge badges, accent-bar callouts, full-bleed tickers, and deep score strips. **The colour
+law:** the two team colours are the only accents, and every value that belongs to a player wears
+their side (`--primary/--primary-strong` ember, `--p2/--p2-strong` blue); results speak through the
+semantic status tokens (W/L/D chips). **What it buys:** a system built for data-dense features —
+every future stat has a native graphic shape (ticker, callout, strip, row) — and the FUT player
+cards (kept, per the original brief) read as the one crafted object against flat graphics. **What
+it costs:** the Ultimate gradients, gold accent, spotlight staging, and card-glow hover sprites,
+all retired; no light theme (a studio has one lighting rig). Live reference: `/storybook`
+Foundations pages.

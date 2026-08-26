@@ -16,7 +16,8 @@ import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
 import { BallDots } from "@/components/ball-dots"
-import { PageTitle, SectionTitle } from "@/components/typography"
+import { Overline, SectionTitle } from "@/components/typography"
+import { ScoreStrip } from "@/components/score-strip"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -175,25 +176,31 @@ function MatchDetailPage() {
             </span>
           )}
         </div>
-        <PageTitle className="flex items-baseline gap-3">
-          {/* the winner wears their own side's colour, same convention as the
-              duel: player one ember, player two blue */}
-          <span className={cn(verdict.outcome === "p1" && "text-primary")}>
-            {p1Name}
-          </span>
-          <span className="tabular-nums">
-            {gamesWonP1}–{gamesWonP2}
-          </span>
-          <span className={cn(verdict.outcome === "p2" && "text-p2-strong")}>
-            {p2Name}
-          </span>
-        </PageTitle>
-        {verdict.outcome === "draw" && (
-          <p className="text-sm text-muted-foreground">Drawn.</p>
-        )}
-        {verdict.outcome === "pending" && (
-          <p className="text-sm text-muted-foreground">In play.</p>
-        )}
+        {/* the full-time graphic: status overline, then the deep score strip
+            with the winner's score in their side's colour */}
+        <div className="flex flex-col gap-1.5 pt-1">
+          <Overline
+            as="h2"
+            tone={verdict.outcome === "pending" ? "primary" : "muted"}
+          >
+            {verdict.outcome === "pending"
+              ? "In play"
+              : verdict.outcome === "draw"
+                ? "Drawn"
+                : "Full time"}
+          </Overline>
+          <ScoreStrip
+            name1={p1Name}
+            name2={p2Name}
+            score1={gamesWonP1}
+            score2={gamesWonP2}
+            outcome={
+              verdict.outcome === "p1" || verdict.outcome === "p2"
+                ? verdict.outcome
+                : null
+            }
+          />
+        </div>
         {user && (
           <div className="pt-1">
             <Button asChild variant="outline" size="sm">

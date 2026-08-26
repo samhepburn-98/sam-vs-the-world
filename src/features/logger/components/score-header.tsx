@@ -43,7 +43,7 @@ export function ScoreHeader({
       <button
         type="button"
         onClick={onToggleSide}
-        className="cursor-pointer rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+        className="cursor-pointer border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
       >
         {draft.serveSide === "left" ? "Left" : "Right"} box{" "}
         <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
@@ -52,7 +52,7 @@ export function ScoreHeader({
         <button
           type="button"
           onClick={onToggleServeNumber}
-          className="cursor-pointer rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          className="cursor-pointer border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
         >
           {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}{" "}
           <Kbd>{HOTKEY_HINTS.serveNumber}</Kbd>

@@ -20,6 +20,7 @@ const match = (over: Partial<MatchResultSummary> = {}): MatchResultSummary => ({
   games_won_p2: 1,
   match_winner_id: SAM,
   ball_type: null,
+  venue: null,
   outcome: "p1",
   ...over,
 })

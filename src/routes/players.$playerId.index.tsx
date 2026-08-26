@@ -80,10 +80,27 @@ function PlayerProfilePage() {
       <ProfileHero header={header} />
 
       <Tabs defaultValue="summary">
-        <TabsList aria-label="Profile sections">
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
-          <TabsTrigger value="matches">Matches</TabsTrigger>
+        {/* broadcast segmented tabs: square, condensed, the active segment
+            takes the ember fill */}
+        <TabsList
+          aria-label="Profile sections"
+          className="w-full gap-0.5 rounded-none bg-transparent p-0"
+        >
+          {(
+            [
+              { value: "summary", label: "Summary" },
+              { value: "stats", label: "Stats" },
+              { value: "matches", label: "Matches" },
+            ] as const
+          ).map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="flex-1 rounded-none border-0 bg-card font-heading text-sm font-extrabold tracking-[0.1em] text-muted-foreground uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
         <TabsContent value="summary" className="pt-4">
           <ProfileSummaryTab

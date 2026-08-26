@@ -39,7 +39,7 @@ export function H2hTable({ rows }: { rows: Array<H2hRow> }) {
               <td className="py-2.5 pr-3">
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-success/80"
+                    className="h-full bg-success/80"
                     style={{ width: `${row.share}%` }}
                   />
                 </div>

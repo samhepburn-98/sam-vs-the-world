@@ -80,13 +80,15 @@ export function DuelCenter({
               {Math.round((1 - dominance) * 100)}%
             </span>
           </div>
-          <div className="flex h-2 overflow-hidden rounded-full">
+          {/* square broadcast split with the hairline notch at the boundary */}
+          <div className="flex h-2">
             <div
               style={{
-                width: `${dominance * 100}%`,
+                width: `calc(${dominance * 100}% - 1px)`,
                 backgroundColor: P1_COLOR,
               }}
             />
+            <div className="w-0.5 bg-background" />
             <div className="flex-1" style={{ backgroundColor: P2_COLOR }} />
           </div>
         </div>
