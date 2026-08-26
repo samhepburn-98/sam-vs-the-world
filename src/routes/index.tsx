@@ -55,14 +55,14 @@ function tickerDate(iso: string) {
   return `${d} ${MONTHS[m - 1]}`
 }
 
-/** The one-line result for the ticker: winner first, "d." for a decision. */
+/** The one-line result for the ticker: winner first, in plain words. */
 function tickerLine(m: MatchResultSummary, nameOf: Map<string, string>) {
   const p1 = nameOf.get(m.player1_id) ?? "Unknown"
   const p2 = nameOf.get(m.player2_id) ?? "Unknown"
   const s1 = m.games_won_p1 ?? 0
   const s2 = m.games_won_p2 ?? 0
-  if (m.outcome === "p1") return `${p1} d. ${p2} ${s1}–${s2}`
-  if (m.outcome === "p2") return `${p2} d. ${p1} ${s2}–${s1}`
+  if (m.outcome === "p1") return `${p1} beat ${p2} ${s1}–${s2}`
+  if (m.outcome === "p2") return `${p2} beat ${p1} ${s2}–${s1}`
   if (m.outcome === "draw") return `${p1} ${s1}–${s2} ${p2} · drawn`
   return `In play · ${p1} v ${p2}`
 }
