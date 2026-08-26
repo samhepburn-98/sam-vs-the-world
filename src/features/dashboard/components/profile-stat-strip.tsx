@@ -1,5 +1,5 @@
-import { CountUp } from "@/components/count-up"
 import { Overline } from "@/components/typography"
+import { StatTile } from "@/components/stat-tile"
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
@@ -83,23 +83,13 @@ export function ProfileStatStrip({
       </Overline>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
-          <div
+          <StatTile
             key={t.label}
-            className="rounded-xl bg-card p-3 ring-1 ring-foreground/10"
-          >
-            <p className="text-2xl font-bold tabular-nums">
-              {t.value === null ? (
-                <span className="text-muted-foreground">—</span>
-              ) : (
-                <CountUp
-                  value={t.value}
-                  decimals={t.decimals ?? 0}
-                  suffix={t.suffix ?? ""}
-                />
-              )}
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{t.label}</p>
-          </div>
+            label={t.label}
+            value={t.value}
+            suffix={t.suffix}
+            decimals={t.decimals}
+          />
         ))}
       </div>
     </section>
