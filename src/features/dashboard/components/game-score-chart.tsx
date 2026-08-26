@@ -38,7 +38,7 @@ export function GameScoreChart({
   // adapt to light/dark via theme tokens.
   const config = {
     p1: { label: p1Name, color: "var(--primary)" },
-    p2: { label: p2Name, color: "var(--foreground)" },
+    p2: { label: p2Name, color: "var(--p2)" },
   } satisfies ChartConfig
 
   return (

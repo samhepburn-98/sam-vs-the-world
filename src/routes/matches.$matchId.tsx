@@ -176,13 +176,15 @@ function MatchDetailPage() {
           )}
         </div>
         <PageTitle className="flex items-baseline gap-3">
+          {/* the winner wears their own side's colour, same convention as the
+              duel: player one ember, player two blue */}
           <span className={cn(verdict.outcome === "p1" && "text-primary")}>
             {p1Name}
           </span>
           <span className="tabular-nums">
             {gamesWonP1}–{gamesWonP2}
           </span>
-          <span className={cn(verdict.outcome === "p2" && "text-primary")}>
+          <span className={cn(verdict.outcome === "p2" && "text-p2-strong")}>
             {p2Name}
           </span>
         </PageTitle>
@@ -227,7 +229,7 @@ function MatchDetailPage() {
             className={cn(
               "rounded-lg px-4 py-2 text-sm font-medium tabular-nums ring-1 ring-foreground/10 transition-colors hover:bg-muted/60",
               g.winner === m.player1_id && "bg-primary/10",
-              g.winner === m.player2_id && "bg-primary/10"
+              g.winner === m.player2_id && "bg-p2/10"
             )}
           >
             <span className="mr-2 text-xs text-muted-foreground">

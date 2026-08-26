@@ -7,6 +7,7 @@ import { Duel } from "@/features/dashboard/components/duel"
 import { DuelModeToggle } from "@/features/dashboard/components/duel-mode-toggle"
 import { DuelPicker } from "@/features/dashboard/components/duel-picker"
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
+import { Atmosphere } from "@/components/atmosphere"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
 import {
@@ -80,6 +81,9 @@ function ComparePage() {
 
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-8 px-3 py-8 sm:gap-10 sm:px-4 sm:py-12">
+      {/* with a duel on screen, the split atmosphere overrides the root's solo
+          glow — ember for player one's side, blue for player two's */}
+      {ready && <Atmosphere tone="duel" />}
       <header className="flex items-start justify-between gap-4">
         <div>
           <PageTitle>Compare players</PageTitle>

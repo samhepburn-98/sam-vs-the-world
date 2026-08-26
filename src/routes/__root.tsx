@@ -7,6 +7,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 
+import { Atmosphere } from "@/components/atmosphere"
 import { PageStub } from "@/components/page-stub"
 import { SiteHeader } from "@/components/layouts/site-header"
 import { fetchUser } from "@/lib/auth/functions"
@@ -87,6 +88,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {/* outside RouteFade so the backdrop never re-fades on navigation */}
+        <Atmosphere />
         <Header />
         <RouteFade>{children}</RouteFade>
         <TanStackDevtools
