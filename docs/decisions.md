@@ -156,5 +156,20 @@ semantic status tokens (W/L/D chips). **What it buys:** a system built for data-
 every future stat has a native graphic shape (ticker, callout, strip, row) — and the FUT player
 cards (kept, per the original brief) read as the one crafted object against flat graphics. **What
 it costs:** the Ultimate gradients, gold accent, spotlight staging, and card-glow hover sprites,
-all retired; no light theme (a studio has one lighting rig). Live reference: `/storybook`
-Foundations pages.
+all retired. Live reference: `/storybook`
+Foundations pages. (Amended by decision 18: a designed light rig joined the system.)
+
+## 18. The daylight rig — a designed light theme
+
+Broadcast gains a light palette ("daylight studio"): paper-grey floor, white panels, a darker-grey
+deep step, deepened side/status tones for text on light — same graphics language, inverted
+lighting. **Why:** a real usage report, not a preference — the dark studio was hard to read in a
+bright room, and the person reporting it is the app's one daily user. **Mechanics:** light values
+live on `:root`, the night rig under `.dark`; the three-state theme machinery (light/dark/system,
+no-flash script, header toggle) returned from git history unchanged. Fills (`--primary`/`--p2`)
+and their on-fill text are shared between rigs; only surfaces, text tones, and the per-side strong
+tones swap — so the ticker, lozenge, tabs, and buttons need no theme-specific code. The FUT cards
+use hard-coded `text-white` internally and render identically on both rigs. **What it costs:**
+every future graphic is designed against both rigs (Storybook's Theme toolbar exists for exactly
+this), and the light palette was designed in code, not from boards — conservative paper neutrals,
+the team colours doing the talking.

@@ -1,19 +1,35 @@
 import { themes } from "storybook/theming"
 
-import type { Preview } from "@storybook/react-vite"
+import type { Decorator, Preview } from "@storybook/react-vite"
 
 import "../src/styles.css"
 
-// Ultimate is dark-only; mirror the app's permanent root class so shadcn's
-// dark: refinements are active in stories too.
-document.documentElement.classList.add("dark")
-document.documentElement.style.colorScheme = "dark"
+// Two lighting rigs (see styles.css): stories default to the night studio
+// and the toolbar switches to daylight, mirroring the app's theme class.
+const withTheme: Decorator = (Story, context) => {
+  const dark = context.globals.theme !== "light"
+  document.documentElement.classList.toggle("dark", dark)
+  document.documentElement.style.colorScheme = dark ? "dark" : "light"
+  return Story()
+}
 
 const preview: Preview = {
+  decorators: [withTheme],
+  globalTypes: {
+    theme: {
+      description: "Studio lighting rig",
+      toolbar: {
+        title: "Theme",
+        icon: "mirror",
+        items: ["dark", "light"],
+        dynamicTitle: true,
+      },
+    },
+  },
+  initialGlobals: { theme: "dark" },
   parameters: {
     layout: "centered",
-    // dark-only system, dark docs canvas — the app's light foreground text
-    // would wash out on Storybook's default white docs pages
+    // the docs shell stays dark; story canvases follow the toolbar theme
     docs: { theme: themes.dark },
     // The app's surfaces come from its own tokens; Storybook's background
     // switcher would paint colors that exist nowhere in the system.

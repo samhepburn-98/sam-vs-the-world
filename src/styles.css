@@ -11,24 +11,70 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Broadcast palette (docs: /storybook → Foundations). The studio look:
-   flat graphite-navy surfaces, square corners, and the two team colours as
-   the only accents — every number that belongs to a player wears their
-   colour. Dark-only by design (a broadcast studio has one lighting rig);
-   <html> carries a permanent `dark` class so shadcn's dark: refinements
-   stay active. No gradients anywhere: panels are flat, depth comes from
-   the three surface steps and the accent bars. */
+   flat surfaces in three depth steps, square corners, and the two team
+   colours as the only accents — every number that belongs to a player wears
+   their colour. Two lighting rigs, same studio: the daylight rig on :root
+   (paper-grey floor, white panels) and the night rig under .dark (the
+   graphite-navy the boards were drawn in). The theme follows the system by
+   default and persists an explicit choice (src/lib/theme.ts). Fills
+   (--primary/--p2) and their on-fill text are shared; only the surfaces,
+   text tones, and per-side strong tones swap. No gradients anywhere:
+   depth comes from the surface steps and the accent bars. */
 :root {
+  --background: oklch(0.955 0.005 250);
+  --foreground: oklch(0.17 0.02 255);
+  /* raised surface — panels, rows, callouts */
+  --card: oklch(0.99 0.002 250);
+  --card-foreground: oklch(0.17 0.02 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.02 255);
+  /* player one's ember: --primary for fills (dark text on it),
+     --primary-strong for text on the theme's surfaces — mirrored by --p2 */
+  --primary: oklch(0.62 0.19 40);
+  --primary-foreground: oklch(0.14 0.02 255);
+  --primary-strong: oklch(0.553 0.195 38.402);
+  --p2: oklch(0.62 0.21 260);
+  --p2-strong: oklch(0.546 0.245 262.881);
+  --secondary: oklch(0.93 0.008 250);
+  --secondary-foreground: oklch(0.25 0.02 255);
+  --muted: oklch(0.92 0.008 250);
+  /* L 0.5 clears AA as text on the paper-grey floor and white panels */
+  --muted-foreground: oklch(0.5 0.02 255);
+  --accent: oklch(0.9 0.01 250);
+  --accent-foreground: oklch(0.2 0.02 255);
+  --destructive: oklch(0.577 0.245 27.325);
+  /* the deep panel — scorebugs and full-time strips sit BELOW the
+     background, one step darker than the studio floor */
+  --panel-deep: oklch(0.88 0.01 250);
+  /* semantic status colors (Jira-style), deepened to read as text on light */
+  --success: oklch(0.596 0.145 163.225);
+  --error: oklch(0.577 0.245 27.325);
+  --warning: oklch(0.666 0.179 58.318);
+  --info: oklch(0.546 0.245 262.881);
+  --discovery: oklch(0.558 0.288 302.321);
+  --border: oklch(0.87 0.01 250);
+  --input: oklch(0.89 0.01 250);
+  --ring: oklch(0.62 0.19 40);
+  /* single-hue ember ramp — deeper steps so every band reads on light */
+  --chart-1: oklch(0.72 0.15 42);
+  --chart-2: oklch(0.65 0.17 41);
+  --chart-3: oklch(0.58 0.18 40);
+  --chart-4: oklch(0.5 0.16 40);
+  --chart-5: oklch(0.42 0.13 40);
+  /* Broadcast is square. Graphics are cut, not rounded. */
+  --radius: 0px;
+}
+
+.dark {
   --background: oklch(0.16 0.02 255);
   --foreground: oklch(0.97 0.005 250);
-  /* raised surface — panels, rows, callouts */
   --card: oklch(0.21 0.025 255);
   --card-foreground: oklch(0.97 0.005 250);
   --popover: oklch(0.24 0.03 255);
   --popover-foreground: oklch(0.97 0.005 250);
-  /* player one's ember: --primary for fills (dark text on it),
-       --primary-strong for text on dark surfaces — mirrored by --p2 */
   --primary: oklch(0.62 0.19 40);
   --primary-foreground: oklch(0.14 0.02 255);
+  /* lifted tones so the side colours read as text on dark surfaces */
   --primary-strong: oklch(0.72 0.17 42);
   --p2: oklch(0.62 0.21 260);
   --p2-strong: oklch(0.71 0.17 255);
@@ -39,10 +85,7 @@
   --accent: oklch(0.26 0.03 255);
   --accent-foreground: oklch(0.97 0.005 250);
   --destructive: oklch(0.704 0.191 22.216);
-  /* the deep panel — scorebugs and full-time strips sit BELOW the
-       background, one step darker than the studio floor */
   --panel-deep: oklch(0.14 0.02 255);
-  /* semantic status colors (Jira-style), lifted to read on dark */
   --success: oklch(0.696 0.17 162.48);
   --error: oklch(0.704 0.191 22.216);
   --warning: oklch(0.769 0.188 70.08);
@@ -51,15 +94,11 @@
   --border: oklch(0.35 0.02 255);
   --input: oklch(0.32 0.02 255);
   --ring: oklch(0.62 0.19 40);
-  /* single-hue ember ramp, light → dark, for charts that need ordered
-       steps of one color (error breakdown, momentum) */
   --chart-1: oklch(0.8 0.11 45);
   --chart-2: oklch(0.72 0.15 42);
   --chart-3: oklch(0.62 0.19 40);
   --chart-4: oklch(0.52 0.16 40);
   --chart-5: oklch(0.44 0.12 40);
-  /* Broadcast is square. Graphics are cut, not rounded. */
-  --radius: 0px;
 }
 
 @theme inline {
@@ -128,6 +167,9 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  html.dark {
     color-scheme: dark;
   }
 }
