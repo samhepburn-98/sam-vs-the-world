@@ -96,7 +96,7 @@ function PlayerProfilePage() {
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="flex-1 rounded-none border-0 bg-card font-heading text-sm font-extrabold tracking-[0.1em] text-muted-foreground uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="flex-1 rounded-none border-0 bg-card font-heading text-sm font-extrabold tracking-[0.1em] text-muted-foreground uppercase data-active:bg-primary data-active:text-primary-foreground dark:data-active:border-transparent dark:data-active:bg-primary dark:data-active:text-primary-foreground"
             >
               {tab.label}
             </TabsTrigger>
