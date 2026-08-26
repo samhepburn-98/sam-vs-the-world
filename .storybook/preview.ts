@@ -2,6 +2,11 @@ import type { Preview } from "@storybook/react-vite"
 
 import "../src/styles.css"
 
+// Ultimate is dark-only; mirror the app's permanent root class so shadcn's
+// dark: refinements are active in stories too.
+document.documentElement.classList.add("dark")
+document.documentElement.style.colorScheme = "dark"
+
 const preview: Preview = {
   parameters: {
     layout: "centered",
@@ -10,7 +15,12 @@ const preview: Preview = {
     backgrounds: { disable: true },
     options: {
       storySort: {
-        order: ["Foundations", "Typography", "UI"],
+        order: [
+          "Foundations",
+          ["Overview", "Colors", "Typography", "The ten rules"],
+          "Typography",
+          "UI",
+        ],
       },
     },
   },
