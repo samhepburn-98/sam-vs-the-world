@@ -128,7 +128,14 @@ export function RallyTimeline({
                 ) : (
                   <>
                     <span className="text-right">{p1Won && cell}</span>
-                    <span className="self-center text-center text-xs font-semibold text-muted-foreground tabular-nums">
+                    {/* the running score wears the rally winner's colour —
+                        the spine tells the story at a scroll */}
+                    <span
+                      className={cn(
+                        "self-center text-center font-heading text-xs font-semibold tabular-nums",
+                        p1Won ? "text-primary" : "text-p2-strong"
+                      )}
+                    >
                       {score.p1}–{score.p2}
                     </span>
                     <span>{!p1Won && cell}</span>

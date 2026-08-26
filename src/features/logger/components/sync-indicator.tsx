@@ -38,8 +38,20 @@ export function SyncIndicator({ queue }: { queue: WriteQueue }) {
   }
 
   return (
-    <p className="text-right text-xs text-muted-foreground" aria-live="polite">
-      {state.pending > 0 ? `Syncing ${state.pending}…` : "Synced ✓"}
+    <p
+      className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground"
+      aria-live="polite"
+    >
+      {state.pending > 0 ? (
+        `Syncing ${state.pending}…`
+      ) : (
+        <>
+          <span aria-hidden className="size-1.5 rounded-full bg-success" />
+          <span className="font-heading text-[11px] font-semibold tracking-[0.14em] uppercase">
+            Synced
+          </span>
+        </>
+      )}
     </p>
   )
 }

@@ -61,37 +61,41 @@ export function ScoreHeader({
     </span>
   )
 
-  const side = (name: string, points: number, serving: boolean) => (
+  // each side wears its own colour — the score always reads ember vs blue,
+  // and the serve is marked by the gold dot, not by dimming the receiver
+  const side = (
+    name: string,
+    points: number,
+    serving: boolean,
+    colorClass: string
+  ) => (
     <div className="text-center">
       <button
         type="button"
         onClick={onToggleServer}
         title="Tap to change the server"
-        className={cn(
-          "cursor-pointer text-sm font-bold tracking-wide uppercase transition-colors",
-          serving ? "" : "text-muted-foreground"
-        )}
+        className="cursor-pointer font-heading text-sm font-bold tracking-wide uppercase transition-colors"
       >
         {name}
-        {serving && <span className="ml-1.5 text-primary">●</span>}
+        {serving && <span className="ml-1.5 text-gold">●</span>}
       </button>
       <p
         className={cn(
-          "mt-1 text-6xl font-bold tabular-nums sm:text-7xl",
-          serving ? "" : "text-muted-foreground"
+          "mt-1 font-heading text-6xl font-bold tabular-nums sm:text-7xl",
+          colorClass
         )}
       >
         {points}
       </p>
       {serving ? (
         <>
-          <span className="mt-1.5 block text-[11px] text-muted-foreground/60">
+          <span className="mt-1.5 block font-heading text-[10px] font-semibold tracking-[0.16em] text-gold uppercase">
             Serving
           </span>
           {chips}
         </>
       ) : (
-        <span className="mt-1.5 block text-[11px] text-muted-foreground/60">
+        <span className="mt-1.5 block font-heading text-[10px] font-semibold tracking-[0.16em] text-muted-foreground/60 uppercase">
           Receiving
         </span>
       )}
@@ -104,9 +108,9 @@ export function ScoreHeader({
         Game {gameNumber} · {rulesLine}
       </p>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        {side(p1Name, score.p1, p1Serving)}
+        {side(p1Name, score.p1, p1Serving, "text-primary")}
         <span className="pb-4 text-3xl text-muted-foreground/50">–</span>
-        {side(p2Name, score.p2, !p1Serving)}
+        {side(p2Name, score.p2, !p1Serving, "text-p2-strong")}
       </div>
     </section>
   )

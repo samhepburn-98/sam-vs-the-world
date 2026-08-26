@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { cn } from "@/lib/utils"
 
 // The primary action: who won the rally — a real single-choice group, with
 // the slim let between the two sides (a let saves immediately, no chips, so
@@ -21,10 +22,17 @@ interface WinnerButtonsProps {
 
 export const WinnerButtons = forwardRef<HTMLDivElement, WinnerButtonsProps>(
   function WinnerButtons({ p1Name, p2Name, selected, onWinner, onLet }, ref) {
+    // each button wears its player's colour — ember left, blue right — the
+    // same convention as the score above it
     const winnerItem = (side: "p1" | "p2", name: string) => (
       <ToggleGroupItem
         value={side}
-        className="h-16 min-w-0 bg-primary px-2 text-sm leading-tight tracking-wide whitespace-normal text-primary-foreground uppercase hover:bg-primary/90 hover:text-primary-foreground group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-2 data-[state=on]:ring-primary/50 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base"
+        className={cn(
+          "h-16 min-w-0 px-2 font-heading text-sm leading-tight tracking-wide whitespace-normal uppercase group-has-data-[state=on]/winners:data-[state=off]:border group-has-data-[state=on]/winners:data-[state=off]:border-input group-has-data-[state=on]/winners:data-[state=off]:bg-background group-has-data-[state=on]/winners:data-[state=off]:text-foreground group-has-data-[state=on]/winners:data-[state=off]:opacity-60 data-[state=on]:ring-2 data-[state=on]:ring-offset-2 sm:px-6 sm:text-base",
+          side === "p1"
+            ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:ring-primary/50"
+            : "bg-p2 text-foreground hover:bg-p2/90 hover:text-foreground data-[state=on]:bg-p2 data-[state=on]:text-foreground data-[state=on]:ring-p2/50"
+        )}
         onClick={() => onWinner(side)}
       >
         <Kbd>
