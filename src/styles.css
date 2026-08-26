@@ -2,136 +2,185 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/nunito-sans";
-@import "@fontsource-variable/merriweather";
+@import "@fontsource/chakra-petch/500.css";
+@import "@fontsource/chakra-petch/600.css";
+@import "@fontsource/chakra-petch/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* Ultimate palette (docs: /storybook → Foundations). Dark-only by design —
+   the atmosphere gradients, earned gold, and baked card glows only work
+   against near-black, so there is no light theme and no toggle. <html>
+   carries a permanent `dark` class so shadcn's dark: refinements (opacity
+   mixes tuned for dark surfaces) stay active; tokens are defined once, here. */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.153 0.006 107.1);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.153 0.006 107.1);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.153 0.006 107.1);
-    --primary: oklch(0.553 0.195 38.402);
-    --primary-foreground: oklch(0.98 0.016 73.684);
-    /* player-two accent (compare): --p2 for graphical fills, --p2-strong for
-       text — the deeper tone that clears AA on the surface behind it */
-    --p2: oklch(0.623 0.214 259.815);
-    --p2-strong: oklch(0.546 0.245 262.881);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.966 0.005 106.5);
-    /* L 0.54 clears WCAG AA (4.5:1) for text on white and on muted surfaces */
-    --muted-foreground: oklch(0.54 0.031 107.3);
-    --accent: oklch(0.966 0.005 106.5);
-    --accent-foreground: oklch(0.228 0.013 107.4);
-    --destructive: oklch(0.577 0.245 27.325);
-    /* semantic status colors (Jira-style): deeper tones so each clears AA as
-       text on light surfaces; fills can use opacity modifiers */
-    --success: oklch(0.596 0.145 163.225);
-    --error: oklch(0.577 0.245 27.325);
-    --warning: oklch(0.666 0.179 58.318);
-    --info: oklch(0.546 0.245 262.881);
-    --discovery: oklch(0.558 0.288 302.321);
-    --border: oklch(0.93 0.007 106.5);
-    --input: oklch(0.93 0.007 106.5);
-    --ring: oklch(0.737 0.021 106.9);
-    --chart-1: oklch(0.808 0.114 19.571);
-    --chart-2: oklch(0.637 0.237 25.331);
-    --chart-3: oklch(0.577 0.245 27.325);
-    --chart-4: oklch(0.505 0.213 27.518);
-    --chart-5: oklch(0.444 0.177 26.899);
-    --radius: 0.625rem;
-}
-
-.dark {
-    --background: oklch(0.153 0.006 107.1);
-    --foreground: oklch(0.988 0.003 106.5);
-    --card: oklch(0.228 0.013 107.4);
-    --card-foreground: oklch(0.988 0.003 106.5);
-    --popover: oklch(0.228 0.013 107.4);
-    --popover-foreground: oklch(0.988 0.003 106.5);
-    /* brighter orange so it reads as an accent on dark (AA as text), with a
-       dark foreground for legible text on primary-filled buttons */
-    --primary: oklch(0.68 0.17 42);
-    --primary-foreground: oklch(0.2 0.03 40);
-    /* lighter blue for text on dark; the graphical fill can stay saturated */
-    --p2: oklch(0.623 0.214 259.815);
-    --p2-strong: oklch(0.707 0.165 254.624);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.286 0.016 107.4);
-    --muted-foreground: oklch(0.737 0.021 106.9);
-    --accent: oklch(0.286 0.016 107.4);
-    --accent-foreground: oklch(0.988 0.003 106.5);
-    --destructive: oklch(0.704 0.191 22.216);
-    /* brighter status tones so they read as accents on dark surfaces */
-    --success: oklch(0.696 0.17 162.48);
-    --error: oklch(0.704 0.191 22.216);
-    --warning: oklch(0.769 0.188 70.08);
-    --info: oklch(0.707 0.165 254.624);
-    --discovery: oklch(0.714 0.203 305.504);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.58 0.031 107.3);
-    --chart-1: oklch(0.808 0.114 19.571);
-    --chart-2: oklch(0.637 0.237 25.331);
-    --chart-3: oklch(0.577 0.245 27.325);
-    --chart-4: oklch(0.505 0.213 27.518);
-    --chart-5: oklch(0.444 0.177 26.899);
+  --background: oklch(0.13 0.01 60);
+  --foreground: oklch(0.96 0.01 80);
+  /* raised surface — panels, cards, plaque interiors */
+  --card: oklch(0.19 0.025 55);
+  --card-foreground: oklch(0.96 0.01 80);
+  /* popovers float above cards, so one step lighter again */
+  --popover: oklch(0.22 0.03 55);
+  --popover-foreground: oklch(0.96 0.01 80);
+  /* player one — Sam's ember. Dark foreground: text on ember fills must be
+       dark to clear AA, the fill is too bright for white */
+  --primary: oklch(0.62 0.19 40);
+  --primary-foreground: oklch(0.14 0.015 60);
+  /* player-two accent (compare): --p2 for graphical fills, --p2-strong for
+       text — lifted lightness so blue clears AA on the dark surfaces */
+  --p2: oklch(0.62 0.21 260);
+  --p2-strong: oklch(0.72 0.14 255);
+  /* chip / secondary-action surface, slightly recessed from card */
+  --secondary: oklch(0.18 0.02 58);
+  --secondary-foreground: oklch(0.88 0.015 75);
+  --muted: oklch(0.16 0.02 55);
+  /* L 0.72 is the muted text tone; L 0.62 is the floor for text that must
+       be read (rule 08) — anything dimmer is decoration */
+  --muted-foreground: oklch(0.72 0.03 70);
+  --accent: oklch(0.22 0.03 55);
+  --accent-foreground: oklch(0.96 0.01 80);
+  --destructive: oklch(0.704 0.191 22.216);
+  /* semantic status colors (Jira-style), lifted to read on dark surfaces.
+       Warning sits at hue 85 — deliberately yellower than gold (hue 70) so
+       caution never masquerades as prestige */
+  --success: oklch(0.696 0.17 162.48);
+  --error: oklch(0.704 0.191 22.216);
+  --warning: oklch(0.83 0.17 85);
+  --info: oklch(0.72 0.14 255);
+  --discovery: oklch(0.714 0.203 305.504);
+  /* the prestige accent (rule 05): traits, verdicts, hero scores, the VS
+       badge. Never chrome, never navigation, never data encoding */
+  --gold: oklch(0.78 0.14 70);
+  --border: oklch(0.3 0.04 55);
+  --input: oklch(0.28 0.03 55);
+  --ring: oklch(0.62 0.19 40);
+  /* single-hue ember ramp, light → dark, for charts that need ordered
+       steps of one color (error breakdown, momentum) */
+  --chart-1: oklch(0.8 0.11 45);
+  --chart-2: oklch(0.72 0.15 42);
+  --chart-3: oklch(0.62 0.19 40);
+  --chart-4: oklch(0.52 0.16 40);
+  --chart-5: oklch(0.44 0.12 40);
+  --radius: 0.625rem;
 }
 
 @theme inline {
-    --font-sans: 'Nunito Sans Variable', sans-serif;
-    --font-heading: 'Merriweather Variable', serif;
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-success: var(--success);
-    --color-error: var(--error);
-    --color-warning: var(--warning);
-    --color-info: var(--info);
-    --color-discovery: var(--discovery);
-    --color-p2: var(--p2);
-    --color-p2-strong: var(--p2-strong);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  --font-sans: "Nunito Sans Variable", sans-serif;
+  /* the display voice: shouts in uppercase — headings, labels, scores */
+  --font-heading: "Chakra Petch", "Trebuchet MS", sans-serif;
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-discovery: var(--discovery);
+  --color-gold: var(--gold);
+  --color-p2: var(--p2);
+  --color-p2-strong: var(--p2-strong);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* The four gradients (rule 03) — the complete list. A gradient anywhere else
+   (a fill, a bar, a chart, text) is a bug: the atmosphere does the glowing so
+   the data never has to. */
+
+/* warm glow at the top of a screen; one per screen, always behind everything */
+@utility bg-atmosphere {
+  background-color: oklch(0.13 0.01 60);
+  background-image: radial-gradient(
+    ellipse 120% 80% at 50% -10%,
+    oklch(0.3 0.06 45) 0%,
+    oklch(0.17 0.015 60) 60%,
+    oklch(0.13 0.01 60) 100%
+  );
+}
+
+/* the head-to-head split: ember glow left, blue glow right (Versus screens) */
+@utility bg-atmosphere-duel {
+  background-color: oklch(0.13 0.01 60);
+  background-image:
+    radial-gradient(
+      ellipse 85% 90% at 22% 30%,
+      oklch(0.28 0.06 45) 0%,
+      oklch(0.14 0.012 60) 55%
+    ),
+    radial-gradient(
+      ellipse 85% 90% at 78% 30%,
+      oklch(0.26 0.07 260) 0%,
+      oklch(0.13 0.01 60) 60%
+    );
+}
+
+/* behind the one staged card per screen (rule 02) — player's own color */
+@utility bg-spotlight-p1 {
+  background-image: radial-gradient(
+    circle,
+    oklch(0.62 0.19 40 / 0.4) 0%,
+    oklch(0.62 0.19 40 / 0) 68%
+  );
+}
+@utility bg-spotlight-p2 {
+  background-image: radial-gradient(
+    circle,
+    oklch(0.62 0.21 260 / 0.4) 0%,
+    oklch(0.62 0.21 260 / 0) 68%
+  );
+}
+
+/* the earned edge: a ~1.5px padded wrapper around a plaque, gold → ember
+   (blue variant for player-two plaques) */
+@utility bg-plaque-edge {
+  background-image: linear-gradient(
+    160deg,
+    oklch(0.78 0.14 70) 0%,
+    oklch(0.4 0.1 40) 100%
+  );
+}
+@utility bg-plaque-edge-p2 {
+  background-image: linear-gradient(
+    160deg,
+    oklch(0.68 0.16 255) 0%,
+    oklch(0.35 0.09 260) 100%
+  );
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+    color-scheme: dark;
+  }
 }
