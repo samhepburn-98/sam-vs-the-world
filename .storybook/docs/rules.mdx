@@ -1,0 +1,86 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+<Meta title="Foundations/The ten rules" />
+
+export const Rule = ({ n, title, children }) => (
+  <div
+    style={{
+      display: "flex",
+      gap: 14,
+      background: "var(--card)",
+      border: "1px solid var(--border)",
+      borderRadius: 12,
+      padding: "12px 16px",
+    }}
+  >
+    <span
+      className="font-heading"
+      style={{ fontWeight: 700, fontSize: 15, color: "var(--gold)", flex: "0 0 26px" }}
+    >
+      {n}
+    </span>
+    <span style={{ fontSize: 14, lineHeight: 1.55 }}>
+      <strong>{title}</strong> {children}
+    </span>
+  </div>
+)
+
+# The ten rules
+
+What keeps Ultimate a design system instead of a costume. Every rule exists to
+stop the same failure: atmosphere leaking into data.
+
+<Unstyled>
+<div className="text-foreground" style={{ display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 32px", fontFamily: "var(--font-sans)" }}>
+  <Rule n="01" title="The card is the brightest object on screen.">
+    Nothing may out-glow, out-saturate, or out-decorate it. If a surface
+    competes with the card, mute the surface.
+  </Rule>
+  <Rule n="02" title="One spotlight per screen.">
+    Exactly one staged card gets a glow. Roster grids and list rows never glow
+    — a collection shines by being many, not by each shining.
+  </Rule>
+  <Rule n="03" title="Four gradients, no more.">
+    Atmosphere, duel atmosphere, spotlight, plaque edge. A gradient anywhere
+    else — on a fill, a bar, a chart, text — is a bug.
+  </Rule>
+  <Rule n="04" title="Data is flat.">
+    Charts, bars, and tables sit on flat panels in flat colour: player orange,
+    player blue, neutrals, and the status tokens. Gold never encodes data.
+  </Rule>
+  <Rule n="05" title="Gold is earned.">
+    The prestige accent marks traits, verdicts, hero scores, and the VS badge
+    — things the data awarded. It never decorates chrome, navigation, or idle
+    states.
+  </Rule>
+  <Rule n="06" title="Two voices, strict jobs.">
+    Chakra Petch shouts in uppercase: headings, labels, scores. Nunito Sans
+    speaks in sentences: prose, receipts, table numbers. Neither borrows the
+    other's job.
+  </Rule>
+  <Rule n="07" title="Receipts survive the redesign.">
+    Every rate shows its denominator; under-sampled values show a quiet dash,
+    never an invented number. Game UI dresses the truth, it does not replace
+    it.
+  </Rule>
+  <Rule n="08" title="Contrast is non-negotiable.">
+    Body text on any surface clears WCAG AA. The muted label tone (oklch 0.62)
+    is the floor for text that must be read; anything dimmer is decoration.
+  </Rule>
+  <Rule n="09" title="Motion is compositor-only and rare.">
+    Transform and opacity, 300ms ease-out, on hero moments (card lift, tab
+    slide, count-up). No animated filters, no animated gradients — the Safari
+    sprite lesson is law.
+  </Rule>
+  <Rule n="10" title="Phone-first, thumb-first.">
+    Every surface designs at 390px first; hit targets are 44px minimum; the
+    logger works one-handed mid-game. Desktop is the phone layout given room,
+    not a different app.
+  </Rule>
+</div>
+</Unstyled>
+
+**Migration note**: Ultimate is dark-only, so the light palette and theme
+toggle are retired; `--gold` joined the tokens; Merriweather left the font
+stack. Typography lands via the existing `PageTitle` / `SectionTitle` /
+`Overline` primitives — same seams, new voice.

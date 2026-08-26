@@ -4,17 +4,15 @@ import type { ComponentProps } from "react"
 
 // The heading voice of the app, as composable primitives rather than a type
 // scale: every page title, section title, and overline label renders through
-// one of these, so the sizes can't drift between pages. Body copy stays on
-// plain Tailwind utilities.
+// one of these, so the sizes can't drift between pages. The voice is Ultimate's
+// display face (Chakra Petch, uppercase — rule 06: it shouts); body copy stays
+// on Nunito Sans via plain Tailwind utilities.
 
-/** Top-of-page h1 — serif, one size everywhere. */
+/** Top-of-page h1 — display face, one size everywhere. */
 export function PageTitle({ className, ...props }: ComponentProps<"h1">) {
   return (
     <h1
-      className={cn(
-        "font-heading text-3xl font-bold tracking-tight",
-        className
-      )}
+      className={cn("font-heading text-3xl font-bold uppercase", className)}
       {...props}
     />
   )
@@ -24,7 +22,7 @@ export function PageTitle({ className, ...props }: ComponentProps<"h1">) {
 export function SectionTitle({ className, ...props }: ComponentProps<"h2">) {
   return (
     <h2
-      className={cn("font-heading text-xl font-bold", className)}
+      className={cn("font-heading text-xl font-bold uppercase", className)}
       {...props}
     />
   )
@@ -45,7 +43,7 @@ export function Overline({
   return (
     <Tag
       className={cn(
-        "text-xs font-medium tracking-widest uppercase",
+        "font-heading text-xs font-semibold tracking-[0.2em] uppercase",
         tone === "primary" ? "text-primary" : "text-muted-foreground",
         className
       )}

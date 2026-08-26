@@ -1,0 +1,145 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Foundations/Colors" />
+
+export const Swatch = ({ token, note }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 10,
+        background: `var(${token})`,
+        border: "1px solid var(--border)",
+        flexShrink: 0,
+      }}
+    />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <code style={{ fontSize: 13 }}>{token}</code>
+      {note ? <span style={{ fontSize: 12, opacity: 0.7 }}>{note}</span> : null}
+    </div>
+  </div>
+)
+
+export const SwatchGrid = ({ children }) => (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+      gap: 16,
+      margin: "16px 0 32px",
+    }}
+  >
+    {children}
+  </div>
+)
+
+export const GradientCard = ({ className, name, note }) => (
+  <div
+    className={className}
+    style={{
+      borderRadius: 12,
+      border: "1px solid var(--border)",
+      height: 96,
+      padding: 12,
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-end",
+    }}
+  >
+    <code style={{ fontSize: 13 }}>{name}</code>
+    <span style={{ fontSize: 12, opacity: 0.7 }}>{note}</span>
+  </div>
+)
+
+# Colors
+
+Every color below renders from the **live CSS variables** in `src/styles.css`.
+Ultimate is dark-only: the palette is defined once on `:root`, there is no
+theme toggle, and there is deliberately no light variant — the atmosphere
+gradients, earned gold, and baked card glows only work against near-black.
+
+## Core palette
+
+<SwatchGrid>
+  <Swatch token="--background" note="The near-black ground" />
+  <Swatch token="--foreground" note="Primary text" />
+  <Swatch token="--card" note="Raised surface — panels, plaques" />
+  <Swatch token="--popover" note="Floats above cards" />
+  <Swatch token="--primary" note="Player one — Sam's ember" />
+  <Swatch token="--p2" note="Player two — graphical fills" />
+  <Swatch token="--p2-strong" note="Player two — text on dark surfaces" />
+  <Swatch token="--secondary" note="Chip / secondary-action surface" />
+  <Swatch token="--muted" note="Recessed surface" />
+  <Swatch token="--muted-foreground" note="Muted text — L 0.62 is the readable floor" />
+  <Swatch token="--border" />
+  <Swatch token="--input" />
+</SwatchGrid>
+
+## Gold
+
+<SwatchGrid>
+  <Swatch token="--gold" note="The prestige accent" />
+</SwatchGrid>
+
+**Gold is earned** (rule 05). It marks traits, verdicts, hero scores, and the
+VS badge — things the data awarded. It never decorates chrome, navigation, or
+idle states, and it never encodes data.
+
+## Status tokens
+
+Jira-style semantic tokens, lifted to read on dark surfaces. Win/loss
+colouring, trends, and callouts use these — never raw palette values. Warning
+sits at hue 85, deliberately yellower than gold (hue 70), so caution never
+masquerades as prestige.
+
+<SwatchGrid>
+  <Swatch token="--success" note="Wins, improving trends" />
+  <Swatch token="--error" note="Losses, declining trends" />
+  <Swatch token="--warning" note="Caution, under-sampled" />
+  <Swatch token="--info" note="Neutral information" />
+  <Swatch token="--discovery" note="New or highlighted" />
+</SwatchGrid>
+
+## Chart ramp
+
+A single-hue ember ramp, light to dark, for charts that need ordered steps of
+one color (error breakdown, momentum). Player comparisons use `--primary` vs
+`--p2` instead.
+
+<SwatchGrid>
+  <Swatch token="--chart-1" />
+  <Swatch token="--chart-2" />
+  <Swatch token="--chart-3" />
+  <Swatch token="--chart-4" />
+  <Swatch token="--chart-5" />
+</SwatchGrid>
+
+## The four gradients — the complete list
+
+A gradient anywhere else — on a fill, a bar, a chart, text — is a bug
+(rule 03). The atmosphere does the glowing so the data never has to. Each is a
+Tailwind utility defined in `styles.css`.
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, margin: "16px 0 32px" }}>
+  <GradientCard
+    className="bg-atmosphere"
+    name="bg-atmosphere"
+    note="Warm glow at top · one per screen, always behind everything"
+  />
+  <GradientCard
+    className="bg-atmosphere-duel"
+    name="bg-atmosphere-duel"
+    note="Head-to-head split: ember left, blue right (Versus)"
+  />
+  <GradientCard
+    className="bg-spotlight-p1"
+    name="bg-spotlight-p1 / -p2"
+    note="Radial in the player's colour · behind the one staged card per screen"
+  />
+  <GradientCard
+    className="bg-plaque-edge"
+    name="bg-plaque-edge / -p2"
+    note="Gold → ember edge on a ~1.5px padded wrapper (blue variant for player two)"
+  />
+</div>
