@@ -10,8 +10,14 @@ import {
 } from "@/features/dashboard/api/get-player-h2h"
 import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
 import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
+import {
+  recordsQueryOptions,
+  useRecords,
+} from "@/features/dashboard/api/get-records"
 import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
 import { ProfileHero } from "@/features/dashboard/components/profile-hero"
+import { RecordsWall } from "@/features/dashboard/components/record-tile"
+import { buildRecordTiles } from "@/features/dashboard/lib/record-display"
 import { ProfileMatchesTab } from "@/features/dashboard/components/profile-matches-tab"
 import { ProfileStatsTab } from "@/features/dashboard/components/profile-stats-tab"
 import { ProfileSummaryTab } from "@/features/dashboard/components/profile-summary-tab"
@@ -20,6 +26,7 @@ import { computeH2h } from "@/features/dashboard/lib/profile-h2h"
 import { computeProfileHeader } from "@/features/dashboard/lib/profile-header"
 import { computeProfileShape } from "@/features/dashboard/lib/profile-shape"
 import { computeProfileStats } from "@/features/dashboard/lib/profile-stats"
+import { Overline } from "@/components/typography"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
@@ -41,6 +48,7 @@ export const Route = createFileRoute("/players/$playerId/")({
       context.queryClient.ensureQueryData(decisiveShotsOptions(id, {})),
       context.queryClient.ensureQueryData(playerH2hQueryOptions(id)),
       context.queryClient.ensureQueryData(playersQueryOptions()),
+      context.queryClient.ensureQueryData(recordsQueryOptions()),
     ])
   },
   component: PlayerProfilePage,
@@ -51,6 +59,7 @@ function PlayerProfilePage() {
   const data = usePlayerInsights(playerId, {})
   const players = usePlayers()
   const h2hMatches = usePlayerH2h(playerId)
+  const records = useRecords()
   const player = players.data?.find((p) => p.id === playerId)
 
   if (!player) {
@@ -75,9 +84,24 @@ function PlayerProfilePage() {
   const errors = computeProfileErrors(data)
   const h2h = computeH2h(playerId, h2hMatches.data ?? [], nameOf)
 
+  // the trophy shelf: all-time records this player holds, ember because on
+  // their own page every record on show is theirs. Hidden when they hold
+  // none — an empty shelf is dead air, not honesty.
+  const held = buildRecordTiles(
+    (records.data ?? []).filter((r) => r.player_id === playerId),
+    nameOf
+  )
+
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
       <ProfileHero header={header} />
+
+      {held.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <Overline as="h2">Records held</Overline>
+          <RecordsWall records={held} tone="p1" />
+        </section>
+      )}
 
       <Tabs defaultValue="summary">
         {/* broadcast segmented tabs: square, condensed, the active segment

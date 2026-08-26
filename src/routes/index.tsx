@@ -6,7 +6,9 @@ import { Overline, PageTitle } from "@/components/typography"
 import { Ticker } from "@/components/ticker"
 import { FeaturedPlayer } from "@/features/dashboard/components/featured-player"
 import { MatchRow } from "@/features/dashboard/components/match-row"
+import { RecordsWall } from "@/features/dashboard/components/record-tile"
 import { RosterRow } from "@/features/dashboard/components/roster-row"
+import { buildRecordTiles } from "@/features/dashboard/lib/record-display"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -23,6 +25,10 @@ import {
   recentResultsQueryOptions,
   useRecentResults,
 } from "@/features/dashboard/api/get-recent-results"
+import {
+  recordsQueryOptions,
+  useRecords,
+} from "@/features/dashboard/api/get-records"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
 import type { MatchResultSummary } from "@/lib/schemas/match"
@@ -41,6 +47,7 @@ export const Route = createFileRoute("/")({
     await Promise.all([
       queryClient.ensureQueryData(recentResultsQueryOptions()),
       queryClient.ensureQueryData(homeCountsQueryOptions()),
+      queryClient.ensureQueryData(recordsQueryOptions()),
       // warm each player's stats so the rundown is complete in the SSR markup
       ...players.map((p) => prefetchPlayerInsights(queryClient, p.id)),
     ])
@@ -94,10 +101,15 @@ function HomePage() {
   const roster = usePlayers()
   const results = useRecentResults()
   const counts = useHomeCounts()
+  const records = useRecords()
 
   const players = roster.data ?? []
   const nameOf = new Map(players.map((p) => [p.id, p.name]))
   const recent = results.data ?? []
+  const recordTiles = buildRecordTiles(
+    records.data ?? [],
+    (id) => nameOf.get(id) ?? "Unknown"
+  )
 
   // the featured slot goes to the protagonist; everyone else is the roster
   const featured: PlayerSummary | undefined =
@@ -219,6 +231,14 @@ function HomePage() {
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {/* the records wall */}
+        {recordTiles.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <Overline as="h2">The numbers</Overline>
+            <RecordsWall records={recordTiles} />
           </section>
         )}
       </div>

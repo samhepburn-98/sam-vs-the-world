@@ -173,3 +173,20 @@ use hard-coded `text-white` internally and render identically on both rigs. **Wh
 every future graphic is designed against both rigs (Storybook's Theme toolbar exists for exactly
 this), and the light palette was designed in code, not from boards — conservative paper neutrals,
 the team colours doing the talking.
+
+## 19. The records wall — first achiever holds, tiles anchor to their match
+
+The home rundown gains "The numbers" — an all-time records wall (biggest win, longest rally, best
+streak, marathon game, most aces / most lets in a match) — and profiles gain "Records held". **The
+rules:** a record is held by the *first* achiever until *strictly* beaten (the real-world records
+convention — ties don't transfer silverware); an unheld record renders nothing (no dash walls);
+draws break win streaks, in-play matches neither extend nor break them; aces use the derived
+definition (the server's 1-shot winner), and the marathon counts lets — it measures time on court.
+**The colour rule that matters:** each tile wears the holder's side *in the match the record was
+set in* — not a per-page perspective, not decorative alternation — so the tile always agrees with
+the match page it links to; match-owned records (marathon, lets) wear a neutral bar. A profile is
+the one perspective page: there, held records paint in the player's own ember. **Mechanics:** one
+`records()` RPC (union-all of per-record blocks, each liftable into its own function the day a
+second caller appears), one global query key both screens share, presentation in a pure tested
+lib, and the fetch drops record keys the deployed client doesn't know — a database one migration
+ahead must never break the home page.
