@@ -1,3 +1,5 @@
+import { themes } from "storybook/theming"
+
 import type { Preview } from "@storybook/react-vite"
 
 import "../src/styles.css"
@@ -10,6 +12,9 @@ document.documentElement.style.colorScheme = "dark"
 const preview: Preview = {
   parameters: {
     layout: "centered",
+    // dark-only system, dark docs canvas — the app's light foreground text
+    // would wash out on Storybook's default white docs pages
+    docs: { theme: themes.dark },
     // The app's surfaces come from its own tokens; Storybook's background
     // switcher would paint colors that exist nowhere in the system.
     backgrounds: { disable: true },

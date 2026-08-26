@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 <Meta title="Foundations/The ten rules" />
 
@@ -30,7 +30,8 @@ export const Rule = ({ n, title, children }) => (
 What keeps Ultimate a design system instead of a costume. Every rule exists to
 stop the same failure: atmosphere leaking into data.
 
-<div style={{ display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 32px" }}>
+<Unstyled>
+<div className="text-foreground" style={{ display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 32px", fontFamily: "var(--font-sans)" }}>
   <Rule n="01" title="The card is the brightest object on screen.">
     Nothing may out-glow, out-saturate, or out-decorate it. If a surface
     competes with the card, mute the surface.
@@ -77,6 +78,7 @@ stop the same failure: atmosphere leaking into data.
     not a different app.
   </Rule>
 </div>
+</Unstyled>
 
 **Migration note**: Ultimate is dark-only, so the light palette and theme
 toggle are retired; `--gold` joined the tokens; Merriweather left the font

@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { Overline, PageTitle, SectionTitle } from "../../src/components/typography"
 
 <Meta title="Foundations/Typography" />
@@ -19,20 +19,22 @@ Every title in the app renders through `PageTitle`, `SectionTitle`, or
 `Overline` (`src/components/typography.tsx`) — the sizes cannot drift between
 pages because there is exactly one place they are defined.
 
-<div style={{ display: "flex", flexDirection: "column", gap: 24, background: "var(--background)", border: "1px solid var(--border)", borderRadius: 12, padding: 24, margin: "16px 0 32px" }}>
-  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <Overline>Overline · muted tone</Overline>
-    <PageTitle>Page title</PageTitle>
+<Unstyled>
+  <div className="text-foreground" style={{ display: "flex", flexDirection: "column", gap: 24, background: "var(--background)", border: "1px solid var(--border)", borderRadius: 12, padding: 24, margin: "16px 0 32px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <Overline>Overline · muted tone</Overline>
+      <PageTitle>Page title</PageTitle>
+    </div>
+    <SectionTitle>Section title</SectionTitle>
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <Overline tone="primary">Overline · primary tone</Overline>
+      <p className="text-sm text-muted-foreground" style={{ margin: 0 }}>
+        Body copy in Nunito Sans. Receipts, explanations, and table numbers all
+        speak in this voice — sentence case, no tracking, no shouting.
+      </p>
+    </div>
   </div>
-  <SectionTitle>Section title</SectionTitle>
-  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-    <Overline tone="primary">Overline · primary tone</Overline>
-    <p className="text-sm text-muted-foreground" style={{ margin: 0 }}>
-      Body copy in Nunito Sans. Receipts, explanations, and table numbers all
-      speak in this voice — sentence case, no tracking, no shouting.
-    </p>
-  </div>
-</div>
+</Unstyled>
 
 ## Rules of the voice
 
