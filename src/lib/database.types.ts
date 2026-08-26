@@ -788,6 +788,19 @@ export type Database = {
           signature_trait: string
         }[]
       }
+      records: {
+        Args: never
+        Returns: {
+          record_key: string
+          player_id: string | null
+          player1_id: string
+          player2_id: string
+          value: number
+          detail: string | null
+          match_id: string
+          date: string
+        }[]
+      }
       rally_length_rallies: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
