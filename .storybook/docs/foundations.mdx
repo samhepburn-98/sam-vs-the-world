@@ -1,0 +1,90 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Foundations/Overview" />
+
+export const Swatch = ({ token, note }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 10,
+        background: `var(${token})`,
+        border: "1px solid var(--border)",
+        flexShrink: 0,
+      }}
+    />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <code style={{ fontSize: 13 }}>{token}</code>
+      {note ? <span style={{ fontSize: 12, opacity: 0.7 }}>{note}</span> : null}
+    </div>
+  </div>
+)
+
+export const SwatchGrid = ({ children }) => (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+      gap: 16,
+      margin: "16px 0 32px",
+    }}
+  >
+    {children}
+  </div>
+)
+
+# Sam vs the World — design system
+
+This Storybook is the living reference for the app's components and tokens.
+Every reusable component gets a story here; the pages of the app are
+compositions of what you see in the sidebar.
+
+The swatches below render from the **live CSS variables** in `src/styles.css` —
+they cannot drift from the app. When the Ultimate redesign lands, this page
+re-colors itself.
+
+## Core palette
+
+<SwatchGrid>
+  <Swatch token="--background" />
+  <Swatch token="--foreground" />
+  <Swatch token="--primary" note="Player one — Sam" />
+  <Swatch token="--p2" note="Player two — graphical fills" />
+  <Swatch token="--p2-strong" note="Player two — text on light surfaces" />
+  <Swatch token="--muted" />
+  <Swatch token="--muted-foreground" />
+  <Swatch token="--border" />
+</SwatchGrid>
+
+## Status tokens
+
+Jira-style semantic tokens. Win/loss colouring, trends, and callouts use
+these — never raw palette values.
+
+<SwatchGrid>
+  <Swatch token="--success" note="Wins, improving trends" />
+  <Swatch token="--error" note="Losses, declining trends" />
+  <Swatch token="--warning" note="Caution, under-sampled" />
+  <Swatch token="--info" note="Neutral information" />
+  <Swatch token="--discovery" note="New or highlighted" />
+</SwatchGrid>
+
+## Rules of the road
+
+- **Semantic over raw.** Components reference tokens (`text-success`,
+  `bg-p2`), never one-off colours.
+- **Headings are componentised.** `PageTitle`, `SectionTitle`, and `Overline`
+  are the only way titles render — see Typography/Headings.
+- **Charts are recharts** wherever a chart type exists for the data; court
+  visuals stay hand-drawn SVG.
+- **Phone-first.** Every surface works at 390px with 44px hit targets before
+  it earns a desktop layout.
+
+## Where things go
+
+- `src/components/ui` — shadcn primitives, themed by tokens only.
+- `src/components` — shared composed components (typography, court, rally).
+- `src/features/*` — feature-specific components; a feature never imports a
+  sibling feature.
+- Stories live next to their component as `*.stories.tsx`.
