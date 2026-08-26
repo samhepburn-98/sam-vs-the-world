@@ -72,7 +72,7 @@ export function StatCard({
           <p className="flex items-baseline gap-1.5">
             {rate ? (
               <>
-                <span className="text-3xl font-bold">
+                <span className="font-heading text-3xl font-bold">
                   <CountUp value={pct(rate)} suffix="%" />
                 </span>
                 <span className="text-sm text-muted-foreground tabular-nums">
@@ -81,7 +81,7 @@ export function StatCard({
               </>
             ) : (
               <>
-                <span className="text-3xl font-bold tabular-nums">
+                <span className="font-heading text-3xl font-bold tabular-nums">
                   {typeof value === "number" ? (
                     <CountUp
                       value={value}

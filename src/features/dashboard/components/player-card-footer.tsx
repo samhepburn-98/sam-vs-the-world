@@ -19,7 +19,10 @@ export function PlayerCardFooter({
         {trait && (
           <>
             {" · "}
-            <span className="font-semibold">{TRAIT_LABELS[trait]}</span>
+            {/* earned, so it speaks in the display voice and wears gold */}
+            <span className="font-heading text-[10px] font-semibold tracking-[0.14em] text-gold uppercase">
+              {TRAIT_LABELS[trait]}
+            </span>
           </>
         )}
         {" · measured"}

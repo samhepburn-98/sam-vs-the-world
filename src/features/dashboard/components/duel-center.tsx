@@ -3,6 +3,7 @@ import { useState } from "react"
 
 import { DuelAttributeRow } from "@/features/dashboard/components/duel-attribute-row"
 import { Button } from "@/components/ui/button"
+import { Plaque } from "@/components/plaque"
 
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
@@ -96,15 +97,19 @@ export function DuelCenter({
         ))}
       </div>
 
-      <div className="mt-10 text-center md:mt-14">
+      {/* the verdict is earned, so it gets the plaque edge and — when someone
+          actually leads — the gold (an all-square verdict earned nobody it) */}
+      <Plaque className="mt-10 md:mt-14" innerClassName="py-4 text-center">
         <p className="text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
           On the stats
         </p>
-        <p className="mt-1.5 font-heading text-3xl leading-tight">
+        <p
+          className={`mt-1.5 font-heading text-3xl leading-tight uppercase ${leader ? "text-gold" : ""}`}
+        >
           {leader ?? "All square"}
         </p>
         <p className="mt-0.5 text-sm text-muted-foreground">{tallyLine}</p>
-      </div>
+      </Plaque>
 
       <div className="mt-8 overflow-hidden rounded-xl ring-1 ring-border">
         <p className="py-2.5 text-center text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
