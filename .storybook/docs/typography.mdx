@@ -1,36 +1,53 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
-import { Overline, PageTitle, SectionTitle } from "../../src/components/typography"
+import {
+  Overline,
+  PageTitle,
+  SectionTitle,
+} from "../../src/components/typography"
 
 <Meta title="Foundations/Typography" />
 
 # Typography
 
-Two voices with strict jobs (rule 06), and neither borrows the other's:
+Two Barlow voices with strict jobs, and neither borrows the other's:
 
-- **Chakra Petch** shouts in uppercase — headings, labels, scores. It renders
-  through the `font-heading` utility and, for titles, only ever through the
-  three primitives below.
-- **Nunito Sans** speaks in sentences — prose, receipts, table numbers. It is
-  the default `font-sans` on `<html>`, so body copy needs no font class at all.
+- **Barlow Condensed** (600/700/800) shouts in uppercase — headlines,
+  straps, section labels, scores, the brand lozenge. It renders through the
+  `font-heading` utility and, for titles, only ever through the three
+  primitives below.
+- **Barlow** (400/500/600) speaks in sentences — prose, receipts, table
+  numbers. It is the default `font-sans` on `<html>`, so body copy needs no
+  font class at all.
 
 ## The heading primitives
 
 Every title in the app renders through `PageTitle`, `SectionTitle`, or
-`Overline` (`src/components/typography.tsx`) — the sizes cannot drift between
-pages because there is exactly one place they are defined.
+`Overline` (`src/components/typography.tsx`) — the sizes cannot drift
+between pages because there is exactly one place they are defined.
 
 <Unstyled>
-  <div className="text-foreground" style={{ display: "flex", flexDirection: "column", gap: 24, background: "var(--background)", border: "1px solid var(--border)", borderRadius: 12, padding: 24, margin: "16px 0 32px" }}>
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <Overline>Overline · muted tone</Overline>
-      <PageTitle>Page title</PageTitle>
+  <div
+    className="text-foreground"
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 24,
+      background: "var(--background)",
+      border: "1px solid var(--border)",
+      padding: 24,
+      margin: "16px 0 32px",
+    }}
+  >
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <Overline>Overline label</Overline>
+      <PageTitle>Every rally, counted.</PageTitle>
     </div>
-    <SectionTitle>Section title</SectionTitle>
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <Overline tone="primary">Overline · primary tone</Overline>
+    <SectionTitle>Head to head</SectionTitle>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <Overline tone="primary">Primary overline</Overline>
       <p className="text-sm text-muted-foreground" style={{ margin: 0 }}>
-        Body copy in Nunito Sans. Receipts, explanations, and table numbers all
-        speak in this voice — sentence case, no tracking, no shouting.
+        Body copy in Barlow. Receipts, explanations, and table numbers all speak
+        in this voice — sentence case, no tracking, no shouting.
       </p>
     </div>
   </div>
@@ -38,11 +55,12 @@ pages because there is exactly one place they are defined.
 
 ## Rules of the voice
 
-- **Scores and stat values** are Chakra Petch with `tabular-nums`, so columns
-  of numbers align.
-- **Uppercase belongs to the display face only.** Nunito Sans is never
-  uppercased; Chakra Petch headings always are.
-- **The muted label tone** (`--muted-foreground`) is the floor for text that
-  must be read (rule 08); anything dimmer is decoration.
-- **Weights**: Chakra Petch ships at 500 / 600 / 700 — no light weights, the
-  display voice doesn't whisper. Nunito Sans is variable.
+- **Scores and stat values** are Barlow Condensed extrabold with
+  `tabular-nums`, so columns of numbers align.
+- **Uppercase belongs to the display face only.** Barlow is never
+  uppercased; condensed headings always are.
+- **The skew is a badge treatment, not a text style**: `skew-badge` leans
+  the lozenge, `skew-badge-text` counter-skews the text upright. Only
+  brand marks and the VS get it.
+- **The muted tone** (`--muted-foreground`) is the floor for text that must
+  be read; anything dimmer is decoration.

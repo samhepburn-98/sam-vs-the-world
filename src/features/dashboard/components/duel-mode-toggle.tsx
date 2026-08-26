@@ -19,7 +19,7 @@ export function DuelModeToggle({
     <div
       role="tablist"
       aria-label="Comparison scope"
-      className="inline-flex items-center gap-1 rounded-full bg-muted p-1"
+      className="inline-flex items-center gap-0.5 bg-muted p-0.5"
     >
       {options.map((o) => {
         const active = mode === o.value
@@ -31,7 +31,7 @@ export function DuelModeToggle({
             aria-selected={active}
             onClick={() => onChange(o.value)}
             className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              "px-4 py-1.5 font-heading text-sm font-bold tracking-[0.08em] uppercase transition-colors",
               active
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

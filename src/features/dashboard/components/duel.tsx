@@ -146,6 +146,7 @@ export function Duel({
             name={player2.name}
             trait={playerTrait(d2)}
             pills={pills.p2}
+            side="p2"
           />
         </div>
       </div>

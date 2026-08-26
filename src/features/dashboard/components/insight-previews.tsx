@@ -35,7 +35,7 @@ export function ErrorSplitPreview({ errors }: { errors: ErrorProfile }) {
   const seg = (n: number) => `${(n / total) * 100}%`
   return (
     <div className="w-full">
-      <div className="flex h-3 w-full overflow-hidden rounded-full">
+      <div className="flex h-3 w-full overflow-hidden">
         <div
           className="bg-primary"
           style={{ width: seg(errors.unforced_errors) }}

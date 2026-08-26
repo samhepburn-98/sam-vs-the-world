@@ -1,4 +1,12 @@
-# The roster card hover glow
+# The roster card hover glow (retired)
+
+> **Status: retired.** The Broadcast redesign (decision 17) replaced the home
+> card grid with roster rows, so nothing renders these sprites any more and
+> they are deleted from `public/`. The technique below — pre-rendered glow
+> sprites over live `drop-shadow`, compositor-only animation — remains the
+> playbook if a card glow ever returns; `scripts/generate-card-glow.mjs`
+> still bakes the sprites.
+
 
 The glow behind a roster card on hover is **not** a CSS `drop-shadow` — it is a
 pre-rendered image: the card frame's silhouette, tinted to the frame's colour,

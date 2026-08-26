@@ -98,6 +98,7 @@ export const matchResultSummary = z.object({
   games_won_p2: z.number().int().nullable(),
   match_winner_id: z.string().uuid().nullable(),
   ball_type: ballType.nullable(),
+  venue: z.string().nullable(),
   outcome: matchOutcome,
 })
 
@@ -106,7 +107,6 @@ export type MatchResultSummary = z.infer<typeof matchResultSummary>
 /** The match history row (§5.2): the derived result plus the badges the list
  *  shows. From `match_results`; names resolved separately. */
 export const matchListRow = matchResultSummary.extend({
-  venue: z.string().nullable(),
   format: z.number().nullable(),
   target_score: z.number().int(),
 })

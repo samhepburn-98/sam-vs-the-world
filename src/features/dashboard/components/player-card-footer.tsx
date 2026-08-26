@@ -1,4 +1,5 @@
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
+import { TraitChip } from "@/components/trait-chip"
 
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 
@@ -7,10 +8,12 @@ export function PlayerCardFooter({
   name,
   trait,
   pills,
+  side = "p1",
 }: {
   name: string
   trait: SignatureTrait | null
   pills: Array<string>
+  side?: "p1" | "p2"
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
@@ -19,10 +22,9 @@ export function PlayerCardFooter({
         {trait && (
           <>
             {" · "}
-            {/* earned, so it speaks in the display voice and wears gold */}
-            <span className="font-heading text-[10px] font-semibold tracking-[0.14em] text-gold uppercase">
+            <TraitChip tone={side} className="text-[11px]">
               {TRAIT_LABELS[trait]}
-            </span>
+            </TraitChip>
           </>
         )}
         {" · measured"}
@@ -32,7 +34,7 @@ export function PlayerCardFooter({
           {pills.map((pill) => (
             <li
               key={pill}
-              className="rounded-full px-2.5 py-0.5 text-[10px] text-muted-foreground ring-1 ring-border"
+              className="px-2.5 py-0.5 text-[10px] text-muted-foreground ring-1 ring-border"
             >
               {pill}
             </li>

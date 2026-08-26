@@ -9,6 +9,9 @@ export const playerSummary = z.object({
   // full public storage URL (with a ?v= cache-buster), or null for the
   // silhouette fallback
   avatar_url: z.string().nullable(),
+  // the first-person player the app fronts (home featured slot) — display
+  // ordering only, never a stats distinction
+  is_protagonist: z.boolean().catch(false),
 })
 
 export type PlayerSummary = z.infer<typeof playerSummary>

@@ -4,9 +4,9 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # Sam vs the World — design system
 
-This Storybook is the living reference for the app's **Ultimate** design
-system: stadium-at-night surfaces built around the FUT-style player cards.
-Every reusable component gets a story here; the pages of the app are
+This Storybook is the living reference for the app's **Broadcast** design
+system: sports-TV information graphics built around the FUT-style player
+cards. Every reusable component gets a story here; the pages of the app are
 compositions of what you see in the sidebar.
 
 Everything renders from the **live CSS variables** in `src/styles.css`, so
@@ -14,23 +14,35 @@ these docs cannot drift from the app.
 
 ## The one-paragraph version
 
-Ultimate is **dark-only** — near-black warm surfaces, one atmosphere gradient
-per screen, ember for Sam and blue for the opponent, and gold reserved for
-what the data awarded. Chakra Petch shouts the headings; Nunito Sans speaks
-the sentences. The card is the brightest object on screen, and the data stays
-flat so the atmosphere can glow.
+Broadcast is **dark-only studio graphics** — flat graphite-navy surfaces in
+three steps, square corners everywhere, Barlow Condensed shouting the
+headlines from skewed lozenge badges. The two team colours are the only
+accents, and **every value that belongs to a player wears their side**:
+ember for player one, blue for player two. Results speak through the status
+tokens as W/L/D chips. The player card is the one crafted, textured object;
+everything around it is a flat graphic with a slot for a number.
 
 The details live in the neighbouring pages:
 
-- **Colors** — the palette, status tokens, chart ramp, and the only four
-  gradients allowed to exist.
-- **Typography** — the two voices and the heading primitives.
-- **The ten rules** — what keeps this a design system instead of a costume.
+- **Colors** — the palette, the colour law, status tokens, and the chart
+  ramp. No gradients exist.
+- **Typography** — the two Barlow voices and the heading primitives.
+- **The Broadcast rules** — what keeps this a design system instead of a
+  costume.
+
+## The graphic shapes
+
+The system is a kit of broadcast graphics, each a story in the sidebar:
+**Ticker** (full-bleed strip), **Callout** (accent-bar pundit panel),
+**ScoreStrip** (deep full-time graphic), **ResultChip / FormGuide** (W/L/D
+in status colours), **StatRow / StatTile** (label-and-number lower-thirds),
+and the skewed **brand lozenge** (`skew-badge` utilities).
 
 ## Where things go
 
 - `src/components/ui` — shadcn primitives, themed by tokens only.
-- `src/components` — shared composed components (typography, court, rally).
+- `src/components` — shared composed components (typography, the broadcast
+  graphics, court, rally).
 - `src/features/*` — feature-specific components; a feature never imports a
   sibling feature.
 - Stories live next to their component as `*.stories.tsx`.
@@ -38,9 +50,9 @@ The details live in the neighbouring pages:
 ## Working rules
 
 - **Semantic over raw.** Components reference tokens (`text-success`,
-  `bg-p2`, `text-gold`), never one-off colours.
-- **Headings are componentised.** `PageTitle`, `SectionTitle`, and `Overline`
-  are the only way titles render.
+  `bg-p2`, `text-primary-strong`), never one-off colours.
+- **Headings are componentised.** `PageTitle`, `SectionTitle`, and
+  `Overline` are the only way titles render.
 - **Charts are recharts** wherever a chart type exists for the data; court
   visuals stay hand-drawn SVG.
 - **Phone-first.** Every surface works at 390px with 44px hit targets before

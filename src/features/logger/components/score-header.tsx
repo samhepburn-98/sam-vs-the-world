@@ -43,7 +43,7 @@ export function ScoreHeader({
       <button
         type="button"
         onClick={onToggleSide}
-        className="cursor-pointer rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+        className="cursor-pointer border border-primary/40 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
       >
         {draft.serveSide === "left" ? "Left" : "Right"} box{" "}
         <Kbd className="border-primary/30">{HOTKEY_HINTS.serveSide}</Kbd>
@@ -52,7 +52,7 @@ export function ScoreHeader({
         <button
           type="button"
           onClick={onToggleServeNumber}
-          className="cursor-pointer rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          className="cursor-pointer border px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
         >
           {draft.serveNumber === 1 ? "1st serve" : "2nd serve"}{" "}
           <Kbd>{HOTKEY_HINTS.serveNumber}</Kbd>
@@ -62,7 +62,7 @@ export function ScoreHeader({
   )
 
   // each side wears its own colour — the score always reads ember vs blue,
-  // and the serve is marked by the gold dot, not by dimming the receiver
+  // and the serve is marked by the dot, not by dimming the receiver
   const side = (
     name: string,
     points: number,
@@ -77,7 +77,7 @@ export function ScoreHeader({
         className="cursor-pointer font-heading text-sm font-bold tracking-wide uppercase transition-colors"
       >
         {name}
-        {serving && <span className="ml-1.5 text-gold">●</span>}
+        {serving && <span className="ml-1.5 text-foreground">●</span>}
       </button>
       <p
         className={cn(
@@ -89,13 +89,13 @@ export function ScoreHeader({
       </p>
       {serving ? (
         <>
-          <span className="mt-1.5 block font-heading text-[10px] font-semibold tracking-[0.16em] text-gold uppercase">
+          <span className="mt-1.5 block font-heading text-[11px] font-bold tracking-[0.16em] uppercase">
             Serving
           </span>
           {chips}
         </>
       ) : (
-        <span className="mt-1.5 block font-heading text-[10px] font-semibold tracking-[0.16em] text-muted-foreground/60 uppercase">
+        <span className="mt-1.5 block font-heading text-[11px] font-bold tracking-[0.16em] text-muted-foreground/60 uppercase">
           Receiving
         </span>
       )}
@@ -108,7 +108,7 @@ export function ScoreHeader({
         Game {gameNumber} · {rulesLine}
       </p>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        {side(p1Name, score.p1, p1Serving, "text-primary")}
+        {side(p1Name, score.p1, p1Serving, "text-primary-strong")}
         <span className="pb-4 text-3xl text-muted-foreground/50">–</span>
         {side(p2Name, score.p2, !p1Serving, "text-p2-strong")}
       </div>

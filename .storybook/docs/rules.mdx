@@ -1,6 +1,6 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
-<Meta title="Foundations/The ten rules" />
+<Meta title="Foundations/The Broadcast rules" />
 
 export const Rule = ({ n, title, children }) => (
   <div
@@ -8,14 +8,18 @@ export const Rule = ({ n, title, children }) => (
       display: "flex",
       gap: 14,
       background: "var(--card)",
-      border: "1px solid var(--border)",
-      borderRadius: 12,
+      borderLeft: "4px solid var(--primary)",
       padding: "12px 16px",
     }}
   >
     <span
       className="font-heading"
-      style={{ fontWeight: 700, fontSize: 15, color: "var(--gold)", flex: "0 0 26px" }}
+      style={{
+        fontWeight: 800,
+        fontSize: 15,
+        color: "var(--primary-strong)",
+        flex: "0 0 26px",
+      }}
     >
       {n}
     </span>
@@ -25,62 +29,73 @@ export const Rule = ({ n, title, children }) => (
   </div>
 )
 
-# The ten rules
+# The Broadcast rules
 
-What keeps Ultimate a design system instead of a costume. Every rule exists to
-stop the same failure: atmosphere leaking into data.
+What keeps Broadcast a design system instead of a costume. Every rule
+exists to stop the same failure: decoration leaking into data.
 
 <Unstyled>
-<div className="text-foreground" style={{ display: "flex", flexDirection: "column", gap: 10, margin: "16px 0 32px", fontFamily: "var(--font-sans)" }}>
-  <Rule n="01" title="The card is the brightest object on screen.">
-    Nothing may out-glow, out-saturate, or out-decorate it. If a surface
-    competes with the card, mute the surface.
-  </Rule>
-  <Rule n="02" title="One spotlight per screen.">
-    Exactly one staged card gets a glow. Roster grids and list rows never glow
-    — a collection shines by being many, not by each shining.
-  </Rule>
-  <Rule n="03" title="Four gradients, no more.">
-    Atmosphere, duel atmosphere, spotlight, plaque edge. A gradient anywhere
-    else — on a fill, a bar, a chart, text — is a bug.
-  </Rule>
-  <Rule n="04" title="Data is flat.">
-    Charts, bars, and tables sit on flat panels in flat colour: player orange,
-    player blue, neutrals, and the status tokens. Gold never encodes data.
-  </Rule>
-  <Rule n="05" title="Gold is earned.">
-    The prestige accent marks traits, verdicts, hero scores, and the VS badge
-    — things the data awarded. It never decorates chrome, navigation, or idle
-    states.
-  </Rule>
-  <Rule n="06" title="Two voices, strict jobs.">
-    Chakra Petch shouts in uppercase: headings, labels, scores. Nunito Sans
-    speaks in sentences: prose, receipts, table numbers. Neither borrows the
-    other's job.
-  </Rule>
-  <Rule n="07" title="Receipts survive the redesign.">
-    Every rate shows its denominator; under-sampled values show a quiet dash,
-    never an invented number. Game UI dresses the truth, it does not replace
-    it.
-  </Rule>
-  <Rule n="08" title="Contrast is non-negotiable.">
-    Body text on any surface clears WCAG AA. The muted label tone (oklch 0.62)
-    is the floor for text that must be read; anything dimmer is decoration.
-  </Rule>
-  <Rule n="09" title="Motion is compositor-only and rare.">
-    Transform and opacity, 300ms ease-out, on hero moments (card lift, tab
-    slide, count-up). No animated filters, no animated gradients — the Safari
-    sprite lesson is law.
-  </Rule>
-  <Rule n="10" title="Phone-first, thumb-first.">
-    Every surface designs at 390px first; hit targets are 44px minimum; the
-    logger works one-handed mid-game. Desktop is the phone layout given room,
-    not a different app.
-  </Rule>
-</div>
+  <div
+    className="text-foreground"
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 10,
+      margin: "16px 0 32px",
+      fontFamily: "var(--font-sans)",
+    }}
+  >
+    <Rule n="01" title="The card is the one crafted object.">
+      The FUT player card keeps its texture and shine; everything around it is a
+      flat graphic. Nothing else gets texture, gloss, or depth effects.
+    </Rule>
+    <Rule n="02" title="Flat, always.">
+      No gradients exist — not on surfaces, bars, charts, or text. Depth comes
+      from the three surface steps (deep, floor, panel) and the accent bars.
+    </Rule>
+    <Rule n="03" title="Square cut.">
+      Broadcast graphics are cut, not rounded: --radius is zero and stays zero.
+      Only dots (serving marker, ball dots, avatars) are circles.
+    </Rule>
+    <Rule n="04" title="The colour law.">
+      Every value that belongs to a player wears their side — ember for player
+      one, blue for player two — scores, bars, tags, chart lines, no exceptions.
+      Fills use the base tones; text on dark uses the strong tones.
+    </Rule>
+    <Rule n="05" title="Results speak status.">
+      W/L/D chips, trends, and cautions use the semantic status tokens, never
+      the team colours — a loss is red whichever side lost it.
+    </Rule>
+    <Rule n="06" title="Two voices, strict jobs.">
+      Barlow Condensed shouts in uppercase: headlines, straps, labels, scores.
+      Barlow speaks in sentences: prose, receipts, table numbers. Neither
+      borrows the other's job.
+    </Rule>
+    <Rule n="07" title="The skew is earned by badges.">
+      The -10° lean belongs to the brand lozenge and the VS mark. Panels, chips,
+      and text stay upright — a screen of leaning boxes is a carnival, not a
+      broadcast.
+    </Rule>
+    <Rule n="08" title="Receipts survive the redesign.">
+      Every rate shows its denominator; under-sampled values show a quiet dash,
+      never an invented number. Graphics dress the truth, they do not replace
+      it.
+    </Rule>
+    <Rule n="09" title="Motion is compositor-only and rare.">
+      Transform and opacity, 300ms ease-out, on hero moments. No animated
+      filters, no layout animation — the Safari lesson is law.
+    </Rule>
+    <Rule n="10" title="Phone-first, thumb-first.">
+      Every surface designs at 390px first; hit targets are 44px minimum; the
+      logger works one-handed mid-game. Desktop is the phone layout given room,
+      not a different app.
+    </Rule>
+  </div>
 </Unstyled>
 
-**Migration note**: Ultimate is dark-only, so the light palette and theme
-toggle are retired; `--gold` joined the tokens; Merriweather left the font
-stack. Typography lands via the existing `PageTitle` / `SectionTitle` /
-`Overline` primitives — same seams, new voice.
+**Migration note**: Broadcast replaced Ultimate (decision 17): the
+gradients, gold accent, spotlight staging, and card-glow sprites retired;
+`--primary-strong` and `--panel-deep` joined the tokens; Barlow Condensed
+and Barlow replaced Chakra Petch and Nunito Sans. Typography lands via the
+existing `PageTitle` / `SectionTitle` / `Overline` primitives — same seams,
+new voice.

@@ -10,6 +10,7 @@ const player = (over: Partial<PlayerSummary> = {}): PlayerSummary => ({
   name: "Sam",
   handedness: "right",
   avatar_url: null,
+  is_protagonist: false,
   ...over,
 })
 

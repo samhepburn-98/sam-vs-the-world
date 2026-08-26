@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Fragment } from "react"
 
-import {
-  TRAIT_META
-  
-  
+import { TRAIT_META } from "@/features/dashboard/lib/player-attributes"
+import type {
+  TraitAgency,
+  TraitTempo,
 } from "@/features/dashboard/lib/player-attributes"
-import type {TraitAgency, TraitTempo} from "@/features/dashboard/lib/player-attributes";
 import { Overline, PageTitle, SectionTitle } from "@/components/typography"
 import { cn } from "@/lib/utils"
 

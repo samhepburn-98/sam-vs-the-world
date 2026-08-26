@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start"
 import { MenuIcon } from "lucide-react"
 import { useState } from "react"
 
-import { CourtDiagram } from "@/components/court/court-diagram"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -29,7 +28,7 @@ const NAV: Array<{ to: string; label: string; exact?: boolean }> = [
 // 375px, so below md the links move into a slide-in menu behind one button.
 
 const linkBase =
-  "rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "px-2.5 py-1.5 font-heading text-[13px] font-bold tracking-[0.14em] uppercase text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function SiteHeader({ user }: { user: SessionUser | null }) {
   const router = useRouter()
@@ -46,12 +45,12 @@ export function SiteHeader({ user }: { user: SessionUser | null }) {
   return (
     <header className="border-b">
       <div className="container mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
+        {/* the brand lozenge: ember, leaning, text counter-skewed upright */}
         <Link
           to="/"
-          className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="shrink-0 skew-badge bg-primary px-3 py-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
-          <CourtDiagram className="h-6 w-4" label="Sam vs the World" />
-          <span className="font-heading text-sm font-bold tracking-tight whitespace-nowrap">
+          <span className="skew-badge-text font-heading text-[15px] font-extrabold tracking-[0.04em] whitespace-nowrap text-primary-foreground uppercase">
             Sam vs the World
           </span>
         </Link>
@@ -117,7 +116,7 @@ function MobileMenu({
   }
 
   const itemClass =
-    "rounded-md px-2 py-2 text-base text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    "px-2 py-2 font-heading text-base font-bold tracking-[0.1em] uppercase text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

@@ -98,8 +98,9 @@ export function DuelPicker({
         options={optionsFor(0)}
         onPick={(id) => onPick(0, id)}
       />
-      <span className="font-heading text-sm font-semibold text-muted-foreground">
-        vs
+      {/* the broadcast VS mark: ember, leaning */}
+      <span className="skew-badge font-heading text-lg font-extrabold tracking-[0.08em] text-primary-strong uppercase">
+        VS
       </span>
       <PlayerSlot
         side="p2"

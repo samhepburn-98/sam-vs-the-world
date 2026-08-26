@@ -2,16 +2,22 @@ import { cn } from "@/lib/utils"
 
 import type { ComponentProps } from "react"
 
-// The gold marker for things the data awarded (rule 05): a signature trait,
-// a verdict. Display face, uppercase, gold — and only ever fed an earned
-// label. It never decorates chrome, and it takes plain children so shared
-// code stays ignorant of the trait model.
+// The trait tag: a player's earned class line, spoken in the display face
+// and the player's own colour — Broadcast's color law: every value that
+// belongs to a player wears their side. Plain text, no box; broadcast
+// graphics label, they don't decorate. Takes plain children so shared code
+// stays ignorant of the trait model.
 
-export function TraitChip({ className, ...props }: ComponentProps<"span">) {
+export function TraitChip({
+  tone = "p1",
+  className,
+  ...props
+}: ComponentProps<"span"> & { tone?: "p1" | "p2" }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md bg-gold/10 px-2 py-0.5 font-heading text-[11px] font-semibold tracking-[0.14em] text-gold uppercase ring-1 ring-gold/40",
+        "font-heading text-[13px] font-bold tracking-[0.12em] uppercase",
+        tone === "p1" ? "text-primary-strong" : "text-p2-strong",
         className
       )}
       {...props}

@@ -58,10 +58,10 @@ export function ServeBoxes({ serve }: { serve: ServeBoxesData }) {
         />
       </div>
       <div className="flex flex-wrap gap-2">
-        <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground tabular-nums">
+        <span className="border px-3 py-1 text-xs text-muted-foreground tabular-nums">
           {serve.aces} aces
         </span>
-        <span className="rounded-full border px-3 py-1 text-xs text-muted-foreground tabular-nums">
+        <span className="border px-3 py-1 text-xs text-muted-foreground tabular-nums">
           {serve.doubleFaults} double faults
         </span>
       </div>

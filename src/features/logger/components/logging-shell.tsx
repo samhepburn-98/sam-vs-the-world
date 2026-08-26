@@ -457,10 +457,15 @@ function MatchLogger({
     <KbdHintsContext.Provider value={showHints && hintsWide}>
       <div className="flex flex-col gap-6">
         <header className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {nameOf(match.player1_id)} vs {nameOf(match.player2_id)} ·{" "}
-            {match.date}
-          </p>
+          <div className="flex min-w-0 flex-col">
+            <p className="font-heading text-base leading-tight font-extrabold tracking-[0.1em] uppercase">
+              Live match
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {nameOf(match.player1_id)} vs {nameOf(match.player2_id)} ·{" "}
+              {match.date}
+            </p>
+          </div>
           <div className="flex items-center gap-1">
             <Button
               type="button"
@@ -485,21 +490,25 @@ function MatchLogger({
         />
         <Glossary open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
 
-        <ScoreHeader
-          p1Name={nameOf(match.player1_id)}
-          p2Name={nameOf(match.player2_id)}
-          p1Id={match.player1_id}
-          score={score}
-          gameNumber={game.gameNumber}
-          rulesLine={rulesLine}
-          draft={draft}
-          servesPerPoint={rules.servesPerPoint}
-          onToggleServer={() => setDraftState(toggleServer(draft, draftCtx))}
-          onToggleSide={() => setDraftState(toggleServeSide(draft))}
-          onToggleServeNumber={() =>
-            setDraftState(toggleServeNumber(draft, draftCtx))
-          }
-        />
+        {/* the scorebug: the score sits on the deep panel, like a broadcast
+            graphic over the studio floor */}
+        <div className="bg-panel-deep px-4 pt-3 pb-4">
+          <ScoreHeader
+            p1Name={nameOf(match.player1_id)}
+            p2Name={nameOf(match.player2_id)}
+            p1Id={match.player1_id}
+            score={score}
+            gameNumber={game.gameNumber}
+            rulesLine={rulesLine}
+            draft={draft}
+            servesPerPoint={rules.servesPerPoint}
+            onToggleServer={() => setDraftState(toggleServer(draft, draftCtx))}
+            onToggleSide={() => setDraftState(toggleServeSide(draft))}
+            onToggleServeNumber={() =>
+              setDraftState(toggleServeNumber(draft, draftCtx))
+            }
+          />
+        </div>
 
         {over.over && (
           <GameOverBanner
