@@ -73,6 +73,7 @@ export default [
       ".prettierrc",
       "src/lib/database.types.ts",
       "scripts/**",
+      "storybook-static/**",
     ],
   },
 ]
