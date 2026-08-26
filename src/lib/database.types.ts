@@ -140,6 +140,7 @@ export type Database = {
           created_at: string
           handedness: Database["public"]["Enums"]["handedness"] | null
           id: string
+          is_protagonist: boolean
           name: string
           updated_at: string
         }
@@ -148,6 +149,7 @@ export type Database = {
           created_at?: string
           handedness?: Database["public"]["Enums"]["handedness"] | null
           id?: string
+          is_protagonist?: boolean
           name: string
           updated_at?: string
         }
@@ -156,6 +158,7 @@ export type Database = {
           created_at?: string
           handedness?: Database["public"]["Enums"]["handedness"] | null
           id?: string
+          is_protagonist?: boolean
           name?: string
           updated_at?: string
         }
