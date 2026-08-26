@@ -22,9 +22,11 @@ const preview: Preview = {
       storySort: {
         order: [
           "Foundations",
-          ["Overview", "Colors", "Typography", "The ten rules"],
+          ["Overview", "Colors", "Typography", "The Broadcast rules"],
+          "Cards",
           "Typography",
           "UI",
+          "Logger",
         ],
       },
     },
