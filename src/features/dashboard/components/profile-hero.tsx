@@ -17,12 +17,7 @@ import type { ProfileHeaderData } from "@/features/dashboard/lib/profile-header"
 export function ProfileHero({ header }: { header: ProfileHeaderData }) {
   return (
     <header className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-      <div className="relative w-48 shrink-0 sm:w-52">
-        {/* the one staged card on this screen (rule 02) gets the spotlight */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-[35%] -z-10 bg-spotlight-p1"
-        />
+      <div className="w-48 shrink-0 sm:w-52">
         <PlayerCard
           name={header.name}
           side="p1"

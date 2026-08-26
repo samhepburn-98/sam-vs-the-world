@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import { DuelAttributeRow } from "@/features/dashboard/components/duel-attribute-row"
 import { Button } from "@/components/ui/button"
-import { Plaque } from "@/components/plaque"
+import { cn } from "@/lib/utils"
 
 import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
 
@@ -14,6 +14,7 @@ import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes
 // cards flanking it.
 
 const P1_COLOR = "var(--primary)"
+const P1_TEXT = "var(--primary-strong)"
 const P2_COLOR = "var(--p2)"
 const P2_TEXT = "var(--p2-strong)"
 
@@ -57,7 +58,7 @@ export function DuelCenter({
           {score.heading}
         </p>
         <p className="mt-1 text-6xl leading-none font-extrabold tabular-nums">
-          <span style={{ color: P1_COLOR }}>{score.p1}</span>
+          <span style={{ color: P1_TEXT }}>{score.p1}</span>
           <span className="mx-3 font-normal text-muted-foreground">–</span>
           <span style={{ color: P2_TEXT }}>{score.p2}</span>
         </p>
@@ -69,7 +70,7 @@ export function DuelCenter({
       {dominance !== null && (
         <div className="mt-6">
           <div className="mb-1.5 flex items-baseline justify-between text-sm">
-            <span className="font-bold" style={{ color: P1_COLOR }}>
+            <span className="font-bold" style={{ color: P1_TEXT }}>
               {Math.round(dominance * 100)}%
             </span>
             <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
@@ -97,19 +98,23 @@ export function DuelCenter({
         ))}
       </div>
 
-      {/* the verdict is earned, so it gets the plaque edge and — when someone
-          actually leads — the gold (an all-square verdict earned nobody it) */}
-      <Plaque className="mt-10 md:mt-14" innerClassName="py-4 text-center">
-        <p className="text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+      {/* the verdict strip: a deep panel like a full-time graphic, with the
+          leader's name in their own colour (all square stays neutral) */}
+      <div className="mt-10 bg-panel-deep py-4 text-center md:mt-14">
+        <p className="font-heading text-[13px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
           On the stats
         </p>
         <p
-          className={`mt-1.5 font-heading text-3xl leading-tight uppercase ${leader ? "text-gold" : ""}`}
+          className={cn(
+            "mt-1 font-heading text-4xl leading-none font-extrabold uppercase",
+            leader === name1 && "text-primary-strong",
+            leader === name2 && "text-p2-strong"
+          )}
         >
           {leader ?? "All square"}
         </p>
-        <p className="mt-0.5 text-sm text-muted-foreground">{tallyLine}</p>
-      </Plaque>
+        <p className="mt-1 text-sm text-muted-foreground">{tallyLine}</p>
+      </div>
 
       <div className="mt-8 overflow-hidden rounded-xl ring-1 ring-border">
         <p className="py-2.5 text-center text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
