@@ -1,25 +1,13 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { applyMigrations } from "./migrations"
 
 // Starting a match writes two rows that must not half-land (§1.8): a game
 // with no match is impossible, and a match with no game 1 is a dead session
 // the user can't log into. Both inserts live in one function body, so they
 // share the caller's transaction. Verified against the real migrations,
 // PGlite-style (§8.7 #1).
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
 
 let db: PGlite
 let p1: string
@@ -34,11 +22,7 @@ const countRows = async (table: "matches" | "games") => {
 
 beforeAll(async () => {
   db = new PGlite()
-  // the grant/revoke tail of the function migration needs these to exist
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("create_match_with_game"))
+  await applyMigrations(db)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Dave') returning id`
@@ -153,6 +137,94 @@ describe("create_match_with_game", () => {
 
     expect(await countRows("matches")).toBe(before.matches)
     expect(await countRows("games")).toBe(before.games)
+  })
+})
+
+// §1.8's promise isn't "two rows landed" — it's that the pair is a session the
+// user can log into. That only means anything against the rally model as it
+// stands today, and this suite used to load three hand-picked migrations, so
+// it couldn't see the model at all. Everything below post-dates those three:
+// the ace retirement and its derived replacement (20260710160000, §3.3.2),
+// and the rallies_scored the shot split rebuilt (20260710200000). If the
+// loading ever narrows again, these fail rather than quietly agreeing with a
+// July schema — under the old three, an 'ace' row inserted happily.
+describe("the game it opens is loggable at the current model", () => {
+  let gameId: string
+
+  beforeAll(async () => {
+    const created = await db.query<{ create_match_with_game: string }>(
+      `select create_match_with_game($1, $2, '2026-08-27'::date)`,
+      [p1, p2]
+    )
+    const game = await db.query<{ id: string }>(
+      `select id from games where match_id = $1 and game_number = 1`,
+      [created.rows[0].create_match_with_game]
+    )
+    gameId = game.rows[0].id
+
+    // Three rallies straight into the fresh game, written the way the logger
+    // writes them: Sam's serve won on one shot (an ace, by derivation), a
+    // rally Dave takes off the return, then one Dave serves and wins long.
+    // The lengths are deliberate — a server's winner on shot_count 1 IS an
+    // ace, and the logger's fresh draft opens on 1, so a plain winner has to
+    // carry a real rally length or it lands in the ace count.
+    for (const [n, server, winner, shots] of [
+      [1, p1, p1, 1],
+      [2, p1, p2, 9],
+      [3, p2, p2, 5],
+    ] as const) {
+      await db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side,
+                              serve_number, winner_id, end_reason, shot_count)
+         values ($1, $2, $3, 'left', 1, $4, 'winner', $5)`,
+        [gameId, n, server, winner, shots]
+      )
+    }
+  })
+
+  it("takes rallies the moment it exists, and scores them", async () => {
+    const rows = await db.query<{ score_p1: number; score_p2: number }>(
+      `select score_p1, score_p2 from rallies_scored
+       where game_id = $1 order by rally_number`,
+      [gameId]
+    )
+    // the game the function opened is wired to its match: rallies_scored can
+    // only name the two players by walking games → matches
+    expect(rows.rows.map((r) => `${r.score_p1}-${r.score_p2}`)).toEqual([
+      "1-0",
+      "1-1",
+      "1-2",
+    ])
+  })
+
+  it("rejects the retired 'ace' end reason", async () => {
+    await expect(
+      db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side,
+                              serve_number, winner_id, end_reason)
+         values ($1, 4, $2, 'left', 1, $2, 'ace')`,
+        [gameId, p1]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
+  })
+
+  it("counts rally 1 as an ace anyway — derived from the row's shape", async () => {
+    const stats = await db.query<{
+      aces: number
+      rallies_served: number
+      serve_wins: number
+    }>(`select aces, rallies_served, serve_wins from serve_stats($1, $2)`, [
+      p1,
+      p2,
+    ])
+    // the coverage the stored end reason used to carry, kept where it lives
+    // now: winner + shot_count 1 + winner is the server (§3.3.2)
+    expect(stats.rows[0]).toEqual({ aces: 1, rallies_served: 2, serve_wins: 1 })
+
+    const stored = await db.query<{ n: number }>(
+      `select count(*)::int as n from rallies where end_reason = 'ace'`
+    )
+    expect(stored.rows[0].n).toBe(0)
   })
 })
 

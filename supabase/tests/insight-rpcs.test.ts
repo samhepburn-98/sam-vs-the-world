@@ -1,24 +1,18 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
-// Migration 0004a fixture tests (§8.7 #1): player_headline(s) + h2h and the
-// shared filter helpers, asserted row-by-row against seeded games covering
-// lets, an undecided game, every filter param, and the §3.2 signature-trait
-// thresholds (≥30 rallies per bucket, 10-point gap) at their boundaries.
+import { applyMigrations } from "./migrations"
 
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
+// Insight-RPC fixture tests (§8.7 #1): player_headline(s) + h2h and the shared
+// filter helpers, asserted row-by-row against seeded games covering lets, an
+// undecided game, every filter param, and the §3.2 signature trait at its
+// cutoffs.
+//
+// The whole migration set is applied, so the RPCs under test are the ones
+// production ships. That matters most for the trait: it is the two-axis
+// tempo × agency matrix of 20260825120000_trait_matrix, not the single
+// rally-length differential (grinder / shotmaker / balanced) it replaced, and
+// the fixtures below can no longer write an end reason the schema retired.
 
 let db: PGlite
 
@@ -55,41 +49,64 @@ async function seedGame(matchId: string, gameNumber: number) {
   return res.rows[0].id
 }
 
-/** winner null = let; shotCount null = untagged rally length. */
+interface RallySpec {
+  winner: string | null
+  shotCount?: number | null
+  reason?: string
+}
+
+/**
+ * winner null = let; shotCount null = untagged rally length; reason defaults
+ * to 'winner' — pass 'error' for a point the opponent handed over, which is
+ * what separates the agency columns of the trait matrix.
+ *
+ * Shot counts here are deliberately never 1 unless a case says so: a 1-shot
+ * winner taken by the server is a derived ace (20260710160000), so a fixture
+ * that wants a plain rally winner has to give the rally a real length.
+ */
 async function seedRallies(
   gameId: string,
   server: string,
-  rallies: Array<{ winner: string | null; shotCount?: number | null }>
+  rallies: Array<RallySpec>
 ) {
-  let n = 0
-  for (const r of rallies) {
-    n += 1
-    await db.query(
-      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
-       values ($1, $2, $3, 'left', 1, $4, $5, $6)`,
-      [
-        gameId,
-        n,
-        server,
-        r.winner,
-        r.winner === null ? "let" : "winner",
-        r.shotCount ?? null,
-      ]
+  if (rallies.length === 0) return
+  // one statement, not one round trip per rally: the cutoff fixtures below run
+  // to a hundred rallies apiece
+  const params: Array<unknown> = [gameId, server]
+  const values = rallies.map((r, i) => {
+    const at = params.length
+    params.push(
+      r.winner,
+      r.winner === null ? "let" : (r.reason ?? "winner"),
+      r.shotCount ?? null
     )
-  }
+    return `($1, ${i + 1}, $2, 'left', 1, $${at + 1}::uuid, $${at + 2}::public.end_reason, $${at + 3}::smallint)`
+  })
+  await db.query(
+    `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+     values ${values.join(", ")}`,
+    params
+  )
 }
 
-/** n rallies in the bucket's shot count, `wins` of them won by `player`. */
+/**
+ * `n` rallies at one shot count: `wins` of them won by `player`, of which
+ * `cleanWins` end on the player's own racket and the rest on the opponent's
+ * error. The opponent's own rallies are always their own winners, so the
+ * agency axis only ever moves for `player`.
+ */
 function bucket(
   player: string,
   other: string,
   n: number,
   wins: number,
-  shotCount: number
+  shotCount: number,
+  cleanWins = wins
 ) {
   return Array.from({ length: n }, (_, i) => ({
     winner: i < wins ? player : other,
     shotCount,
+    reason: i < wins && i >= cleanWins ? "error" : "winner",
   }))
 }
 
@@ -101,16 +118,7 @@ let matchB: string
 
 beforeAll(async () => {
   db = new PGlite()
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("insights_headline_h2h"))
-  // match_outcome adds the verdict column to match_results; h2h_outcome
-  // recreates h2h to pass it through match_history — load both so the
-  // tested RPC is the live one
-  await db.exec(loadMigration("match_outcome"))
-  await db.exec(loadMigration("h2h_outcome"))
+  await applyMigrations(db)
   ;[sam, dave, alex] = await seedPlayers("Sam", "Dave", "Alex")
 
   // Match A — Sam vs Dave, blue ball, 2026-06-01. Drawn 1–1 with a third
@@ -157,6 +165,8 @@ async function headline(playerId: string, filters = "") {
     matches_won: number
     matches_decided: number
     signature_trait: string | null
+    clean_finish_wins: number
+    points_won: number
     recent_games: Array<Record<string, unknown>>
   }>(`select * from player_headline($1${filters})`, [playerId])
   expect(res.rows).toHaveLength(1)
@@ -231,43 +241,160 @@ describe("player_headline", () => {
   })
 })
 
-describe("signature trait (§3.2 thresholds)", () => {
-  it("grinder at exactly a 10-point gap with exactly 30 rallies per bucket", async () => {
+// The trait is a matrix (§3.2): a tempo row — short (1–3 shot) win rate minus
+// extended (5+ shot) win rate, ±8 points marking a lean — crossed with an
+// agency column, the share of the player's won points their own racket
+// finished (≥55% finisher, ≤43% pressure). It is withheld below ≥30 rallies
+// in each tempo bucket and ≥30 points won.
+//
+// Every case sits ON a cutoff, because that is where a silent redefinition
+// shows first. Bucket sizes are picked so the cutoffs land exactly: at 50
+// rallies one result moves a win rate by 2 points, and 43% only falls on a
+// whole point at a hundred.
+describe("signature trait (§3.2 cutoffs)", () => {
+  it("names the tempo row at exactly an 8-point gap, and flips it at the net", async () => {
     const [gina, hank] = await seedPlayers("Gina", "Hank")
     const game = await seedGame(await seedMatch(gina, hank, "2026-06-20"), 1)
-    // short 18/30 = 60%, long 21/30 = 70% — the gap is exactly 10 points
+    // Gina takes 27/50 short (54%) and 23/50 extended (46%) — a +8-point
+    // short-court lean, dead on the cutoff
     await seedRallies(game, gina, [
-      ...bucket(gina, hank, 30, 18, 2),
-      ...bucket(gina, hank, 30, 21, 10),
+      ...bucket(gina, hank, 50, 27, 2),
+      ...bucket(gina, hank, 50, 23, 10),
     ])
-    expect((await headline(gina)).signature_trait).toBe("grinder")
-    // …and the same data reads as shotmaker from the other side of the net
-    // (Hank: short 12/30 = 40%, long 9/30 = 30%)
-    expect((await headline(hank)).signature_trait).toBe("shotmaker")
+    // every rally ends on its winner's own racket, so both players sit in the
+    // finisher column and only the tempo row varies
+    expect((await headline(gina)).signature_trait).toBe("sniper")
+    // Hank holds the mirror image — 23/50 short, 27/50 extended — so the same
+    // rallies read as the long-court finisher from his side of the net
+    expect((await headline(hank)).signature_trait).toBe("hunter")
   })
 
-  it("omitted at 29 in a bucket — lets and untagged lengths don't count", async () => {
+  it("lands in the neutral cell when neither axis reaches its cutoff", async () => {
+    const [mia, ned] = await seedPlayers("Mia", "Ned")
+    const game = await seedGame(await seedMatch(mia, ned, "2026-06-22"), 1)
+    // one result short of a lean: 26/50 short (52%) against 23/50 extended
+    // (46%) is a 6-point gap. Mia finishes her short points herself and is
+    // handed every extended one, so her clean share is 26/49 ≈ 53% — inside
+    // both agency cutoffs.
+    await seedRallies(game, mia, [
+      ...bucket(mia, ned, 50, 26, 2),
+      ...bucket(mia, ned, 50, 23, 10, 0),
+    ])
+    expect(await headline(mia)).toMatchObject({
+      clean_finish_wins: 26,
+      points_won: 49,
+      signature_trait: "all_rounder",
+    })
+  })
+
+  it("names the agency column at exactly 55% and exactly 43%", async () => {
+    // both players below sweep every rally, which pins the tempo row flat at
+    // zero and leaves the column as the only thing under test
+    const [marla, otto] = await seedPlayers("Marla", "Otto")
+    const marlaGame = await seedGame(
+      await seedMatch(marla, otto, "2026-06-23"),
+      1
+    )
+    await seedRallies(marlaGame, marla, [
+      ...bucket(marla, otto, 30, 30, 2),
+      ...bucket(marla, otto, 30, 30, 10, 3), // 33 of her 60 points are her own
+    ])
+    // §3.5 wants the receipt, not a bare rate — the numerator and denominator
+    // come back on the row that names the trait
+    expect(await headline(marla)).toMatchObject({
+      clean_finish_wins: 33,
+      points_won: 60, // 33/60 = 55% exactly → the finisher column
+      signature_trait: "marksman",
+    })
+
+    const [percy, quinn] = await seedPlayers("Percy", "Quinn")
+    const percyGame = await seedGame(
+      await seedMatch(percy, quinn, "2026-06-24"),
+      1
+    )
+    await seedRallies(percyGame, percy, [
+      ...bucket(percy, quinn, 50, 50, 2, 43),
+      ...bucket(percy, quinn, 50, 50, 10, 0),
+    ])
+    expect(await headline(percy)).toMatchObject({
+      clean_finish_wins: 43,
+      points_won: 100, // 43/100 = 43% exactly → the pressure column
+      signature_trait: "grafter",
+    })
+  })
+
+  it("withheld until both tempo buckets hold 30 rallies", async () => {
     const [ivy, jack] = await seedPlayers("Ivy", "Jack")
     const game = await seedGame(await seedMatch(ivy, jack, "2026-06-21"), 1)
     await seedRallies(game, ivy, [
       ...bucket(ivy, jack, 30, 20, 2),
       ...bucket(ivy, jack, 29, 25, 10),
-      // would be the 30th long rally if wrongly counted:
-      { winner: null, shotCount: 10 }, // a let
-      { winner: ivy, shotCount: null }, // an untagged length
+      // neither of these is an extended rally the guard can count:
+      { winner: null, shotCount: 10 }, // a let has no winner
+      { winner: ivy, shotCount: null }, // an untagged length has no bucket
     ])
     expect((await headline(ivy)).signature_trait).toBeNull()
+
+    // the 30th real extended rally, and the same data names her — so the null
+    // above was the bucket count and nothing else
+    await db.query(
+      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+       values ($1, 62, $2, 'left', 1, $2, 'winner', 10)`,
+      [game, ivy]
+    )
+    expect((await headline(ivy)).signature_trait).toBe("hunter")
   })
 
-  it("balanced when the gap is under 10 points", async () => {
-    const [mia, ned] = await seedPlayers("Mia", "Ned")
-    const game = await seedGame(await seedMatch(mia, ned, "2026-06-22"), 1)
-    // short 18/30 = 60%, long 20/30 ≈ 66.7% — a 6.7-point gap
-    await seedRallies(game, mia, [
-      ...bucket(mia, ned, 30, 18, 2),
-      ...bucket(mia, ned, 30, 20, 10),
+  it("withheld under 30 points won, however the buckets look", async () => {
+    const [rita, stan] = await seedPlayers("Rita", "Stan")
+    const game = await seedGame(await seedMatch(rita, stan, "2026-06-25"), 1)
+    // both buckets clear 30 rallies and neither axis leans, so the points
+    // floor is the only thing left holding the trait back
+    await seedRallies(game, rita, [
+      ...bucket(rita, stan, 30, 14, 2),
+      ...bucket(rita, stan, 30, 15, 10),
     ])
-    expect((await headline(mia)).signature_trait).toBe("balanced")
+    expect(await headline(rita)).toMatchObject({
+      points_won: 29,
+      signature_trait: null,
+    })
+    // Stan took the other 31 — one over the floor — off the same rallies
+    expect(await headline(stan)).toMatchObject({
+      points_won: 31,
+      signature_trait: "marksman",
+    })
+  })
+})
+
+// The agency column counts clean finishes, which the RPC spells as the
+// winner's own winner or ace. Ace is no longer an end reason anyone can write
+// (20260710160000) — it is derived — so these two cases hold the definition
+// from both ends and stop the fixtures above drifting back to a value the
+// schema rejects.
+describe("the retired 'ace' end reason", () => {
+  it("counts a derived ace — a 1-shot winner by the server — as a clean finish", async () => {
+    const [tess, ugo] = await seedPlayers("Tess", "Ugo")
+    const game = await seedGame(await seedMatch(tess, ugo, "2026-06-26"), 1)
+    await seedRallies(game, tess, [
+      { winner: tess, shotCount: 1 }, // Tess serving: the ace, derived
+      { winner: ugo, shotCount: 6, reason: "error" }, // Tess handed one back
+    ])
+    expect(await headline(tess)).toMatchObject({
+      clean_finish_wins: 1,
+      points_won: 1,
+    })
+  })
+
+  it("cannot be written back in — the CHECK retires it", async () => {
+    const [vic, walt] = await seedPlayers("Vic", "Walt")
+    const game = await seedGame(await seedMatch(vic, walt, "2026-06-27"), 1)
+    await expect(
+      db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+         values ($1, 1, $2, 'left', 1, $2, 'ace', 1)`,
+        [game, vic]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
   })
 })
 
@@ -276,8 +403,11 @@ describe("players_headline", () => {
     const all = await db.query<{
       player_id: string
       name: string
+      handedness: string | null
       games_won: number
       games_decided: number
+      clean_finish_wins: number
+      points_won: number
     }>(`select * from players_headline()`)
     const count = await db.query<{ n: number }>(
       `select count(*)::int as n from players`
@@ -285,10 +415,15 @@ describe("players_headline", () => {
     expect(all.rows).toHaveLength(count.rows[0].n)
     const samRow = all.rows.find((r) => r.player_id === sam)!
     const single = await headline(sam)
+    // the roster forwards the trait's receipt columns too, so a card can cite
+    // the agency numbers without a second call
     expect(samRow).toMatchObject({
       name: "Sam",
+      handedness: null,
       games_won: single.games_won,
       games_decided: single.games_decided,
+      clean_finish_wins: single.clean_finish_wins,
+      points_won: single.points_won,
     })
   })
 })

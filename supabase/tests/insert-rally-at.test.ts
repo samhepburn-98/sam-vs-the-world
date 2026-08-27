@@ -1,35 +1,11 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { applyMigrations } from "./migrations"
 
 // The mid-game insert (§5.4): insert_rally_at renumbers later rallies in one
 // transaction via the DEFERRABLE unique constraint. Verified against a real
 // game inserted through the actual migrations, PGlite-style (§8.7 #1).
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-// PGlite has no Supabase-managed schemas, so the three migrations that reach
-// into `auth` and `storage` can't run here — they were verified against the
-// live project (§8). Everything else loads in order, and that ordering is the
-// point: this file used to hand-pick four migrations, so it ran against a
-// July schema and happily round-tripped an `end_reason` the live CHECK now
-// rejects, and exercised a signature the client had already outgrown.
-const NEEDS_SUPABASE_SCHEMAS = ["rls_policies", "security_hardening", "avatars"]
-
-function allMigrations(): Array<string> {
-  return readdirSync(MIGRATIONS)
-    .filter((f) => f.endsWith(".sql"))
-    .sort()
-    .filter((f) => !NEEDS_SUPABASE_SCHEMAS.some((skip) => f.includes(skip)))
-    .map((f) =>
-      readFileSync(join(MIGRATIONS, f), "utf8").replace(
-        /^create extension if not exists pgcrypto;$/m,
-        ""
-      )
-    )
-}
 
 let db: PGlite
 let gameId: string
@@ -38,11 +14,7 @@ let p2: string
 
 beforeAll(async () => {
   db = new PGlite()
-  // the grant/revoke tails across the migrations need these to exist
-  await db.exec(
-    `create role anon; create role authenticated; create role service_role;`
-  )
-  for (const sql of allMigrations()) await db.exec(sql)
+  await applyMigrations(db)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Dave') returning id`
