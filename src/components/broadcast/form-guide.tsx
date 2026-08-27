@@ -1,4 +1,4 @@
-import { ResultChip } from "@/components/result-chip"
+import { ResultChip } from "@/components/broadcast/result-chip"
 import { cn } from "@/lib/utils"
 
 // The form guide: a player's recent results as a row of result chips,

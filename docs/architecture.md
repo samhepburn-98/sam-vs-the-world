@@ -16,7 +16,15 @@ src/
     logger/      components + logic/ (session planner, hotkeys) — the live rally logger
     manage/      api/ (paginated list reads) + components/ (data table, tabs, edit dialogs)
     dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + lib/ + schemas/
-  components/    SHARED UI: ui/ (shadcn) · layouts/ · court/ · rally/ (editor, house-rules) · ball-dots
+  components/    SHARED UI, one folder per kind:
+    ui/          shadcn primitives, themed by tokens only — never edited for one screen
+    broadcast/   the design-system graphic kit (ticker, callout, score strip, stat row/tile,
+                 result chip, form guide, trait chip, ball dots, count-up)
+    layouts/     page furniture — site header, theme toggle, the not-found stub
+    court/       hand-drawn court SVGs
+    rally/       the rally-entry composites (editor, house-rules form)
+    typography   the type scale itself (PageTitle/SectionTitle/Overline) — a foundation,
+                 not a graphic, so it sits above the folders rather than in one
   lib/           SHARED non-UI:
     schemas/     zod domain schemas — one file per concept (player, match, game, rally, auth)
     api/         entity data-access used across features — CRUD + the FIFO write queue

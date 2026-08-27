@@ -8,7 +8,7 @@ import {
   heroStat,
   playerTrait,
 } from "@/features/dashboard/lib/player-attributes"
-import { Callout } from "@/components/callout"
+import { Callout } from "@/components/broadcast/callout"
 
 import type { PlayerSummary } from "@/lib/schemas/player"
 

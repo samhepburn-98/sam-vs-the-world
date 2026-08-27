@@ -1,4 +1,4 @@
-import { StatRow } from "@/components/stat-row"
+import { StatRow } from "@/components/broadcast/stat-row"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

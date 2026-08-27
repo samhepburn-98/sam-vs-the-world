@@ -1,6 +1,6 @@
 import { XIcon } from "lucide-react"
 
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {

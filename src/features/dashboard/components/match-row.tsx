@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { cn } from "@/lib/utils"
 
 import type { BallType } from "@/lib/schemas/enums"

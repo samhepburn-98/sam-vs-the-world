@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import { CountUp } from "@/components/count-up"
+import { CountUp } from "@/components/broadcast/count-up"
 import { Card } from "@/components/ui/card"
 import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/lib/insight-thresholds"
 import { cn } from "@/lib/utils"

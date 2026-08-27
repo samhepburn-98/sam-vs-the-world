@@ -1,4 +1,4 @@
-import { ScoreStrip } from "@/components/score-strip"
+import { ScoreStrip } from "@/components/broadcast/score-strip"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

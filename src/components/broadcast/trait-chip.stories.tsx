@@ -1,4 +1,4 @@
-import { TraitChip } from "@/components/trait-chip"
+import { TraitChip } from "@/components/broadcast/trait-chip"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

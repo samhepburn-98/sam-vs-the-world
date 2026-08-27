@@ -6,7 +6,7 @@ import {
   matchesQueryOptions,
   useMatches,
 } from "@/features/dashboard/api/get-matches"
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
 import { MatchRow } from "@/features/dashboard/components/match-row"

@@ -1,5 +1,5 @@
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
-import { TraitChip } from "@/components/trait-chip"
+import { TraitChip } from "@/components/broadcast/trait-chip"
 
 import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 

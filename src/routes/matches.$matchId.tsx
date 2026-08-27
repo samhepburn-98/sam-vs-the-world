@@ -15,9 +15,9 @@ import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-s
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { Overline, SectionTitle } from "@/components/typography"
-import { ScoreStrip } from "@/components/score-strip"
+import { ScoreStrip } from "@/components/broadcast/score-strip"
 import {
   Breadcrumb,
   BreadcrumbItem,

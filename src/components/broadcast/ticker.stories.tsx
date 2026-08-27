@@ -1,4 +1,4 @@
-import { Ticker } from "@/components/ticker"
+import { Ticker } from "@/components/broadcast/ticker"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

@@ -1,4 +1,4 @@
-import { Callout } from "@/components/callout"
+import { Callout } from "@/components/broadcast/callout"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

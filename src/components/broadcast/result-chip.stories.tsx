@@ -1,5 +1,5 @@
-import { FormGuide } from "@/components/form-guide"
-import { ResultChip } from "@/components/result-chip"
+import { FormGuide } from "@/components/broadcast/form-guide"
+import { ResultChip } from "@/components/broadcast/result-chip"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

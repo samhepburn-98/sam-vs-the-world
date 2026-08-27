@@ -1,4 +1,4 @@
-import { CountUp } from "@/components/count-up"
+import { CountUp } from "@/components/broadcast/count-up"
 import { cn } from "@/lib/utils"
 
 // The small stat tile: one number, its label, optionally its receipt. This is

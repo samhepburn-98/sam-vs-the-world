@@ -1,4 +1,4 @@
-import { StatTile } from "@/components/stat-tile"
+import { StatTile } from "@/components/broadcast/stat-tile"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 

@@ -3,8 +3,8 @@ import { Link } from "@tanstack/react-router"
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 import { PageTitle } from "@/components/typography"
-import { StatRow } from "@/components/stat-row"
-import { TraitChip } from "@/components/trait-chip"
+import { StatRow } from "@/components/broadcast/stat-row"
+import { TraitChip } from "@/components/broadcast/trait-chip"
 
 import type { ProfileHeaderData } from "@/features/dashboard/lib/profile-header"
 

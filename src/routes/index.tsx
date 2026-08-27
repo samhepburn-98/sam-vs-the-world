@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 
-import { CountUp } from "@/components/count-up"
+import { CountUp } from "@/components/broadcast/count-up"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Overline, PageTitle } from "@/components/typography"
-import { Ticker } from "@/components/ticker"
+import { Ticker } from "@/components/broadcast/ticker"
 import { FeaturedPlayer } from "@/features/dashboard/components/featured-player"
 import { MatchRow } from "@/features/dashboard/components/match-row"
 import { RecordsWall } from "@/features/dashboard/components/record-tile"
