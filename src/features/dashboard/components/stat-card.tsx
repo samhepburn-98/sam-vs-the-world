@@ -1,8 +1,8 @@
 import type { ReactNode } from "react"
 
-import { CountUp } from "@/components/count-up"
+import { CountUp } from "@/components/broadcast/count-up"
 import { Card } from "@/components/ui/card"
-import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
+import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/lib/insight-thresholds"
 import { cn } from "@/lib/utils"
 
 // StatCard (§6.1) enforces the §3.5 honesty rules by design:
@@ -20,24 +20,42 @@ export interface Rate {
   of: number
 }
 
-interface StatCardProps {
+interface StatCardBase {
   label: string
-  /** A proportion shown as "62% · 15 of 22"; gated on `of`. */
-  rate?: Rate
-  /** A plain stat — a count or an average. Never rendered as a percentage. */
-  value?: number | string
-  /** Suffix for `value` mode, e.g. "per game" or "shots". */
-  unit?: string
   /** Sub-label under the number (e.g. the opponent, the span). */
   hint?: string
-  /** Sample below which the "not enough data" state shows. For a plain
-   *  `value`, pass `sample` too; a `rate` uses its own `of`. */
+  /** Sample below which the "not enough data" state shows instead. */
   minSample?: number
-  sample?: number
   /** Optional mini-viz slot (sparkline, court, bucket bars). */
   children?: ReactNode
   className?: string
 }
+
+interface StatCardRateProps extends StatCardBase {
+  /** A proportion shown as "62% · 15 of 22". Its own `of` is the sample, so
+   *  a rate can never be gated on a number that isn't its denominator. */
+  rate: Rate
+  value?: never
+  unit?: never
+  sample?: never
+}
+
+interface StatCardValueProps extends StatCardBase {
+  /** A plain stat — a count or an average. Never rendered as a percentage. */
+  value: number | string
+  /** Suffix for `value`, e.g. "per game" or "shots". */
+  unit?: string
+  /** How many observations `value` is drawn from — what the gate reads. */
+  sample?: number
+  rate?: never
+}
+
+// The two modes are exclusive by construction: a card is a rate or a plain
+// value, never both and never neither. Without the union, `<StatCard rate={…}
+// unit="shots" />` typechecks and quietly renders a percentage with a shots
+// suffix, and a rate could be gated on a sample that isn't its denominator.
+// stat-card.test.tsx pins all four of those with @ts-expect-error.
+type StatCardProps = StatCardRateProps | StatCardValueProps
 
 function pct(rate: Rate) {
   return Math.round((rate.won / rate.of) * 100)

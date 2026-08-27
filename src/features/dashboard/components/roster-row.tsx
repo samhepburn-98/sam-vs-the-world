@@ -6,8 +6,8 @@ import {
   heroStat,
   playerTrait,
 } from "@/features/dashboard/lib/player-attributes"
-import { FormGuide } from "@/components/form-guide"
-import { TraitChip } from "@/components/trait-chip"
+import { FormGuide } from "@/components/broadcast/form-guide"
+import { TraitChip } from "@/components/broadcast/trait-chip"
 import { cn } from "@/lib/utils"
 
 import type { PlayerSummary } from "@/lib/schemas/player"
@@ -46,7 +46,7 @@ export function RosterRow({
           {player.name}
         </span>
         {trait && (
-          <TraitChip tone={side} className="text-xs">
+          <TraitChip side={side} className="text-xs">
             {TRAIT_LABELS[trait]}
           </TraitChip>
         )}

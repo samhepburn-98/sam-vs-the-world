@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import {
   Item,
   ItemActions,

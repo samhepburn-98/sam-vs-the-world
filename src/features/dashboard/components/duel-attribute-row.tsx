@@ -10,20 +10,20 @@ const P2_COLOR = "var(--p2)"
 const P2_TEXT = "var(--p2-strong)"
 
 export function DuelAttributeRow({
-  a,
-  b,
+  p1Attr,
+  p2Attr,
 }: {
-  a: PlayerAttribute
-  b: PlayerAttribute | undefined
+  p1Attr: PlayerAttribute
+  p2Attr: PlayerAttribute | undefined
 }) {
-  if (!b) return null
-  const v1 = a.value
-  const v2 = b.value
-  const max = Math.max(v1 ?? 0, v2 ?? 0)
+  if (!p2Attr) return null
+  const p1Value = p1Attr.value
+  const p2Value = p2Attr.value
+  const max = Math.max(p1Value ?? 0, p2Value ?? 0)
   const width = (v: number | null) =>
     v === null || max === 0 ? 0 : (v / max) * 100
-  const p1Wins = v1 !== null && v2 !== null && v1 > v2
-  const p2Wins = v1 !== null && v2 !== null && v2 > v1
+  const p1Wins = p1Value !== null && p2Value !== null && p1Value > p2Value
+  const p2Wins = p1Value !== null && p2Value !== null && p2Value > p1Value
 
   return (
     <div className="flex items-center gap-2">
@@ -33,14 +33,14 @@ export function DuelAttributeRow({
           color: p1Wins ? P1_COLOR : "var(--muted-foreground)",
         }}
       >
-        {a.display}
-        <span className="sr-only"> — {a.sr}</span>
+        {p1Attr.display}
+        <span className="sr-only"> — {p1Attr.sr}</span>
       </span>
       <div className="flex min-w-0 flex-1 justify-end">
         <div
           className="h-2 rounded-l-sm"
           style={{
-            width: `${width(a.value)}%`,
+            width: `${width(p1Attr.value)}%`,
             backgroundColor: P1_COLOR,
             opacity: p1Wins ? 1 : 0.3,
           }}
@@ -48,16 +48,16 @@ export function DuelAttributeRow({
       </div>
       <span
         className="w-10 shrink-0 text-center text-xs tracking-[0.06em] text-muted-foreground"
-        title={b.detail}
+        title={p2Attr.detail}
       >
-        {a.code}
-        <span className="sr-only"> — {a.detail}</span>
+        {p1Attr.code}
+        <span className="sr-only"> — {p1Attr.detail}</span>
       </span>
       <div className="min-w-0 flex-1">
         <div
           className="h-2 rounded-r-sm"
           style={{
-            width: `${width(b.value)}%`,
+            width: `${width(p2Attr.value)}%`,
             backgroundColor: P2_COLOR,
             opacity: p2Wins ? 1 : 0.3,
           }}
@@ -69,8 +69,8 @@ export function DuelAttributeRow({
           color: p2Wins ? P2_TEXT : "var(--muted-foreground)",
         }}
       >
-        {b.display}
-        <span className="sr-only"> — {b.sr}</span>
+        {p2Attr.display}
+        <span className="sr-only"> — {p2Attr.sr}</span>
       </span>
     </div>
   )

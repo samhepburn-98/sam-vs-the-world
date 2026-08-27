@@ -99,7 +99,7 @@ function PlayerProfilePage() {
       {held.length > 0 && (
         <section className="flex flex-col gap-3">
           <Overline as="h2">Records held</Overline>
-          <RecordsWall records={held} tone="p1" />
+          <RecordsWall records={held} side="p1" />
         </section>
       )}
 

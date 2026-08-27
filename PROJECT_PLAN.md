@@ -512,6 +512,12 @@ extend it for our richer per-rally data. Super simple, clean, generous tap targe
 Principle: a small set of domain components, built once, reused everywhere — each fed by exactly one
 view/RPC so there's never a question of where a number comes from.
 
+> **What this section is for now.** Storybook is the component reference — it renders every component
+> live, in both lighting rigs, with the states that matter, and it can't drift from what ships. Don't
+> describe *appearance* here; it will rot. What stays here is the one thing a story can't show,
+> because a story renders from fixtures: **which view or RPC feeds each component.** That's the
+> "Fed by" column below.
+
 ### 6.1 Domain components
 
 | Component | What it is | Used on | Fed by |
@@ -521,7 +527,7 @@ view/RPC so there's never a question of where a number comes from.
 | `CourtDiagram` | SVG court, service boxes shaded by win % — signature motif; doubles as empty-state art + wordmark | serve pages, empties, brand | `serve_stats` |
 | `RallyTimeline` | two-sided vertical rally list (winner's side, running score, end-reason icon, serve chips, lets as hash-marks). **One component, two modes:** editable (logger) / read-only (match detail) | logger, match detail | `rallies_scored` / local queue |
 | `MomentumChart` | diverging area chart of a game's lead | match detail, momentum page, summary | `momentum` RPC (player pages); computed client-side from the already-fetched `rallies_scored` rows on match detail / in the logger |
-| `GameCard` | one game's score chip, winner-tinted | match detail, summary | `game_results` |
+| ~~`GameCard`~~ | *never built.* `ScoreStrip` and `GameScoreChart` cover match detail. The logger's finish screen uses neither — `MatchSummary` renders its own per-game rows from a pre-formatted `scoreline: string`, so the duplication GameCard was meant to prevent is live in that file | — | — |
 | `MatchRow` | date · players · score · format/ball badges | home, /matches | `match_results` |
 | `FilterBar` | opponent · ball · date range; **state lives in the URL** (`?vs=…&ball=…`) so filters persist across pages and every filtered view is shareable | player + category pages | drives RPC params |
 | `ErrorBreakdown` | stacked bar of error types + forced split | errors page, compare | `error_profile` |
@@ -537,8 +543,12 @@ let) · `OutcomeChips` (end-reason → conditional detail/forced/shot-type/count
 
 ### 6.3 Straight from shadcn
 
-Table, Tabs, Sheet, Dialog/AlertDialog, Combobox, ToggleGroup, Field/FieldGroup, Sonner, Skeleton,
-Empty, Breadcrumb, Badge, Card, top-bar nav block, login block, Pagination, Command.
+Whatever is in `src/components/ui`, themed by tokens only and never edited for one screen. Browse
+the current set in Storybook under **Primitives** rather than trusting an inventory typed here.
+
+One caveat on that: the Primitives section lists what has a *story*, not what exists. `ui/chart.tsx`
+(the recharts container the dashboard charts are built on) has no story, so it doesn't appear —
+check `src/components/ui` itself before concluding something isn't there.
 
 ---
 

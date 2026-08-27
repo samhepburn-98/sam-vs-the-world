@@ -1,7 +1,7 @@
 import {
   MIN_ERRORS_FOR_RATE,
   MIN_MATCHES_FOR_TREND,
-} from "@/features/dashboard/utils/insight-thresholds"
+} from "@/features/dashboard/lib/insight-thresholds"
 
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"

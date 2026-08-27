@@ -41,8 +41,16 @@ and roadmap — lives in [PROJECT_PLAN.md](PROJECT_PLAN.md). Work is organised a
 [issues](../../issues) grouped by phase milestones; one issue = one PR.
 
 Standalone reference docs live in [docs/](docs/): [the architecture](docs/architecture.md) (how the
-code is organised and the enforced module boundaries), [the database explained](docs/database.md),
-and [the decision log](docs/decisions.md).
+code is organised, the enforced module boundaries, and the component API conventions),
+[the database explained](docs/database.md), [the testing strategy](docs/testing.md), and
+[the decision log](docs/decisions.md).
+
+**The component catalogue is Storybook**, deployed alongside the app at
+[/storybook/](https://sam-vs-the-world.samhepburn98.workers.dev/storybook/). It's the live reference
+for the **Broadcast** design system — the colour law, the type scale, and every component in the kit
+with the states that matter. It renders from the app's own CSS variables, so it can't drift from what
+ships. Anything you'd need to *see* to understand lives there; anything you'd read while editing code
+lives in `docs/`.
 
 ## Development
 
@@ -50,8 +58,11 @@ and [the decision log](docs/decisions.md).
 pnpm install
 pnpm dev           # http://localhost:3000
 pnpm typecheck
+pnpm lint
+pnpm check         # prettier — a CI gate, so keep it green
 pnpm test          # unit/component (vitest)
 pnpm test:e2e      # playwright (boots its own server on 3210)
+pnpm storybook     # the component catalogue on :6006
 pnpm build
 pnpm run deploy    # build + wrangler deploy ("run" required — bare `pnpm deploy` is a reserved pnpm command)
 ```

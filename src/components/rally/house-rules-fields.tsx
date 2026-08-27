@@ -1,6 +1,6 @@
 import { Controller } from "react-hook-form"
 
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import {
   Field,
   FieldError,

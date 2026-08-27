@@ -6,7 +6,7 @@ import {
   matchesQueryOptions,
   useMatches,
 } from "@/features/dashboard/api/get-matches"
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
 import { MatchRow } from "@/features/dashboard/components/match-row"
@@ -163,10 +163,10 @@ function MatchesPage() {
               <MatchRow
                 matchId={m.match_id}
                 date={m.date}
-                name1={nameOf.get(m.player1_id) ?? "Unknown"}
-                name2={nameOf.get(m.player2_id) ?? "Unknown"}
-                score1={m.games_won_p1}
-                score2={m.games_won_p2}
+                p1Name={nameOf.get(m.player1_id) ?? "Unknown"}
+                p2Name={nameOf.get(m.player2_id) ?? "Unknown"}
+                p1Score={m.games_won_p1}
+                p2Score={m.games_won_p2}
                 outcome={m.outcome}
                 venue={m.venue}
                 format={m.format}

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 
-import { CountUp } from "@/components/count-up"
+import { CountUp } from "@/components/broadcast/count-up"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Overline, PageTitle } from "@/components/typography"
-import { Ticker } from "@/components/ticker"
+import { Ticker } from "@/components/broadcast/ticker"
 import { FeaturedPlayer } from "@/features/dashboard/components/featured-player"
 import { MatchRow } from "@/features/dashboard/components/match-row"
 import { RecordsWall } from "@/features/dashboard/components/record-tile"
@@ -220,10 +220,10 @@ function HomePage() {
                   <MatchRow
                     matchId={m.match_id}
                     date={m.date}
-                    name1={nameOf.get(m.player1_id) ?? "Unknown"}
-                    name2={nameOf.get(m.player2_id) ?? "Unknown"}
-                    score1={m.games_won_p1}
-                    score2={m.games_won_p2}
+                    p1Name={nameOf.get(m.player1_id) ?? "Unknown"}
+                    p2Name={nameOf.get(m.player2_id) ?? "Unknown"}
+                    p1Score={m.games_won_p1}
+                    p2Score={m.games_won_p2}
                     outcome={m.outcome}
                     venue={m.venue}
                     ball={m.ball_type}

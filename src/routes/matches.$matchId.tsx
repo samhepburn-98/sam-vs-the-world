@@ -15,9 +15,9 @@ import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-s
 import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
 import { humanise } from "@/features/dashboard/lib/humanise"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { Overline, SectionTitle } from "@/components/typography"
-import { ScoreStrip } from "@/components/score-strip"
+import { ScoreStrip } from "@/components/broadcast/score-strip"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -190,10 +190,10 @@ function MatchDetailPage() {
                 : "Full time"}
           </Overline>
           <ScoreStrip
-            name1={p1Name}
-            name2={p2Name}
-            score1={gamesWonP1}
-            score2={gamesWonP2}
+            p1Name={p1Name}
+            p2Name={p2Name}
+            p1Score={gamesWonP1}
+            p2Score={gamesWonP2}
             outcome={
               verdict.outcome === "p1" || verdict.outcome === "p2"
                 ? verdict.outcome

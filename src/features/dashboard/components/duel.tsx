@@ -30,60 +30,63 @@ function receiptValue(n: number | undefined): string {
   return n === undefined ? "—" : String(n)
 }
 
-function buildReceipts(d1: PlayerData, d2: PlayerData): Array<DuelReceipt> {
+function buildReceipts(
+  p1Data: PlayerData,
+  p2Data: PlayerData
+): Array<DuelReceipt> {
   return [
     {
       label: "Games won",
-      v1: receiptValue(d1.headline?.games_won),
-      v2: receiptValue(d2.headline?.games_won),
+      p1Value: receiptValue(p1Data.headline?.games_won),
+      p2Value: receiptValue(p2Data.headline?.games_won),
     },
     {
       label: "Aces",
-      v1: receiptValue(d1.serve?.aces),
-      v2: receiptValue(d2.serve?.aces),
+      p1Value: receiptValue(p1Data.serve?.aces),
+      p2Value: receiptValue(p2Data.serve?.aces),
     },
     {
       label: "Double faults",
-      v1: receiptValue(d1.serve?.double_faults),
-      v2: receiptValue(d2.serve?.double_faults),
+      p1Value: receiptValue(p1Data.serve?.double_faults),
+      p2Value: receiptValue(p2Data.serve?.double_faults),
     },
     {
       label: "Comebacks",
-      v1: receiptValue(d1.momentum?.comebacks),
-      v2: receiptValue(d2.momentum?.comebacks),
+      p1Value: receiptValue(p1Data.momentum?.comebacks),
+      p2Value: receiptValue(p2Data.momentum?.comebacks),
     },
     {
       label: "Longest rally",
-      v1: receiptValue(d1.rally?.longest),
-      v2: receiptValue(d2.rally?.longest),
+      p1Value: receiptValue(p1Data.rally?.longest),
+      p2Value: receiptValue(p2Data.rally?.longest),
     },
     {
       label: "Tins",
-      v1: receiptValue(d1.error?.tin),
-      v2: receiptValue(d2.error?.tin),
+      p1Value: receiptValue(p1Data.error?.tin),
+      p2Value: receiptValue(p2Data.error?.tin),
     },
   ]
 }
 
 export function Duel({
-  player1,
-  player2,
-  d1,
-  d2,
+  p1,
+  p2,
+  p1Data,
+  p2Data,
   mode,
 }: {
-  player1: PlayerSummary
-  player2: PlayerSummary
-  d1: PlayerData
-  d2: PlayerData
+  p1: PlayerSummary
+  p2: PlayerSummary
+  p1Data: PlayerData
+  p2Data: PlayerData
   mode: "all" | "h2h"
 }) {
-  const h2h = useH2h(player1.id, player2.id)
+  const h2h = useH2h(p1.id, p2.id)
 
-  const attrs1 = computePlayerAttributes(d1)
-  const attrs2 = computePlayerAttributes(d2)
-  const tally = duelTally(attrs1, attrs2)
-  const pills = superlatives(d1, d2, attrs1, attrs2)
+  const p1Attrs = computePlayerAttributes(p1Data)
+  const p2Attrs = computePlayerAttributes(p2Data)
+  const tally = duelTally(p1Attrs, p2Attrs)
+  const pills = superlatives(p1Data, p2Data, p1Attrs, p2Attrs)
 
   const score =
     mode === "h2h"
@@ -99,7 +102,7 @@ export function Duel({
       ? h2h.data
         ? dominanceFromH2h(h2h.data)
         : null
-      : dominanceFromForm(d1.headline, d2.headline)
+      : dominanceFromForm(p1Data.headline, p2Data.headline)
 
   // desktop is the three-column duel — cards flank the engine, all three
   // middle-aligned; on phones the cards face off two-up with
@@ -108,21 +111,21 @@ export function Duel({
     <div className="grid grid-cols-2 items-center gap-x-2.5 gap-y-6 sm:gap-x-8 md:grid-cols-[16rem_minmax(0,1fr)_16rem] md:gap-x-12">
       <div className="flex flex-col gap-3 md:col-start-1 md:row-start-1 md:gap-14">
         <PlayerCard
-          name={player1.name}
+          name={p1.name}
           side="p1"
-          avatarSrc={player1.avatar_url ?? "/avatars/default.svg"}
-          trait={playerTrait(d1)}
-          handedness={player1.handedness}
-          hero={heroStat(d1)}
-          attrs={attrs1}
+          avatarSrc={p1.avatar_url ?? "/avatars/default.svg"}
+          trait={playerTrait(p1Data)}
+          handedness={p1.handedness}
+          hero={heroStat(p1Data)}
+          attrs={p1Attrs}
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <AttributeRadar attrs={attrs1} side="p1" name={player1.name} />
+            <AttributeRadar attrs={p1Attrs} side="p1" name={p1.name} />
           </div>
           <PlayerCardFooter
-            name={player1.name}
-            trait={playerTrait(d1)}
+            name={p1.name}
+            trait={playerTrait(p1Data)}
             pills={pills.p1}
           />
         </div>
@@ -130,21 +133,21 @@ export function Duel({
 
       <div className="flex flex-col gap-3 md:col-start-3 md:row-start-1 md:gap-14">
         <PlayerCard
-          name={player2.name}
+          name={p2.name}
           side="p2"
-          avatarSrc={player2.avatar_url ?? "/avatars/default.svg"}
-          trait={playerTrait(d2)}
-          handedness={player2.handedness}
-          hero={heroStat(d2)}
-          attrs={attrs2}
+          avatarSrc={p2.avatar_url ?? "/avatars/default.svg"}
+          trait={playerTrait(p2Data)}
+          handedness={p2.handedness}
+          hero={heroStat(p2Data)}
+          attrs={p2Attrs}
         />
         <div className="flex flex-col gap-3">
           <div className="mx-auto w-full max-w-36 md:max-w-none">
-            <AttributeRadar attrs={attrs2} side="p2" name={player2.name} />
+            <AttributeRadar attrs={p2Attrs} side="p2" name={p2.name} />
           </div>
           <PlayerCardFooter
-            name={player2.name}
-            trait={playerTrait(d2)}
+            name={p2.name}
+            trait={playerTrait(p2Data)}
             pills={pills.p2}
             side="p2"
           />
@@ -153,14 +156,14 @@ export function Duel({
 
       <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">
         <DuelCenter
-          name1={player1.name}
-          name2={player2.name}
+          p1Name={p1.name}
+          p2Name={p2.name}
           score={score}
           dominance={dominance}
-          attrs1={attrs1}
-          attrs2={attrs2}
+          p1Attrs={p1Attrs}
+          p2Attrs={p2Attrs}
           tally={tally}
-          receipts={buildReceipts(d1, d2)}
+          receipts={buildReceipts(p1Data, p2Data)}
         />
       </div>
     </div>

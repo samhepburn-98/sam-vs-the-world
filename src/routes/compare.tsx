@@ -71,12 +71,12 @@ function ComparePage() {
   const filtersFor = (i: number): InsightFilters =>
     h2h ? { opponentId: selected[i === 0 ? 1 : 0] } : {}
 
-  const d1 = usePlayerInsights(selected[0], filtersFor(0))
-  const d2 = usePlayerInsights(selected[1], filtersFor(1))
+  const p1Data = usePlayerInsights(selected[0], filtersFor(0))
+  const p2Data = usePlayerInsights(selected[1], filtersFor(1))
 
-  const player1 = roster.find((p) => p.id === selected[0])
-  const player2 = roster.find((p) => p.id === selected[1])
-  const ready = Boolean(player1 && player2)
+  const p1 = roster.find((p) => p.id === selected[0])
+  const p2 = roster.find((p) => p.id === selected[1])
+  const ready = Boolean(p1 && p2)
 
   return (
     <main className="container mx-auto flex max-w-5xl flex-col gap-8 px-3 py-8 sm:gap-10 sm:px-4 sm:py-12">
@@ -95,7 +95,7 @@ function ComparePage() {
         {ready && <DuelModeToggle mode={search.mode} onChange={setMode} />}
       </div>
 
-      {!player1 || !player2 ? (
+      {!p1 || !p2 ? (
         <Empty>
           <EmptyHeader>
             <CourtEmptyMedia />
@@ -108,17 +108,17 @@ function ComparePage() {
       ) : (
         <>
           <Duel
-            player1={player1}
-            player2={player2}
-            d1={d1}
-            d2={d2}
+            p1={p1}
+            p2={p2}
+            p1Data={p1Data}
+            p2Data={p2Data}
             mode={search.mode}
           />
           <H2hPanel
-            player1Id={player1.id}
-            player2Id={player2.id}
-            name1={player1.name}
-            name2={player2.name}
+            player1Id={p1.id}
+            player2Id={p2.id}
+            p1Name={p1.name}
+            p2Name={p2.name}
           />
         </>
       )}
