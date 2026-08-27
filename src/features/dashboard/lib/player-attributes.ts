@@ -2,7 +2,7 @@ import {
   MIN_ERRORS_FOR_RATE,
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
+} from "@/features/dashboard/lib/insight-thresholds"
 
 import type {
   DecisiveShots,

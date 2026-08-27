@@ -41,7 +41,7 @@ describe("buildRecordTiles", () => {
     })
   })
 
-  it("anchors the tone to the holder's side in the record's match", () => {
+  it("anchors the side to the holder's side in the record's match", () => {
     const tiles = buildRecordTiles(
       [
         row({ record_key: "biggest_win", player_id: SAM }),
@@ -50,7 +50,7 @@ describe("buildRecordTiles", () => {
       ],
       nameOf
     )
-    expect(tiles.map((t) => t.tone)).toEqual(["p1", "p2", null])
+    expect(tiles.map((t) => t.side)).toEqual(["p1", "p2", null])
   })
 
   it("pluralises units, including the irregular rally", () => {

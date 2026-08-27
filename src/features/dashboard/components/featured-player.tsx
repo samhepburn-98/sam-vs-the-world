@@ -8,7 +8,7 @@ import {
   heroStat,
   playerTrait,
 } from "@/features/dashboard/lib/player-attributes"
-import { Callout } from "@/components/callout"
+import { Callout } from "@/components/broadcast/callout"
 
 import type { PlayerSummary } from "@/lib/schemas/player"
 
@@ -50,12 +50,12 @@ export function FeaturedPlayer({ player }: { player: PlayerSummary }) {
       </Link>
       <div className="flex min-w-0 flex-1 flex-col gap-2.5">
         {read && (
-          <Callout tone="p1" label="The read">
+          <Callout side="p1" label="The read">
             {read}
           </Callout>
         )}
         {formParts.length > 0 && (
-          <Callout tone="neutral" label="Form">
+          <Callout side="neutral" label="Form">
             {formParts.join(" · ")}.
           </Callout>
         )}

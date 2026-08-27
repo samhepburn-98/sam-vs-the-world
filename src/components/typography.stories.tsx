@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 // how the app speaks.
 
 const meta = {
-  title: "Typography/Headings",
+  title: "Foundations/Headings",
   component: PageTitle,
 } satisfies Meta<typeof PageTitle>
 
@@ -34,5 +34,6 @@ export const Voice: Story = {
 }
 
 export const PageTitleOnly: Story = {
+  name: "Page title only",
   args: { children: "Sam vs the world" },
 }

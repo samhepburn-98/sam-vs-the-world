@@ -1,4 +1,4 @@
-import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
+import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/lib/insight-thresholds"
 
 import type {
   AttributeKey,

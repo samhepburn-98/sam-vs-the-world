@@ -6,11 +6,20 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 This Storybook is the living reference for the app's **Broadcast** design
 system: sports-TV information graphics built around the FUT-style player
-cards. Every reusable component gets a story here; the pages of the app are
-compositions of what you see in the sidebar.
+cards. Every component you would *place on a page* has a story here. Two
+kinds don't: page-level compositions that assemble a whole screen region
+(the profile tabs, the head-to-head panel, category content) — those are
+documented in [Page anatomy](?path=/docs/patterns-page-anatomy--docs) — and
+`SiteHeader`, which imports a server function whose module chain Storybook's
+build deliberately excludes.
 
 Everything renders from the **live CSS variables** in `src/styles.css`, so
 these docs cannot drift from the app.
+
+**Planning a page?** Start at [Pick a component](?path=/docs/foundations-pick-a-component--docs)
+— it's organised by what you're trying to say rather than by what things are
+called. [Page anatomy](?path=/docs/patterns-page-anatomy--docs) then shows how
+the existing pages are assembled from those pieces.
 
 ## The one-paragraph version
 
@@ -44,11 +53,19 @@ the match the record was set in), and the skewed **brand lozenge**
 ## Where things go
 
 - `src/components/ui` — shadcn primitives, themed by tokens only.
-- `src/components` — shared composed components (typography, the broadcast
-  graphics, court, rally).
+- `src/components/broadcast` — the graphic kit above.
+- `src/components/{layouts,court,rally}` — page furniture, court SVGs, and the
+  rally-entry composites. `typography.tsx` sits at the root: it's the type
+  scale, not a graphic.
 - `src/features/*` — feature-specific components; a feature never imports a
   sibling feature.
 - Stories live next to their component as `*.stories.tsx`.
+
+The sidebar and the folders answer different questions, so they don't match
+one-for-one: a folder says **who owns this**, a sidebar section says **what
+kind of thing it is**. `RecordTile` lives in the dashboard feature (it reads a
+dashboard type) but files under **Broadcast** here, because that's where
+you'd look for it when planning a page.
 
 ## Working rules
 

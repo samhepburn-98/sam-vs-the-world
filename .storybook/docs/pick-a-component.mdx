@@ -1,0 +1,149 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Foundations/Pick a component" />
+
+# Pick a component
+
+Start here when you're planning a page. Find the row that matches what you're trying to
+**say**, not what you want it to look like — the design system already decided the looks.
+
+Everything below is in the sidebar; the section is where to find it.
+
+## Say a result
+
+| You want to show | Reach for | Section |
+| --- | --- | --- |
+| A finished match, big — the full-time graphic | **Score strip** | Broadcast |
+| A match as one line in a list | **Match row** | Dashboard |
+| A run of recent results | **Form guide** (the strip) or **Result chip** (one) | Broadcast |
+| A head-to-head record between two people | **Head-to-head table** | Dashboard |
+| Every game of one match, scored | **Game score chart** | Dashboard |
+| A finished match the logger just closed | **Match summary** | Logger |
+
+## Say a number
+
+| You want to show | Reach for | Section |
+| --- | --- | --- |
+| A rate you must not fake | **Stat card** — a `{ won, of }` pair, so a percentage *cannot* render without its denominator | Dashboard |
+| One number in a grid of numbers | **Stat tile** | Broadcast |
+| A label-and-value line, stacked into a block | **Stat row** | Broadcast |
+| A proportion as a bar, in a list of them | **Stat bar row** | Dashboard |
+| A number that should count up on arrival | **Count up** | Broadcast |
+| An all-time best | **Record tile** / the wall | Broadcast |
+
+There are four "stat" components because there are four shapes, not four opinions: a **card**
+is a rate with its receipt, a **tile** goes in a grid, a **row** is a lower-third line, a
+**bar row** is a proportion. If you're unsure, you probably want Stat card — it's the one that
+enforces the honesty rules.
+
+## Say something about a person
+
+| You want to show | Reach for | Section |
+| --- | --- | --- |
+| A player, full-dress | **Player card** | Cards |
+| A player as a list row | **Roster row** | Dashboard |
+| A player at the top of their own page | **Profile hero** | Dashboard |
+| Their earned class line (Sniper, Grafter, Wall) | **Trait chip** | Broadcast |
+| Their six attributes, compared | **Attribute radar**, **Duel attribute row** | Dashboard |
+| What an attribute means | **Attribute glossary** | Dashboard |
+
+## Say something about how they play
+
+| You want to show | Reach for | Section |
+| --- | --- | --- |
+| Where errors land, on a court | **Error wall** | Dashboard |
+| The forced/unforced split | **Error breakdown** | Dashboard |
+| Rally-length distribution | **Rally length histogram** (from the RPC row) or **Rally length curve** (from buckets you already have) | Dashboard |
+| Win rate drifting over time | **Win rate trend** | Dashboard |
+| The lead swinging through a game | **Momentum chart** — pass `rallies` and it folds them; its file also exports `MomentumArea` if you already hold a lead series | Dashboard |
+| Which box they serve from | **Serve boxes**, **Court diagram** | Dashboard, Layouts |
+| Two players, everything at once | **Duel** (assembled) or its pieces: **Duel centre**, **Duel picker**, **Duel mode toggle** | Dashboard |
+
+## Frame the page
+
+| You want | Reach for | Section |
+| --- | --- | --- |
+| A page title | **Headings** — `PageTitle`, `SectionTitle`, `Overline` | Foundations |
+| A titled block with a lede | **Profile section** | Dashboard |
+| A headline strip across the top | **Ticker** | Broadcast |
+| An editorial point — the pundit panel | **Callout** | Broadcast |
+| A written read on the data | **Narrative insight** | Dashboard |
+| A link into a deeper page, with a preview | **Insight card** — ⚠️ currently rendered by nothing; see the note below | Dashboard |
+| Nothing to show yet | **Empty** + **Court empty media** | Primitives, Layouts |
+| Loading | **Skeleton**, **Spinner** | Primitives |
+| A whole placeholder page | **Page stub** | Layouts |
+
+## Rally-level surfaces
+
+| You want | Reach for | Section |
+| --- | --- | --- |
+| Every rally of a match, as a table | **Rally table** | Dashboard |
+| Every rally, as a two-sided timeline | **Rally timeline** | Logger |
+| One rally in full, with prev/next | **Rally detail sheet** | Dashboard |
+| Which ball was in play | **Ball dots** | Broadcast |
+| To edit a rally | **Rally editor** | Forms |
+
+## Filter, page, or edit
+
+| You want | Reach for | Section |
+| --- | --- | --- |
+| Opponent / ball / date filters, held in the URL | **Filter bar** | Dashboard |
+| A player's match history with game scores | **Match history** | Dashboard |
+| The name-and-trait line under a card | **Player card footer** | Dashboard |
+| A sortable, paged table of raw rows | **Data table** + **Cells** | Manage |
+| A form in a modal | **Edit dialog** | Manage |
+| A destructive confirm | **Confirm delete** | Manage |
+| The house rules of a match, as fields | **House rules fields** | Forms |
+| Sign-in | **Login form** | Forms |
+| Light/dark | **Theme toggle** | Layouts |
+
+## Building the logger
+
+The live rally logger has its own kit, tuned for speed at 2× playback. If you're adding to that
+screen, start here rather than in Broadcast.
+
+**Score header** (the giant running score, serving dot, box and serve chips) ·
+**Winner buttons** (two big targets plus let) · **Outcome chips** (end reason, then the conditional
+detail/forced/shot-type/count) · **Undo bar** · **Sync indicator** (the write queue's three states) ·
+**Game over banner** · **Rally timeline** · **Match setup** · **Player select** ·
+**Recent matches** · **Hotkey help** (`?`) · **Glossary**.
+
+## One orphan, on purpose
+
+**Insight card** has no caller, and it is the *only* thing in the app that links to a category
+page (`/players/$playerId/$category`). So the whole category chain — that route, `CategoryContent`
+(377 lines), `FilterBar`, `CATEGORY_KEYS` — is currently reachable only by typing a URL.
+
+It is left in the catalogue rather than deleted precisely because deleting the bridge would
+quietly cement an orphaned feature. The decision to make is *wire it back up or remove the chain* —
+not "tidy away the one component that still points at it".
+
+## Primitives
+
+Buttons, inputs, tabs, dialogs, tables — the shadcn layer, themed by tokens only. They're in the
+sidebar under **Primitives** for reference, but they're not in the tables above: you already know
+what a Button is, and the interesting decision is which *domain* component wraps it.
+
+Never edit a primitive for one screen. If a screen needs something a primitive doesn't do, that's a
+new component in `broadcast/` or the feature, built on top.
+
+## Before you compose
+
+Four rules the kit assumes. Breaking them is what makes a new page look like a different app.
+
+1. **The colour law.** Every value belonging to a player wears their side — ember for player one,
+   blue for player two. The prop is always called `side`. `tone` means emphasis that is nobody's
+   colour; `outcome` is the only one that carries a verdict. See **The Broadcast rules**.
+2. **Show the denominator.** A percentage without its sample is a lie the components are built to
+   make difficult. Prefer the component that enforces it over one that lets you print a bare number.
+3. **Phone first.** Every surface works at 390px with 44px hit targets before it earns a desktop
+   layout. Check a story at mobile width before you believe it.
+4. **Say the gap out loud.** When there isn't enough data, the kit shows a dash or "Not enough data
+   yet" — it never invents a number and never silently disappears.
+
+## Where things live
+
+The sidebar and the folders answer different questions on purpose — a folder says *who owns
+this*, a sidebar section says *what kind of thing it is*. `Record tile` files under **Broadcast**
+because that's where you'd look for it, but lives in the dashboard feature because it reads a
+dashboard type. `docs/architecture.md` has the folder rules.

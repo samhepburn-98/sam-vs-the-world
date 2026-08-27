@@ -4,13 +4,13 @@ import {
   CATEGORY_KEYS,
   categoryBlurb,
   categoryLabel,
-} from "@/features/dashboard/categories"
+} from "@/features/dashboard/lib/categories"
 import { CategoryContent } from "@/features/dashboard/components/category-content"
 import { FilterBar } from "@/features/dashboard/components/filter-bar"
 import {
   insightSearch,
   searchToFilters,
-} from "@/features/dashboard/utils/insight-filters"
+} from "@/features/dashboard/lib/insight-filters"
 import { Overline, PageTitle } from "@/components/typography"
 import {
   Breadcrumb,
@@ -23,7 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { CategoryKey } from "@/features/dashboard/categories"
+import type { CategoryKey } from "@/features/dashboard/lib/categories"
 
 // Category detail (§5.1, §3.3): one shared template — breadcrumb, filter bar,
 // then the per-category content — instantiated for all five categories. The

@@ -22,13 +22,13 @@ import { WinRateTrend } from "@/features/dashboard/components/win-rate-trend"
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
+} from "@/features/dashboard/lib/insight-thresholds"
 import { CourtDiagram } from "@/components/court/court-diagram"
-import { ResultChip } from "@/components/result-chip"
-import { StatRow } from "@/components/stat-row"
+import { ResultChip } from "@/components/broadcast/result-chip"
+import { StatRow } from "@/components/broadcast/stat-row"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import type { CategoryKey } from "@/features/dashboard/categories"
+import type { CategoryKey } from "@/features/dashboard/lib/categories"
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
 import type { TrendPoint } from "@/features/dashboard/components/win-rate-trend"
 import type { ReactNode } from "react"

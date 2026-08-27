@@ -1,84 +1,67 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
 
 import { FilterBar } from "@/features/dashboard/components/filter-bar"
 
-import type { InsightSearch } from "@/features/dashboard/utils/insight-filters"
-import type { PlayerSummary } from "@/lib/schemas/player"
+import { withQueryClient } from "#storybook/decorators"
+import { IDS, ROSTER, SAM } from "#storybook/fixtures"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
+import type { ComponentProps } from "react"
 
-// The control strip. It owns no state — the route does — so the stories
-// hold the search themselves and hand it straight back, which is exactly
-// what navigate() does on the real page.
+// The one filter row every insight page shares: opponent, ball, date span.
+// It holds no state — the route reads the URL, hands the search down, and
+// navigates on change — so every filtered view is a shareable link. Reach for
+// it directly under a page title, above the numbers it narrows.
 
-const ME = "11111111-1111-1111-1111-111111111111"
-
-const ROSTER: Array<PlayerSummary> = [
-  {
-    id: ME,
-    name: "Sam",
-    avatar_url: null,
-    handedness: "right",
-    is_protagonist: true,
-  },
-  {
-    id: "22222222-2222-2222-2222-222222222222",
-    name: "Alex",
-    avatar_url: null,
-    handedness: "left",
-    is_protagonist: false,
-  },
-  {
-    id: "33333333-3333-3333-3333-333333333333",
-    name: "Ormond",
-    avatar_url: null,
-    handedness: "right",
-    is_protagonist: false,
-  },
-]
-
-function Harness({ children }: { children: ReactNode }) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  })
-  qc.setQueryData(["players"], ROSTER)
-  return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-}
-
-function Live({ initial }: { initial: InsightSearch }) {
-  const [search, setSearch] = useState(initial)
-  return (
-    <Harness>
-      <FilterBar value={search} onChange={setSearch} excludePlayerId={ME} />
-    </Harness>
-  )
+// Stands in for the URL, so the controls in these stories actually move.
+function UrlStandIn({ value, ...props }: ComponentProps<typeof FilterBar>) {
+  const [search, setSearch] = useState(value)
+  return <FilterBar {...props} value={search} onChange={setSearch} />
 }
 
 const meta = {
   title: "Dashboard/Filter bar",
   component: FilterBar,
-  parameters: { layout: "padded" },
-  args: { value: {}, onChange: () => {} },
+  decorators: [
+    withQueryClient((queryClient) => {
+      queryClient.setQueryData(["players"], ROSTER)
+    }),
+  ],
+  args: { value: {}, onChange: () => {}, excludePlayerId: IDS.sam },
+  render: (args) => <UrlStandIn {...args} />,
 } satisfies Meta<typeof FilterBar>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Nothing set: the bar is neutral and says so, and there's nothing to clear. */
-export const Unfiltered: Story = { render: () => <Live initial={{}} /> }
+// Nothing narrowed, so there is nothing to clear and the row stays quiet.
+// This is Sam's own page: the opponent list is Alex and Ormond, because no
+// one is ever offered as their own opponent.
+export const Default: Story = {}
 
-/** The moment a filter bites, the edge takes the ember and the strip says
- *  "Filtered" — every number on the board below is now a subset, and a page
- *  quietly showing a subset has to admit it. */
+// Three filters live at once — every number on the page now reads "vs Alex,
+// double yellow, July to late August". Only now does Clear appear, as the one
+// way back to the whole record.
 export const Filtered: Story = {
-  render: () => (
-    <Live
-      initial={{
-        vs: "22222222-2222-2222-2222-222222222222",
-        ball: "yellow",
-        from: "2026-06-01",
-      }}
-    />
-  ),
+  args: {
+    value: {
+      vs: IDS.alex,
+      ball: "double_yellow",
+      from: "2026-07-01",
+      to: "2026-08-27",
+    },
+  },
+}
+
+// A fresh account with only Sam on it. No one is ever offered as their own
+// opponent, so excludePlayerId empties the list — and the select still keeps
+// its "All opponents" option rather than collapsing, so the row never looks
+// broken. (The story's own seed sits inside the meta one, so it wins.)
+export const NoOpponentsYet: Story = {
+  name: "No opponents yet",
+  decorators: [
+    withQueryClient((queryClient) => {
+      queryClient.setQueryData(["players"], [SAM])
+    }),
+  ],
 }

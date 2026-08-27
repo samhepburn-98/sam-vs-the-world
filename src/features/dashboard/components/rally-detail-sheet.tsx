@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { humanise } from "@/features/dashboard/lib/humanise"
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,

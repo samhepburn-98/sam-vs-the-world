@@ -3,8 +3,8 @@ import { Link } from "@tanstack/react-router"
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { TRAIT_LABELS } from "@/features/dashboard/lib/player-attributes"
 import { PageTitle } from "@/components/typography"
-import { StatRow } from "@/components/stat-row"
-import { TraitChip } from "@/components/trait-chip"
+import { StatRow } from "@/components/broadcast/stat-row"
+import { TraitChip } from "@/components/broadcast/trait-chip"
 
 import type { ProfileHeaderData } from "@/features/dashboard/lib/profile-header"
 
@@ -34,7 +34,7 @@ export function ProfileHero({ header }: { header: ProfileHeaderData }) {
           <PageTitle>{header.name}</PageTitle>
           <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             {header.trait && (
-              <TraitChip tone="p1">{TRAIT_LABELS[header.trait]}</TraitChip>
+              <TraitChip side="p1">{TRAIT_LABELS[header.trait]}</TraitChip>
             )}
             <span className="font-heading text-[13px] font-bold tracking-[0.12em] text-muted-foreground uppercase">
               {header.meta}

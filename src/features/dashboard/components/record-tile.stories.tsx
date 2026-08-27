@@ -1,42 +1,15 @@
 import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
-
-import {
   RecordTile,
   RecordsWall,
 } from "@/features/dashboard/components/record-tile"
 
+import { withRouter } from "#storybook/decorators"
+
 import type { RecordTileDisplay } from "@/features/dashboard/lib/record-display"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
 
-// RecordTile links to the match its record was set in, so stories mount a
-// minimal memory router: the story renders at "/", and the match route
-// exists for the links to resolve against.
-
-function StoryRouter({ children }: { children: ReactNode }) {
-  const rootRoute = createRootRoute()
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: () => <>{children}</>,
-  })
-  const matchRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/matches/$matchId",
-    component: () => null,
-  })
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, matchRoute]),
-    history: createMemoryHistory(),
-  })
-  return <RouterProvider router={router} />
-}
+// RecordTile links to the match its record was set in, so it needs the
+// shared router harness.
 
 const record = (overrides: Partial<RecordTileDisplay>): RecordTileDisplay => ({
   key: "longest_rally",
@@ -46,7 +19,7 @@ const record = (overrides: Partial<RecordTileDisplay>): RecordTileDisplay => ({
   lead: "Alex",
   isHolder: true,
   rest: "14 Jul 2026",
-  tone: "p2",
+  side: "p2",
   matchId: "m1",
   ...overrides,
 })
@@ -58,10 +31,10 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "3–0",
     unit: null,
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
   }),
   // Sam held this one from the p2 slot: blue on the wall (match-anchored),
-  // repainted ember by the RecordsHeld story's tone override below.
+  // repainted ember by the RecordsHeld story's side override below.
   record({ key: "longest_rally", lead: "Sam", matchId: "m2" }),
   record({
     key: "best_streak",
@@ -69,7 +42,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "6",
     unit: "wins",
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
     matchId: "m3",
   }),
   record({
@@ -80,7 +53,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     lead: "Sam v Alex",
     isHolder: false,
     rest: "15–13 · 14 Jul 2026",
-    tone: null,
+    side: null,
     matchId: "m4",
   }),
   record({
@@ -89,7 +62,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "5",
     unit: null,
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
     matchId: "m5",
   }),
   record({
@@ -99,21 +72,15 @@ const THE_WALL: Array<RecordTileDisplay> = [
     unit: null,
     lead: "Sam v Ormond",
     isHolder: false,
-    tone: null,
+    side: null,
     matchId: "m6",
   }),
 ]
 
 const meta = {
-  title: "UI/Record tile",
+  title: "Broadcast/Record tile",
   component: RecordTile,
-  decorators: [
-    (Story) => (
-      <StoryRouter>
-        <Story />
-      </StoryRouter>
-    ),
-  ],
+  decorators: [withRouter],
   args: { record: record({}) },
 } satisfies Meta<typeof RecordTile>
 
@@ -121,33 +88,37 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const HolderRecord: Story = {
-  render: () => (
+  name: "Holder record",
+  render: (args) => (
     <div className="w-56">
-      <RecordTile record={record({})} />
+      <RecordTile {...args} />
     </div>
   ),
 }
 
 export const MatchOwnedRecord: Story = {
-  render: () => (
+  name: "Match-owned record",
+  args: {
+    record: record({
+      key: "marathon_game",
+      title: "Marathon game",
+      value: "27",
+      unit: "rallies",
+      lead: "Sam v Alex",
+      isHolder: false,
+      rest: "15–13 · 14 Jul 2026",
+      side: null,
+    }),
+  },
+  render: (args) => (
     <div className="w-56">
-      <RecordTile
-        record={record({
-          key: "marathon_game",
-          title: "Marathon game",
-          value: "27",
-          unit: "rallies",
-          lead: "Sam v Alex",
-          isHolder: false,
-          rest: "15–13 · 14 Jul 2026",
-          tone: null,
-        })}
-      />
+      <RecordTile {...args} />
     </div>
   ),
 }
 
 export const TheWall: Story = {
+  name: "The wall",
   render: () => (
     <div className="w-full max-w-2xl">
       <RecordsWall records={THE_WALL} />
@@ -159,11 +130,12 @@ export const TheWall: Story = {
 // player's own ember — including the longest rally Sam set from the p2
 // slot, which the home wall shows in blue.
 export const RecordsHeld: Story = {
+  name: "Records held",
   render: () => (
     <div className="w-full max-w-2xl">
       <RecordsWall
         records={THE_WALL.filter((r) => r.lead === "Sam")}
-        tone="p1"
+        side="p1"
       />
     </div>
   ),

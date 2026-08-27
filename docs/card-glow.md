@@ -7,7 +7,6 @@
 > playbook if a card glow ever returns; `scripts/generate-card-glow.mjs`
 > still bakes the sprites.
 
-
 The glow behind a roster card on hover is **not** a CSS `drop-shadow` — it is a
 pre-rendered image: the card frame's silhouette, tinted to the frame's colour,
 Gaussian-blurred, and baked into a small webp. The hover then animates only
@@ -34,12 +33,12 @@ costs nothing at runtime, and fading it with `opacity` stays on the compositor.
 
 ## The moving parts
 
-| Piece | Where |
-|---|---|
-| Source frames | `public/card-frame-p1.png`, `public/card-frame-p2.png` |
-| Generator | `scripts/generate-card-glow.mjs` (tints, blur, and padding live here) |
+| Piece         | Where                                                                          |
+| ------------- | ------------------------------------------------------------------------------ |
+| Source frames | `public/card-frame-p1.png`, `public/card-frame-p2.png`                         |
+| Generator     | `scripts/generate-card-glow.mjs` (tints, blur, and padding live here)          |
 | Baked sprites | `public/card-glow-p1.webp`, `public/card-glow-p2.webp` (~19KB each, committed) |
-| Consumer | `RosterCard` (`src/features/dashboard/components/roster-card.tsx`) |
+| Consumer      | `RosterCard` (`src/features/dashboard/components/roster-card.tsx`)             |
 
 The sprite is larger than the frame: the generator adds transparent padding on
 every side so the blur has room to breathe. The consumer positions the sprite

@@ -1,7 +1,7 @@
 import { PencilIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 
-import { BallDots } from "@/components/ball-dots"
+import { BallDots } from "@/components/broadcast/ball-dots"
 import {
   BoolCell,
   EnumCell,

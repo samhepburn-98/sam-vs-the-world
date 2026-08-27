@@ -6,7 +6,7 @@ database; 14 onward, the frontend.
 
 ## 1. Log at the rally level, one row per point
 
-Final scores answer "who won." The *ordered sequence* of rallies answers everything else — comebacks,
+Final scores answer "who won." The _ordered sequence_ of rallies answers everything else — comebacks,
 who closes out games, streaks, error types, serve win rates. Anything depending on the order of
 points needs the sequence; summary totals cannot reconstruct it. This is the project's core bet.
 
@@ -20,15 +20,15 @@ at hobby volume. **Consequence:** editing any rally instantly corrects every dow
 ## 3. The game winner is "whoever leads at the last rally played"
 
 Deliberately rule-agnostic: the view doesn't know about 11 points or win-by-2. The rules only decide
-*when you stop playing*, and that's already encoded in which rallies exist. This makes win-by-2 and
+_when you stop playing_, and that's already encoded in which rallies exist. This makes win-by-2 and
 sudden-death both work with zero rule-specific code, and survives any future house-rule change.
-`target_score`/`tiebreak` exist only as *logger hints* for suggesting "game over".
+`target_score`/`tiebreak` exist only as _logger hints_ for suggesting "game over".
 
 ## 4. `server_id` is stored, never derived
 
 Real-world serving can deviate from the official rotation (someone serves from the wrong box, or the
 "wrong" player serves — nobody's refereeing). The database records what happened; the logger merely
-*suggests* the rule-correct server/box, tappable to override. **Corollary:** edits never cascade serve
+_suggests_ the rule-correct server/box, tappable to override. **Corollary:** edits never cascade serve
 context — fixing rally 5's winner doesn't rewrite who actually served rally 6.
 
 ## 5. No "in progress" state — every match is finished-as-logged
@@ -46,11 +46,11 @@ shifting every score after it — is impossible.
 
 ## 7. Serve rules are per-match, enforced by a rule-aware trigger
 
-*(Amended by the house-rules migration — originally a two-serve CHECK.)* Serve rules are a match
-parameter (`serves_per_point`, default 2 — our game). In a two-serve match a point can only *end* on
+_(Amended by the house-rules migration — originally a two-serve CHECK.)_ Serve rules are a match
+parameter (`serves_per_point`, default 2 — our game). In a two-serve match a point can only _end_ on
 a second-serve fault; in an official single-serve match a first-serve fault ends the point. The
 enforcement lives in the rally-validation trigger, which reads the match's rules — the original CHECK
-made single-serve squash *unloggable*, which violated decision 13's principle. Ace ⇒ server wins and
+made single-serve squash _unloggable_, which violated decision 13's principle. Ace ⇒ server wins and
 fault ⇒ receiver wins hold under any serve rule, so they remain plain CHECKs. First-serve faults in
 two-serve matches are never rows — they exist implicitly as points played on serve 2. Let/serve
 interaction (`let_resets_serve`, default false) is a logger default only, never data.
@@ -78,7 +78,7 @@ fix wrong players by recreating the match before logging games.
 
 UUID keys (client-generatable — the logger mints ids locally so optimistic writes retry
 idempotently); smallint counters (squash never approaches the limits); `(game_id, rally_number)`
-unique but *deferrable*, so "insert a missed rally at position k" can renumber inside one
+unique but _deferrable_, so "insert a missed rally at position k" can renumber inside one
 transaction.
 
 ## 12. Public read, owner-only write (RLS)
@@ -94,7 +94,7 @@ derivation (rule-agnostic where it counts), logger behaviour (parameterized) —
 is unrecoverable. Hence the per-match house-rule columns (format, target score, tiebreak, serves per
 point, let-resets-serve, ball), defaulted to our rules so the common case configures nothing.
 `serves_per_point` locks once games exist. Explicit non-goal: English hand-in/hand-out scoring
-changes score *derivation* itself and isn't supported by the views — but the server is stored on
+changes score _derivation_ itself and isn't supported by the views — but the server is stored on
 every rally, so a future view could derive it from the same data. Locked out of the views, not the
 data.
 
@@ -133,7 +133,7 @@ tooling but used in Safari.
 The signature trait is a 3×3 classification matrix — tempo (short/all/long-court, from the
 short-vs-extended win-rate differential) × agency (finisher/mixed/pressure, from the share of won
 points ended by the player's own clean winner) — replacing the single rally-length differential.
-**What it buys:** nine identities that describe *how* someone plays on two independent style axes,
+**What it buys:** nine identities that describe _how_ someone plays on two independent style axes,
 neither recoverable from skill alone; each row and column reads as a progression (left→right the
 winning racket shifts from yours to theirs, top→bottom the points live longer); and every trait
 cites its receipts. **What it costs:** two thresholds per axis to calibrate (checked against live
@@ -178,12 +178,12 @@ the team colours doing the talking.
 
 The home rundown gains "The numbers" — an all-time records wall (biggest win, longest rally, best
 streak, marathon game, most aces / most lets in a match) — and profiles gain "Records held". **The
-rules:** a record is held by the *first* achiever until *strictly* beaten (the real-world records
+rules:** a record is held by the _first_ achiever until _strictly_ beaten (the real-world records
 convention — ties don't transfer silverware); an unheld record renders nothing (no dash walls);
 draws break win streaks, in-play matches neither extend nor break them; aces use the derived
 definition (the server's 1-shot winner), and the marathon counts lets — it measures time on court.
-**The colour rule that matters:** each tile wears the holder's side *in the match the record was
-set in* — not a per-page perspective, not decorative alternation — so the tile always agrees with
+**The colour rule that matters:** each tile wears the holder's side _in the match the record was
+set in_ — not a per-page perspective, not decorative alternation — so the tile always agrees with
 the match page it links to; match-owned records (marathon, lets) wear a neutral bar. A profile is
 the one perspective page: there, held records paint in the player's own ember. **Mechanics:** one
 `records()` RPC (union-all of per-record blocks, each liftable into its own function the day a

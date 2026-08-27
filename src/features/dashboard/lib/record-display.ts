@@ -21,7 +21,7 @@ export interface RecordTileDisplay {
   /** The holder's side IN THE RECORD'S MATCH — the colour law's anchor, so
    *  the tile agrees with the match page it links to. Null for match-owned
    *  records, which wear a neutral bar. */
-  tone: "p1" | "p2" | null
+  side: "p1" | "p2" | null
   matchId: string
 }
 
@@ -95,7 +95,7 @@ export function buildRecordTiles(
             : nameOf(row.player_id),
         isHolder: row.player_id !== null,
         rest: [detail, formatDate(row.date)].filter(Boolean).join(" · "),
-        tone:
+        side:
           row.player_id === row.player1_id
             ? ("p1" as const)
             : row.player_id === row.player2_id

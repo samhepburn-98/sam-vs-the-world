@@ -1,170 +1,121 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
-
 import { CategoryContent } from "@/features/dashboard/components/category-content"
-import {
-  error,
-  headline,
-  momentum,
-  rally,
-  serve,
-} from "@/features/dashboard/lib/player-data.fixtures"
 
-import type { CategoryKey } from "@/features/dashboard/categories"
+import { withAppContext } from "#storybook/decorators"
+import { IDS, SAM_DATA } from "#storybook/fixtures"
+
+import type { CategoryKey } from "@/features/dashboard/lib/categories"
 import type { RallyScored } from "@/lib/schemas/rally"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
 
-// The five category boards, rendered offline. Every hook underneath reads
-// through TanStack Query, so seeding the cache under each hook's key renders
-// the real component against fixture payloads — no network, no Supabase, and
-// the same code path the live page takes.
+// The five level-two boards, one per insight category: a key-stat row, the
+// category's own graphic, then the rallies the numbers were counted from.
+// Reached from the profile's category tiles, under the filter bar.
+//
+// Every panel reads through TanStack Query, so seeding the cache under each
+// hook's key renders the real component on the real code path with nothing
+// behind it. The keys are copied from the `api/` files — note that `momentum`
+// and `comeback-rallies` both end on a trailing `deficit ?? null`.
 
-const PLAYER = "11111111-1111-1111-1111-111111111111"
-const OPPONENT = "22222222-2222-2222-2222-222222222222"
 const FILTERS = {}
+const game = (n: number) => `55555555-5555-4555-8555-00000000000${n}`
 
-const scored = (i: number, over: Partial<RallyScored> = {}): RallyScored => ({
-  id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
-  game_id: `aaaaaaaa-0000-0000-0000-${String(i % 3).padStart(12, "0")}`,
-  rally_number: i,
-  server_id: i % 2 === 0 ? PLAYER : OPPONENT,
-  serve_side: i % 2 === 0 ? "left" : "right",
+const rally = (n: number): RallyScored => ({
+  id: `66666666-6666-4666-8666-00000000000${n}`,
+  game_id: game(n % 3),
+  match_id: IDS.match,
+  game_number: 1 + (n % 3),
+  date: "2026-07-14",
+  ball_type: "double_yellow",
+  player1_id: IDS.sam,
+  player2_id: IDS.alex,
+  server_id: n % 2 === 0 ? IDS.sam : IDS.alex,
+  receiver_id: n % 2 === 0 ? IDS.alex : IDS.sam,
+  rally_number: n,
+  serve_side: n % 2 === 0 ? "left" : "right",
   serve_number: 1,
-  winner_id: i % 3 === 0 ? OPPONENT : PLAYER,
-  end_reason: i % 3 === 0 ? "error" : "winner",
-  error_detail: i % 3 === 0 ? "tin" : null,
-  forced: i % 3 === 0 ? false : null,
-  winning_shot: i % 3 === 0 ? null : "drive",
-  losing_shot: i % 3 === 0 ? "drop" : null,
-  shot_count: 3 + (i % 9),
-  match_id: "bbbbbbbb-0000-0000-0000-000000000001",
-  game_number: 1 + (i % 3),
-  date: "2026-08-14",
-  ball_type: "yellow",
-  player1_id: PLAYER,
-  player2_id: OPPONENT,
-  receiver_id: i % 2 === 0 ? OPPONENT : PLAYER,
+  winner_id: n % 3 === 0 ? IDS.alex : IDS.sam,
+  end_reason: n % 3 === 0 ? "error" : "winner",
+  error_detail: n % 3 === 0 ? "tin" : null,
+  forced: n % 3 === 0 ? false : null,
+  winning_shot: n % 3 === 0 ? null : "drive",
+  losing_shot: n % 3 === 0 ? "drop" : null,
+  shot_count: 3 + (n % 9),
   is_let: false,
-  score_p1: 1 + i,
-  score_p2: Math.max(0, i - 2),
-  ...over,
+  score_p1: n,
+  score_p2: Math.max(0, n - 2),
 })
 
-const RALLIES = Array.from({ length: 8 }, (_, i) => scored(i + 1))
+const RALLIES = Array.from({ length: 8 }, (_, i) => rally(i + 1))
 
-const HEADLINE = headline({
-  games_won: 34,
-  games_decided: 52,
-  matches_won: 11,
-  matches_decided: 18,
-  // newest first, as the RPC returns them
-  recent_games: [6, 5, 4, 3, 2, 1].map((i) => ({
-    game_id: `cccccccc-0000-0000-0000-${String(i).padStart(12, "0")}`,
-    match_id: "bbbbbbbb-0000-0000-0000-000000000001",
-    game_number: i,
-    date: `2026-08-0${i}`,
-    opponent_id: OPPONENT,
-    player_score: i % 3 === 0 ? 8 : 11,
-    opponent_score: i % 3 === 0 ? 11 : 7,
-    // the middle one ends level — the D chip, not a W or an L
-    won: i === 4 ? null : i % 3 !== 0,
-  })),
-})
+// recent_games arrives newest-first, and the head-to-head board reverses it so
+// the trend reads chronologically — the fixture has to be in that order too,
+// or the chart runs right to left here and nowhere else. The fourth game ends
+// level: that takes the D chip, not a W or an L.
+const RECENT = [6, 5, 4, 3, 2, 1].map((i) => ({
+  game_id: `77777777-7777-4777-8777-00000000000${i}`,
+  match_id: IDS.match,
+  game_number: i,
+  date: `2026-08-0${i}`,
+  opponent_id: IDS.alex,
+  player_score: i % 3 === 0 ? 8 : 11,
+  opponent_score: i % 3 === 0 ? 11 : 7,
+  won: i === 4 ? null : i % 3 !== 0,
+}))
 
-const MOMENTUM = momentum({
-  comebacks: 2,
-  longest_streak: 7,
+const HEADLINE = { ...SAM_DATA.headline!, recent_games: RECENT }
+
+const MOMENTUM = {
+  ...SAM_DATA.momentum!,
   comeback_games: [
     {
-      game_id: "aaaaaaaa-0000-0000-0000-000000000001",
-      match_id: "bbbbbbbb-0000-0000-0000-000000000001",
+      game_id: game(1),
+      match_id: IDS.match,
       date: "2026-08-04",
       max_deficit: 5,
       player_score: 12,
       opponent_score: 10,
     },
   ],
-})
-
-/** Seed every key the five boards read, so no hook ever reaches the network. */
-function seededClient() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  })
-  qc.setQueryData(["insights", "player-headline", PLAYER, FILTERS], HEADLINE)
-  qc.setQueryData(["insights", "serve-stats", PLAYER, FILTERS], serve())
-  qc.setQueryData(["insights", "serve-rallies", PLAYER, FILTERS], RALLIES)
-  qc.setQueryData(["insights", "error-profile", PLAYER, FILTERS], error())
-  qc.setQueryData(["insights", "error-rallies", PLAYER, FILTERS], RALLIES)
-  qc.setQueryData(["insights", "rally-lengths", PLAYER, FILTERS], rally())
-  qc.setQueryData(
-    ["insights", "rally-length-rallies", PLAYER, null, FILTERS],
-    RALLIES
-  )
-  qc.setQueryData(["insights", "momentum", PLAYER, FILTERS, null], MOMENTUM)
-  qc.setQueryData(
-    ["insights", "comeback-rallies", PLAYER, FILTERS, null],
-    RALLIES
-  )
-  return qc
 }
-
-function Harness({ children }: { children: ReactNode }) {
-  const rootRoute = createRootRoute()
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: () => <>{children}</>,
-  })
-  const matchRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/matches/$matchId",
-    component: () => null,
-  })
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, matchRoute]),
-    history: createMemoryHistory(),
-  })
-  return (
-    <QueryClientProvider client={seededClient()}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
-}
-
-const board = (category: CategoryKey): Story => ({
-  render: () => (
-    <Harness>
-      <div className="mx-auto max-w-5xl">
-        <CategoryContent
-          category={category}
-          playerId={PLAYER}
-          filters={FILTERS}
-        />
-      </div>
-    </Harness>
-  ),
-})
 
 const meta = {
   title: "Dashboard/Category boards",
   component: CategoryContent,
   parameters: { layout: "padded" },
-  args: { category: "serve", playerId: PLAYER, filters: FILTERS },
+  decorators: withAppContext((queryClient) => {
+    const seed = (key: Array<unknown>, data: unknown) =>
+      queryClient.setQueryData(key, data)
+    seed(["insights", "player-headline", IDS.sam, FILTERS], HEADLINE)
+    seed(["insights", "serve-stats", IDS.sam, FILTERS], SAM_DATA.serve)
+    seed(["insights", "serve-rallies", IDS.sam, FILTERS], RALLIES)
+    seed(["insights", "error-profile", IDS.sam, FILTERS], SAM_DATA.error)
+    seed(["insights", "error-rallies", IDS.sam, FILTERS], RALLIES)
+    seed(["insights", "rally-lengths", IDS.sam, FILTERS], SAM_DATA.rally)
+    seed(["insights", "rally-length-rallies", IDS.sam, null, FILTERS], RALLIES)
+    seed(["insights", "momentum", IDS.sam, FILTERS, null], MOMENTUM)
+    seed(["insights", "comeback-rallies", IDS.sam, FILTERS, null], RALLIES)
+  }),
+  args: { category: "serve", playerId: IDS.sam, filters: FILTERS },
 } satisfies Meta<typeof CategoryContent>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+const board = (category: CategoryKey): Story => ({ args: { category } })
+
+// Results and form — the one board that drills to matches rather than
+// rallies, so its list is match links carrying a W/L/D chip each.
 export const HeadToHead: Story = board("head-to-head")
+
+// The court motif shaded by win rate, each box's reading as a lower-third
+// beside it, then every rally served.
 export const Serve: Story = board("serve")
+
+// Where the points go, split by type and by cause.
 export const Errors: Story = board("errors")
+
+// The three length buckets, each annotated with the rate it was won at.
 export const Rallies: Story = board("rallies")
+
+// Phase win-share as three gated rates, then one diverging area per comeback.
 export const Momentum: Story = board("momentum")

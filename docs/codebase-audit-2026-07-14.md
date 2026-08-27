@@ -1,5 +1,29 @@
 # Codebase audit — 14 July 2026
 
+> **Status: a dated snapshot, mostly actioned. Not current guidance.**
+>
+> This is what the codebase looked like on 14 July 2026. Most of it has since been
+> fixed, so read it as a record of what was found and what was done — not as a to-do
+> list. The per-finding table is in [§ Status](#status) below; **§1.7 and §1.8 are the
+> P0-adjacent items still genuinely open.**
+>
+> **§6 was not just incomplete — its reasoning was wrong, and it is worth reading
+> before trusting a "zero importers" verdict anywhere.** It listed `insight-card.tsx`
+> as a deletable dead file and, four lines later, cleared `category-content.tsx` as
+> alive _"via `players.$playerId.$category`"_ — the route that file held the only link
+> to. Both halves came from treating "a route renders it" as reachability. A route
+> nothing links to is reachable only by typing a URL, and taking the advice would have
+> stranded roughly 1,900 lines and five tested RPCs behind one.
+>
+> That chain has since been wired back up: the category tiles are on the profile, the
+> five pages have had their Broadcast pass, and `get-h2h-rallies.ts` — the other file
+> this section called dead — turned out to be the unbuilt half of the compare
+> drill-through rather than a leftover, and now has a caller. §6 carries the full
+> correction and the check to run instead.
+>
+> Everything not in the status table was not re-checked; assume it still needs
+> verifying before you act on it.
+
 **Method.** Two tracks, as requested: the repo's `/code-review` at high effort pointed at the data layer (8 finder angles → dedup → one adversarial verifier per candidate), plus a manual sweep by four dedicated audit agents (dead code & organisation, RPC/fetching conventions, tests, UI patterns) and mechanical checks run directly. Every correctness claim below carries a verdict from an independent verification pass: **CONFIRMED** (verifier reproduced the reasoning end-to-end from the code), **PLAUSIBLE** (real but scope-narrowed), or it was **refuted** and moved to §2 so the same false lead doesn't get chased twice.
 
 **Reading order.** §1 is what's actually wrong. §2 is what looked wrong but isn't. §3–§10 are the sweep: efficiency, conventions, duplication, dead code, organisation, UI, tests, product gaps. §11 is the priority shortlist.
@@ -8,36 +32,37 @@
 
 ## Status
 
-Where each finding stands. A row is marked fixed or open only where the code was re-checked on the date given; **not re-checked** means exactly that — the row still says what the audit said in July, and nobody has confirmed it since.
+Fix status re-checked **27 Aug 2026**. A row says fixed or open only where the named code path was actually looked at; **not re-checked** means nobody has confirmed it since July.
 
-| # | Finding | Status | Checked |
-|---|---|---|---|
-| §0 | Prettier drift, 171 files | ✅ **Fixed** — pinned at 3.9.4, `pnpm check` green on a clean tree | 27 Aug 2026 |
-| §1.1 | No mutation invalidates `["insights"]` / `["home"]` | ✅ **Fixed** — every rally/game/match mutation and the logger exit invalidate `["insights"]` | 27 Aug 2026 |
-| §1.2 | Match detail recomputes the match winner | ✅ **Fixed** — reads the view's verdict rather than counting games | 27 Aug 2026 |
-| §1.3 | `errorProfile` schema strips `double_bounce` | ❌ **Open** — the key is still absent from the client schema, so the two error bars still sum differently | 27 Aug 2026 |
-| §1.4 | New-match flow hangs on sustained transient errors | ❌ **Open** — `write-queue.ts` still retries a retryable error with backoff but no attempt cap, timeout, or cancel. `entry.tsx` handles the hard-pause case only | 27 Aug 2026 |
-| §1.5 | Home recent results nondeterministic on same-day matches | ✅ **Fixed** — ordered by `created_at`, with the reasoning recorded in the file | 27 Aug 2026 |
-| §1.6 | Null `match_winner_id` renders five different ways | ⚠️ Not re-checked | — |
-| §1.7 | Logger banner contradicts read surfaces for casual leaders | ⚠️ Not re-checked | — |
-| §6 | Dead code | ◐ **Partly, and partly wrong** — three of the five "deletable" files were a feature with no way in, not dead code. §6 is corrected in place | 27 Aug 2026 |
-| §8 | Compare panel's match rows don't link | ✅ **Fixed** — rows are links, and drill on to the rallies | 27 Aug 2026 |
-| §8 | Three section/panel primitives | ◐ **Half** — `category-content` and `h2h-panel` consolidated; `profile-stats-tab` still local | 27 Aug 2026 |
-| §2–§5, §7, §9–§11 | The rest of the sweep | ⚠️ Not re-checked, except where a note is dated in the section itself | — |
+| §            | Defect                                                | Status                                                                                                                                                                                                                        |
+| ------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0            | Prettier drift, 171 files                             | ✅ Fixed — pinned, and `pnpm check` is a CI gate on a clean tree                                                                                                                                                              |
+| 1.1          | Nothing invalidates `["insights"]` / `["home"]`       | ✅ Fixed — all ten mutations + logger exit invalidate the derived families                                                                                                                                                    |
+| 1.2          | Match detail recomputes the match winner              | ✅ Fixed — the match-level verdict is the view's                                                                                                                                                                              |
+| 1.3          | `errorProfile` schema strips `double_bounce`          | ✅ Resolved, differently — the value was retired at the database (`20260714120000_retire_double_bounce.sql` backfills it away and adds a CHECK), so the schema omitting it is now correct                                     |
+| 1.4          | New-match flow hangs on sustained transient errors    | ✅ Fixed — retries capped in `WriteQueue` (`maxAttempts`), covered by tests                                                                                                                                                   |
+| 1.5          | Home recent results ordering is nondeterministic      | ✅ Fixed — orders by `created_at`                                                                                                                                                                                             |
+| 1.6          | Null `match_winner_id` renders five different ways    | ✅ Fixed — shared `matchOutcome`, "Drawn" across surfaces                                                                                                                                                                     |
+| 1.7          | Logger in-play banner contradicts read surfaces       | ❌ Open — `matchWinnerName` still format-gated (`logging-shell.tsx:252`)                                                                                                                                                      |
+| 1.8          | `discardFailed()` leaves the dependent create-game op | ❌ Open — **and now more likely to fire**, see the note there                                                                                                                                                                 |
+| 6            | Dead code                                             | ◐ Partly — **and the section's reasoning was wrong**. Three of the five "deletable" files were a feature with no way in, not dead code. Corrected in place; one genuinely dead file (`profile-stat-strip.tsx`) has since gone |
+| 8            | Compare panel's match rows don't link                 | ✅ Fixed — the rows are links, and the record drills on to the rallies beneath them                                                                                                                                           |
+| 8            | Three section/panel primitives                        | ◐ Half — `category-content` and `h2h-panel` consolidated onto `ProfileSection`/`PROFILE_PANEL`; `profile-stats-tab`'s local shell is still open                                                                               |
+| 2–5, 7, 9–11 | The rest of the sweep                                 | ⚠️ Not re-checked, except where a note is dated in the section itself                                                                                                                                                         |
 
 ---
 
 ## 0. Mechanical checks
 
-| Check | 14 Jul 2026 | 27 Aug 2026 |
-|---|---|---|
-| `pnpm typecheck` | ✅ clean | ✅ clean |
-| `pnpm lint` (eslint) | ✅ clean | ✅ clean |
-| `pnpm test` (vitest) | ✅ 309 tests, 42 files | ✅ 344 passed, 2 skipped, 45 files |
-| `pnpm check` (prettier) | ❌ **fails on 171 files** | ✅ clean |
-| Dependencies | Patch-level drift only; no unused deps found in spot-checks | Not re-checked |
+| Check                   | 14 Jul 2026                                                 | 27 Aug 2026                        |
+| ----------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| `pnpm typecheck`        | ✅ clean                                                    | ✅ clean                           |
+| `pnpm lint` (eslint)    | ✅ clean                                                    | ✅ clean                           |
+| `pnpm test` (vitest)    | ✅ 309 tests, 42 files                                      | ✅ 344 passed, 2 skipped, 45 files |
+| `pnpm check` (prettier) | ❌ **fails on 171 files**                                   | ✅ clean                           |
+| Dependencies            | Patch-level drift only; no unused deps found in spot-checks | Not re-checked                     |
 
-- ~~**Prettier drift (171 files).**~~ **Fixed.** `prettier` sits at 3.9.4 and `pnpm check` is green, so the command can gate now.
+- ~~**Prettier drift (171 files).**~~ **Fixed.** `prettier` sits at 3.9.4, `pnpm check` is green, and it gates in CI.
 - **Dependency majors available, not urgent:** eslint 10, typescript 7, jsdom 29, `@types/node` 26. Worth a deliberate upgrade pass, not a fire. recharts 3.8.0 → 3.9.2 is a minor worth taking (bug fixes).
 - Hygiene: `dist/` and `test-results/` are properly gitignored.
 
@@ -76,13 +101,15 @@ The live `error_profile` RPC (20260703200000, never redefined since) returns a `
 
 **Fix.** Either add `double_bounce` to the schema and fold it into `detail_untagged`-style handling, or redefine the RPC to merge it server-side — and add the missing DB CHECK so the enum value is actually retired.
 
-### 1.4 New-match flow hangs forever on sustained transient errors — `entry.tsx:86` · **CONFIRMED**
+### 1.4 New-match flow hangs forever on sustained transient errors — `entry.tsx:86` · **CONFIRMED** · ✅ **FIXED 27 Aug 2026**
 
-`onStart` awaits `queue.flush()`, whose promise settles only on drain or hard-pause. Retryable errors (5xx/429/408/network failures per `supabase-errors.ts`) loop with capped *backoff delay* but **no attempt cap, no timeout, no cancel, no `navigator.onLine` short-circuit**. Under a sustained 503 the submit spinner spins forever with the button disabled — and no sync UI is visible, because `SyncIndicator` only mounts inside `LoggingShell`, which requires the very session that never starts. Only recovery: reload.
+`onStart` awaits `queue.flush()`, whose promise settles only on drain or hard-pause. Retryable errors (5xx/429/408/network failures per `supabase-errors.ts`) loop with capped _backoff delay_ but **no attempt cap, no timeout, no cancel, no `navigator.onLine` short-circuit**. Under a sustained 503 the submit spinner spins forever with the button disabled — and no sync UI is visible, because `SyncIndicator` only mounts inside `LoggingShell`, which requires the very session that never starts. Only recovery: reload.
 
-Scope note from verification: infinite retry is *correct by design* for the fire-and-forget logging path (retry-until-online, never log past a hole — and the tests encode this). The defect is specifically that a UI path treats `flush()` as bounded. `onStart` handles the `paused` (permanent-error) outcome gracefully but has no branch for "still syncing after too long."
+Scope note from verification: infinite retry is _correct by design_ for the fire-and-forget logging path (retry-until-online, never log past a hole — and the tests encode this). The defect is specifically that a UI path treats `flush()` as bounded. `onStart` handles the `paused` (permanent-error) outcome gracefully but has no branch for "still syncing after too long."
 
 **Fix.** Race `flush()` against a timeout in `onStart` (surface "still saving — check your connection" with a retry/cancel), or cap attempts for the pre-session flush specifically.
+
+**Fixed 27 Aug 2026** — queue-side, not caller-side: `WriteQueue` takes a `maxAttempts` (default 6, ≈23s of backoff), and an op whose retryable failures exhaust it pauses exactly like a permanent one. `flush()` therefore always settles, `onStart`'s existing `paused` branch fires, and the logger's `SyncIndicator` offers its Retry. Every caller is covered rather than just this one; the sustained-503 case is now in `write-queue.test.ts`. The tradeoff accepted: a connectivity blip longer than ~23s pauses the logging queue instead of healing itself, which is visible and one tap from resuming (nothing is dropped, nothing lands out of order).
 
 ### 1.5 Home "recent results" is nondeterministic on same-day matches — `get-recent-results.ts:18` · **CONFIRMED**
 
@@ -94,30 +121,32 @@ Orders by `date desc` with `limit(8)` and no unique tiebreak — and `matches.da
 
 The tri-state (won / lost / null-meaning-drawn-or-ongoing) is re-interpreted inline at every call site with no shared helper:
 
-| Surface | Null winner renders as |
-|---|---|
+| Surface                                        | Null winner renders as                        |
+| ---------------------------------------------- | --------------------------------------------- |
 | Profile match history (`match-history.tsx:53`) | neutral "·" badge, documented "still in play" |
-| Profile h2h (`profile-h2h.ts:68`) | match skipped from the ledger entirely |
-| Compare panel (`h2h-panel.tsx:68`) | **the word "Drawn"** |
-| Home recent (`index.tsx:187`) | neither name bold, no cue |
-| Matches list (`matches.index.tsx:226`) | neither name bold, no cue |
+| Profile h2h (`profile-h2h.ts:68`)              | match skipped from the ledger entirely        |
+| Compare panel (`h2h-panel.tsx:68`)             | **the word "Drawn"**                          |
+| Home recent (`index.tsx:187`)                  | neither name bold, no cue                     |
+| Matches list (`matches.index.tsx:226`)         | neither name bold, no cue                     |
 
 The compare panel stamps a decided-draw verdict on the exact value the profile explicitly treats as "a quiet dot, not a false verdict". This is the concrete version of the draws problem discussed on 14 Jul — the planned `matchOutcome` helper in `src/lib/scoring` resolves all five sites at once.
 
 ### 1.7 Logger's in-play banner contradicts every read surface for casual leaders — `logging-shell.tsx:250` · **PLAUSIBLE (narrowed)**
 
-`matchWinnerName` is format-gated, so for a casual session the game-over banner says "Played on? Just keep logging rallies." while the SQL view already names the leader as `match_winner_id` — which the home hub and matches list bold as the winner. Narrowed by verification: the **finished** summary is *not* gated (it uses `tallyMatch` directly and says "X wins 2–1"), so the contradiction is only between the mid-session banner and the read surfaces. Low severity; folds naturally into the draws/outcome work.
+`matchWinnerName` is format-gated, so for a casual session the game-over banner says "Played on? Just keep logging rallies." while the SQL view already names the leader as `match_winner_id` — which the home hub and matches list bold as the winner. Narrowed by verification: the **finished** summary is _not_ gated (it uses `tallyMatch` directly and says "X wins 2–1"), so the contradiction is only between the mid-session banner and the read surfaces. Low severity; folds naturally into the draws/outcome work.
 
 ### 1.8 Residual footnote from a refuted candidate
 
 `discardFailed()` on a failed **create-match** op lets the queued **create-game** op run and FK-fail against the never-created match. Nothing corrupts (no session starts, error surfaces), but the second failure is noise. Cheap fix: discard dependent ops together, or clear the queue on match-create failure.
+
+**Raised in likelihood by the §1.4 fix (27 Aug 2026).** This used to need a _permanent_ create-match failure (RLS denial, CHECK violation — rare). Now any sustained outage reaches the same branch, and the residue is worse than noise: the orphan create-game FK-fails permanently and leaves the queue **paused**, so the user's next attempt — connectivity restored — takes `flush()`'s paused fast-path, shows "Couldn't save the match" _spuriously_, and starts no session while its own ops land in the background, creating an orphan match row. The attempt after that succeeds. Traced end-to-end with a mocked FK. Worth taking now, not later.
 
 ---
 
 ## 2. Investigated and refuted (so nobody re-chases these)
 
 - **"Best-of 1/7/9 in the form violates the DB CHECK `(3,5)`" — REFUTED.** `20260702221549_house_rules.sql` explicitly widened the constraint to `format is null or (format % 2 = 1 and format between 1 and 9)`. Zod, the form (`1/3/5/7/9` + casual), and the DB are aligned. (This also corrects a claim made in conversation on 14 Jul that the live constraint was `(3,5)`.)
-- **"`discardFailed()` punches a hole in the rally sequence → corrupted scores" — REFUTED.** It's only reachable from the new-match flow (before any rally exists); the logging surface exposes Retry, never Discard; and a `rally_number` gap would derive *correct* scores anyway (the window orders by rally_number, it doesn't index). The header invariant holds. See §1.8 for the one real residual.
+- **"`discardFailed()` punches a hole in the rally sequence → corrupted scores" — REFUTED.** It's only reachable from the new-match flow (before any rally exists); the logging surface exposes Retry, never Discard; and a `rally_number` gap would derive _correct_ scores anyway (the window orders by rally_number, it doesn't index). The header invariant holds. See §1.8 for the one real residual.
 - **"`gameOver` target/tiebreak logic can disagree with the recorded winner" — cleared.** Advisory-only by design (§7.7 tier 3); the recorded outcome flows through `gameResult`/`tallyMatch`, which are fixture-pinned to the SQL.
 - **"`get-match-detail` is single-consumer route code misplaced in `lib/api`" — REFUTED.** It's genuinely shared: logger (`logging-shell.tsx:42`) + match-detail route. Placement is correct.
 - **SQL derivations — clean bill.** Window frames, `DISTINCT ON` ordering, `format/2+1` integer division, `COUNT FILTER` over the left join: all verified correct.
@@ -130,7 +159,7 @@ The compare panel stamps a decided-draw verdict on the exact value the profile e
 
 - **Six insight RPCs per profile load, each re-scanning the same rally set** (`use-player-insights.ts:22`). Every one calls `filtered_rallies()` → `rallies_scored` (window functions over the whole rallies table). Same params, six round-trips, six scans (seven with h2h). A combined `player_insights` RPC returning all six payloads in one row would collapse this. The 6-query facade is also the one breach of one-query-per-hook (see §4).
 - **`rallies_scored` windows over the entire rallies table for every consumer** — and four of the six aggregate RPCs discard the running scores it computes. Cost grows with total rallies logged, not with the result requested. Options, in escalating effort: a window-free variant for count-only aggregates; or materialise per-game final scores maintained on write. Not urgent at current volumes; will matter first on the profile page.
-- **Profile loader eagerly fetches the unpaged h2h scan for a non-default tab** (`players.$playerId.index.tsx:42`). `playerH2hQueryOptions` fetches *every* `match_results` row for the player up front, but h2h feeds only the Stats tab; Summary is the default. The Matches tab already demonstrates the right pattern (lazy fetch on mount). Move h2h out of the loader.
+- **Profile loader eagerly fetches the unpaged h2h scan for a non-default tab** (`players.$playerId.index.tsx:42`). `playerH2hQueryOptions` fetches _every_ `match_results` row for the player up front, but h2h feeds only the Stats tab; Summary is the default. The Matches tab already demonstrates the right pattern (lazy fetch on mount). Move h2h out of the loader.
 - **The profile fetches the same `match_results` rows twice** — the unpaged h2h read and the paged history read (`get-player-match-history.ts` → `fetchMatches`) overlap entirely. The history could derive from the h2h array already in cache (plus its one `game_results` read), or better, both could ride the lazy-tab pattern.
 - **`fetchPlayerMatchHistory` fetches 20 rows + exact count to render 8** (`get-player-match-history.ts:29`). Deliberate reuse of `fetchMatches` at the time; still over-fetch. A `.limit(8)` read with only the rendered columns fixes it (the exact count is still needed for the "See all N" link — keep `count` but drop the surplus rows).
 - **`get-match-detail` selects `*` + `rallies(*)`** — defensible for a detail view per the house convention, but ~half the columns are unused by its consumers. Trimming to explicit column lists is cheap insurance against payload creep.
@@ -148,7 +177,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 - **Over-broad grants:** `filtered_matches` / `filtered_games` / `filtered_rallies` are internal SQL helpers, never called client-side, yet granted EXECUTE to `anon, authenticated`. Revoke; keep grants on the aggregates and drill-throughs only.
 - **Client-side aggregation where an aggregate RPC belongs:** the profile h2h table fetches **all** of a player's `match_results` unpaged and folds them in TS (`computeH2h`) — logic that overlaps the existing pairwise `h2h` RPC. The gap is a missing `player_rivals(p_player_id)` returning one summary row per opponent. (The code comment acknowledges and defends the unpaged read; it's still the one clear breach of the summaries-vs-detail convention, and it grows O(matches).)
 - **Multi-fetch hooks, adjudicated:** `usePlayerInsights` fires 6 queries (breach — but each payload is independently cached; the real fix is the combined RPC, §3). `fetchPlayerMatchHistory` and `fetchManageGames` make 2 round-trips each — justified, PostgREST can't join across views. `fetchHomeCounts`' two head-counts — justified.
-- **Query-key hygiene:** no collisions. Two shape inconsistencies: momentum/comeback append a trailing `deficit ?? null` segment no other key has, and `rally-length-rallies` puts `bucket` *before* `filters` while every sibling puts filters last. Standardise `["insights", name, ...ids, filters, ...extras]`. Naming smell: `["matches","recent"]` (raw matches) vs `["matches","recent-results"]` (view) are confusingly close.
+- **Query-key hygiene:** no collisions. Two shape inconsistencies: momentum/comeback append a trailing `deficit ?? null` segment no other key has, and `rally-length-rallies` puts `bucket` _before_ `filters` while every sibling puts filters last. Standardise `["insights", name, ...ids, filters, ...extras]`. Naming smell: `["matches","recent"]` (raw matches) vs `["matches","recent-results"]` (view) are confusingly close.
 - **`players_headline` takes no filters while its engine supports all four** — documented as intentional ("roster shows the all-time picture"); flagged only so it isn't mistaken for a bug.
 
 ---
@@ -157,7 +186,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 
 - **`nameOf` is hand-rolled at 10 sites with 3 different fallbacks** — `"—"` (logging-shell), `"Unknown"` (recent-matches, player-match-history, profile route, home route), `id.slice(0,8)` (all four manage tabs). A deleted/unknown player renders differently on every surface. One `makeNameLookup(players)` in `src/lib` with one agreed fallback; `match-history.ts`/`profile-h2h.ts` could stop threading `nameOf` as a parameter.
 - **Short-date formatting duplicated and divergent:** two live copies of `MONTHS`+`formatDate` (`match-history.ts` — "9 Jul"; `routes/index.tsx` — "9 Jul 2026"), plus **raw ISO dates rendered to users** on four surfaces (`matches.index.tsx:222`, `matches.$matchId.tsx:161`, `category-content.tsx`, `h2h-panel.tsx`) and a fourth format in manage cells. One shared formatter; route the ISO surfaces through it.
-  *27 Aug 2026:* still open, deliberately. The Broadcast pass rewrote the `category-content` and `h2h-panel` rows and left the ISO dates on them: a fourth private `formatDate` would have deepened the duplication this entry is about, and the three existing copies disagree on format (`9 Jul` vs `9 Jul 2026`), so picking one is a call to make across all of them at once, not in passing.
+  _27 Aug 2026:_ still open, deliberately. The Broadcast pass rewrote the `category-content` and `h2h-panel` rows and left the ISO dates on them: a fourth private `formatDate` would have deepened the duplication this entry is about, and the three existing copies disagree on format (`9 Jul` vs `9 Jul 2026`), so picking one is a call to make across all of them at once, not in passing.
 - **Player-first orientation flip duplicated** (`profile-h2h.ts:46`, `match-history.ts:39`) — the `isP1 ? p1 : p2` mirror including the `?? 0` guards. A shared `orientToPlayer(match, playerId) → { mine, theirs, rivalId }` gives the concept one home (the SQL side already centralises this in `filtered_matches`).
 - **`match_results` select strings duplicated as raw strings** (`get-recent-results.ts:15`, `get-player-h2h.ts:20`, superset in `get-matches.ts:36`) while the players API already derives its columns from the zod shape (`PLAYER_SUMMARY_COLUMNS`). A `MATCH_RESULT_COLUMNS` from `matchResultSummary.shape` closes the drift channel.
 - **`fold-match.ts` re-implements running-score accumulation** that `lib/scoring` owns and fixture-pins. The dashboard fold is a second, unpinned copy of the windowed-count rule — the match timeline would silently keep old semantics if the rule ever changed. Fold should build on `runningScores`.
@@ -171,26 +200,27 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 
 **Zero importers — and what each turned out to be:**
 
-| File | July verdict | Now |
-|---|---|---|
-| `insight-previews.tsx` | 5 internal components, all unreachable; carries drifted W/L styling | **Alive.** Four of the five ride in the profile's category tiles. `FormDotsPreview` *was* the drift the note spotted — a round-dot duplicate of `FormGuide` — and is gone. |
-| `insight-card.tsx` | *(no note)* | **Alive.** It was the only link into the category route; restored to the profile above the tabs. |
-| `player-recent-matches.tsx` | superseded by profile redesign chain | Deleted, correctly. |
-| `profile-stat-strip.tsx` | *(no note)* | **Still open.** Present, still zero importers, still genuinely deletable. |
-| `get-h2h-rallies.ts` | all 3 exports unreferenced; strands the `h2h_rallies` RPC server-side | **Alive.** Not a leftover but the unbuilt half of a feature: the compare page's record now drills through it to the rallies behind it. |
+| File                        | July verdict                                                          | Now                                                                                                                                                                                                                                           |
+| --------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `insight-previews.tsx`      | 5 internal components, all unreachable; carries drifted W/L styling   | **Alive.** Deleted on this advice in Aug 2026 and restored once the tiles gave it callers again — four of the five ride in them. `FormDotsPreview` _was_ the drift the note spotted, a round-dot duplicate of `FormGuide`, and stays deleted. |
+| `insight-card.tsx`          | _(no note)_                                                           | **Alive.** It was the only link into the category route; restored to the profile above the tabs.                                                                                                                                              |
+| `player-recent-matches.tsx` | superseded by profile redesign chain                                  | Deleted, correctly.                                                                                                                                                                                                                           |
+| `profile-stat-strip.tsx`    | _(no note)_                                                           | Deleted, correctly — the one entry here that was simply right.                                                                                                                                                                                |
+| `get-h2h-rallies.ts`        | all 3 exports unreferenced; strands the `h2h_rallies` RPC server-side | **Alive.** Not a leftover but the unbuilt half of a feature: the compare page's record now drills through it to the rallies behind it.                                                                                                        |
 
 **Cleared as alive (do not delete):** `h2h-panel.tsx` (via `/compare`).
 
 ~~`category-content.tsx` + `win-rate-trend.tsx` + `momentum-chart.tsx` (via `players.$playerId.$category`)~~ — **alive, but the reasoning was wrong, and it mattered.**
 
-**Why this section missed it.** Reachability was taken to mean *a route renders it*. It doesn't: a route nothing links to is reachable only by typing a URL. `insight-card.tsx` held the codebase's only `to="/players/$playerId/$category"`, so listing it as a deletable dead file and clearing `category-content.tsx` as alive-via-that-route were the same mistake read from two ends. Deleting the file as advised would have stranded the whole chain — the route, `category-content.tsx`, `filter-bar.tsx`, `categories.ts`, `insight-filters.ts`, `rally-table.tsx`, `stat-card.tsx` and the four chart components, plus five tested RPCs — about 1,900 lines that no user could reach.
+**Why this section missed it.** Reachability was taken to mean _a route renders it_. It doesn't: a route nothing links to is reachable only by typing a URL. `insight-card.tsx` held the codebase's only `to="/players/$playerId/$category"`, so listing it as a deletable dead file and clearing `category-content.tsx` as alive-via-that-route were the same mistake read from two ends. Deleting the file as advised would have stranded the whole chain — the route, `category-content.tsx`, `filter-bar.tsx`, `categories.ts`, `insight-filters.ts`, `rally-table.tsx`, `stat-card.tsx` and the four chart components, plus five tested RPCs — about 1,900 lines that no user could reach.
 
 The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("no loaders, no queries — so the layout can be signed off before the insight RPCs are wired back in") and the tile grid went with the old structure; the RPCs came back for the tabs, the tiles never did. This audit was generated from `a74737a` itself, so the link had been gone for exactly one commit when the sweep ran.
 
-**The check to run instead.** Zero importers means *this file* is unused. Before calling it deletable, ask what is unreachable *because* it is unused — for a component that holds a link, that is everything on the other side of it. `rg -n 'to="/<path>"' src` over each route in `routeTree.gen.ts` finds routes with no inbound link.
+**The check to run instead.** Zero importers means _this file_ is unused. Before calling it deletable, ask what is unreachable _because_ it is unused — for a component that holds a link, that is everything on the other side of it. `rg -n 'to="/<path>"' src` over each route in `routeTree.gen.ts` finds routes with no inbound link.
 
 **Dead flesh on live code:**
-- `EndReason` union in `src/lib/scoring/types.ts:12` still lists `"ace"` — retired by migration 20260710160000, filtered from every UI path. (The zod enum keeping `'ace'` for reads is *correct* — legacy rows; only the hand-written union is stale.)
+
+- `EndReason` union in `src/lib/scoring/types.ts:12` still lists `"ace"` — retired by migration 20260710160000, filtered from every UI path. (The zod enum keeping `'ace'` for reads is _correct_ — legacy rows; only the hand-written union is stale.)
 - `deficit` param threaded through fetch/options/hook/queryKey in `get-momentum.ts` and `get-comeback-rallies.ts` — no caller ever passes it. Six signatures of dead configurability; drop it (or actually expose the knob).
 - `errors_attributed` view (§4).
 
@@ -198,8 +228,8 @@ The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("
 
 ## 7. Organisation and conventions
 
-- **`features/dashboard/lib/` (~12 source files) is an undocumented tier.** `docs/architecture.md:49` sanctions `features/<x>/{api,components,schemas,utils}` — no `lib/` — and dashboard *also* has a `utils/`, so contributors face two competing homes for the same category. Decide once: bless `lib/` in the docs (and say how it differs from `utils/`) or fold the two together. `categories.ts` at the feature root falls outside every documented bucket too.
-- **`category-content.tsx` holds 9 components** (~345 lines): dispatcher + 5 substantial per-category panels. The strongest split candidate in the repo (e.g. `category-panels/`). *27 Aug 2026: still open — the Broadcast pass restyled the file and left its shape alone, so it is now 10 components in ~330 lines.* `match-history.tsx`'s 5 components are cohesive private helpers — fine. `manage/cells.tsx` is a deliberate primitives module — fine.
+- **`features/dashboard/lib/` (~12 source files) is an undocumented tier.** `docs/architecture.md:49` sanctions `features/<x>/{api,components,schemas,utils}` — no `lib/` — and dashboard _also_ has a `utils/`, so contributors face two competing homes for the same category. Decide once: bless `lib/` in the docs (and say how it differs from `utils/`) or fold the two together. `categories.ts` at the feature root falls outside every documented bucket too.
+- **`category-content.tsx` holds 9 components** (~345 lines): dispatcher + 5 substantial per-category panels. The strongest split candidate in the repo (e.g. `category-panels/`). _27 Aug 2026: still open — the Broadcast pass restyled the file and left its shape alone, so it is now 10 components in ~330 lines._ `match-history.tsx`'s 5 components are cohesive private helpers — fine. `manage/cells.tsx` is a deliberate primitives module — fine.
 - **Pure chart-data transforms live in component files** (`toErrorTypeData`, `computeLeadSeries`, `toHistoBuckets`, `shouldPlotLine`, `toRadarData` etc.) so `charts.test.ts` imports from `components/`. Extracting to a feature-lib module would clean the tier boundary. Low priority.
 - **`signature-line.test.ts` names a module that doesn't exist** (tests `signatureLine` from `player-attributes.ts`). Rename the test file or extract the function.
 - Otherwise clean: no cross-feature imports anywhere (the eslint boundary works), every shared component genuinely shared, kebab-case consistent, mutation naming (`create-/update-/delete-`) consistent, § spec citations in the data layer resolve correctly.
@@ -213,7 +243,7 @@ The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("
 - ~~**Navigation dead-end:** the compare panel's match rows are the only match list in the app that doesn't link to the match detail.~~ **Fixed 27 Aug 2026** — the rows are `Link`s, and the panel drills on to the rallies underneath them.
 - **Touch/a11y:** manage table sort icons are `opacity-0` until hover — invisible on touch (relevant given mobile-first scope); sortable headers lack `aria-sort`. Otherwise a11y is strong: every `role="img"` SVG labelled, icon buttons labelled, no focus traps.
 - **Date formats:** four variants including raw ISO — see §5.
-- **Panel/section shells:** `profile-stats-tab` re-declares the `PROFILE_PANEL` card shell locally; ~~`category-content` has a third section primitive~~. *27 Aug 2026: half done — `category-content` and `h2h-panel` now use `ProfileSection`/`PROFILE_PANEL` (`lede` became optional to let them). `profile-stats-tab`'s local shell is still open.*
+- **Panel/section shells:** `profile-stats-tab` re-declares the `PROFILE_PANEL` card shell locally; ~~`category-content` has a third section primitive~~. _27 Aug 2026: half done — `category-content` and `h2h-panel` now use `ProfileSection`/`PROFILE_PANEL` (`lede` became optional to let them). `profile-stats-tab`'s local shell is still open._
 
 ---
 
@@ -224,13 +254,13 @@ The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("
 **Gaps, riskiest first:**
 
 1. **`intentToOp` (`session-ops.ts`) has zero real coverage** — the translator every logger write flows through is `vi.mock`ed out in the only test that touches it. The riskiest untested unit in the repo.
-2. **`decisive_shots` is the only RPC with no SQL test** — and it *can't* be tested yet: the golden fixtures carry no `winning_shot`/`losing_shot` data. Extending `fixtures/schema.ts` unlocks it.
+2. **`decisive_shots` is the only RPC with no SQL test** — and it _can't_ be tested yet: the golden fixtures carry no `winning_shot`/`losing_shot` data. Extending `fixtures/schema.ts` unlocks it.
 3. **No shared vitest setup file** — every jsdom test re-declares `cleanup` and its own stubs; `ResizeObserver` is stubbed in exactly one file (attribute-radar); nothing stubs `matchMedia`, so a future `match-history.tsx` component test fails mysteriously. One `setupFiles` with the standard stubs ends the whack-a-mole (this repo has hit both gotchas before).
 4. **Empty-dataset RPC behaviour never exercised:** `rally_lengths.avg_length` null, empty `recent_games`/`trend`, `momentum.longest_streak_game_id` null — documented in schema comments, asserted nowhere.
 5. Untested logic with branches: `friendlyWriteError`, `humanise`, `categoryLabel`; `manage-list.ts` page→range math (and no last-partial-page pager test); resume-mid-game (a game with existing rallies) never driven.
 6. Latent drift: `fixtures/schema.ts` hardcodes the enums in parallel with the DB instead of deriving from `Constants` like `enums.ts` does — they match today; a future enum migration desyncs them silently.
 7. Untested interactive components (accepted risk, listed for completeness): `match-setup`, ~~`filter-bar`~~, all four manage edit dialogs, `duel-picker`, `sync-indicator`.
-   *27 Aug 2026:* `filter-bar` now has stories covering both states, and the category boards and head-to-head panel render offline in Storybook against seeded query keys — the real components on the real code path. Stories, not assertions: they catch "it renders and looks right", not regressions in logic.
+   _27 Aug 2026:_ the catalogue pass covered most of these. The category chain, which had nothing at all, gained the profile tiles, the five category boards, and the head-to-head panel — all rendering offline against seeded query keys, so it is the real component on the real code path. Stories, not assertions: they catch "it renders and looks right", not regressions in logic.
 
 ---
 
@@ -247,28 +277,19 @@ The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("
 ## 11. Priority shortlist
 
 **P0 — correctness, small diffs, do first**
+
 1. Shared `invalidateDerived()` in every mutation + logger exit (§1.1)
 2. Match detail: use `tallyMatch`/view winner (§1.2)
 3. `double_bounce`: schema + RPC merge + the missing DB CHECK (§1.3)
-4. Timeout/cancel on the new-match `flush()` await (§1.4)
+4. ~~Timeout/cancel on the new-match `flush()` await (§1.4)~~ — done 27 Aug 2026 (attempt cap in `WriteQueue`); its follow-on, §1.8, is now the live one
 5. Tiebreak on `get-recent-results` ordering (§1.5)
 
-**P1 — truthfulness of surfaces**
-6. Error states: kill the failure-as-empty and perpetual-skeleton patterns (§8)
-7. `matchOutcome` helper + draws plan — resolves §1.6, §1.7, §10 in one move
-8. Prettier pin + one reformat commit + CI gate (§0)
+**P1 — truthfulness of surfaces** 6. Error states: kill the failure-as-empty and perpetual-skeleton patterns (§8) 7. `matchOutcome` helper + draws plan — resolves §1.6, §1.7, §10 in one move 8. Prettier pin + one reformat commit + CI gate (§0)
 
-**P2 — debt with compounding interest**
-9. ~~Delete the 5 dead files~~ → **one** dead file left (`profile-stat-strip.tsx`); the other four are resolved. Still open: `errors_attributed` + stale `"ace"` + `deficit` param (§6)
-10. Consolidate `nameOf` / date formatting / W-L badge / `MATCH_RESULT_COLUMNS` (§5)
-11. `intentToOp` test + shared vitest `setupFiles` (§9)
+**P2 — debt with compounding interest** 9. ~~Delete the 5 dead files~~ → all five resolved: two deleted, three turned out to be a live feature with no way in (§6). Still open: `errors_attributed` + stale `"ace"` + `deficit` param 10. Consolidate `nameOf` / date formatting / W-L badge / `MATCH_RESULT_COLUMNS` (§5) 11. `intentToOp` test + shared vitest `setupFiles` (§9)
 
-**P3 — structural, schedule deliberately**
-12. Combined `player_insights` RPC + lazy h2h + `player_rivals` (§3, §4)
-13. `features/<x>/lib` vs `utils` ruling in architecture.md + `category-content` split (§7)
-14. Revoke `filtered_*` grants; standardise query-key shapes (§4)
-15. `decisive_shots` SQL tests via fixture extension (§9)
+**P3 — structural, schedule deliberately** 12. Combined `player_insights` RPC + lazy h2h + `player_rivals` (§3, §4) 13. `features/<x>/lib` vs `utils` ruling in architecture.md + `category-content` split (§7) 14. Revoke `filtered_*` grants; standardise query-key shapes (§4) 15. `decisive_shots` SQL tests via fixture extension (§9)
 
 ---
 
-*Generated 14 Jul 2026 from main @ a74737a (+2 audit-time commits) by /code-review (high) over the data layer plus a 12-agent manual sweep; 8 correctness candidates independently verified (6 confirmed, 1 plausible-narrowed, 3 refuted and recorded in §2).*
+_Generated 14 Jul 2026 from main @ a74737a (+2 audit-time commits) by /code-review (high) over the data layer plus a 12-agent manual sweep; 8 correctness candidates independently verified (6 confirmed, 1 plausible-narrowed, 3 refuted and recorded in §2)._

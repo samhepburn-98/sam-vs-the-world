@@ -1,0 +1,89 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Patterns/Page anatomy" />
+
+# Page anatomy
+
+Every page in the app is a thin file in `src/routes/` that composes smaller pieces. Nothing here
+is a special case — if you're planning a new page, these are your worked examples.
+
+The lists below are what each route actually renders today, top to bottom. Most of the pieces are
+in the sidebar; a few named here are **page-level compositions** with no story of their own —
+`Profile summary tab`, `Profile stats tab`, `Profile matches tab`, `Head-to-head panel`,
+`Category content`. They assemble a whole screen region rather than being something you'd place,
+so they're documented here instead. If you find yourself wanting one on a different page, take the
+pieces it's built from, not the composition.
+
+---
+
+## Home — the rundown
+
+`src/routes/index.tsx`
+
+1. **Page title** — "Every rally, counted."
+2. **Ticker** — the full-bleed headline strip, *below* the title, not above it
+3. **Overline** "Featured player" + **Featured player** — the protagonist's card, with a **Callout** read
+4. **Overline** "The roster" + **Roster row** ×N — everyone else, one line each
+5. **Overline** "Recent matches" + **Match row** ×N
+6. **Overline** "The numbers" + **Records wall**
+7. **Count up** carries the standing counts; **Empty** covers the nothing-logged-yet case
+
+The shape to copy: a **page title**, then sections each introduced by an **Overline**, each a list
+of one repeated row component. The rundown reads like a broadcast running order because it is one.
+
+## Player profile
+
+`src/routes/players.$playerId.index.tsx`
+
+1. **Profile hero** — the card, the trait line, the headline stats
+2. **Overline** + **Records wall** — "Records held", hidden when they hold none, and every tile
+   repainted in the player's own ember via `side="p1"`
+3. **Tabs** → **Profile summary tab** · **Profile stats tab** · **Profile matches tab**
+
+The shape to copy: hero, then a shelf that hides itself when empty, then tabs. Note the
+perspective override — on a page written from one player's point of view, everything they own
+wears their side.
+
+## Match detail
+
+`src/routes/matches.$matchId.tsx`
+
+1. Breadcrumb, then the date, venue and **Ball dots** as a meta line
+2. **Overline** carrying the *match status* — "Full time", "In play", "Drawn" — in `tone="primary"`
+   while the match is unfinished. The status gets the display face; the date does not.
+3. **Score strip** — the full-time graphic
+4. **Section title** + **Game score chart** — each game scored rally by rally
+5. **Section title** + **Rally timeline**, passed `editable` — rows open the detail sheet
+6. **Rally detail sheet** — opens over the timeline, driven from the URL's `?rally=`
+
+The shape to copy: the result first and biggest, then the evidence beneath it in decreasing
+granularity. Note that the timeline is one component in two modes — the logger and this page
+both render it, which is why a match never looks like two different things.
+
+## Compare
+
+`src/routes/compare.tsx`
+
+1. **Page title**
+2. **Duel picker** + **Duel mode toggle**
+3. **Duel** — the whole three-column contest
+4. **Head-to-head panel** — only when exactly two players are chosen
+5. **Empty** until both slots are filled
+
+## Matches index
+
+`src/routes/matches.index.tsx`
+
+**Page title**, filter controls, then **Match row** ×N with **Ball dots** — the same row the home
+page uses, so a match never looks like two different things in two places.
+
+---
+
+## What the routes are allowed to do
+
+Routes are the only layer that may compose across features, so they're where a dashboard component
+and a logger component can meet. In exchange they stay thin: fetch through the feature's `api/`
+hooks, hand the data down, and let the components do the rendering. If a route starts computing
+what to display, that logic belongs in the feature's `lib/`.
+
+See `docs/architecture.md` for the one-way import rule that enforces this.

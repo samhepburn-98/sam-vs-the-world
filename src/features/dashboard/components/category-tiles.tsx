@@ -1,4 +1,4 @@
-import { CATEGORIES } from "@/features/dashboard/categories"
+import { CATEGORIES } from "@/features/dashboard/lib/categories"
 import { InsightCard } from "@/features/dashboard/components/insight-card"
 import {
   ErrorSplitPreview,
@@ -9,10 +9,10 @@ import {
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
-import { FormGuide } from "@/components/form-guide"
+} from "@/features/dashboard/lib/insight-thresholds"
+import { FormGuide } from "@/components/broadcast/form-guide"
 
-import type { CategoryKey } from "@/features/dashboard/categories"
+import type { CategoryKey } from "@/features/dashboard/lib/categories"
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { HeadlineGame } from "@/features/dashboard/schemas/insights"
 import type { ReactNode } from "react"

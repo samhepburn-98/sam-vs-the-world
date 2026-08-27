@@ -1,4 +1,4 @@
-import { Callout } from "@/components/callout"
+import { Callout } from "@/components/broadcast/callout"
 
 import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"
 
@@ -11,7 +11,7 @@ import type { ProfileInsight } from "@/features/dashboard/lib/profile-types"
 export function NarrativeInsight({ insight }: { insight: ProfileInsight }) {
   return (
     <Callout
-      tone={insight.highlight ? "p1" : "neutral"}
+      side={insight.highlight ? "p1" : "neutral"}
       label={insight.eyebrow}
       title={insight.title}
     >

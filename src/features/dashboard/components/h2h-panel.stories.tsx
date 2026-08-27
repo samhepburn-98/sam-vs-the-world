@@ -1,56 +1,52 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
-
 import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
+
+import { withAppContext } from "#storybook/decorators"
+import { IDS } from "#storybook/fixtures"
 
 import type { H2hResult } from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
 
-// The compare panel and its drill-through, offline. The rally query is
-// seeded under the same key the hook builds, so opening "Show the rallies"
-// resolves from cache — the real component, the real code path.
+// The pair's record on /compare, and the way underneath it. Everything above
+// the disclosure is an aggregate; opening it fetches the rallies those numbers
+// were counted from, so the list can never disagree with them.
 
-const P1 = "11111111-1111-1111-1111-111111111111"
-const P2 = "22222222-2222-2222-2222-222222222222"
+const GAME = "55555555-5555-4555-8555-555555555555"
 
-const RALLIES: Array<RallyScored> = Array.from({ length: 6 }, (_, n) => {
-  const i = n + 1
-  return {
-    id: `00000000-0000-0000-0000-${String(i).padStart(12, "0")}`,
-    game_id: "aaaaaaaa-0000-0000-0000-000000000001",
-    rally_number: i,
-    server_id: i % 2 === 0 ? P1 : P2,
-    serve_side: i % 2 === 0 ? "left" : "right",
-    serve_number: 1,
-    winner_id: i % 3 === 0 ? P2 : P1,
-    end_reason: i % 3 === 0 ? "error" : "winner",
-    error_detail: i % 3 === 0 ? "tin" : null,
-    forced: i % 3 === 0 ? true : null,
-    winning_shot: i % 3 === 0 ? null : "drop",
-    losing_shot: i % 3 === 0 ? "drive" : null,
-    shot_count: 4 + i,
-    match_id: "bbbbbbbb-0000-0000-0000-000000000001",
-    game_number: 1,
-    date: "2026-08-14",
-    ball_type: "double_yellow",
-    player1_id: P1,
-    player2_id: P2,
-    receiver_id: i % 2 === 0 ? P2 : P1,
-    is_let: false,
-    score_p1: i,
-    score_p2: Math.max(0, i - 2),
-  }
+const rally = (n: number): RallyScored => ({
+  id: `66666666-6666-4666-8666-00000000000${n}`,
+  game_id: GAME,
+  match_id: IDS.match,
+  game_number: 1,
+  date: "2026-06-02",
+  ball_type: "double_yellow",
+  player1_id: IDS.sam,
+  player2_id: IDS.alex,
+  server_id: n % 2 === 0 ? IDS.sam : IDS.alex,
+  receiver_id: n % 2 === 0 ? IDS.alex : IDS.sam,
+  rally_number: n,
+  serve_side: n % 2 === 0 ? "left" : "right",
+  serve_number: 1,
+  winner_id: n % 3 === 0 ? IDS.alex : IDS.sam,
+  end_reason: n % 3 === 0 ? "error" : "winner",
+  error_detail: n % 3 === 0 ? "tin" : null,
+  forced: n % 3 === 0 ? true : null,
+  winning_shot: n % 3 === 0 ? null : "drop",
+  losing_shot: n % 3 === 0 ? "drive" : null,
+  shot_count: 4 + n,
+  is_let: false,
+  score_p1: n,
+  score_p2: Math.max(0, n - 2),
 })
 
-const H2H: H2hResult = {
+const RALLIES = Array.from({ length: 6 }, (_, i) => rally(i + 1))
+
+const matchId = (n: number) => `44444444-4444-4444-8444-00000000000${n}`
+
+// All four outcomes the column can print. A draw and a match still being
+// logged are different things: the draw takes the D chip, the pending one
+// takes no chip at all, because "in play" is not a result.
+const MET: H2hResult = {
   games_won_p1: 12,
   games_won_p2: 8,
   games_decided: 20,
@@ -59,32 +55,31 @@ const H2H: H2hResult = {
   matches_decided: 6,
   match_history: [
     {
-      match_id: "bbbbbbbb-0000-0000-0000-000000000001",
+      match_id: IDS.match,
       date: "2026-06-02",
       games_won_p1: 3,
       games_won_p2: 1,
-      winner_id: P1,
+      winner_id: IDS.sam,
       outcome: "p1",
     },
     {
-      match_id: "bbbbbbbb-0000-0000-0000-000000000002",
+      match_id: matchId(2),
       date: "2026-07-11",
       games_won_p1: 1,
       games_won_p2: 3,
-      winner_id: P2,
+      winner_id: IDS.alex,
       outcome: "p2",
     },
     {
-      match_id: "bbbbbbbb-0000-0000-0000-000000000003",
+      match_id: matchId(3),
       date: "2026-08-03",
       games_won_p1: 2,
       games_won_p2: 2,
       winner_id: null,
       outcome: "draw",
     },
-    // still being logged — a chip would claim a result that doesn't exist
     {
-      match_id: "bbbbbbbb-0000-0000-0000-000000000004",
+      match_id: matchId(4),
       date: "2026-08-19",
       games_won_p1: 1,
       games_won_p2: 1,
@@ -104,63 +99,40 @@ const NEVER_MET: H2hResult = {
   match_history: [],
 }
 
-function Harness({ h2h, children }: { h2h: H2hResult; children: ReactNode }) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  })
-  qc.setQueryData(["insights", "h2h", P1, P2, {}], h2h)
-  qc.setQueryData(["insights", "h2h-rallies", P1, P2, {}], RALLIES)
-
-  const rootRoute = createRootRoute()
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: () => <>{children}</>,
-  })
-  const matchRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/matches/$matchId",
-    component: () => null,
-  })
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, matchRoute]),
-    history: createMemoryHistory(),
-  })
-  return (
-    <QueryClientProvider client={qc}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
-}
-
 const meta = {
   title: "Dashboard/Head-to-head panel",
   component: H2hPanel,
   parameters: { layout: "padded" },
-  args: { player1Id: P1, player2Id: P2, name1: "Sam", name2: "Alex" },
+  decorators: withAppContext((queryClient) => {
+    queryClient.setQueryData(["insights", "h2h", IDS.sam, IDS.alex, {}], MET)
+    queryClient.setQueryData(
+      ["insights", "h2h-rallies", IDS.sam, IDS.alex, {}],
+      RALLIES
+    )
+  }),
+  args: {
+    player1Id: IDS.sam,
+    player2Id: IDS.alex,
+    p1Name: "Sam",
+    p2Name: "Alex",
+  },
 } satisfies Meta<typeof H2hPanel>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The record, the history, and the way into the rallies behind it. The
- *  drill-through is closed until asked for — click it to open the table. */
-export const Met: Story = {
-  render: (args) => (
-    <Harness h2h={H2H}>
-      <div className="mx-auto max-w-3xl">
-        <H2hPanel {...args} />
-      </div>
-    </Harness>
-  ),
-}
+// The record, the history, and the way in. The drill-through stays closed
+// until asked for — a pair's whole rally history is a lot to fetch for a
+// panel most visits never expand. Click it to open the table.
+export const Default: Story = {}
 
+// Two players who have never met. The honest note, and nothing to drill.
 export const NeverMet: Story = {
-  render: (args) => (
-    <Harness h2h={NEVER_MET}>
-      <div className="mx-auto max-w-3xl">
-        <H2hPanel {...args} />
-      </div>
-    </Harness>
-  ),
+  name: "Never met",
+  decorators: withAppContext((queryClient) => {
+    queryClient.setQueryData(
+      ["insights", "h2h", IDS.sam, IDS.alex, {}],
+      NEVER_MET
+    )
+  }),
 }

@@ -1,164 +1,65 @@
-import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
-
 import { CategoryTiles } from "@/features/dashboard/components/category-tiles"
 
-import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
+import { withRouter } from "#storybook/decorators"
+import { IDS, SAM_DATA, THIN_DATA } from "#storybook/fixtures"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
 
-// Each tile links into its category page, so the stories mount a minimal
-// memory router for the links to resolve against — same rig as RecordTile.
-
-function StoryRouter({ children }: { children: ReactNode }) {
-  const rootRoute = createRootRoute()
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: () => <>{children}</>,
-  })
-  const categoryRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/players/$playerId/$category",
-    component: () => null,
-  })
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, categoryRoute]),
-    history: createMemoryHistory(),
-  })
-  return <RouterProvider router={router} />
-}
-
-const game = (i: number, won: boolean | null) => ({
-  game_id: `g${i}`,
-  match_id: `m${i}`,
-  game_number: 1,
+// SAM_DATA carries no recent games — most components don't need them — but the
+// form strip is the whole of the head-to-head tile's preview, so it gets a run
+// of results here. Newest first, as the RPC returns them, and the third one
+// ends level: the tile drops undecided games rather than drawing them as
+// results, so five chips need six games.
+const RECENT = [6, 5, 4, 3, 2, 1].map((i) => ({
+  game_id: `77777777-7777-4777-8777-00000000000${i}`,
+  match_id: IDS.match,
+  game_number: i,
   date: `2026-08-0${i}`,
-  opponent_id: "00000000-0000-0000-0000-0000000000ff",
-  player_score: won ? 11 : 7,
-  opponent_score: won ? 6 : 11,
-  won,
-})
+  opponent_id: IDS.alex,
+  player_score: i % 3 === 0 ? 8 : 11,
+  opponent_score: i % 3 === 0 ? 11 : 7,
+  won: i === 4 ? null : i % 3 !== 0,
+}))
 
-/** One internally consistent season — the numbers across the five tiles all
- *  describe the same fictional player. */
-const SEASON: PlayerData = {
-  headline: {
-    player_id: "00000000-0000-0000-0000-000000000001",
-    games_won: 34,
-    games_decided: 52,
-    matches_won: 11,
-    matches_decided: 18,
-    signature_trait: "grinder",
-    clean_finish_wins: 96,
-    points_won: 421,
-    recent_games: [1, 2, 3, 4, 5, 6].map((i) => game(i, i % 3 !== 0)),
-  },
-  serve: {
-    rallies_served: 207,
-    serve_wins: 120,
-    rallies_returned: 198,
-    return_wins: 88,
-    aces: 9,
-    double_faults: 6,
-    two_serve_rallies_served: 150,
-    first_serve_faults: 31,
-    serve1_served: 150,
-    serve1_wins: 92,
-    serve2_served: 31,
-    serve2_wins: 14,
-    left_served: 104,
-    left_wins: 67,
-    right_served: 103,
-    right_wins: 53,
-  },
-  error: {
-    errors_total: 142,
-    forced_errors: 48,
-    unforced_errors: 79,
-    untagged_errors: 15,
-    tin: 41,
-    out_top: 17,
-    out_side: 9,
-    out_back: 6,
-    not_up: 22,
-    detail_untagged: 47,
-    games_played: 52,
-    trend: [],
-  },
-  rally: {
-    total_rallies: 405,
-    avg_length: 6.2,
-    longest: 24,
-    short_rallies: 121,
-    short_wins: 71,
-    medium_rallies: 188,
-    medium_wins: 96,
-    long_rallies: 96,
-    long_wins: 41,
-  },
-  momentum: {
-    comebacks: 3,
-    longest_streak: 7,
-    longest_streak_game_id: "g2",
-    early_rallies: 160,
-    early_wins: 92,
-    mid_rallies: 145,
-    mid_wins: 71,
-    close_rallies: 100,
-    close_wins: 45,
-    comeback_games: [],
-  },
+const WITH_FORM = {
+  ...SAM_DATA,
+  headline: { ...SAM_DATA.headline!, recent_games: RECENT },
 }
+
+// The five doors off the profile, sitting between the hero and the tabs. The
+// tabs tell the all-time story; a tile opens the page where that story takes
+// filters and drills to the rallies underneath it. Each one previews what is
+// behind it, so the row reads as five graphics rather than five buttons.
+//
+// Router only — the tiles are handed their data by the profile route, which
+// has already fetched it, so nothing here queries.
 
 const meta = {
   title: "Dashboard/Category tiles",
   component: CategoryTiles,
   parameters: { layout: "padded" },
-  decorators: [
-    (Story) => (
-      <StoryRouter>
-        <Story />
-      </StoryRouter>
-    ),
-  ],
-  args: { playerId: "p1", data: SEASON },
+  decorators: [withRouter],
+  args: { playerId: IDS.sam, data: WITH_FORM },
 } satisfies Meta<typeof CategoryTiles>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The row as it sits on the profile: five doors, all payloads in. */
-export const TheRow: Story = {}
+// A full season behind every tile. Two-up on a phone, five across from `lg` —
+// stacked, they would put a screen and a half between the hero and the tabs.
+export const Default: Story = {}
 
-/** Payloads arrive independently, so the row has to hold its shape with only
- *  some of them in — the slots keep their height and the missing lines show a
- *  dash, never a zero. */
+// The six insight payloads resolve independently, so the row has to hold its
+// shape with only some of them in: the preview slot keeps its height and the
+// line below shows a dash. Never a zero — that reads as a real measurement.
 export const StillLoading: Story = {
-  args: { data: { headline: SEASON.headline, rally: SEASON.rally } },
+  args: { data: { headline: WITH_FORM.headline, rally: SAM_DATA.rally } },
 }
 
-/** Below the sample floors (§3.5) every rate steps aside for its count. */
+// Somebody who has played once. Every rate steps aside for its own count
+// rather than quoting a percentage it can't stand behind (§3.5) — and the
+// rally tile has no tagged lengths at all to average.
 export const ThinSample: Story = {
-  args: {
-    data: {
-      headline: {
-        ...SEASON.headline!,
-        games_won: 2,
-        games_decided: 3,
-        matches_won: 1,
-        matches_decided: 1,
-        recent_games: [game(1, true), game(2, false)],
-      },
-      serve: { ...SEASON.serve!, rallies_served: 12, serve_wins: 7 },
-      error: { ...SEASON.error!, games_played: 3, errors_total: 8 },
-      rally: { ...SEASON.rally!, avg_length: null, total_rallies: 0 },
-      momentum: { ...SEASON.momentum!, comebacks: 1, longest_streak: 2 },
-    },
-  },
+  name: "Thin sample",
+  args: { data: THIN_DATA },
 }

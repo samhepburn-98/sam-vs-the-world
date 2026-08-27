@@ -7,7 +7,7 @@ import { useH2hRallies } from "@/features/dashboard/api/get-h2h-rallies"
 import { ProfileSection } from "@/features/dashboard/components/profile-section"
 import { RallyTable } from "@/features/dashboard/components/rally-table"
 import { StatCard } from "@/features/dashboard/components/stat-card"
-import { ResultChip } from "@/components/result-chip"
+import { ResultChip } from "@/components/broadcast/result-chip"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -65,15 +65,15 @@ function RalliesBehind({
  *  ones and the draw take a chip. */
 function HistoryRow({
   match: m,
-  name1,
-  name2,
+  p1Name,
+  p2Name,
 }: {
   match: H2hMatch
-  name1: string
-  name2: string
+  p1Name: string
+  p2Name: string
 }) {
   const winner =
-    m.outcome === "p1" ? name1 : m.outcome === "p2" ? name2 : undefined
+    m.outcome === "p1" ? p1Name : m.outcome === "p2" ? p2Name : undefined
 
   return (
     <li>
@@ -109,13 +109,13 @@ function HistoryRow({
 export function H2hPanel({
   player1Id,
   player2Id,
-  name1,
-  name2,
+  p1Name,
+  p2Name,
 }: {
   player1Id: string
   player2Id: string
-  name1: string
-  name2: string
+  p1Name: string
+  p2Name: string
 }) {
   const h2h = useH2h(player1Id, player2Id)
   if (!h2h.data) return <Skeleton className="h-32 w-full" />
@@ -124,7 +124,7 @@ export function H2hPanel({
   const played = h.games_decided > 0 || h.match_history.length > 0
 
   return (
-    <ProfileSection title={`${name1} vs ${name2}`}>
+    <ProfileSection title={`${p1Name} vs ${p2Name}`}>
       {!played ? (
         <p className="text-sm text-muted-foreground">
           They haven&rsquo;t played each other yet.
@@ -148,8 +148,8 @@ export function H2hPanel({
                 <HistoryRow
                   key={m.match_id}
                   match={m}
-                  name1={name1}
-                  name2={name2}
+                  p1Name={p1Name}
+                  p2Name={p2Name}
                 />
               ))}
             </ul>

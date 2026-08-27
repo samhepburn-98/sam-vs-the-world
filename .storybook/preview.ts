@@ -28,21 +28,40 @@ const preview: Preview = {
   },
   initialGlobals: { theme: "dark" },
   parameters: {
-    layout: "centered",
+    // Padded, not centered: most of this kit is a full-width broadcast strip,
+    // and centering one makes it read as a small object floating in a canvas.
+    // A story that genuinely wants centering sets `layout: "centered"` itself.
+    layout: "padded",
     // the docs shell stays dark; story canvases follow the toolbar theme
     docs: { theme: themes.dark },
     // The app's surfaces come from its own tokens; Storybook's background
     // switcher would paint colors that exist nowhere in the system.
     backgrounds: { disable: true },
     options: {
+      // Sidebar order is reading order for someone planning a page: the
+      // rules first, then whole-page recipes, then the kit those recipes
+      // are built from, then the feature-specific pieces, primitives last
+      // (you reach for a Button knowing what it is).
       storySort: {
         order: [
           "Foundations",
-          ["Overview", "Colors", "Typography", "The Broadcast rules"],
+          [
+            "Overview",
+            "Pick a component",
+            "Colors",
+            "Typography",
+            "Headings",
+            "The Broadcast rules",
+          ],
+          "Patterns",
+          "Broadcast",
           "Cards",
-          "Typography",
-          "UI",
+          "Dashboard",
           "Logger",
+          "Manage",
+          "Forms",
+          "Layouts",
+          "Primitives",
         ],
       },
     },

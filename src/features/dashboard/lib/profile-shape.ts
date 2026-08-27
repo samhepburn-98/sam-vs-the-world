@@ -8,7 +8,7 @@ import {
   MIN_BOX_SERVES,
   MIN_DECISIVE_FOR_MIX,
   MIN_RALLIES_FOR_RATE,
-} from "@/features/dashboard/utils/insight-thresholds"
+} from "@/features/dashboard/lib/insight-thresholds"
 
 import type {
   AttributeKey,

@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-import type { CategoryKey } from "@/features/dashboard/categories"
+import type { CategoryKey } from "@/features/dashboard/lib/categories"
 import type { ReactNode } from "react"
 
 // A category tile on the profile (§5.1) — a link into the deep page that
