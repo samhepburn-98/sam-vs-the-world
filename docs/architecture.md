@@ -72,6 +72,34 @@ is shared so `lib/api` can execute them without importing the planner.
 Entity **reads** split by use: a read only one feature needs lives in that feature's `api/`; a read
 several surfaces share (`get-players`, `get-match-detail`) lives in `lib/api`.
 
+## Component API conventions
+
+One spelling per idea. These aren't style preferences — each one was two or three
+spellings until the whole kit went into Storybook side by side and the drift became obvious.
+
+**Pairs.** An id is `player1Id` / `player2Id` — it matches the zod schemas and the
+`player1_id` columns. *Everything else* a player owns is `p1X` / `p2X`: `p1Name`, `p1Score`,
+`p1Attrs`, `p1Data`. Never `name1`, never `a` / `b`.
+
+**Colour props.** The design system's colour law says every value belonging to a player wears
+their side, so the prop that carries it is always called `side`:
+
+| Prop | Means | Values |
+|---|---|---|
+| `side` | this value belongs to that player | `"p1" \| "p2"` (`"neutral"` where the house can own it) |
+| `tone` | emphasis that is nobody's colour | `"muted" \| "primary"`, `"accent" \| "loss"` |
+| `outcome` | a **result** — the only one that carries a verdict | `"p1" \| "p2" \| "draw" \| "pending"` |
+
+**Make the wrong call impossible before documenting it.** Where a prop combination would render
+something dishonest, close it in the type rather than warning about it in a comment —
+`StatCard` is a discriminated union so a rate can't grow a unit, and its test file pins each
+rejected combination with `@ts-expect-error` (an unused directive is itself a tsc error, so the
+gate can't rot).
+
+**`className` last.** Anything in `components/` that a page places is expected to take one, so it
+can be positioned without a wrapper. Page-level compositions (`site-header`, `rally-editor`) don't
+need it and don't take it.
+
 ## Enforcement detail
 
 The boundary rule matches on *resolved file paths*, so it needs the `@/` alias to resolve. That's
