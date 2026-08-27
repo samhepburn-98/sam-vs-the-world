@@ -9,15 +9,15 @@ import type { ComponentProps } from "react"
 // stays ignorant of the trait model.
 
 export function TraitChip({
-  tone = "p1",
+  side = "p1",
   className,
   ...props
-}: ComponentProps<"span"> & { tone?: "p1" | "p2" }) {
+}: ComponentProps<"span"> & { side?: "p1" | "p2" }) {
   return (
     <span
       className={cn(
         "font-heading text-[13px] font-bold tracking-[0.12em] uppercase",
-        tone === "p1" ? "text-primary-strong" : "text-p2-strong",
+        side === "p1" ? "text-primary-strong" : "text-p2-strong",
         className
       )}
       {...props}

@@ -5,7 +5,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 const meta = {
   title: "UI/Score strip",
   component: ScoreStrip,
-  args: { name1: "Sam", name2: "Alex", score1: 0, score2: 6, outcome: "p2" },
+  args: {
+    p1Name: "Sam",
+    p2Name: "Alex",
+    p1Score: 0,
+    p2Score: 6,
+    outcome: "p2",
+  },
 } satisfies Meta<typeof ScoreStrip>
 
 export default meta
@@ -20,7 +26,7 @@ export const FullTime: Story = {
 }
 
 export const Drawn: Story = {
-  args: { score1: 3, score2: 3, outcome: null },
+  args: { p1Score: 3, p2Score: 3, outcome: null },
   render: (args) => (
     <div className="w-80">
       <ScoreStrip {...args} />

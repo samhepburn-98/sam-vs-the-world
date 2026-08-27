@@ -46,7 +46,7 @@ export function RosterRow({
           {player.name}
         </span>
         {trait && (
-          <TraitChip tone={side} className="text-xs">
+          <TraitChip side={side} className="text-xs">
             {TRAIT_LABELS[trait]}
           </TraitChip>
         )}

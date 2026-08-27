@@ -190,10 +190,10 @@ function MatchDetailPage() {
                 : "Full time"}
           </Overline>
           <ScoreStrip
-            name1={p1Name}
-            name2={p2Name}
-            score1={gamesWonP1}
-            score2={gamesWonP2}
+            p1Name={p1Name}
+            p2Name={p2Name}
+            p1Score={gamesWonP1}
+            p2Score={gamesWonP2}
             outcome={
               verdict.outcome === "p1" || verdict.outcome === "p2"
                 ? verdict.outcome

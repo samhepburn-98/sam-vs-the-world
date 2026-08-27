@@ -23,10 +23,10 @@ function formatDate(iso: string) {
 export function MatchRow({
   matchId,
   date,
-  name1,
-  name2,
-  score1,
-  score2,
+  p1Name,
+  p2Name,
+  p1Score,
+  p2Score,
   outcome,
   venue,
   format,
@@ -34,17 +34,17 @@ export function MatchRow({
 }: {
   matchId: string
   date: string
-  name1: string
-  name2: string
-  score1: number | null
-  score2: number | null
+  p1Name: string
+  p2Name: string
+  p1Score: number | null
+  p2Score: number | null
   outcome: "p1" | "p2" | "draw" | "pending"
   venue?: string | null
   /** Best-of format; null is a casual match. Omit to hide the format. */
   format?: number | null
   ball?: BallType | null
 }) {
-  const hasScore = score1 !== null && score2 !== null
+  const hasScore = p1Score !== null && p2Score !== null
   const meta = [
     formatDate(date),
     venue ?? null,
@@ -66,11 +66,11 @@ export function MatchRow({
         <span className="flex items-baseline gap-2">
           <span className="truncate font-heading text-lg leading-none font-extrabold uppercase">
             <span className={cn(outcome === "p1" && "text-primary-strong")}>
-              {name1}
+              {p1Name}
             </span>{" "}
             <span className="font-bold text-muted-foreground">v</span>{" "}
             <span className={cn(outcome === "p2" && "text-p2-strong")}>
-              {name2}
+              {p2Name}
             </span>
           </span>
           {outcome === "pending" && (
@@ -97,7 +97,7 @@ export function MatchRow({
             outcome === "p2" && "text-p2-strong"
           )}
         >
-          {score1}–{score2}
+          {p1Score}–{p2Score}
         </span>
       )}
     </Link>

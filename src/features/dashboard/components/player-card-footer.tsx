@@ -22,7 +22,7 @@ export function PlayerCardFooter({
         {trait && (
           <>
             {" · "}
-            <TraitChip tone={side} className="text-[11px]">
+            <TraitChip side={side} className="text-[11px]">
               {TRAIT_LABELS[trait]}
             </TraitChip>
           </>

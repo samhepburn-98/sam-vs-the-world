@@ -46,7 +46,7 @@ const record = (overrides: Partial<RecordTileDisplay>): RecordTileDisplay => ({
   lead: "Alex",
   isHolder: true,
   rest: "14 Jul 2026",
-  tone: "p2",
+  side: "p2",
   matchId: "m1",
   ...overrides,
 })
@@ -58,10 +58,10 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "3–0",
     unit: null,
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
   }),
   // Sam held this one from the p2 slot: blue on the wall (match-anchored),
-  // repainted ember by the RecordsHeld story's tone override below.
+  // repainted ember by the RecordsHeld story's side override below.
   record({ key: "longest_rally", lead: "Sam", matchId: "m2" }),
   record({
     key: "best_streak",
@@ -69,7 +69,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "6",
     unit: "wins",
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
     matchId: "m3",
   }),
   record({
@@ -80,7 +80,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     lead: "Sam v Alex",
     isHolder: false,
     rest: "15–13 · 14 Jul 2026",
-    tone: null,
+    side: null,
     matchId: "m4",
   }),
   record({
@@ -89,7 +89,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     value: "5",
     unit: null,
     lead: "Sam",
-    tone: "p1",
+    side: "p1",
     matchId: "m5",
   }),
   record({
@@ -99,7 +99,7 @@ const THE_WALL: Array<RecordTileDisplay> = [
     unit: null,
     lead: "Sam v Ormond",
     isHolder: false,
-    tone: null,
+    side: null,
     matchId: "m6",
   }),
 ]
@@ -140,7 +140,7 @@ export const MatchOwnedRecord: Story = {
           lead: "Sam v Alex",
           isHolder: false,
           rest: "15–13 · 14 Jul 2026",
-          tone: null,
+          side: null,
         })}
       />
     </div>
@@ -163,7 +163,7 @@ export const RecordsHeld: Story = {
     <div className="w-full max-w-2xl">
       <RecordsWall
         records={THE_WALL.filter((r) => r.lead === "Sam")}
-        tone="p1"
+        side="p1"
       />
     </div>
   ),

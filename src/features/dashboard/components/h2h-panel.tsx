@@ -10,13 +10,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function H2hPanel({
   player1Id,
   player2Id,
-  name1,
-  name2,
+  p1Name,
+  p2Name,
 }: {
   player1Id: string
   player2Id: string
-  name1: string
-  name2: string
+  p1Name: string
+  p2Name: string
 }) {
   const h2h = useH2h(player1Id, player2Id)
   if (!h2h.data) return <Skeleton className="h-32 w-full rounded-2xl" />
@@ -27,7 +27,7 @@ export function H2hPanel({
   return (
     <section className="flex flex-col gap-3 rounded-2xl bg-card p-6 ring-1 ring-foreground/10">
       <SectionTitle>
-        {name1} vs {name2}
+        {p1Name} vs {p2Name}
       </SectionTitle>
 
       {!played ? (
@@ -67,9 +67,9 @@ export function H2hPanel({
                     }
                   >
                     {m.outcome === "p1"
-                      ? name1
+                      ? p1Name
                       : m.outcome === "p2"
-                        ? name2
+                        ? p2Name
                         : m.outcome === "draw"
                           ? "Drawn"
                           : "In play"}

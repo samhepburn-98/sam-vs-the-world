@@ -12,16 +12,16 @@ import type { RecordTileDisplay } from "@/features/dashboard/lib/record-display"
 
 export function RecordTile({
   record,
-  tone,
+  side: sideOverride,
   className,
 }: {
   record: RecordTileDisplay
   /** Override for perspective pages — a profile paints every held record in
-   *  the player's own ember. Defaults to the record's match-anchored tone. */
-  tone?: "p1" | "p2"
+   *  the player's own ember. Defaults to the record's match-anchored side. */
+  side?: "p1" | "p2"
   className?: string
 }) {
-  const side = tone ?? record.tone
+  const side = sideOverride ?? record.side
   return (
     <Link
       to="/matches/$matchId"
@@ -65,23 +65,25 @@ export function RecordTile({
   )
 }
 
-// The wall: a responsive grid of tiles, each in its match-anchored tone.
-// A profile passes tone="p1" because there every record on show is the
+// The wall: a responsive grid of tiles, each in its match-anchored side.
+// A profile passes side="p1" because there every record on show is the
 // player's own.
 
 export function RecordsWall({
   records,
-  tone,
+  side,
   className,
 }: {
   records: Array<RecordTileDisplay>
-  tone?: "p1"
+  /** Repaint every tile in one side, for a page written from one player's
+   *  point of view. Omit on a neutral wall so each tile keeps its own. */
+  side?: "p1" | "p2"
   className?: string
 }) {
   return (
     <div className={cn("grid grid-cols-2 gap-1.5 sm:grid-cols-3", className)}>
       {records.map((record) => (
-        <RecordTile key={record.key} record={record} tone={tone} />
+        <RecordTile key={record.key} record={record} side={side} />
       ))}
     </div>
   )

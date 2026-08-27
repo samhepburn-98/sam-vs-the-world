@@ -6,20 +6,20 @@ import type { ReactNode } from "react"
 // broadcast pundit graphic. The bar and label take a side's colour when the
 // point belongs to a player, neutral when it's the house talking.
 
-const TONE = {
+const SIDE = {
   p1: { bar: "border-primary", label: "text-primary-strong" },
   p2: { bar: "border-p2", label: "text-p2-strong" },
   neutral: { bar: "border-border", label: "text-muted-foreground" },
 } as const
 
 export function Callout({
-  tone = "neutral",
+  side = "neutral",
   label,
   title,
   children,
   className,
 }: {
-  tone?: keyof typeof TONE
+  side?: keyof typeof SIDE
   /** The tracked uppercase kicker, e.g. "Strength" or "The read". */
   label: string
   /** Optional bold one-liner between the kicker and the body. */
@@ -31,14 +31,14 @@ export function Callout({
     <div
       className={cn(
         "flex flex-col gap-0.5 border-l-4 bg-card px-3.5 py-2.5",
-        TONE[tone].bar,
+        SIDE[side].bar,
         className
       )}
     >
       <span
         className={cn(
           "font-heading text-xs font-bold tracking-[0.14em] uppercase",
-          TONE[tone].label
+          SIDE[side].label
         )}
       >
         {label}

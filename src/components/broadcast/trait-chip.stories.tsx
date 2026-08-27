@@ -7,7 +7,7 @@ const meta = {
   component: TraitChip,
   args: { children: "Grafter" },
   argTypes: {
-    tone: { control: "select", options: ["p1", "p2"] },
+    side: { control: "select", options: ["p1", "p2"] },
   },
 } satisfies Meta<typeof TraitChip>
 
@@ -19,9 +19,9 @@ export const Default: Story = {}
 export const BothSides: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-2">
-      <TraitChip tone="p1">Marksman</TraitChip>
-      <TraitChip tone="p2">Shotmaker</TraitChip>
-      <TraitChip tone="p1">Grafter</TraitChip>
+      <TraitChip side="p1">Marksman</TraitChip>
+      <TraitChip side="p2">Shotmaker</TraitChip>
+      <TraitChip side="p1">Grafter</TraitChip>
     </div>
   ),
 }
