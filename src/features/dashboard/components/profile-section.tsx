@@ -4,8 +4,8 @@ import type { ReactNode } from "react"
 
 // One titled band of a profile tab: the uppercase primary heading, a
 // one-line lede that reads the section's data, then whatever the section
-// draws. Shared by the Summary and Matches tabs so every band opens the
-// same way.
+// draws. Shared by the Summary and Matches tabs and by the category pages,
+// so every band on every level opens the same way.
 
 export function ProfileSection({
   title,
@@ -13,7 +13,9 @@ export function ProfileSection({
   children,
 }: {
   title: string
-  lede: string
+  /** The one-line read of the section's data. Omitted where the graphic
+   *  below speaks for itself — a chart with its own axes and legend. */
+  lede?: string
   children: ReactNode
 }) {
   return (
@@ -22,7 +24,7 @@ export function ProfileSection({
         <Overline as="h2" tone="primary">
           {title}
         </Overline>
-        <p className="mt-1.5 text-sm text-muted-foreground">{lede}</p>
+        {lede && <p className="mt-1.5 text-sm text-muted-foreground">{lede}</p>}
       </div>
       {children}
     </section>

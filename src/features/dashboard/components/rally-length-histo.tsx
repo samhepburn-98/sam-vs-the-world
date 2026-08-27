@@ -89,10 +89,14 @@ export function RallyLengthHisto({ lengths }: { lengths: RallyLengths }) {
             />
           }
         />
+        {/* CountUp is the app's one stat-reveal flourish (§4.8), and the
+            trend and momentum charts already opt out — so the bars land at
+            full height rather than growing into it */}
         <Bar
           dataKey="rallies"
           fill="var(--color-rallies)"
-          radius={[4, 4, 0, 0]}
+          radius={0}
+          isAnimationActive={false}
         >
           <LabelList
             dataKey="winRate"

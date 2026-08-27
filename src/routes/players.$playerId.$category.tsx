@@ -1,13 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router"
 
-import { CATEGORY_KEYS, categoryLabel } from "@/features/dashboard/categories"
+import {
+  CATEGORY_KEYS,
+  categoryBlurb,
+  categoryLabel,
+} from "@/features/dashboard/categories"
 import { CategoryContent } from "@/features/dashboard/components/category-content"
 import { FilterBar } from "@/features/dashboard/components/filter-bar"
 import {
   insightSearch,
   searchToFilters,
 } from "@/features/dashboard/utils/insight-filters"
-import { PageTitle } from "@/components/typography"
+import { Overline, PageTitle } from "@/components/typography"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,6 +29,11 @@ import type { CategoryKey } from "@/features/dashboard/categories"
 // then the per-category content — instantiated for all five categories. The
 // content ends in the underlying-rallies table (or, for head-to-head, the
 // results list), so every number drills to what produced it (§3.4).
+//
+// The header is the broadcast title graphic for a level-two board: the
+// player's name as the tracked kicker over the category as the headline —
+// this page is about the serve, and whose serve is the qualifier. The
+// breadcrumb above it is the way back up.
 
 export const Route = createFileRoute("/players/$playerId/$category")({
   validateSearch: (search) => insightSearch.parse(search),
@@ -72,10 +81,12 @@ function CategoryDetailPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <header>
-        <PageTitle>
-          {player.name} · {categoryLabel(key)}
-        </PageTitle>
+      <header className="flex flex-col gap-1">
+        <Overline as="h2" tone="primary">
+          {player.name}
+        </Overline>
+        <PageTitle>{categoryLabel(key)}</PageTitle>
+        <p className="text-sm text-muted-foreground">{categoryBlurb(key)}</p>
       </header>
 
       <FilterBar

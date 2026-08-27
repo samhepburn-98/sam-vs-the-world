@@ -40,7 +40,9 @@ export function computeLeadSeries(
 }
 
 /** The 0–1 offset where the fill flips colour — the zero line's position in
- *  the value range, so "ahead" is always primary and "behind" always red. */
+ *  the value range, so "ahead" always takes the ember and "behind" the muted
+ *  tone. Two stops share the offset, so the fill cuts at the line rather
+ *  than ramping across it. */
 export function zeroOffset(series: Array<LeadPoint>): number {
   const leads = series.map((s) => s.lead)
   const max = Math.max(0, ...leads)

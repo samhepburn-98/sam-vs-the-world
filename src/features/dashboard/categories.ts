@@ -17,3 +17,8 @@ export const CATEGORY_KEYS = CATEGORIES.map((c) => c.key)
 export function categoryLabel(key: CategoryKey): string {
   return CATEGORIES.find((c) => c.key === key)?.label ?? key
 }
+
+/** The one-line "what's in here" under the category's title graphic. */
+export function categoryBlurb(key: CategoryKey): string {
+  return CATEGORIES.find((c) => c.key === key)?.blurb ?? ""
+}

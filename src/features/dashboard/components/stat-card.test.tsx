@@ -12,7 +12,9 @@ describe("StatCard", () => {
       <StatCard label="Win rate" rate={{ won: 15, of: 22 }} minSample={5} />
     )
     expect(screen.getByText("68%")).toBeDefined()
-    expect(screen.getByText("· 15 of 22")).toBeDefined()
+    // the receipt is separated by a gap and a size step now, not a middot —
+    // what matters is that the denominator is on screen beside the rate
+    expect(screen.getByText("15 of 22")).toBeDefined()
   })
 
   it("hides the number below the sample threshold, showing n instead", () => {

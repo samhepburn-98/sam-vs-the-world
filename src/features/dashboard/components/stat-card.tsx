@@ -1,7 +1,6 @@
 import type { ReactNode } from "react"
 
 import { CountUp } from "@/components/count-up"
-import { Card } from "@/components/ui/card"
 import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +13,11 @@ import { cn } from "@/lib/utils"
 //
 // Non-rate stats (a count, an average) go through `value` and never grow a
 // percent sign — the only path that divides is the rate path.
+//
+// It speaks in StatTile's voice — condensed display number over a tracked
+// label on a flat panel — so the key-stat row on a category page and the KPI
+// grid on the profile read as one system. StatTile stays the shape where the
+// number is always sayable; this is the shape that can decline to say it.
 
 export interface Rate {
   won: number
@@ -59,8 +63,15 @@ export function StatCard({
     effectiveSample !== undefined && effectiveSample < minSample
 
   return (
-    <Card className={cn("gap-2 px-6", className)}>
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+    <div
+      className={cn(
+        "flex flex-col gap-1 bg-card p-3.5 text-card-foreground ring-1 ring-foreground/10",
+        className
+      )}
+    >
+      <p className="font-heading text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase">
+        {label}
+      </p>
 
       {belowSample ? (
         <p className="text-sm text-balance text-muted-foreground">
@@ -72,16 +83,16 @@ export function StatCard({
           <p className="flex items-baseline gap-1.5">
             {rate ? (
               <>
-                <span className="font-heading text-3xl font-bold">
+                <span className="font-heading text-3xl leading-none font-extrabold tabular-nums">
                   <CountUp value={pct(rate)} suffix="%" />
                 </span>
-                <span className="text-sm text-muted-foreground tabular-nums">
-                  · {rate.won} of {rate.of}
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {rate.won} of {rate.of}
                 </span>
               </>
             ) : (
               <>
-                <span className="font-heading text-3xl font-bold tabular-nums">
+                <span className="font-heading text-3xl leading-none font-extrabold tabular-nums">
                   {typeof value === "number" ? (
                     <CountUp
                       value={value}
@@ -92,16 +103,20 @@ export function StatCard({
                   )}
                 </span>
                 {unit && (
-                  <span className="text-sm text-muted-foreground">{unit}</span>
+                  <span className="text-xs text-muted-foreground">{unit}</span>
                 )}
               </>
             )}
           </p>
-          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+          {hint && (
+            <p className="text-xs text-muted-foreground/70 tabular-nums">
+              {hint}
+            </p>
+          )}
         </>
       )}
 
       {children}
-    </Card>
+    </div>
   )
 }
