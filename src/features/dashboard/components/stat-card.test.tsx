@@ -38,6 +38,38 @@ describe("StatCard", () => {
     expect(screen.queryByText(/%/)).toBeNull()
   })
 
+  // Compile-time half of the honesty rules: these are assertions `pnpm
+  // typecheck` runs, and an unused @ts-expect-error is itself an error — so
+  // if the props union ever loosens back into "everything optional", the
+  // build goes red here rather than a percentage quietly growing a unit.
+  it("makes the dishonest prop combinations unrepresentable", () => {
+    const rejected = [
+      // a rate with a unit would render "68% shots"
+      // @ts-expect-error unit belongs to value mode, not rate mode
+      <StatCard
+        key="a"
+        label="Win rate"
+        rate={{ won: 1, of: 2 }}
+        unit="shots"
+      />,
+      // a rate gated on a sample that isn't its own denominator
+      // @ts-expect-error sample belongs to value mode; a rate uses its `of`
+      <StatCard
+        key="b"
+        label="Win rate"
+        rate={{ won: 1, of: 2 }}
+        sample={99}
+      />,
+      // both modes at once — which number wins?
+      // @ts-expect-error a card is a rate or a value, never both
+      <StatCard key="c" label="Win rate" rate={{ won: 1, of: 2 }} value={5} />,
+      // neither mode — a card with nothing to say
+      // @ts-expect-error a card must carry one of rate or value
+      <StatCard key="d" label="Win rate" />,
+    ]
+    expect(rejected).toHaveLength(4)
+  })
+
   it("gates a plain value on its own sample", () => {
     render(
       <StatCard
