@@ -6,17 +6,38 @@
 
 ---
 
+## Status
+
+Where each finding stands. A row is marked fixed or open only where the code was re-checked on the date given; **not re-checked** means exactly that — the row still says what the audit said in July, and nobody has confirmed it since.
+
+| # | Finding | Status | Checked |
+|---|---|---|---|
+| §0 | Prettier drift, 171 files | ✅ **Fixed** — pinned at 3.9.4, `pnpm check` green on a clean tree | 27 Aug 2026 |
+| §1.1 | No mutation invalidates `["insights"]` / `["home"]` | ✅ **Fixed** — every rally/game/match mutation and the logger exit invalidate `["insights"]` | 27 Aug 2026 |
+| §1.2 | Match detail recomputes the match winner | ✅ **Fixed** — reads the view's verdict rather than counting games | 27 Aug 2026 |
+| §1.3 | `errorProfile` schema strips `double_bounce` | ❌ **Open** — the key is still absent from the client schema, so the two error bars still sum differently | 27 Aug 2026 |
+| §1.4 | New-match flow hangs on sustained transient errors | ❌ **Open** — `write-queue.ts` still retries a retryable error with backoff but no attempt cap, timeout, or cancel. `entry.tsx` handles the hard-pause case only | 27 Aug 2026 |
+| §1.5 | Home recent results nondeterministic on same-day matches | ✅ **Fixed** — ordered by `created_at`, with the reasoning recorded in the file | 27 Aug 2026 |
+| §1.6 | Null `match_winner_id` renders five different ways | ⚠️ Not re-checked | — |
+| §1.7 | Logger banner contradicts read surfaces for casual leaders | ⚠️ Not re-checked | — |
+| §6 | Dead code | ◐ **Partly, and partly wrong** — three of the five "deletable" files were a feature with no way in, not dead code. §6 is corrected in place | 27 Aug 2026 |
+| §8 | Compare panel's match rows don't link | ✅ **Fixed** — rows are links, and drill on to the rallies | 27 Aug 2026 |
+| §8 | Three section/panel primitives | ◐ **Half** — `category-content` and `h2h-panel` consolidated; `profile-stats-tab` still local | 27 Aug 2026 |
+| §2–§5, §7, §9–§11 | The rest of the sweep | ⚠️ Not re-checked, except where a note is dated in the section itself | — |
+
+---
+
 ## 0. Mechanical checks
 
-| Check | Result |
-|---|---|
-| `pnpm typecheck` | ✅ clean |
-| `pnpm lint` (eslint) | ✅ clean |
-| `pnpm test` (vitest) | ✅ 309 tests, 42 files, all pass |
-| `pnpm check` (prettier) | ❌ **fails on 171 files** |
-| Dependencies | Patch-level drift only; no unused deps found in spot-checks |
+| Check | 14 Jul 2026 | 27 Aug 2026 |
+|---|---|---|
+| `pnpm typecheck` | ✅ clean | ✅ clean |
+| `pnpm lint` (eslint) | ✅ clean | ✅ clean |
+| `pnpm test` (vitest) | ✅ 309 tests, 42 files | ✅ 344 passed, 2 skipped, 45 files |
+| `pnpm check` (prettier) | ❌ **fails on 171 files** | ✅ clean |
+| Dependencies | Patch-level drift only; no unused deps found in spot-checks | Not re-checked |
 
-- **Prettier drift (171 files).** `package.json` pins `prettier: ^3.8.3` but the lockfile has floated to 3.9.4, whose formatting output differs. Practical consequences: `pnpm check` is red on a clean clone, so it can't be gating anything, and any future `pnpm format` will produce a whole-repo noise diff. Fix: pin prettier exactly (or run one deliberate `pnpm format` commit and pin), and wire `check` into CI so it stays green.
+- ~~**Prettier drift (171 files).**~~ **Fixed.** `prettier` sits at 3.9.4 and `pnpm check` is green, so the command can gate now.
 - **Dependency majors available, not urgent:** eslint 10, typescript 7, jsdom 29, `@types/node` 26. Worth a deliberate upgrade pass, not a fire. recharts 3.8.0 → 3.9.2 is a minor worth taking (bug fixes).
 - Hygiene: `dist/` and `test-results/` are properly gitignored.
 
@@ -123,7 +144,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 
 **Findings:**
 
-- **Orphaned server surface:** `errors_attributed` view — zero client callers, zero RPC consumers; only a derivation test reads it, while the production error-maker rule lives inline in `error_profile` (a second definition that can drift). Drop the view and point the test at `error_profile`. `h2h_rallies` RPC is orphaned from the client side: its whole client module `get-h2h-rallies.ts` is dead (§6).
+- **Orphaned server surface:** `errors_attributed` view — zero client callers, zero RPC consumers; only a derivation test reads it, while the production error-maker rule lives inline in `error_profile` (a second definition that can drift). Drop the view and point the test at `error_profile`. ~~`h2h_rallies` RPC is orphaned from the client side~~ — **resolved 27 Aug 2026:** the compare panel's drill-through calls it (§6).
 - **Over-broad grants:** `filtered_matches` / `filtered_games` / `filtered_rallies` are internal SQL helpers, never called client-side, yet granted EXECUTE to `anon, authenticated`. Revoke; keep grants on the aggregates and drill-throughs only.
 - **Client-side aggregation where an aggregate RPC belongs:** the profile h2h table fetches **all** of a player's `match_results` unpaged and folds them in TS (`computeH2h`) — logic that overlaps the existing pairwise `h2h` RPC. The gap is a missing `player_rivals(p_player_id)` returning one summary row per opponent. (The code comment acknowledges and defends the unpaged read; it's still the one clear breach of the summaries-vs-detail convention, and it grows O(matches).)
 - **Multi-fetch hooks, adjudicated:** `usePlayerInsights` fires 6 queries (breach — but each payload is independently cached; the real fix is the combined RPC, §3). `fetchPlayerMatchHistory` and `fetchManageGames` make 2 round-trips each — justified, PostgREST can't join across views. `fetchHomeCounts`' two head-counts — justified.
@@ -135,7 +156,8 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 ## 5. Reuse and duplication
 
 - **`nameOf` is hand-rolled at 10 sites with 3 different fallbacks** — `"—"` (logging-shell), `"Unknown"` (recent-matches, player-match-history, profile route, home route), `id.slice(0,8)` (all four manage tabs). A deleted/unknown player renders differently on every surface. One `makeNameLookup(players)` in `src/lib` with one agreed fallback; `match-history.ts`/`profile-h2h.ts` could stop threading `nameOf` as a parameter.
-- **Short-date formatting duplicated and divergent:** two live copies of `MONTHS`+`formatDate` (`match-history.ts` — "9 Jul"; `routes/index.tsx` — "9 Jul 2026"), plus **raw ISO dates rendered to users** on four surfaces (`matches.index.tsx:222`, `matches.$matchId.tsx:161`, `category-content.tsx:108,316`, `h2h-panel.tsx`) and a fourth format in manage cells. One shared formatter; route the ISO surfaces through it.
+- **Short-date formatting duplicated and divergent:** two live copies of `MONTHS`+`formatDate` (`match-history.ts` — "9 Jul"; `routes/index.tsx` — "9 Jul 2026"), plus **raw ISO dates rendered to users** on four surfaces (`matches.index.tsx:222`, `matches.$matchId.tsx:161`, `category-content.tsx`, `h2h-panel.tsx`) and a fourth format in manage cells. One shared formatter; route the ISO surfaces through it.
+  *27 Aug 2026:* still open, deliberately. The Broadcast pass rewrote the `category-content` and `h2h-panel` rows and left the ISO dates on them: a fourth private `formatDate` would have deepened the duplication this entry is about, and the three existing copies disagree on format (`9 Jul` vs `9 Jul 2026`), so picking one is a call to make across all of them at once, not in passing.
 - **Player-first orientation flip duplicated** (`profile-h2h.ts:46`, `match-history.ts:39`) — the `isP1 ? p1 : p2` mirror including the `?? 0` guards. A shared `orientToPlayer(match, playerId) → { mine, theirs, rivalId }` gives the concept one home (the SQL side already centralises this in `filtered_matches`).
 - **`match_results` select strings duplicated as raw strings** (`get-recent-results.ts:15`, `get-player-h2h.ts:20`, superset in `get-matches.ts:36`) while the players API already derives its columns from the zod shape (`PLAYER_SUMMARY_COLUMNS`). A `MATCH_RESULT_COLUMNS` from `matchResultSummary.shape` closes the drift channel.
 - **`fold-match.ts` re-implements running-score accumulation** that `lib/scoring` owns and fixture-pins. The dashboard fold is a second, unpinned copy of the windowed-count rule — the match timeline would silently keep old semantics if the rule ever changed. Fold should build on `runningScores`.
@@ -145,17 +167,27 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 
 ## 6. Dead code
 
-**Delete with confidence (zero importers, verified):**
+> **Corrected 27 Aug 2026.** Three of the five files below were not dead code awaiting deletion. They were a working feature with no way in — and this section's own reasoning is what hid that. See the note under the tables.
 
-| File | Note |
-|---|---|
-| `src/features/dashboard/components/insight-previews.tsx` | 5 internal components, all unreachable; carries drifted W/L styling |
-| `src/features/dashboard/components/insight-card.tsx` | |
-| `src/features/dashboard/components/player-recent-matches.tsx` | superseded by profile redesign chain |
-| `src/features/dashboard/components/profile-stat-strip.tsx` | |
-| `src/features/dashboard/api/get-h2h-rallies.ts` | all 3 exports unreferenced; strands the `h2h_rallies` RPC server-side |
+**Zero importers — and what each turned out to be:**
 
-**Cleared as alive (do not delete):** `h2h-panel.tsx` (via `/compare`), `category-content.tsx` + `win-rate-trend.tsx` + `momentum-chart.tsx` (via `players.$playerId.$category`).
+| File | July verdict | Now |
+|---|---|---|
+| `insight-previews.tsx` | 5 internal components, all unreachable; carries drifted W/L styling | **Alive.** Four of the five ride in the profile's category tiles. `FormDotsPreview` *was* the drift the note spotted — a round-dot duplicate of `FormGuide` — and is gone. |
+| `insight-card.tsx` | *(no note)* | **Alive.** It was the only link into the category route; restored to the profile above the tabs. |
+| `player-recent-matches.tsx` | superseded by profile redesign chain | Deleted, correctly. |
+| `profile-stat-strip.tsx` | *(no note)* | **Still open.** Present, still zero importers, still genuinely deletable. |
+| `get-h2h-rallies.ts` | all 3 exports unreferenced; strands the `h2h_rallies` RPC server-side | **Alive.** Not a leftover but the unbuilt half of a feature: the compare page's record now drills through it to the rallies behind it. |
+
+**Cleared as alive (do not delete):** `h2h-panel.tsx` (via `/compare`).
+
+~~`category-content.tsx` + `win-rate-trend.tsx` + `momentum-chart.tsx` (via `players.$playerId.$category`)~~ — **alive, but the reasoning was wrong, and it mattered.**
+
+**Why this section missed it.** Reachability was taken to mean *a route renders it*. It doesn't: a route nothing links to is reachable only by typing a URL. `insight-card.tsx` held the codebase's only `to="/players/$playerId/$category"`, so listing it as a deletable dead file and clearing `category-content.tsx` as alive-via-that-route were the same mistake read from two ends. Deleting the file as advised would have stranded the whole chain — the route, `category-content.tsx`, `filter-bar.tsx`, `categories.ts`, `insight-filters.ts`, `rally-table.tsx`, `stat-card.tsx` and the four chart components, plus five tested RPCs — about 1,900 lines that no user could reach.
+
+The orphaning was accidental. `a74737a` rebuilt the profile against a fixture ("no loaders, no queries — so the layout can be signed off before the insight RPCs are wired back in") and the tile grid went with the old structure; the RPCs came back for the tabs, the tiles never did. This audit was generated from `a74737a` itself, so the link had been gone for exactly one commit when the sweep ran.
+
+**The check to run instead.** Zero importers means *this file* is unused. Before calling it deletable, ask what is unreachable *because* it is unused — for a component that holds a link, that is everything on the other side of it. `rg -n 'to="/<path>"' src` over each route in `routeTree.gen.ts` finds routes with no inbound link.
 
 **Dead flesh on live code:**
 - `EndReason` union in `src/lib/scoring/types.ts:12` still lists `"ace"` — retired by migration 20260710160000, filtered from every UI path. (The zod enum keeping `'ace'` for reads is *correct* — legacy rows; only the hand-written union is stale.)
@@ -167,7 +199,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 ## 7. Organisation and conventions
 
 - **`features/dashboard/lib/` (~12 source files) is an undocumented tier.** `docs/architecture.md:49` sanctions `features/<x>/{api,components,schemas,utils}` — no `lib/` — and dashboard *also* has a `utils/`, so contributors face two competing homes for the same category. Decide once: bless `lib/` in the docs (and say how it differs from `utils/`) or fold the two together. `categories.ts` at the feature root falls outside every documented bucket too.
-- **`category-content.tsx` holds 9 components** (~345 lines): dispatcher + 5 substantial per-category panels. The strongest split candidate in the repo (e.g. `category-panels/`). `match-history.tsx`'s 5 components are cohesive private helpers — fine. `manage/cells.tsx` is a deliberate primitives module — fine.
+- **`category-content.tsx` holds 9 components** (~345 lines): dispatcher + 5 substantial per-category panels. The strongest split candidate in the repo (e.g. `category-panels/`). *27 Aug 2026: still open — the Broadcast pass restyled the file and left its shape alone, so it is now 10 components in ~330 lines.* `match-history.tsx`'s 5 components are cohesive private helpers — fine. `manage/cells.tsx` is a deliberate primitives module — fine.
 - **Pure chart-data transforms live in component files** (`toErrorTypeData`, `computeLeadSeries`, `toHistoBuckets`, `shouldPlotLine`, `toRadarData` etc.) so `charts.test.ts` imports from `components/`. Extracting to a feature-lib module would clean the tier boundary. Low priority.
 - **`signature-line.test.ts` names a module that doesn't exist** (tests `signatureLine` from `player-attributes.ts`). Rename the test file or extract the function.
 - Otherwise clean: no cross-feature imports anywhere (the eslint boundary works), every shared component genuinely shared, kebab-case consistent, mutation naming (`create-/update-/delete-`) consistent, § spec citations in the data layer resolve correctly.
@@ -178,10 +210,10 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 
 - **Failures render as empty states (systemic).** Home page: a failed roster query shows "No players yet" — indistinguishable from a fresh install; failed results/counts silently vanish (`index.tsx:65,78,142`). Six more surfaces show a **perpetual skeleton** on error (`h2h-panel`, `player-match-history`, four `category-content` sections). `usePlayerInsights` swallows error state entirely, so an RPC failure renders a profile of dashes as if the player had no data. The correct pattern already exists in `manage/data-table.tsx:55` and `entry.tsx:47` — port it.
 - **Two competing W/L visual conventions:** emerald/red badges (match history, h2h table, roster dots) vs bold-winner/no-colour (home recent, compare panel, category content). Same concept, different languages. A `--win`/`--loss` token pair + one badge component would fix drift and theming at once. Bonus: `h2h-panel.tsx:65-70` contains a redundant ternary (both winner branches return `"font-semibold"`).
-- **Navigation dead-end:** the compare panel's match rows are the only match list in the app that doesn't link to the match detail. Wrap in `Link` like `category-content.tsx:100` does.
+- ~~**Navigation dead-end:** the compare panel's match rows are the only match list in the app that doesn't link to the match detail.~~ **Fixed 27 Aug 2026** — the rows are `Link`s, and the panel drills on to the rallies underneath them.
 - **Touch/a11y:** manage table sort icons are `opacity-0` until hover — invisible on touch (relevant given mobile-first scope); sortable headers lack `aria-sort`. Otherwise a11y is strong: every `role="img"` SVG labelled, icon buttons labelled, no focus traps.
 - **Date formats:** four variants including raw ISO — see §5.
-- **Panel/section shells:** `profile-stats-tab` re-declares the `PROFILE_PANEL` card shell locally; `category-content` has a third section primitive. Consolidate on `ProfileSection`/`PROFILE_PANEL`.
+- **Panel/section shells:** `profile-stats-tab` re-declares the `PROFILE_PANEL` card shell locally; ~~`category-content` has a third section primitive~~. *27 Aug 2026: half done — `category-content` and `h2h-panel` now use `ProfileSection`/`PROFILE_PANEL` (`lede` became optional to let them). `profile-stats-tab`'s local shell is still open.*
 
 ---
 
@@ -197,7 +229,8 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 4. **Empty-dataset RPC behaviour never exercised:** `rally_lengths.avg_length` null, empty `recent_games`/`trend`, `momentum.longest_streak_game_id` null — documented in schema comments, asserted nowhere.
 5. Untested logic with branches: `friendlyWriteError`, `humanise`, `categoryLabel`; `manage-list.ts` page→range math (and no last-partial-page pager test); resume-mid-game (a game with existing rallies) never driven.
 6. Latent drift: `fixtures/schema.ts` hardcodes the enums in parallel with the DB instead of deriving from `Constants` like `enums.ts` does — they match today; a future enum migration desyncs them silently.
-7. Untested interactive components (accepted risk, listed for completeness): `match-setup`, `filter-bar`, all four manage edit dialogs, `duel-picker`, `sync-indicator`.
+7. Untested interactive components (accepted risk, listed for completeness): `match-setup`, ~~`filter-bar`~~, all four manage edit dialogs, `duel-picker`, `sync-indicator`.
+   *27 Aug 2026:* `filter-bar` now has stories covering both states, and the category boards and head-to-head panel render offline in Storybook against seeded query keys — the real components on the real code path. Stories, not assertions: they catch "it renders and looks right", not regressions in logic.
 
 ---
 
@@ -226,7 +259,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 8. Prettier pin + one reformat commit + CI gate (§0)
 
 **P2 — debt with compounding interest**
-9. Delete the 5 dead files + `errors_attributed` + stale `"ace"` + `deficit` param (§6)
+9. ~~Delete the 5 dead files~~ → **one** dead file left (`profile-stat-strip.tsx`); the other four are resolved. Still open: `errors_attributed` + stale `"ace"` + `deficit` param (§6)
 10. Consolidate `nameOf` / date formatting / W-L badge / `MATCH_RESULT_COLUMNS` (§5)
 11. `intentToOp` test + shared vitest `setupFiles` (§9)
 

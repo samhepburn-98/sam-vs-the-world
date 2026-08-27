@@ -104,13 +104,7 @@ const NEVER_MET: H2hResult = {
   match_history: [],
 }
 
-function Harness({
-  h2h,
-  children,
-}: {
-  h2h: H2hResult
-  children: ReactNode
-}) {
+function Harness({ h2h, children }: { h2h: H2hResult; children: ReactNode }) {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })

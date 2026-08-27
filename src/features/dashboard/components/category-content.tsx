@@ -120,7 +120,9 @@ function HeadToHead({ playerId, filters }: ContentProps) {
                   </span>
                   {/* a game that ended level is a draw, not a game still in
                       play — the D chip says exactly that */}
-                  <ResultChip result={g.won === null ? "d" : g.won ? "w" : "l"} />
+                  <ResultChip
+                    result={g.won === null ? "d" : g.won ? "w" : "l"}
+                  />
                 </span>
               </Link>
             </li>
@@ -189,7 +191,11 @@ function Serve({ playerId, filters }: ContentProps) {
             }
           />
           <div className="flex min-w-56 flex-1 flex-col gap-0.5">
-            <BoxRow label="Left box" wins={s.left_wins} served={s.left_served} />
+            <BoxRow
+              label="Left box"
+              wins={s.left_wins}
+              served={s.left_served}
+            />
             <BoxRow
               label="Right box"
               wins={s.right_wins}
@@ -342,7 +348,10 @@ function Momentum({ playerId, filters }: ContentProps) {
         ) : (
           <div className="flex flex-col gap-1.5">
             {m.comeback_games.map((g) => (
-              <div key={g.game_id} className={`${PROFILE_PANEL} flex flex-col gap-2`}>
+              <div
+                key={g.game_id}
+                className={`${PROFILE_PANEL} flex flex-col gap-2`}
+              >
                 <p className="text-sm">
                   <span className="tabular-nums">{g.date}</span> — trailed by{" "}
                   <span className="tabular-nums">{g.max_deficit}</span>, won{" "}

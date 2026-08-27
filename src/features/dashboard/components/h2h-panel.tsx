@@ -97,9 +97,7 @@ function HistoryRow({
             </span>
           ) : (
             <ResultChip
-              result={
-                m.outcome === "p1" ? "w" : m.outcome === "p2" ? "l" : "d"
-              }
+              result={m.outcome === "p1" ? "w" : m.outcome === "p2" ? "l" : "d"}
             />
           )}
         </span>
