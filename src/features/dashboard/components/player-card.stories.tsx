@@ -1,31 +1,15 @@
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 
-import type { PlayerAttribute } from "@/features/dashboard/lib/player-attributes"
+import { ALEX_ATTRS, SAM_ATTRS, THIN_ATTRS } from "#storybook/fixtures"
+
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 // The crown jewel: the FUT-style player card, kept through the Broadcast
 // redesign as the one crafted object against the flat studio graphics.
-
-const ATTRS = (
-  values: Array<[string, string, number | null]>
-): Array<PlayerAttribute> =>
-  values.map(([code, detail, value]) => ({
-    key: code.toLowerCase() as PlayerAttribute["key"],
-    code,
-    detail,
-    value,
-    display: value === null ? "—" : String(value),
-    sr: `${detail} ${value ?? "under-sampled"}`,
-  }))
-
-const SAM_ATTRS = ATTRS([
-  ["SRV", "serve points won", 58],
-  ["RET", "return points won", 36],
-  ["ATT", "attacking rallies won", 48],
-  ["CON", "clean-finish share", 44],
-  ["GRD", "extended rallies won", 45],
-  ["CLU", "pressure points won", 43],
-])
+// Reach for it wherever a player is the subject rather than a row in a list —
+// the roster's featured slot, both corners of the duel, a profile header.
+// Attributes come from the shared cast, so this Sam is the same Sam as
+// everywhere else in the sidebar.
 
 const meta = {
   title: "Cards/Player card",
@@ -54,10 +38,11 @@ export const PlayerOne: Story = {
 
 export const PlayerTwo: Story = {
   args: {
-    name: "Ormond",
+    name: "Alex",
     side: "p2",
-    trait: "shotmaker",
+    trait: "wall",
     hero: { display: "42%", label: "Win rate" },
+    attrs: ALEX_ATTRS,
   },
   render: (args) => (
     <div className="w-52">
@@ -71,14 +56,8 @@ export const UnderSampled: Story = {
     name: "New player",
     trait: null,
     hero: { display: "—", label: "Win rate" },
-    attrs: ATTRS([
-      ["SRV", "serve points won", null],
-      ["RET", "return points won", null],
-      ["ATT", "attacking rallies won", null],
-      ["CON", "clean-finish share", null],
-      ["GRD", "extended rallies won", null],
-      ["CLU", "pressure points won", null],
-    ]),
+    // the shared thin player: under every gate, so all six read "—"
+    attrs: THIN_ATTRS,
   },
   render: (args) => (
     <div className="w-52">

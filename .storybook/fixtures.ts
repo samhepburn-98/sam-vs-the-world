@@ -1,6 +1,8 @@
 import { computePlayerAttributes } from "@/features/dashboard/lib/player-attributes"
 import {
+  error,
   headline,
+  momentum,
   player,
   rally,
   serve,
@@ -13,6 +15,12 @@ import type { PlayerSummary } from "@/lib/schemas/player"
 // Alex the rival, Ormond the third. Insight *shapes* come from
 // player-data.fixtures.ts, which the unit tests already use; this file is
 // only the people, their ids, and a couple of derived conveniences.
+//
+// Sam and Alex carry full insight payloads, because most components that
+// need data need two contrasting players. Ormond is an identity only — he
+// exists to make a roster longer than two and to be the third name in a
+// picker. A story wanting numbers for him builds them locally, which is why
+// there is no ORMOND_DATA here to shadow.
 
 export const IDS = {
   sam: "11111111-1111-4111-8111-111111111111",
@@ -47,21 +55,59 @@ export const ORMOND: PlayerSummary = {
 
 export const ROSTER: Array<PlayerSummary> = [SAM, ALEX, ORMOND]
 
-/** A plausible PlayerData for each side, so a duel has two distinct shapes
- *  rather than the same numbers mirrored. */
+// Two genuinely different players. Every one of the six attributes is fed by
+// a different field (srv/ret from serve, att/grd from rally buckets, con from
+// the error split, clu from momentum's close phase), so a fixture that only
+// overrides serve leaves five of six rows dead level — which makes a duel
+// story look broken rather than close. Alex therefore differs on all six:
+// the better returner and grinder, the worse server and closer.
 export const SAM_DATA = player()
 export const ALEX_DATA = player({
-  serve: serve({ serve_wins: 41, aces: 2, double_faults: 7 }),
-  rally: rally({ avg_length: 6.1, longest: 23 }),
+  serve: serve({
+    serve_wins: 41,
+    return_wins: 62,
+    aces: 2,
+    double_faults: 7,
+  }),
+  rally: rally({
+    avg_length: 11.2,
+    longest: 41,
+    short_wins: 26,
+    medium_wins: 52,
+    long_wins: 31,
+  }),
+  error: error({ forced_errors: 41, unforced_errors: 14 }),
+  momentum: momentum({ close_wins: 22 }),
 })
 
 export const SAM_ATTRS = computePlayerAttributes(SAM_DATA)
 export const ALEX_ATTRS = computePlayerAttributes(ALEX_DATA)
 
-/** The under-sampled case: every honesty gate trips, so a story can show
- *  what the component does when the data isn't there yet. */
+// The under-sampled case. Every gate is a *denominator* test, so thinning the
+// wins alone changes nothing — each denominator has to drop below its own
+// threshold: 30 rallies for the rally-level rates (srv, ret, att, grd, clu)
+// and 15 tagged errors for the error split (con). Then all six read "—" and
+// the win rate reads "not enough data yet", which is what a brand-new
+// player's page actually looks like.
 export const THIN_DATA = player({
   headline: headline({ games_won: 1, games_decided: 2 }),
-  rally: rally({ total_rallies: 3, avg_length: 4 }),
+  serve: serve({
+    rallies_served: 9,
+    serve_wins: 5,
+    rallies_returned: 8,
+    return_wins: 3,
+  }),
+  rally: rally({
+    total_rallies: 17,
+    avg_length: 4,
+    short_rallies: 9,
+    short_wins: 4,
+    medium_rallies: 6,
+    medium_wins: 2,
+    long_rallies: 2,
+    long_wins: 1,
+  }),
+  error: error({ forced_errors: 4, unforced_errors: 3 }),
+  momentum: momentum({ close_rallies: 5, close_wins: 2 }),
 })
 export const THIN_ATTRS = computePlayerAttributes(THIN_DATA)

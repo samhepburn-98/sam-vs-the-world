@@ -59,6 +59,8 @@ const preview: Preview = {
           "Dashboard",
           "Logger",
           "Manage",
+          "Forms",
+          "Layouts",
           "Primitives",
         ],
       },

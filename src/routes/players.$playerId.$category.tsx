@@ -1,6 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router"
 
-import { CATEGORY_KEYS, categoryLabel } from "@/features/dashboard/lib/categories"
+import {
+  CATEGORY_KEYS,
+  categoryLabel,
+} from "@/features/dashboard/lib/categories"
 import { CategoryContent } from "@/features/dashboard/components/category-content"
 import { FilterBar } from "@/features/dashboard/components/filter-bar"
 import {
