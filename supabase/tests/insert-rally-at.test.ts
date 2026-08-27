@@ -10,13 +10,25 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
 const MIGRATIONS = join(__dirname, "../migrations")
 
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
+// PGlite has no Supabase-managed schemas, so the three migrations that reach
+// into `auth` and `storage` can't run here — they were verified against the
+// live project (§8). Everything else loads in order, and that ordering is the
+// point: this file used to hand-pick four migrations, so it ran against a
+// July schema and happily round-tripped an `end_reason` the live CHECK now
+// rejects, and exercised a signature the client had already outgrown.
+const NEEDS_SUPABASE_SCHEMAS = ["rls_policies", "security_hardening", "avatars"]
+
+function allMigrations(): Array<string> {
+  return readdirSync(MIGRATIONS)
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .filter((f) => !NEEDS_SUPABASE_SCHEMAS.some((skip) => f.includes(skip)))
+    .map((f) =>
+      readFileSync(join(MIGRATIONS, f), "utf8").replace(
+        /^create extension if not exists pgcrypto;$/m,
+        ""
+      )
+    )
 }
 
 let db: PGlite
@@ -26,12 +38,11 @@ let p2: string
 
 beforeAll(async () => {
   db = new PGlite()
-  // the grant/revoke tail of the function migration needs these to exist
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("insert_rally_at"))
+  // the grant/revoke tails across the migrations need these to exist
+  await db.exec(
+    `create role anon; create role authenticated; create role service_role;`
+  )
+  for (const sql of allMigrations()) await db.exec(sql)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Dave') returning id`
@@ -100,16 +111,43 @@ describe("insert_rally_at", () => {
   })
 
   it("appending at the end works (position = count + 1)", async () => {
+    // an ace: a winner the server took on shot 1 (named notation — the
+    // signature grew winning/losing shot columns since this was written)
     await db.query(
-      `select insert_rally_at(gen_random_uuid(), $1, 5::smallint, $2, 'left', 1::smallint, $2, 'ace')`,
+      `select insert_rally_at(
+         p_id => gen_random_uuid(), p_game_id => $1, p_rally_number => 5::smallint,
+         p_server_id => $2, p_serve_side => 'left', p_serve_number => 1::smallint,
+         p_winner_id => $2, p_end_reason => 'winner', p_shot_count => 1::smallint
+       )`,
       [gameId, p2]
     )
-    const last = await db.query<{ rally_number: number; end_reason: string }>(
-      `select rally_number, end_reason from rallies
+    const last = await db.query<{
+      rally_number: number
+      end_reason: string
+      shot_count: number
+    }>(
+      `select rally_number, end_reason, shot_count from rallies
        where game_id = $1 order by rally_number desc limit 1`,
       [gameId]
     )
-    expect(last.rows[0]).toEqual({ rally_number: 5, end_reason: "ace" })
+    expect(last.rows[0]).toEqual({
+      rally_number: 5,
+      end_reason: "winner",
+      shot_count: 1,
+    })
+  })
+
+  it("rejects the retired 'ace' end reason outright", async () => {
+    await expect(
+      db.query(
+        `select insert_rally_at(
+           p_id => gen_random_uuid(), p_game_id => $1, p_rally_number => 6::smallint,
+           p_server_id => $2, p_serve_side => 'left', p_serve_number => 1::smallint,
+           p_winner_id => $2, p_end_reason => 'ace'
+         )`,
+        [gameId, p2]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
   })
 
   it("constraint violations abort the whole thing — no half-applied renumber", async () => {
