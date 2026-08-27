@@ -162,6 +162,7 @@ export const Sizes: Story = {
 // item separator rather than a per-row background, so the panel around them
 // stays the only card on screen.
 export const MatchRows: Story = {
+  name: "Match rows",
   decorators: [withRouter],
   render: () => (
     <ItemGroup className="max-w-md">

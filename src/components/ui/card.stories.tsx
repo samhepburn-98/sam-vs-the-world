@@ -69,6 +69,7 @@ export const Default: Story = {}
 // A card action parks a control on the header's right: the header switches to
 // a two-column grid on its own, so the title and description keep their width.
 export const WithAction: Story = {
+  name: "With an action",
   args: {
     children: (
       <>

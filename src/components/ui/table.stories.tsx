@@ -105,6 +105,7 @@ export const Default: Story = {
 // that thing closes. Pair it with `cursor-pointer` on any row that opens
 // something, which is the part RallyTable already does.
 export const SelectedRow: Story = {
+  name: "Selected row",
   render: () => (
     <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
       <Table>
@@ -141,6 +142,7 @@ export const SelectedRow: Story = {
 // read from, and the caption says what the table counts, which keeps the
 // numbers honest without a paragraph above them.
 export const WithTotals: Story = {
+  name: "With totals",
   render: () => (
     <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
       <Table>

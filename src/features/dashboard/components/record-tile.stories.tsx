@@ -88,33 +88,37 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const HolderRecord: Story = {
-  render: () => (
+  name: "Holder record",
+  render: (args) => (
     <div className="w-56">
-      <RecordTile record={record({})} />
+      <RecordTile {...args} />
     </div>
   ),
 }
 
 export const MatchOwnedRecord: Story = {
-  render: () => (
+  name: "Match-owned record",
+  args: {
+    record: record({
+      key: "marathon_game",
+      title: "Marathon game",
+      value: "27",
+      unit: "rallies",
+      lead: "Sam v Alex",
+      isHolder: false,
+      rest: "15–13 · 14 Jul 2026",
+      side: null,
+    }),
+  },
+  render: (args) => (
     <div className="w-56">
-      <RecordTile
-        record={record({
-          key: "marathon_game",
-          title: "Marathon game",
-          value: "27",
-          unit: "rallies",
-          lead: "Sam v Alex",
-          isHolder: false,
-          rest: "15–13 · 14 Jul 2026",
-          side: null,
-        })}
-      />
+      <RecordTile {...args} />
     </div>
   ),
 }
 
 export const TheWall: Story = {
+  name: "The wall",
   render: () => (
     <div className="w-full max-w-2xl">
       <RecordsWall records={THE_WALL} />
@@ -126,6 +130,7 @@ export const TheWall: Story = {
 // player's own ember — including the longest rally Sam set from the p2
 // slot, which the home wall shows in blue.
 export const RecordsHeld: Story = {
+  name: "Records held",
   render: () => (
     <div className="w-full max-w-2xl">
       <RecordsWall

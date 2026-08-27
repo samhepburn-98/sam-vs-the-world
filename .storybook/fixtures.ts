@@ -1,5 +1,6 @@
 import { computePlayerAttributes } from "@/features/dashboard/lib/player-attributes"
 import {
+  decisive,
   error,
   headline,
   momentum,
@@ -83,23 +84,49 @@ export const ALEX_DATA = player({
 export const SAM_ATTRS = computePlayerAttributes(SAM_DATA)
 export const ALEX_ATTRS = computePlayerAttributes(ALEX_DATA)
 
-// The under-sampled case. Every gate is a *denominator* test, so thinning the
-// wins alone changes nothing — each denominator has to drop below its own
-// threshold: 30 rallies for the rally-level rates (srv, ret, att, grd, clu)
-// and 15 tagged errors for the error split (con). Then all six read "—" and
-// the win rate reads "not enough data yet", which is what a brand-new
-// player's page actually looks like.
+// Somebody who has played once. Every gate is a *denominator* test, so
+// thinning the wins alone changes nothing — each denominator has to drop below
+// its own threshold: 30 rallies for the rally-level rates (srv, ret, att, grd,
+// clu) and 15 tagged errors for the error split (con).
+//
+// It has to be thin ALL the way through, not just on the six attributes: the
+// builders' defaults are a seasoned player, so a partial override prints "—"
+// for every attribute while the same page shows a 7–5 match record and the
+// trait "Grinder" beside it. Every field below is overridden for that reason,
+// and the error counts sum to errors_total the way a real row would.
 export const THIN_DATA = player({
-  headline: headline({ games_won: 1, games_decided: 2 }),
+  headline: headline({
+    games_won: 1,
+    games_decided: 2,
+    matches_won: 0,
+    matches_decided: 1,
+    signature_trait: null,
+    clean_finish_wins: 2,
+    points_won: 17,
+    recent_games: [],
+  }),
   serve: serve({
     rallies_served: 9,
     serve_wins: 5,
     rallies_returned: 8,
     return_wins: 3,
+    aces: 0,
+    double_faults: 1,
+    two_serve_rallies_served: 9,
+    first_serve_faults: 2,
+    serve1_served: 9,
+    serve1_wins: 4,
+    serve2_served: 2,
+    serve2_wins: 1,
+    left_served: 5,
+    left_wins: 3,
+    right_served: 4,
+    right_wins: 2,
   }),
   rally: rally({
     total_rallies: 17,
     avg_length: 4,
+    longest: 9,
     short_rallies: 9,
     short_wins: 4,
     medium_rallies: 6,
@@ -107,7 +134,38 @@ export const THIN_DATA = player({
     long_rallies: 2,
     long_wins: 1,
   }),
-  error: error({ forced_errors: 4, unforced_errors: 3 }),
-  momentum: momentum({ close_rallies: 5, close_wins: 2 }),
+  error: error({
+    errors_total: 8,
+    forced_errors: 4,
+    unforced_errors: 3,
+    untagged_errors: 1,
+    tin: 3,
+    out_top: 2,
+    out_side: 1,
+    out_back: 1,
+    not_up: 1,
+    detail_untagged: 0,
+    games_played: 2,
+    trend: [],
+  }),
+  momentum: momentum({
+    comebacks: 0,
+    longest_streak: 2,
+    early_rallies: 8,
+    early_wins: 4,
+    mid_rallies: 5,
+    mid_wins: 2,
+    close_rallies: 5,
+    close_wins: 2,
+    comeback_games: [],
+  }),
+  decisive: decisive({
+    winning_drive: 2,
+    winning_drop: 0,
+    winning_boast: 0,
+    losing_drive: 1,
+    losing_drop: 1,
+    losing_boast: 0,
+  }),
 })
 export const THIN_ATTRS = computePlayerAttributes(THIN_DATA)

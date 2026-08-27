@@ -44,6 +44,7 @@ export const Decimals: Story = {
 // The sizer earns its keep in running text, where a number that grew from one
 // digit to four would drag the rest of the sentence along behind it.
 export const InASentence: Story = {
+  name: "In a sentence",
   render: () => (
     <div className="max-w-md space-y-2">
       <p className="text-sm text-muted-foreground">

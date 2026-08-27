@@ -29,6 +29,7 @@ export const Default: Story = {}
 // two are independent rates, not a split: they never have to add up to 100%,
 // and the deeper box is simply the better one to serve from.
 export const ServeSideWinRate: Story = {
+  name: "Serve-side win rate",
   args: {
     leftShare: 0.71,
     rightShare: 0.48,
@@ -41,6 +42,7 @@ export const ServeSideWinRate: Story = {
 // differently from "nobody has served from that box yet" — which is why the
 // serve page passes undefined rather than 0 for a box with no serves in it.
 export const ZeroVersusUnset: Story = {
+  name: "Zero versus unset",
   render: () => (
     <div className="flex items-start gap-10">
       <figure className="flex flex-col items-center gap-2">

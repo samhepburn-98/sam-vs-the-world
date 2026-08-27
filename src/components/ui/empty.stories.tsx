@@ -45,6 +45,7 @@ export const Default: Story = {}
 // With a way out. Only offer the action when the reader can actually take it
 // — a visitor sees the description alone, the owner gets the button.
 export const WithAction: Story = {
+  name: "With an action",
   decorators: [withRouter],
   args: {
     children: (
@@ -69,6 +70,7 @@ export const WithAction: Story = {
 // The primitive's own icon tile, for an empty panel too small to carry the
 // court diagram. Everywhere with room, prefer the court motif above.
 export const IconMedia: Story = {
+  name: "Icon media",
   args: {
     className: "p-8",
     children: (

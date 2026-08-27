@@ -107,7 +107,7 @@ export const AlexServing: Story = {
 // Single-serve house rules: the 1st/2nd chip isn't offered at all, because
 // there is no second serve to correct to. Only the box chip remains.
 export const SingleServeMatch: Story = {
-  name: "Single serve match",
+  name: "Single-serve match",
   args: {
     gameNumber: 1,
     score: { p1: 0, p2: 0 },

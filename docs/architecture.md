@@ -50,7 +50,14 @@ Dependencies flow **one way**: `shared → features → routes`. Concretely:
   cross-feature composition happens *only* there.
 
 This isn't a convention you have to remember — it's **enforced by ESLint** (`import/no-restricted-paths`
-in [eslint.config.js](../eslint.config.js)), so a violating import fails `pnpm lint` and CI.
+in [eslint.config.js](../eslint.config.js)), so a violating import fails `pnpm lint` and CI. That
+last clause was untrue until Aug 2026 — CI ran `check`, `typecheck`, `test` and `build` but never
+`lint`, so the rule this whole document rests on was enforceable only by remembering to run it.
+`pnpm lint` is now a CI step.
+
+The `.storybook` harness is a zone too: stories may import it, nothing in `src/` may. Its
+`#storybook/*` alias lives in the same tsconfig `paths` block the app uses, so without that zone a
+route could import the fixture cast and ship it to `dist/client` with every gate green.
 
 ## Where does a new file go?
 
@@ -77,9 +84,19 @@ several surfaces share (`get-players`, `get-match-detail`) lives in `lib/api`.
 One spelling per idea. These aren't style preferences — each one was two or three
 spellings until the whole kit went into Storybook side by side and the drift became obvious.
 
-**Pairs.** An id is `player1Id` / `player2Id` — it matches the zod schemas and the
-`player1_id` columns. *Everything else* a player owns is `p1X` / `p2X`: `p1Name`, `p1Score`,
-`p1Attrs`, `p1Data`. Never `name1`, never `a` / `b`.
+**Pairs.** Everything a player owns is `p1X` / `p2X`: `p1Name`, `p1Score`, `p1Attrs`, `p1Data`.
+Never `name1`, never `a` / `b`.
+
+Ids are the one place with two spellings, and both are correct in their context:
+
+- `player1Id` / `player2Id` where the id is a **field of a domain object** — the zod schemas, the
+  scoring contexts, the RPC hook arguments. It echoes the `player1_id` columns.
+- `p1Id` / `p2Id` where the id is a **component prop sitting beside `p1Name`** — `ScoreHeader`
+  and `RallyTimeline` both do this, and `p1Name`/`player1Id` on one component would read worse
+  than either rule alone.
+
+If you're adding a prop next to `p1Name`, use `p1Id`. If you're adding a field to a schema or a
+fetcher signature, use `player1Id`.
 
 **Colour props.** The design system's colour law says every value belonging to a player wears
 their side, so the prop that carries it is always called `side`:
@@ -88,7 +105,13 @@ their side, so the prop that carries it is always called `side`:
 |---|---|---|
 | `side` | this value belongs to that player | `"p1" \| "p2"` (`"neutral"` where the house can own it) |
 | `tone` | emphasis that is nobody's colour | `"muted" \| "primary"`, `"accent" \| "loss"` |
-| `outcome` | a **result** — the only one that carries a verdict | `"p1" \| "p2" \| "draw" \| "pending"` |
+| `outcome` | a **result** — the only one that carries a verdict | `"p1" \| "p2"` plus whatever unresolved states that surface can show |
+
+`outcome`'s exact union is per-component, because the states a surface can show differ:
+`MatchRow` lists every match, so it needs `"draw"` and `"pending"`; `ScoreStrip` renders one
+finished scoreline and takes `"p1" | "p2" | null`, where `null` means "don't colour a side". Don't
+copy one component's union into another — decide which unresolved states *your* surface can
+actually be asked to render.
 
 **Make the wrong call impossible before documenting it.** Where a prop combination would render
 something dishonest, close it in the type rather than warning about it in a comment —
@@ -96,9 +119,14 @@ something dishonest, close it in the type rather than warning about it in a comm
 rejected combination with `@ts-expect-error` (an unused directive is itself a tsc error, so the
 gate can't rot).
 
-**`className` last.** Anything in `components/` that a page places is expected to take one, so it
-can be positioned without a wrapper. Page-level compositions (`site-header`, `rally-editor`) don't
-need it and don't take it.
+**`className` last.** Anything in `components/` that a page *places* is expected to take one, so it
+can be positioned without a wrapper — the whole `broadcast/` kit, `CourtDiagram`, the typography
+primitives, `ThemeToggle`.
+
+Three don't, and would need a wrapper: `CourtEmptyMedia` (it's a fixed slot inside `Empty`),
+`PageStub` (it renders its own `<main>` — it's a page, not a block), and the `rally/` form
+sections. Adding `className` to one of those is fine if a caller needs it; just don't assume it's
+already there.
 
 ## Enforcement detail
 

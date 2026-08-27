@@ -34,5 +34,6 @@ export const Voice: Story = {
 }
 
 export const PageTitleOnly: Story = {
+  name: "Page title only",
   args: { children: "Sam vs the world" },
 }

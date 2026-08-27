@@ -107,7 +107,7 @@ export const Default: Story = {
             </TableCell>
             <TableCell>12</TableCell>
             <TableCell>
-              <RelCell tab="players" id={ALEX.id} label={ALEX.name} />
+              <RelCell tab="players" id={SAM.id} label={SAM.name} />
             </TableCell>
             <TableCell>
               <RelCell tab="players" id={SAM.id} label={SAM.name} />
@@ -190,10 +190,11 @@ export const Default: Story = {
 // A foreign key you can walk. The link pastes the id into the target tab's
 // search box, so following one lands on that row's children already filtered
 // — the match's games, the game's rallies, the player's own row. Hover any of
-// them for the full uuid.
+// them for the full uuid. The last link is the live one: point it at another
+// tab, id or label in Controls.
 export const RelationLinks: Story = {
   name: "Relation links",
-  render: () => (
+  render: (args) => (
     <div className="flex flex-col items-start gap-2 text-sm">
       <RelCell
         tab="matches"
@@ -202,7 +203,7 @@ export const RelationLinks: Story = {
       />
       <RelCell tab="games" id={IDS.match} label="Games" />
       <RelCell tab="rallies" id={GAME_ID} label="Rallies" />
-      <RelCell tab="players" id={SAM.id} label={SAM.name} />
+      <RelCell {...args} />
     </div>
   ),
 }

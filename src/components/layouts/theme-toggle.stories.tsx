@@ -24,6 +24,7 @@ export const Default: Story = {}
 // The mobile sheet gives it a label instead — on its own in a list of words, a
 // moon does not explain itself.
 export const LabelledRow: Story = {
+  name: "Labelled row",
   render: () => (
     <div className="flex w-64 items-center justify-between px-2 py-1">
       <span className="font-heading text-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">

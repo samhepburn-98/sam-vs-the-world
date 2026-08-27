@@ -4,10 +4,15 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # Page anatomy
 
-Every page in the app is a thin file in `src/routes/` that composes pieces from the sidebar.
-Nothing here is a special case — if you're planning a new page, these are your worked examples.
+Every page in the app is a thin file in `src/routes/` that composes smaller pieces. Nothing here
+is a special case — if you're planning a new page, these are your worked examples.
 
-The lists below are what each route actually renders today, top to bottom.
+The lists below are what each route actually renders today, top to bottom. Most of the pieces are
+in the sidebar; a few named here are **page-level compositions** with no story of their own —
+`Profile summary tab`, `Profile stats tab`, `Profile matches tab`, `Head-to-head panel`,
+`Category content`. They assemble a whole screen region rather than being something you'd place,
+so they're documented here instead. If you find yourself wanting one on a different page, take the
+pieces it's built from, not the composition.
 
 ---
 
@@ -15,12 +20,12 @@ The lists below are what each route actually renders today, top to bottom.
 
 `src/routes/index.tsx`
 
-1. **Ticker** — the full-bleed headline strip
-2. **Page title**
-3. **Featured player** — the protagonist's card, with a **Callout** read
-4. **Overline** + **Roster row** ×N — everyone else, one line each
-5. **Overline** + **Match row** ×N — recent results
-6. **Overline** + **Records wall** — "The numbers"
+1. **Page title** — "Every rally, counted."
+2. **Ticker** — the full-bleed headline strip, *below* the title, not above it
+3. **Overline** "Featured player" + **Featured player** — the protagonist's card, with a **Callout** read
+4. **Overline** "The roster" + **Roster row** ×N — everyone else, one line each
+5. **Overline** "Recent matches" + **Match row** ×N
+6. **Overline** "The numbers" + **Records wall**
 7. **Count up** carries the standing counts; **Empty** covers the nothing-logged-yet case
 
 The shape to copy: a **page title**, then sections each introduced by an **Overline**, each a list
@@ -43,14 +48,17 @@ wears their side.
 
 `src/routes/matches.$matchId.tsx`
 
-1. Breadcrumb, **Overline** with the date and venue, **Ball dots**
-2. **Score strip** — the full-time graphic
-3. **Section title** + **Game score chart** — each game scored rally by rally
-4. **Section title** + **Rally timeline** — every rally, read-only mode
-5. **Rally detail sheet** — opens over the timeline, driven from the URL's `?rally=`
+1. Breadcrumb, then the date, venue and **Ball dots** as a meta line
+2. **Overline** carrying the *match status* — "Full time", "In play", "Drawn" — in `tone="primary"`
+   while the match is unfinished. The status gets the display face; the date does not.
+3. **Score strip** — the full-time graphic
+4. **Section title** + **Game score chart** — each game scored rally by rally
+5. **Section title** + **Rally timeline**, passed `editable` — rows open the detail sheet
+6. **Rally detail sheet** — opens over the timeline, driven from the URL's `?rally=`
 
 The shape to copy: the result first and biggest, then the evidence beneath it in decreasing
-granularity.
+granularity. Note that the timeline is one component in two modes — the logger and this page
+both render it, which is why a match never looks like two different things.
 
 ## Compare
 

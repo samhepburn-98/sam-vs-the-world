@@ -2,6 +2,11 @@ import { TraitChip } from "@/components/broadcast/trait-chip"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+// A player's earned class line, spoken in the display face and their own
+// side's colour. It labels the name wherever one is shown: the roster row on
+// home, the footer under a player card, and the profile header. Plain text by
+// design — reach for Badge only when a value genuinely wants a boxed pill.
+
 const meta = {
   title: "Broadcast/Trait chip",
   component: TraitChip,
@@ -17,6 +22,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 export const BothSides: Story = {
+  name: "Both sides",
   render: () => (
     <div className="flex flex-col items-start gap-2">
       <TraitChip side="p1">Marksman</TraitChip>

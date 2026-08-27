@@ -15,10 +15,12 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const RateWithReceipt: Story = {
+  name: "Rate with a receipt",
   args: { className: "w-64" },
 }
 
 export const PlainValue: Story = {
+  name: "Plain value",
   args: {
     label: "Average rally",
     rate: undefined,
@@ -30,6 +32,7 @@ export const PlainValue: Story = {
 }
 
 export const NotEnoughData: Story = {
+  name: "Not enough data",
   args: {
     label: "Return points won",
     rate: { won: 2, of: 4 },

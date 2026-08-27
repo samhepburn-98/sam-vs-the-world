@@ -25,6 +25,7 @@ export const Default: Story = {}
 // `data-icon="inline-start"` attribute is what tightens the button's leading
 // padding around it.
 export const InButton: Story = {
+  name: "In a button",
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <Button disabled>

@@ -28,6 +28,7 @@ export const Default: Story = {}
 // logged yet (the logger's recent matches) and nothing left after filtering
 // (the matches list). Only the words change — the graphic never does.
 export const InEmptyStates: Story = {
+  name: "In empty states",
   render: () => (
     <div className="grid gap-4 md:grid-cols-2">
       <Empty>

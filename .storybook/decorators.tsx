@@ -18,9 +18,12 @@ import type { ReactNode } from "react"
 
 // ---------------------------------------------------------------- router --
 
-// Every path a component links to. A story doesn't navigate, but TanStack
-// Router type-checks and resolves `to`, so a missing route throws at render
-// rather than silently rendering a dead link. Keep in step with routes/.
+// Every path a component links to, so a `<Link>` renders against a route that
+// exists. Note what this does NOT buy you: a path missing from this list does
+// not throw — the link simply resolves to nothing, silently, and the story
+// still looks fine. `to` is type-checked against routeTree.gen.ts, not against
+// this array, so adding a route to src/routes/ will never remind you to add it
+// here. Keep it in step with routes/ by hand.
 const PATHS = [
   "/matches",
   "/matches/$matchId",
@@ -82,9 +85,19 @@ export const withRouter: Decorator = (Story) => (
  *
  * ```ts
  * decorators: [withQueryClient((qc) => {
- *   qc.setQueryData(["insights", "serve", PLAYER_ID, {}], serve())
+ *   qc.setQueryData(["insights", "serve-stats", IDS.sam, {}], serve())
  * })]
  * ```
+ *
+ * **Get the key exactly right, or the story hits the network.** The options
+ * below govern *refetching data that is already cached*; they do nothing for a
+ * cache miss, which mounts pending and calls its queryFn like any other query.
+ * So a mistyped key doesn't render an empty state — it reaches
+ * `getSupabaseBrowserClient()` and either throws on missing env or silently
+ * reads the real database. Copy the key from the hook's own file under the
+ * feature's `api/` folder; don't reconstruct it from the name. Some carry a
+ * trailing member that is easy to miss — `momentum` ends
+ * `..., filters, deficit ?? null]`.
  */
 export function withQueryClient(
   seed?: (queryClient: QueryClient) => void
@@ -95,7 +108,8 @@ export function withQueryClient(
         defaultOptions: {
           queries: {
             retry: false,
-            // seeded data is the whole point — never go looking for more
+            // stop anything SEEDED from being refetched. A cache miss still
+            // fetches — see the warning above.
             staleTime: Infinity,
             refetchOnMount: false,
             refetchOnWindowFocus: false,

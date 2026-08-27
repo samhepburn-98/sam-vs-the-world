@@ -2,6 +2,12 @@ import { Callout } from "@/components/broadcast/callout"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+// The pundit panel: a 4px accent bar, a tracked kicker, and the sentence that
+// says what a number means. Home's featured slot runs two beside the card
+// ("The read", "Form"), and NarrativeInsight wraps it for every insight on the
+// profile's Summary tab. Reach for InsightCard instead when the block is a
+// link into a category page rather than a point made about a figure.
+
 const meta = {
   title: "Broadcast/Callout",
   component: Callout,
@@ -26,6 +32,7 @@ export const Strength: Story = {
 }
 
 export const StrengthAndWeakness: Story = {
+  name: "Strength and weakness",
   render: () => (
     <div className="flex w-80 flex-col gap-2">
       <Callout side="p1" label="Strength" title="The serve is the weapon.">

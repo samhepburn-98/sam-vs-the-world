@@ -38,6 +38,7 @@ export const Default: Story = {}
 // Twelve results in, five out — the caller never has to slice the history
 // itself, so a player page can pass whatever the query returned.
 export const OnlyTheLastFive: Story = {
+  name: "Only the last five",
   args: {
     results: ["w", "w", "l", "d", "w", "l", "l", "w", "d", "l", "l", "w"],
   },
@@ -46,12 +47,14 @@ export const OnlyTheLastFive: Story = {
 // Fewer than five is not padded out with blanks: two matches means two chips,
 // and the row it sits in has to tolerate a short strip.
 export const EarlyDays: Story = {
+  name: "Early days",
   args: { results: ["w", "l"] },
 }
 
 // A player with no matches gets no strip at all rather than an empty shell,
 // so the row holding it needs to read correctly with the space simply gone.
 export const NoMatchesYet: Story = {
+  name: "No matches yet",
   args: { results: [] },
   render: (args) => (
     <div className="w-64">
@@ -62,6 +65,7 @@ export const NoMatchesYet: Story = {
 
 // Stacked, the strips become a comparison: Alex is running hot, Ormond is not.
 export const AcrossTheRoster: Story = {
+  name: "Across the roster",
   render: () => (
     <div className="flex w-64 flex-col gap-2">
       <PlayerRow name={SAM.name} results={["l", "w", "d", "l", "w"]} />

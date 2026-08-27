@@ -16,7 +16,10 @@
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
-      // the shared story harness — stories only, never imported by the app
+      // the shared story harness. This alias resolves in the app build too,
+      // so "stories only" is enforced by an import/no-restricted-paths zone
+      // in eslint.config.js, not by this comment — without it a route could
+      // import the fixture cast and ship it to dist/client.
       "#storybook/*": ["./.storybook/*"]
     },
 

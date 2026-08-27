@@ -6,8 +6,12 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 This Storybook is the living reference for the app's **Broadcast** design
 system: sports-TV information graphics built around the FUT-style player
-cards. Every component in the app has a story here; the pages of the app are
-compositions of what you see in the sidebar.
+cards. Every component you would *place on a page* has a story here. Two
+kinds don't: page-level compositions that assemble a whole screen region
+(the profile tabs, the head-to-head panel, category content) — those are
+documented in [Page anatomy](?path=/docs/patterns-page-anatomy--docs) — and
+`SiteHeader`, which imports a server function whose module chain Storybook's
+build deliberately excludes.
 
 Everything renders from the **live CSS variables** in `src/styles.css`, so
 these docs cannot drift from the app.

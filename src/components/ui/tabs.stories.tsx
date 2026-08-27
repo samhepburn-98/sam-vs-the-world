@@ -111,6 +111,7 @@ export const Vertical: Story = {
 // heading type, and the live segment taking the ember fill. The primitive
 // carries the behaviour; the Broadcast look is all class names.
 export const BroadcastSegments: Story = {
+  name: "Broadcast segments",
   render: () => (
     <Tabs defaultValue="summary" className="w-full max-w-xl">
       <TabsList

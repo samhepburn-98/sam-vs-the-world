@@ -38,6 +38,7 @@ export const Default: Story = {}
 // Unlabelled and side by side, as the filter and the match rows show them:
 // four dot treatments that have to stay apart at a glance, at 8px across.
 export const EveryBall: Story = {
+  name: "Every ball",
   render: () => (
     <div className="flex items-center gap-5">
       {BALLS.map((ball) => (
@@ -50,6 +51,7 @@ export const EveryBall: Story = {
 // Match setup is the one place the name is spelt out, because there the
 // reader is picking a ball rather than recognising one already chosen.
 export const AsSetupChips: Story = {
+  name: "As setup chips",
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
       {BALLS.map((ball) => (

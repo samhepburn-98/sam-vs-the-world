@@ -4,19 +4,27 @@
 >
 > This is what the codebase looked like on 14 July 2026. Most of it has since been
 > fixed, so read it as a record of what was found and what was done — not as a to-do
-> list. Two P0 items are genuinely still open and are called out below.
+> list. **One P0 item (§1.4) is genuinely still open**, and two of §6's dead files
+> still exist; both are called out below.
 >
 > | Finding | Status as of 27 Aug 2026 |
 > |---|---|
 > | §1.1 no mutation invalidates `["insights"]` | **Fixed** — seven mutation files in `lib/api` now invalidate it |
-> | §1.2 match page computes its own winner | **Fixed** — the page folds the match through the shared helper |
+> | §1.2 match page computes its own winner | **Fixed** — the verdict now comes straight from the `match_results` view (`matches.$matchId.tsx:138`) and is never recomputed client-side; `foldMatchToScored` handles only the rally rows |
 > | §1.3 `double_bounce` stripped by the schema | **Resolved, differently** — the value was retired at the database (`20260714120000_retire_double_bounce.sql` backfills it away and adds a CHECK), so the schema omitting it is now correct |
 > | §1.4 new-match flow hangs on sustained transient errors | **STILL OPEN** — `write-queue.ts` retries a `retryable` op with capped backoff but no attempt limit, and `entry.tsx:90` awaits `flush()` with no timeout |
 > | §1.5 nondeterministic same-day "recent results" | **Fixed** — ordered by `created_at`, with the reasoning in the file's comment |
 > | §1.6 / §1.7 null `match_winner_id` rendered five ways | **Fixed** — the `match_outcome` migration plus a shared helper |
 > | §0 prettier drift on 171 files | **Fixed** — `pnpm check` is a CI gate and the tree is clean |
-> | §6 dead code | **Partly** — the five files are gone, and two more the Broadcast redesign orphaned went with them |
+> | §6 dead code | **Partly — 3 of 5.** Gone: `insight-previews.tsx`, `player-recent-matches.tsx`, `profile-stat-strip.tsx` (the last two plus `insight-previews` were swept Aug 2026). **Still present, both still at zero importers:** `api/get-h2h-rallies.ts`, and `insight-card.tsx` — which is deliberate, see below. The `"ace"` union in `lib/scoring/types.ts` and the dead `deficit` param are also still there |
 > | §7 `features/<x>/lib` vs `utils` unruled | **Fixed** — one `lib/` per feature, ruled in [architecture.md](architecture.md) |
+>
+> **Why `insight-card.tsx` was not deleted.** It has no caller, but it is the *only* thing
+> in the app that links to `/players/$playerId/$category` — so the whole category chain
+> (that route, `CategoryContent` at 377 lines, `FilterBar`, `CATEGORY_KEYS`) is currently
+> reachable only by typing a URL. Deleting the bridge would quietly cement an orphaned
+> feature rather than tidy up. The open question is *wire it back up or remove the chain*,
+> and it's a product call.
 >
 > Everything not in this table was not re-checked on 27 Aug; assume it still needs
 > verifying before you act on it.

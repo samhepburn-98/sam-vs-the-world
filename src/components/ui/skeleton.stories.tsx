@@ -23,6 +23,7 @@ export const Default: Story = {}
 // Inside a table, the placeholder takes the shape of the cells: a fixed row
 // count at cell width, so the header does not slide down when rows arrive.
 export const TableRows: Story = {
+  name: "Table rows",
   render: () => (
     <div className="max-w-md">
       <div className="flex gap-4 border-b py-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">

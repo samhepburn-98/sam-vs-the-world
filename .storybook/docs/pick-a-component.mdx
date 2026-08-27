@@ -55,7 +55,7 @@ enforces the honesty rules.
 | The forced/unforced split | **Error breakdown** | Dashboard |
 | Rally-length distribution | **Rally length histogram** (from the RPC row) or **Rally length curve** (from buckets you already have) | Dashboard |
 | Win rate drifting over time | **Win rate trend** | Dashboard |
-| The lead swinging through a game | **Momentum chart** (folds rallies) or **Momentum area** (you have the series) | Dashboard |
+| The lead swinging through a game | **Momentum chart** — pass `rallies` and it folds them; its file also exports `MomentumArea` if you already hold a lead series | Dashboard |
 | Which box they serve from | **Serve boxes**, **Court diagram** | Dashboard, Layouts |
 | Two players, everything at once | **Duel** (assembled) or its pieces: **Duel centre**, **Duel picker**, **Duel mode toggle** | Dashboard |
 
@@ -68,7 +68,7 @@ enforces the honesty rules.
 | A headline strip across the top | **Ticker** | Broadcast |
 | An editorial point — the pundit panel | **Callout** | Broadcast |
 | A written read on the data | **Narrative insight** | Dashboard |
-| A link into a deeper page, with a preview | **Insight card** | Dashboard |
+| A link into a deeper page, with a preview | **Insight card** — ⚠️ currently rendered by nothing; see the note below | Dashboard |
 | Nothing to show yet | **Empty** + **Court empty media** | Primitives, Layouts |
 | Loading | **Skeleton**, **Spinner** | Primitives |
 | A whole placeholder page | **Page stub** | Layouts |
@@ -107,6 +107,16 @@ screen, start here rather than in Broadcast.
 detail/forced/shot-type/count) · **Undo bar** · **Sync indicator** (the write queue's three states) ·
 **Game over banner** · **Rally timeline** · **Match setup** · **Player select** ·
 **Recent matches** · **Hotkey help** (`?`) · **Glossary**.
+
+## One orphan, on purpose
+
+**Insight card** has no caller, and it is the *only* thing in the app that links to a category
+page (`/players/$playerId/$category`). So the whole category chain — that route, `CategoryContent`
+(377 lines), `FilterBar`, `CATEGORY_KEYS` — is currently reachable only by typing a URL.
+
+It is left in the catalogue rather than deleted precisely because deleting the bridge would
+quietly cement an orphaned feature. The decision to make is *wire it back up or remove the chain* —
+not "tidy away the one component that still points at it".
 
 ## Primitives
 
