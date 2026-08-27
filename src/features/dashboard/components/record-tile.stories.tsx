@@ -1,42 +1,15 @@
 import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from "@tanstack/react-router"
-
-import {
   RecordTile,
   RecordsWall,
 } from "@/features/dashboard/components/record-tile"
 
+import { withRouter } from "#storybook/decorators"
+
 import type { RecordTileDisplay } from "@/features/dashboard/lib/record-display"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import type { ReactNode } from "react"
 
-// RecordTile links to the match its record was set in, so stories mount a
-// minimal memory router: the story renders at "/", and the match route
-// exists for the links to resolve against.
-
-function StoryRouter({ children }: { children: ReactNode }) {
-  const rootRoute = createRootRoute()
-  const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: () => <>{children}</>,
-  })
-  const matchRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/matches/$matchId",
-    component: () => null,
-  })
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([indexRoute, matchRoute]),
-    history: createMemoryHistory(),
-  })
-  return <RouterProvider router={router} />
-}
+// RecordTile links to the match its record was set in, so it needs the
+// shared router harness.
 
 const record = (overrides: Partial<RecordTileDisplay>): RecordTileDisplay => ({
   key: "longest_rally",
@@ -105,15 +78,9 @@ const THE_WALL: Array<RecordTileDisplay> = [
 ]
 
 const meta = {
-  title: "UI/Record tile",
+  title: "Broadcast/Record tile",
   component: RecordTile,
-  decorators: [
-    (Story) => (
-      <StoryRouter>
-        <Story />
-      </StoryRouter>
-    ),
-  ],
+  decorators: [withRouter],
   args: { record: record({}) },
 } satisfies Meta<typeof RecordTile>
 

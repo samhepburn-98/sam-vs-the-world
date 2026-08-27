@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 // how the app speaks.
 
 const meta = {
-  title: "Typography/Headings",
+  title: "Foundations/Headings",
   component: PageTitle,
 } satisfies Meta<typeof PageTitle>
 

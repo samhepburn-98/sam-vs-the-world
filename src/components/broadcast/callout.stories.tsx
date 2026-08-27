@@ -3,7 +3,7 @@ import { Callout } from "@/components/broadcast/callout"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Callout",
+  title: "Broadcast/Callout",
   component: Callout,
   args: {
     side: "p1",

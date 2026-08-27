@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Badge",
+  title: "Primitives/Badge",
   component: Badge,
   args: { children: "Shotmaker" },
   argTypes: {

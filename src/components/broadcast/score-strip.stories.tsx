@@ -3,7 +3,7 @@ import { ScoreStrip } from "@/components/broadcast/score-strip"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Score strip",
+  title: "Broadcast/Score strip",
   component: ScoreStrip,
   args: {
     p1Name: "Sam",

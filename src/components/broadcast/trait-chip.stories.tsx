@@ -3,7 +3,7 @@ import { TraitChip } from "@/components/broadcast/trait-chip"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Trait tag",
+  title: "Broadcast/Trait chip",
   component: TraitChip,
   args: { children: "Grafter" },
   argTypes: {

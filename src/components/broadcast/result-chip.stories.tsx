@@ -4,7 +4,7 @@ import { ResultChip } from "@/components/broadcast/result-chip"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Result chip",
+  title: "Broadcast/Result chip",
   component: ResultChip,
   args: { result: "w" },
 } satisfies Meta<typeof ResultChip>

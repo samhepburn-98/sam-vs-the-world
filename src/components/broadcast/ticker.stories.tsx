@@ -3,7 +3,7 @@ import { Ticker } from "@/components/broadcast/ticker"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Ticker",
+  title: "Broadcast/Ticker",
   component: Ticker,
   parameters: { layout: "padded" },
   args: {

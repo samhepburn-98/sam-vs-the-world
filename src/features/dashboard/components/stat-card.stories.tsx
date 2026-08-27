@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 // { won, of } pair, so a percentage cannot render without its denominator.
 
 const meta = {
-  title: "UI/Stat card",
+  title: "Dashboard/Stat card",
   component: StatCard,
   args: { label: "Serve points won", rate: { won: 34, of: 61 } },
 } satisfies Meta<typeof StatCard>

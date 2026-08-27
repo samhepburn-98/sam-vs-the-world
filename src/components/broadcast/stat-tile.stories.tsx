@@ -3,7 +3,7 @@ import { StatTile } from "@/components/broadcast/stat-tile"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Stat tile",
+  title: "Broadcast/Stat tile",
   component: StatTile,
   args: { label: "Win rate", value: 42, suffix: "%" },
 } satisfies Meta<typeof StatTile>

@@ -3,7 +3,7 @@ import { StatRow } from "@/components/broadcast/stat-row"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 const meta = {
-  title: "UI/Stat row",
+  title: "Broadcast/Stat row",
   component: StatRow,
   args: { label: "Matches", value: "1–3–1" },
 } satisfies Meta<typeof StatRow>
