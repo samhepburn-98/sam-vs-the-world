@@ -26,6 +26,20 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
+// a macrotask sleep — still instant, but it yields, so a regression back to
+// unbounded retrying fails on the vitest timeout instead of starving the
+// event loop with a pure-microtask spin that no timer can interrupt
+const yieldSleep = () => new Promise<void>((resolve) => setTimeout(resolve, 0))
+
+function cappedQueue(maxAttempts?: number) {
+  return new WriteQueue({
+    classify: classifySupabaseWriteError,
+    sleep: yieldSleep,
+    backoffMs: () => 0,
+    maxAttempts,
+  })
+}
+
 const op = (id: string, run: WriteOp["run"]): WriteOp => ({
   id,
   label: id,
@@ -111,6 +125,73 @@ describe("retry semantics", () => {
     )
     await queue.flush()
     expect(attempts).toBe(3)
+    expect(queue.state).toMatchObject({ status: "idle", pending: 0 })
+  })
+
+  it("gives up on a sustained transient failure: pauses, so flush() settles", async () => {
+    const queue = cappedQueue(4)
+    let attempts = 0
+    let laterRan = false
+    queue.enqueue(
+      op("always-503", () => {
+        attempts++
+        return Promise.reject({ status: 503 })
+      })
+    )
+    queue.enqueue(
+      op("later", () => {
+        laterRan = true
+        return Promise.resolve()
+      })
+    )
+
+    // the defect this guards: under a never-clearing 503 this await never
+    // settled, so entry.tsx's new-match form hung with no way out
+    await queue.flush()
+
+    expect(attempts).toBe(4)
+    expect(queue.state.status).toBe("paused")
+    expect(queue.state.failure?.op.id).toBe("always-503")
+    expect(queue.state.pending).toBe(2) // failed op retained at head
+    expect(laterRan).toBe(false) // still never logs past a hole
+  })
+
+  it("the default attempt cap is finite", async () => {
+    const queue = cappedQueue() // no maxAttempts — the shipped default
+    let attempts = 0
+    queue.enqueue(
+      op("always-offline", () => {
+        attempts++
+        return Promise.reject(new TypeError("fetch failed"))
+      })
+    )
+
+    await queue.flush()
+
+    expect(queue.state.status).toBe("paused")
+    expect(attempts).toBeGreaterThan(1) // a blip still gets retried
+    expect(attempts).toBeLessThan(50) // but not for ever
+  })
+
+  it("resume() after an exhausted retry picks the op back up", async () => {
+    const queue = cappedQueue(3)
+    let offline = true
+    let landed = false
+    queue.enqueue(
+      op("save-rally-12", () => {
+        if (offline) return Promise.reject({ status: 503 })
+        landed = true
+        return Promise.resolve()
+      })
+    )
+    await queue.flush()
+    expect(queue.state.status).toBe("paused")
+
+    offline = false // connectivity back; the user taps Retry
+    queue.resume()
+    await queue.flush()
+
+    expect(landed).toBe(true)
     expect(queue.state).toMatchObject({ status: "idle", pending: 0 })
   })
 

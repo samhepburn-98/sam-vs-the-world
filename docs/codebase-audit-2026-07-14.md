@@ -6,6 +6,23 @@
 
 ---
 
+## Status
+
+Fix status re-checked **27 Aug 2026**. §1.4 was fixed in that pass and is covered by tests; the other rows are a spot-check of the named code paths, not a re-run of the audit.
+
+| § | Defect | Status |
+|---|---|---|
+| 1.1 | Nothing invalidates `["insights"]` / `["home"]` | ✅ Fixed — all ten mutations + logger exit invalidate the derived families |
+| 1.2 | Match detail recomputes the match winner | ✅ Fixed — the match-level verdict is the view's |
+| 1.3 | `errorProfile` schema strips `double_bounce` | ❌ Open — still absent from `schemas/insights.ts:132` |
+| 1.4 | New-match flow hangs on sustained transient errors | ✅ Fixed 27 Aug 2026 — retries capped in `WriteQueue` |
+| 1.5 | Home recent results ordering is nondeterministic | ✅ Fixed — orders by `created_at` |
+| 1.6 | Null `match_winner_id` renders five different ways | ✅ Fixed — shared `matchOutcome`, "Drawn" across surfaces |
+| 1.7 | Logger in-play banner contradicts read surfaces | ❌ Open — `matchWinnerName` still format-gated (`logging-shell.tsx:252`) |
+| 1.8 | `discardFailed()` leaves the dependent create-game op | ❌ Open — **and now more likely to fire**, see the note there |
+
+---
+
 ## 0. Mechanical checks
 
 | Check | Result |
@@ -55,13 +72,15 @@ The live `error_profile` RPC (20260703200000, never redefined since) returns a `
 
 **Fix.** Either add `double_bounce` to the schema and fold it into `detail_untagged`-style handling, or redefine the RPC to merge it server-side — and add the missing DB CHECK so the enum value is actually retired.
 
-### 1.4 New-match flow hangs forever on sustained transient errors — `entry.tsx:86` · **CONFIRMED**
+### 1.4 New-match flow hangs forever on sustained transient errors — `entry.tsx:86` · **CONFIRMED** · ✅ **FIXED 27 Aug 2026**
 
 `onStart` awaits `queue.flush()`, whose promise settles only on drain or hard-pause. Retryable errors (5xx/429/408/network failures per `supabase-errors.ts`) loop with capped *backoff delay* but **no attempt cap, no timeout, no cancel, no `navigator.onLine` short-circuit**. Under a sustained 503 the submit spinner spins forever with the button disabled — and no sync UI is visible, because `SyncIndicator` only mounts inside `LoggingShell`, which requires the very session that never starts. Only recovery: reload.
 
 Scope note from verification: infinite retry is *correct by design* for the fire-and-forget logging path (retry-until-online, never log past a hole — and the tests encode this). The defect is specifically that a UI path treats `flush()` as bounded. `onStart` handles the `paused` (permanent-error) outcome gracefully but has no branch for "still syncing after too long."
 
 **Fix.** Race `flush()` against a timeout in `onStart` (surface "still saving — check your connection" with a retry/cancel), or cap attempts for the pre-session flush specifically.
+
+**Fixed 27 Aug 2026** — queue-side, not caller-side: `WriteQueue` takes a `maxAttempts` (default 6, ≈23s of backoff), and an op whose retryable failures exhaust it pauses exactly like a permanent one. `flush()` therefore always settles, `onStart`'s existing `paused` branch fires, and the logger's `SyncIndicator` offers its Retry. Every caller is covered rather than just this one; the sustained-503 case is now in `write-queue.test.ts`. The tradeoff accepted: a connectivity blip longer than ~23s pauses the logging queue instead of healing itself, which is visible and one tap from resuming (nothing is dropped, nothing lands out of order).
 
 ### 1.5 Home "recent results" is nondeterministic on same-day matches — `get-recent-results.ts:18` · **CONFIRMED**
 
@@ -90,6 +109,8 @@ The compare panel stamps a decided-draw verdict on the exact value the profile e
 ### 1.8 Residual footnote from a refuted candidate
 
 `discardFailed()` on a failed **create-match** op lets the queued **create-game** op run and FK-fail against the never-created match. Nothing corrupts (no session starts, error surfaces), but the second failure is noise. Cheap fix: discard dependent ops together, or clear the queue on match-create failure.
+
+**Raised in likelihood by the §1.4 fix (27 Aug 2026).** This used to need a *permanent* create-match failure (RLS denial, CHECK violation — rare). Now any sustained outage reaches the same branch, and the residue is worse than noise: the orphan create-game FK-fails permanently and leaves the queue **paused**, so the user's next attempt — connectivity restored — takes `flush()`'s paused fast-path, shows "Couldn't save the match" *spuriously*, and starts no session while its own ops land in the background, creating an orphan match row. The attempt after that succeeds. Traced end-to-end with a mocked FK. Worth taking now, not later.
 
 ---
 
@@ -217,7 +238,7 @@ Full inventory (4 views, 17 RPC signatures) traced to client callers; the layer 
 1. Shared `invalidateDerived()` in every mutation + logger exit (§1.1)
 2. Match detail: use `tallyMatch`/view winner (§1.2)
 3. `double_bounce`: schema + RPC merge + the missing DB CHECK (§1.3)
-4. Timeout/cancel on the new-match `flush()` await (§1.4)
+4. ~~Timeout/cancel on the new-match `flush()` await (§1.4)~~ — done 27 Aug 2026 (attempt cap in `WriteQueue`); its follow-on, §1.8, is now the live one
 5. Tiebreak on `get-recent-results` ordering (§1.5)
 
 **P1 — truthfulness of surfaces**
