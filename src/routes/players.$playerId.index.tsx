@@ -15,6 +15,7 @@ import {
   useRecords,
 } from "@/features/dashboard/api/get-records"
 import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { CategoryTiles } from "@/features/dashboard/components/category-tiles"
 import { ProfileHero } from "@/features/dashboard/components/profile-hero"
 import { RecordsWall } from "@/features/dashboard/components/record-tile"
 import { buildRecordTiles } from "@/features/dashboard/lib/record-display"
@@ -35,6 +36,12 @@ import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 // three tabs — Summary tells the story (radar, error wall), Stats is the
 // dense bento for scanning before a match, Matches is the full history.
 // Every card and section reads real data.
+//
+// The category tiles sit above the tabs, not inside one: they're the way
+// down a level — into the deep pages where the same numbers take the filters
+// and drill to the rallies that produced them (§3.4) — so they belong to the
+// whole profile, and they'd ride at a different depth on every tab (and end
+// up under the full match history) if they lived below it.
 
 export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {
@@ -102,6 +109,17 @@ function PlayerProfilePage() {
           <RecordsWall records={held} side="p1" />
         </section>
       )}
+
+      <section className="flex flex-col gap-3">
+        <div>
+          <Overline as="h2">Go deeper</Overline>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Every category filters by opponent, ball, and date — and drills to
+            the rallies behind the number.
+          </p>
+        </div>
+        <CategoryTiles playerId={playerId} data={data} />
+      </section>
 
       <Tabs defaultValue="summary">
         {/* broadcast segmented tabs: square, condensed, the active segment

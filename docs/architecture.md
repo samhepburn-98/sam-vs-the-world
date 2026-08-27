@@ -1,12 +1,12 @@
 # Architecture
 
-How the frontend is organised, and the one rule that keeps it that way. For the *why*, see
+How the frontend is organised, and the one rule that keeps it that way. For the _why_, see
 [decisions.md #14](decisions.md). The plan of record is [PROJECT_PLAN.md](../PROJECT_PLAN.md) §8.2.
 
 ## The shape
 
 Feature-based, following [bulletproof-react](https://github.com/alan2207/bulletproof-react/tree/master/apps/react-vite).
-Code is grouped by *what it's for*, not by *what kind of thing it is*.
+Code is grouped by _what it's for_, not by _what kind of thing it is_.
 
 ```
 src/
@@ -47,7 +47,7 @@ Dependencies flow **one way**: `shared → features → routes`. Concretely:
 - **Shared code never imports a feature.** `lib/` and `components/` sit below features and can't reach
   up into them.
 - **Nothing outside `routes/` imports a route.** Routes are the top; they compose features, and
-  cross-feature composition happens *only* there.
+  cross-feature composition happens _only_ there.
 
 This isn't a convention you have to remember — it's **enforced by ESLint** (`import/no-restricted-paths`
 in [eslint.config.js](../eslint.config.js)), so a violating import fails `pnpm lint` and CI. That
@@ -66,12 +66,12 @@ route could import the fixture cast and ship it to `dist/client` with every gate
    folder only when it earns a genuinely new kind of thing (the logger's `logic/`, not a second
    spelling of `lib/`).
 2. **Two or more features use it?** → shared. UI to `components/`, everything else to `lib/`. It is
-   *not* owned by whichever feature happened to build it first.
+   _not_ owned by whichever feature happened to build it first.
 3. **A new page?** → a thin file in `routes/` that pulls the pieces together.
 
 Rule 2 is the one that bites. The **rally-entry engine** (the draft state machine in `lib/rally`, the
 `rally-editor` and house-rules form in `components/rally`, and `lib/scoring`) and the **entity
-data-access layer** (`lib/api`) are shared for exactly this reason: the logger *and* manage's edit
+data-access layer** (`lib/api`) are shared for exactly this reason: the logger _and_ manage's edit
 dialogs both build on them, so by the one-way rule they can't live inside either feature. The
 logger's session planner produces `WriteIntent`s; the contract for those (`lib/rally/write-intent.ts`)
 is shared so `lib/api` can execute them without importing the planner.
@@ -101,16 +101,16 @@ fetcher signature, use `player1Id`.
 **Colour props.** The design system's colour law says every value belonging to a player wears
 their side, so the prop that carries it is always called `side`:
 
-| Prop | Means | Values |
-|---|---|---|
-| `side` | this value belongs to that player | `"p1" \| "p2"` (`"neutral"` where the house can own it) |
-| `tone` | emphasis that is nobody's colour | `"muted" \| "primary"`, `"accent" \| "loss"` |
+| Prop      | Means                                              | Values                                                               |
+| --------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| `side`    | this value belongs to that player                  | `"p1" \| "p2"` (`"neutral"` where the house can own it)              |
+| `tone`    | emphasis that is nobody's colour                   | `"muted" \| "primary"`, `"accent" \| "loss"`                         |
 | `outcome` | a **result** — the only one that carries a verdict | `"p1" \| "p2"` plus whatever unresolved states that surface can show |
 
 `outcome`'s exact union is per-component, because the states a surface can show differ:
 `MatchRow` lists every match, so it needs `"draw"` and `"pending"`; `ScoreStrip` renders one
 finished scoreline and takes `"p1" | "p2" | null`, where `null` means "don't colour a side". Don't
-copy one component's union into another — decide which unresolved states *your* surface can
+copy one component's union into another — decide which unresolved states _your_ surface can
 actually be asked to render.
 
 **Make the wrong call impossible before documenting it.** Where a prop combination would render
@@ -119,7 +119,7 @@ something dishonest, close it in the type rather than warning about it in a comm
 rejected combination with `@ts-expect-error` (an unused directive is itself a tsc error, so the
 gate can't rot).
 
-**`className` last.** Anything in `components/` that a page *places* is expected to take one, so it
+**`className` last.** Anything in `components/` that a page _places_ is expected to take one, so it
 can be positioned without a wrapper — the whole `broadcast/` kit, `CourtDiagram`, the typography
 primitives, `ThemeToggle`.
 
@@ -130,8 +130,8 @@ already there.
 
 ## Enforcement detail
 
-The boundary rule matches on *resolved file paths*, so it needs the `@/` alias to resolve. That's
+The boundary rule matches on _resolved file paths_, so it needs the `@/` alias to resolve. That's
 wired in `eslint.config.js` via eslint-plugin-import-x's `import-x/resolver-next` with the TypeScript
 resolver — **not** the classic `import/resolver` key, which import-x@4 silently ignores (the rule then
-no-ops without error). After touching resolver config, confirm the rule still *fires* by planting a
+no-ops without error). After touching resolver config, confirm the rule still _fires_ by planting a
 cross-feature import and checking it errors.

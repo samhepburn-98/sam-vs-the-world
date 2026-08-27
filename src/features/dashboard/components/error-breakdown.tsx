@@ -80,15 +80,16 @@ function StackedRow<TConfig extends ChartConfig>({
         <YAxis type="category" dataKey="row" hide />
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend content={<ChartLegendContent />} />
-        {keys.map((key, i) => (
+        {/* square ends: broadcast graphics are cut, not rounded. No grow-in
+            either — CountUp is the one stat-reveal flourish (§4.8). */}
+        {keys.map((key) => (
           <Bar
             key={key}
             dataKey={key}
             stackId="a"
             fill={`var(--color-${key})`}
-            radius={
-              i === 0 ? [4, 0, 0, 4] : i === keys.length - 1 ? [0, 4, 4, 0] : 0
-            }
+            radius={0}
+            isAnimationActive={false}
           />
         ))}
       </BarChart>

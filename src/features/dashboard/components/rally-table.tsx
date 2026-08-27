@@ -55,9 +55,10 @@ export function RallyTable({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg ring-1 ring-foreground/10">
+      <div className="overflow-x-auto bg-card ring-1 ring-foreground/10">
         <Table>
-          <TableHeader>
+          {/* condensed tracked heads — the broadcast table's column strap */}
+          <TableHeader className="[&_th]:h-9 [&_th]:font-heading [&_th]:text-xs [&_th]:font-bold [&_th]:tracking-[0.12em] [&_th]:text-muted-foreground [&_th]:uppercase">
             <TableRow>
               <TableHead>Game · rally</TableHead>
               <TableHead>Score</TableHead>
