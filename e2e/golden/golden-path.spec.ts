@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
 
+import { waitForHydration } from "../hydration"
 import { GOLDEN_USER, serviceClient } from "./local-stack"
 
 import type { Page } from "@playwright/test"
@@ -24,7 +25,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   // ---- login ----------------------------------------------------------
   await page.goto("/login")
   await page.waitForLoadState("load")
-  await page.waitForTimeout(750) // hydration beat (see e2e/auth.spec.ts)
+  await waitForHydration(page, "form") // or the submit click is lost
   await page.getByLabel(/email/i).fill(GOLDEN_USER.email)
   await page.getByLabel(/password/i).fill(GOLDEN_USER.password)
   await page.getByRole("button", { name: /sign in/i }).click()
@@ -48,8 +49,9 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
     ).toHaveCount(expectRallies)
   }
 
-  // shot_count defaults to 1, and a 1-shot winner by the server IS an ace —
-  // so a plain rally winner has to be given a real rally length to stay one
+  // the logger opens every draft at shotCount 1 (rally-draft.ts: a rally is at
+  // least its serve), and a 1-shot winner by the server IS an ace — so a plain
+  // rally winner has to be given a real length or it derives as one
   await rally(["s", "w", "5", "Enter"], 1) // Sam wins a 5-shot rally 1–0
   await rally(["l"], 2) //              let — replay, score holds  1–0
   await rally(["d", "f", "Enter"], 3) // double fault by Sam      1–1
@@ -183,8 +185,8 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   await page.getByRole("button", { name: "Done" }).click()
   await page.reload()
   await page.waitForLoadState("load")
-  await page.waitForTimeout(750)
   await expect(page.getByText("Golden Sam vs Golden Dave")).toBeVisible()
+  await waitForHydration(page)
   await page.getByRole("button", { name: "Open", exact: true }).click() // reopen
   await expect(page.getByRole("status")).toContainText("Game 1 to Golden Sam")
   await expect(page.getByRole("status")).toContainText("3–1")
@@ -192,9 +194,9 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   // ---- manage: owner editing through the raw browser (§5.4) -------------
   await page.goto("/manage?tab=rallies")
   await page.waitForLoadState("load")
-  await page.waitForTimeout(750)
 
   // insert a missed let before rally #2 — insert_rally_at renumbers the rest
+  await waitForHydration(page)
   await page.getByRole("button", { name: "Insert a rally before #2" }).click()
   await page.getByRole("button", { name: "Save changes" }).click()
   await expect(page.getByRole("dialog")).toBeHidden()
