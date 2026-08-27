@@ -6,7 +6,9 @@
 // that shifts every derived score. Client-generated UUIDs make retries
 // idempotent: a timeout-then-retry that actually landed surfaces as a
 // unique violation, which the classifier maps to "already applied" = success.
-// A permanent failure hard-pauses the queue — never log past a hole.
+// A permanent failure hard-pauses the queue — never log past a hole. So does
+// a transient one that never clears: retries are capped, because "retry for
+// ever" is indistinguishable from a hang to anyone awaiting flush().
 
 export type QueueStatus = "idle" | "syncing" | "paused"
 
@@ -34,6 +36,9 @@ interface WriteQueueOptions {
   sleep?: (ms: number) => Promise<void>
   /** capped exponential backoff by default */
   backoffMs?: (attempt: number) => number
+  /** total run() attempts per op (initial + retries) before a retryable
+   *  failure pauses the queue; defaults to DEFAULT_MAX_ATTEMPTS */
+  maxAttempts?: number
 }
 
 const defaultSleep = (ms: number) =>
@@ -41,6 +46,11 @@ const defaultSleep = (ms: number) =>
 
 const defaultBackoff = (attempt: number) =>
   Math.min(1000 * 2 ** (attempt - 1), 8000)
+
+// ~23s of backoff before a sustained transient failure pauses: long enough
+// that a courtside connectivity blip heals itself, short enough that a real
+// outage reaches the user while they're still looking at the screen.
+const DEFAULT_MAX_ATTEMPTS = 6
 
 export class WriteQueue {
   private queue: Array<WriteOp> = []
@@ -53,11 +63,13 @@ export class WriteQueue {
   private readonly classify: WriteQueueOptions["classify"]
   private readonly sleep: (ms: number) => Promise<void>
   private readonly backoffMs: (attempt: number) => number
+  private readonly maxAttempts: number
 
   constructor(options: WriteQueueOptions) {
     this.classify = options.classify
     this.sleep = options.sleep ?? defaultSleep
     this.backoffMs = options.backoffMs ?? defaultBackoff
+    this.maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS
   }
 
   get state(): QueueState {
@@ -96,7 +108,8 @@ export class WriteQueue {
     void this.process()
   }
 
-  /** resolves when every queued op is confirmed (or the queue pauses) */
+  /** resolves when every queued op is confirmed (or the queue pauses) —
+   *  always settles, since retries are bounded */
   flush(): Promise<void> {
     if (this.queue.length === 0 || this.status === "paused") {
       return Promise.resolve()
@@ -123,12 +136,15 @@ export class WriteQueue {
             settled = true
           } else if (kind === "retryable") {
             attempt += 1
+            if (attempt >= this.maxAttempts) {
+              // out of retries: pause rather than spin, so flush() waiters
+              // settle and the user gets the Retry affordance
+              this.pause(op, error)
+              return
+            }
             await this.sleep(this.backoffMs(attempt))
           } else {
-            this.failure = { op, error }
-            this.processing = false
-            this.setStatus("paused")
-            this.releaseDrain()
+            this.pause(op, error)
             return
           }
         }
@@ -139,6 +155,14 @@ export class WriteQueue {
 
     this.processing = false
     this.setStatus("idle")
+    this.releaseDrain()
+  }
+
+  /** stop on the failed head op — it stays queued, nothing behind it runs */
+  private pause(op: WriteOp, error: unknown): void {
+    this.failure = { op, error }
+    this.processing = false
+    this.setStatus("paused")
     this.releaseDrain()
   }
 
