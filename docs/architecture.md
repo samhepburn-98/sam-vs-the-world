@@ -15,7 +15,7 @@ src/
     auth/        components (login form)
     logger/      components + logic/ (session planner, hotkeys) — the live rally logger
     manage/      api/ (paginated list reads) + components/ (data table, tabs, edit dialogs)
-    dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + schemas/ + utils/
+    dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + lib/ + schemas/
   components/    SHARED UI: ui/ (shadcn) · layouts/ · court/ · rally/ (editor, house-rules) · ball-dots
   lib/           SHARED non-UI:
     schemas/     zod domain schemas — one file per concept (player, match, game, rally, auth)
@@ -46,7 +46,10 @@ in [eslint.config.js](../eslint.config.js)), so a violating import fails `pnpm l
 
 ## Where does a new file go?
 
-1. **Only one feature uses it?** → that feature (`features/<x>/{api,components,schemas,utils}`).
+1. **Only one feature uses it?** → that feature (`features/<x>/{api,components,lib,schemas}`). Those
+   four are the whole vocabulary: requests, UI, pure logic, parsed shapes. A feature grows a fifth
+   folder only when it earns a genuinely new kind of thing (the logger's `logic/`, not a second
+   spelling of `lib/`).
 2. **Two or more features use it?** → shared. UI to `components/`, everything else to `lib/`. It is
    *not* owned by whichever feature happened to build it first.
 3. **A new page?** → a thin file in `routes/` that pulls the pieces together.

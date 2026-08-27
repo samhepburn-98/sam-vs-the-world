@@ -11,11 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { hasActiveFilters } from "@/features/dashboard/utils/insight-filters"
+import { hasActiveFilters } from "@/features/dashboard/lib/insight-filters"
 import { usePlayers } from "@/lib/api/get-players"
 import { Constants } from "@/lib/database.types"
 
-import type { InsightSearch } from "@/features/dashboard/utils/insight-filters"
+import type { InsightSearch } from "@/features/dashboard/lib/insight-filters"
 import type { BallType } from "@/lib/schemas/enums"
 
 // The cross-cutting filter row (§6.1). It owns no state — the URL does. It

@@ -5,7 +5,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { MIN_MATCHES_FOR_TREND } from "@/features/dashboard/utils/insight-thresholds"
+import { MIN_MATCHES_FOR_TREND } from "@/features/dashboard/lib/insight-thresholds"
 
 import type { ChartConfig } from "@/components/ui/chart"
 

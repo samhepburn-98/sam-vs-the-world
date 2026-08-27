@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 import { CountUp } from "@/components/count-up"
 import { Card } from "@/components/ui/card"
-import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/utils/insight-thresholds"
+import { MIN_GAMES_FOR_WIN_RATE } from "@/features/dashboard/lib/insight-thresholds"
 import { cn } from "@/lib/utils"
 
 // StatCard (§6.1) enforces the §3.5 honesty rules by design:

@@ -1,4 +1,4 @@
-import { MIN_RALLIES_FOR_RATE } from "@/features/dashboard/utils/insight-thresholds"
+import { MIN_RALLIES_FOR_RATE } from "@/features/dashboard/lib/insight-thresholds"
 
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type {
