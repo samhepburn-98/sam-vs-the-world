@@ -1,0 +1,81 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Patterns/Page anatomy" />
+
+# Page anatomy
+
+Every page in the app is a thin file in `src/routes/` that composes pieces from the sidebar.
+Nothing here is a special case — if you're planning a new page, these are your worked examples.
+
+The lists below are what each route actually renders today, top to bottom.
+
+---
+
+## Home — the rundown
+
+`src/routes/index.tsx`
+
+1. **Ticker** — the full-bleed headline strip
+2. **Page title**
+3. **Featured player** — the protagonist's card, with a **Callout** read
+4. **Overline** + **Roster row** ×N — everyone else, one line each
+5. **Overline** + **Match row** ×N — recent results
+6. **Overline** + **Records wall** — "The numbers"
+7. **Count up** carries the standing counts; **Empty** covers the nothing-logged-yet case
+
+The shape to copy: a **page title**, then sections each introduced by an **Overline**, each a list
+of one repeated row component. The rundown reads like a broadcast running order because it is one.
+
+## Player profile
+
+`src/routes/players.$playerId.index.tsx`
+
+1. **Profile hero** — the card, the trait line, the headline stats
+2. **Overline** + **Records wall** — "Records held", hidden when they hold none, and every tile
+   repainted in the player's own ember via `side="p1"`
+3. **Tabs** → **Profile summary tab** · **Profile stats tab** · **Profile matches tab**
+
+The shape to copy: hero, then a shelf that hides itself when empty, then tabs. Note the
+perspective override — on a page written from one player's point of view, everything they own
+wears their side.
+
+## Match detail
+
+`src/routes/matches.$matchId.tsx`
+
+1. Breadcrumb, **Overline** with the date and venue, **Ball dots**
+2. **Score strip** — the full-time graphic
+3. **Section title** + **Game score chart** — each game scored rally by rally
+4. **Section title** + **Rally timeline** — every rally, read-only mode
+5. **Rally detail sheet** — opens over the timeline, driven from the URL's `?rally=`
+
+The shape to copy: the result first and biggest, then the evidence beneath it in decreasing
+granularity.
+
+## Compare
+
+`src/routes/compare.tsx`
+
+1. **Page title**
+2. **Duel picker** + **Duel mode toggle**
+3. **Duel** — the whole three-column contest
+4. **Head-to-head panel** — only when exactly two players are chosen
+5. **Empty** until both slots are filled
+
+## Matches index
+
+`src/routes/matches.index.tsx`
+
+**Page title**, filter controls, then **Match row** ×N with **Ball dots** — the same row the home
+page uses, so a match never looks like two different things in two places.
+
+---
+
+## What the routes are allowed to do
+
+Routes are the only layer that may compose across features, so they're where a dashboard component
+and a logger component can meet. In exchange they stay thin: fetch through the feature's `api/`
+hooks, hand the data down, and let the components do the rendering. If a route starts computing
+what to display, that logic belongs in the feature's `lib/`.
+
+See `docs/architecture.md` for the one-way import rule that enforces this.
