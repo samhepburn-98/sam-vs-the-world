@@ -39,7 +39,13 @@ export function h2hRalliesOptions(
 export function useH2hRallies(
   player1Id: string,
   player2Id: string,
-  filters: H2hFilters = {}
+  filters: H2hFilters = {},
+  /** The compare panel opens this drill-through on demand: a pair's whole
+   *  rally history is a lot to fetch for a panel most visits never expand. */
+  enabled = true
 ) {
-  return useQuery(h2hRalliesOptions(player1Id, player2Id, filters))
+  return useQuery({
+    ...h2hRalliesOptions(player1Id, player2Id, filters),
+    enabled,
+  })
 }
