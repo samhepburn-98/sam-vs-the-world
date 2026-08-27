@@ -48,18 +48,23 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
     ).toHaveCount(expectRallies)
   }
 
-  await rally(["s", "w", "Enter"], 1) // Sam hits a winner        1–0
+  // shot_count defaults to 1, and a 1-shot winner by the server IS an ace —
+  // so a plain rally winner has to be given a real rally length to stay one
+  await rally(["s", "w", "5", "Enter"], 1) // Sam wins a 5-shot rally 1–0
   await rally(["l"], 2) //              let — replay, score holds  1–0
   await rally(["d", "f", "Enter"], 3) // double fault by Sam      1–1
   await rally(["s", "e", "t", "g", "Enter"], 4) // Dave tin, forced 2–1
-  await rally(["s", "a", "Enter"], 5) // Sam aces                 3–1
+  // an ace is no longer an end reason: it IS a winner the server took on
+  // shot 1, so it is logged as one and derived back out below (0004/§7)
+  await rally(["s", "w", "1", "Enter"], 5) // Sam aces             3–1
 
   // banner fires off the derived score at target 3, win by 2
   await expect(page.getByRole("status")).toContainText("Game 1 to Golden Sam")
   await expect(page.getByRole("status")).toContainText("3–1")
 
-  // every queued write confirmed before we look at the DB
-  await expect(page.getByText("Synced ✓")).toBeVisible()
+  // every queued write confirmed before we look at the DB (the indicator's
+  // tick became a status dot in the redesign — the word is the assertion)
+  await expect(page.getByText("Synced", { exact: true })).toBeVisible()
 
   // ---- finish → derived summary ----------------------------------------
   await page.getByRole("button", { name: "Finish match" }).click()
@@ -99,7 +104,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
   const rallies = await db
     .from("rallies")
     .select(
-      "rally_number, server_id, serve_number, winner_id, end_reason, error_detail, forced"
+      "rally_number, server_id, serve_number, winner_id, end_reason, error_detail, forced, shot_count"
     )
     .order("rally_number")
   expect(rallies.error).toBeNull()
@@ -109,6 +114,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
       server_id: sam.id,
       winner_id: sam.id,
       end_reason: "winner",
+      shot_count: 5, // a rally winner, NOT an ace — see rally 5
     }),
     expect.objectContaining({
       rally_number: 2,
@@ -131,8 +137,9 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
     }),
     expect.objectContaining({
       rally_number: 5,
-      end_reason: "ace",
-      server_id: sam.id, // an ace is served by its winner
+      end_reason: "winner", // an ace is stored as what it is…
+      shot_count: 1, //       …a winner the server took on the serve itself
+      server_id: sam.id,
       winner_id: sam.id,
     }),
   ])
@@ -161,6 +168,16 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
       games_won_p2: 0,
     }),
   ])
+
+  // the ace is gone as a stored reason but must survive as a derivation:
+  // serve_stats recovers it from the server winning their own rally in one
+  // shot. This is what the old `end_reason: "ace"` assertion was really for.
+  const serveStats = await db.rpc("serve_stats", { p_player_id: sam.id })
+  expect(serveStats.error).toBeNull()
+  expect(serveStats.data![0]).toMatchObject({
+    aces: 1, //          rally 5: Sam served, Sam won, one shot
+    double_faults: 1, // rally 3: Sam's fault on serve 2
+  })
 
   // ---- rendered derived output survives a full reload -------------------
   await page.getByRole("button", { name: "Done" }).click()
@@ -192,7 +209,7 @@ test("golden path: a match logged end-to-end lands derived-correct", async ({
     "let", // …the original #2, shifted to #3
     "serve_fault",
     "error",
-    "ace",
+    "winner", // the ace
   ])
   // a let holds the score: the derived result is untouched
   const afterInsertResult = await db
