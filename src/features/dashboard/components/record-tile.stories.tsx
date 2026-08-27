@@ -6,7 +6,10 @@ import {
   createRouter,
 } from "@tanstack/react-router"
 
-import { RecordTile, RecordsWall } from "@/features/dashboard/components/record-tile"
+import {
+  RecordTile,
+  RecordsWall,
+} from "@/features/dashboard/components/record-tile"
 
 import type { RecordTileDisplay } from "@/features/dashboard/lib/record-display"
 import type { Meta, StoryObj } from "@storybook/react-vite"

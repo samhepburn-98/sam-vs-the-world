@@ -236,10 +236,7 @@ describe("records() over the seeded timeline", () => {
     // A second 23-shot rally (Sam's, Jun 26) inside a PENDING match (tied
     // game), so it perturbs no streak or margin: Alex's Jun 10 rally holds.
     const rallyTie = await seedMatch(sam, alex, "2026-06-26")
-    await seedGame(rallyTie, [
-      { winner: sam, shotCount: 23 },
-      { winner: alex },
-    ])
+    await seedGame(rallyTie, [{ winner: sam, shotCount: 23 }, { winner: alex }])
   })
 
   it("returns exactly the six records", async () => {

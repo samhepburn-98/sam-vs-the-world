@@ -58,7 +58,12 @@ describe("buildRecordTiles", () => {
       [
         row({ record_key: "longest_rally", value: 1 }),
         row({ record_key: "best_streak", value: 6 }),
-        row({ record_key: "marathon_game", player_id: null, value: 27, detail: "15–13" }),
+        row({
+          record_key: "marathon_game",
+          player_id: null,
+          value: 27,
+          detail: "15–13",
+        }),
       ],
       nameOf
     )

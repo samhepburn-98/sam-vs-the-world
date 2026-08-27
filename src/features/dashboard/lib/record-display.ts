@@ -50,7 +50,10 @@ const META: Record<RecordKey, RecordMeta> = {
     title: "Biggest win",
     value: (r) => r.detail ?? String(r.value),
   },
-  longest_rally: { title: "Longest rally", unit: (r) => plural(r.value, "shot") },
+  longest_rally: {
+    title: "Longest rally",
+    unit: (r) => plural(r.value, "shot"),
+  },
   best_streak: { title: "Best streak", unit: (r) => plural(r.value, "win") },
   marathon_game: {
     title: "Marathon game",
