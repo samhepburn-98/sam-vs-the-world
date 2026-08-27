@@ -148,16 +148,28 @@ To grant the owner: create the auth user, then
 | `20260703200000_serve_stats_error_profile` | 0004b: serve_stats + error_profile (+ companions)                               |
 | `20260703220000_rally_lengths_momentum`    | 0004c: rally_lengths + momentum (+ companions)                                  |
 
-### `insert_rally_at(...)` — the one write that needs a transaction
+### The two writes that need a transaction
 
-Inserting a missed rally at position _k_ means shifting every later rally up
-by one **and** inserting, atomically — PostgREST can't span statements, so
-this lives as a database function. The unique constraint on
-`(game_id, rally_number)` is `DEFERRABLE` for exactly this: the function
-defers it, renumbers, inserts, and the constraint re-checks at commit.
+**`insert_rally_at(...)`.** Inserting a missed rally at position _k_ means
+shifting every later rally up by one **and** inserting, atomically — PostgREST
+can't span statements, so this lives as a database function. The unique
+constraint on `(game_id, rally_number)` is `DEFERRABLE` for exactly this: the
+function defers it, renumbers, inserts, and the constraint re-checks at commit.
 `SECURITY INVOKER`, so RLS decides who can write, same as any direct insert;
 `/rpc` exposure is owner-only per the hardening rules. A constraint violation
 anywhere aborts the whole thing — no half-applied renumber is possible.
+
+**`create_match_with_game(...)`** (migration `20260827120000`) is the other:
+starting a match inserts a `matches` row and its `games` row 1, and PostgREST
+can't span those two statements either. They were once two client writes
+ordered by the logger's write queue, which meant an abandoned match could
+leave its game queued to fail against a row that never existed (audit §1.8).
+Inside one function body they share the caller's transaction, so neither half
+can land alone — no game without its match, and no match without a game 1 to
+log into. `SECURITY INVOKER` and owner-only `/rpc` exposure, as above.
+
+Everything else the app writes is a single-statement insert/update/delete and
+goes through PostgREST directly.
 
 ### The insight RPCs (migration 0004a onward)
 

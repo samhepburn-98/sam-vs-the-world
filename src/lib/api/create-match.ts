@@ -1,65 +1,44 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { Database } from "@/lib/database.types"
 import type { MatchSetupInput } from "@/lib/schemas/match"
-import type { WriteOp } from "@/lib/api/write-queue"
 
-// Builds the write-queue ops for a new match: the match row commits before
-// its game row (FIFO guarantees ordering, §8.3). Ids are client-generated so
-// the logger can transition immediately and retries stay idempotent.
+// Starting a match is one form submit, not rally logging: a single RPC that
+// writes the match and its game 1 in one transaction (§1.8). It deliberately
+// does NOT go through the write queue — the queue exists to keep the *rally
+// sequence* in order during a session, and routing a one-off create through
+// it bought nothing but failure states to unwind.
 
-interface InsertCapableClient {
-  from: (table: "matches" | "games") => {
-    insert: (values: Record<string, unknown>) => PromiseLike<{ error: unknown }>
-  }
+type CreateMatchArgs =
+  Database["public"]["Functions"]["create_match_with_game"]["Args"]
+
+/** the sliver of the Supabase client this needs, so tests can fake it */
+interface RpcCapableClient {
+  rpc: (
+    fn: "create_match_with_game",
+    args: CreateMatchArgs
+  ) => PromiseLike<{ data: string | null; error: unknown }>
 }
 
-export interface CreateMatchPlan {
-  matchId: string
-  gameId: string
-  ops: Array<WriteOp>
-}
-
-export function planCreateMatch(
+/** Returns the new match's id. Throws the Supabase error as-is — callers
+ *  translate it (`friendlyWriteError`). */
+export async function createMatchWithGame(
   input: MatchSetupInput,
-  client: InsertCapableClient = getSupabaseBrowserClient()
-): CreateMatchPlan {
-  const matchId = crypto.randomUUID()
-  const gameId = crypto.randomUUID()
-
-  const matchRow = {
-    id: matchId,
-    date: input.date,
-    player1_id: input.player1Id,
-    player2_id: input.player2Id,
-    venue: input.venue?.length ? input.venue : null,
-    format: input.houseRules.format,
-    target_score: input.houseRules.targetScore,
-    tiebreak: input.houseRules.tiebreak,
-    serves_per_point: input.houseRules.servesPerPoint,
-    let_resets_serve: input.houseRules.letResetsServe,
-    ball_type: input.houseRules.ballType,
-  }
-
-  const gameRow = { id: gameId, match_id: matchId, game_number: 1 }
-
-  const ops: Array<WriteOp> = [
-    {
-      id: matchId,
-      label: "create match",
-      run: async () => {
-        const { error } = await client.from("matches").insert(matchRow)
-        if (error) throw error
-      },
-    },
-    {
-      id: gameId,
-      label: "create game 1",
-      run: async () => {
-        const { error } = await client.from("games").insert(gameRow)
-        if (error) throw error
-      },
-    },
-  ]
-
-  return { matchId, gameId, ops }
+  client: RpcCapableClient = getSupabaseBrowserClient()
+): Promise<string> {
+  const { data, error } = await client.rpc("create_match_with_game", {
+    p_player1_id: input.player1Id,
+    p_player2_id: input.player2Id,
+    p_date: input.date,
+    p_venue: input.venue?.length ? input.venue : null,
+    p_format: input.houseRules.format,
+    p_target_score: input.houseRules.targetScore,
+    p_tiebreak: input.houseRules.tiebreak,
+    p_serves_per_point: input.houseRules.servesPerPoint,
+    p_let_resets_serve: input.houseRules.letResetsServe,
+    p_ball_type: input.houseRules.ballType,
+  })
+  if (error) throw error
+  if (data === null) throw new Error("create_match_with_game returned no id")
+  return data
 }

@@ -450,6 +450,21 @@ export type Database = {
       }
     }
     Functions: {
+      create_match_with_game: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
+          p_date: string
+          p_format?: number | null
+          p_let_resets_serve?: boolean
+          p_player1_id: string
+          p_player2_id: string
+          p_serves_per_point?: number
+          p_target_score?: number
+          p_tiebreak?: Database["public"]["Enums"]["tiebreak"]
+          p_venue?: string | null
+        }
+        Returns: string
+      }
       comeback_rallies: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]

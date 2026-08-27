@@ -282,15 +282,16 @@ describe("pause recovery", () => {
     expect(queue.state).toMatchObject({ status: "idle", pending: 0 })
   })
 
-  it("discardFailed() drops the head and continues", async () => {
+  it("stays paused until the user retries — nothing behind the hole runs", async () => {
     const { queue, ran } = pausedQueue()
     await queue.flush()
-    expect(queue.state.status).toBe("paused")
 
-    queue.discardFailed()
-    await queue.flush()
-    expect(ran).toEqual(["tail"])
-    expect(queue.state).toMatchObject({ status: "idle", pending: 0 })
+    // no discard path any more: a paused queue holds its place, and the
+    // logger's Retry (resume) is the only way past it
+    expect(queue.state.status).toBe("paused")
+    expect(queue.state.failure?.op.id).toBe("head")
+    expect(ran).toEqual([])
+    expect(queue.state.pending).toBe(2)
   })
 })
 

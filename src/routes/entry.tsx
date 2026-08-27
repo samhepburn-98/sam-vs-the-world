@@ -8,7 +8,8 @@ import { MatchSetup } from "@/features/logger/components/match-setup"
 import { RecentMatches } from "@/features/logger/components/recent-matches"
 import { Spinner } from "@/components/ui/spinner"
 import { useCreatePlayer } from "@/lib/api/create-player"
-import { planCreateMatch } from "@/lib/api/create-match"
+import { createMatchWithGame } from "@/lib/api/create-match"
+import { friendlyWriteError } from "@/lib/api/friendly-errors"
 import { useRecentMatches } from "@/features/dashboard/api/get-recent-matches"
 import { usePlayers } from "@/lib/api/get-players"
 import { classifySupabaseWriteError } from "@/lib/api/supabase-errors"
@@ -85,21 +86,22 @@ function EntryPage() {
           players={players.data}
           onCreatePlayer={(name) => createPlayer.mutateAsync({ name })}
           onStart={async (input) => {
-            const plan = planCreateMatch(input)
-            for (const op of plan.ops) queue.enqueue(op)
-            await queue.flush()
-            if (queue.state.status === "paused") {
-              queue.discardFailed()
-              return "Couldn't save the match — check your connection and try again."
+            // One transactional RPC, awaited directly — not queued. Either
+            // the match and its game 1 both exist, or nothing changed (§1.8).
+            let matchId: string
+            try {
+              matchId = await createMatchWithGame(input)
+            } catch (error) {
+              return friendlyWriteError(
+                error,
+                "Couldn't save the match — check your connection and try again."
+              )
             }
             // the match row now exists: lists, manage browsers, home count
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
             void queryClient.invalidateQueries({ queryKey: ["manage"] })
             void queryClient.invalidateQueries({ queryKey: ["home"] })
-            setSession({
-              matchId: plan.matchId,
-              firstServerId: input.firstServerId,
-            })
+            setSession({ matchId, firstServerId: input.firstServerId })
             return null
           }}
         />

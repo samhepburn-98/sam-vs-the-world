@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { planCreateMatch } from "./create-match"
+import { createMatchWithGame } from "./create-match"
 
 import type { MatchSetupInput } from "@/lib/schemas/match"
 
@@ -20,76 +20,82 @@ const input: MatchSetupInput = {
   },
 }
 
-function fakeClient() {
-  const inserts: Array<[string, Record<string, unknown>]> = []
+const MATCH_ID = "33333333-3333-4333-8333-333333333333"
+
+function fakeClient(result: { data: string | null; error: unknown }) {
+  const calls: Array<[string, Record<string, unknown>]> = []
   return {
-    inserts,
-    from(table: "matches" | "games") {
-      return {
-        insert(values: Record<string, unknown>) {
-          inserts.push([table, values])
-          return Promise.resolve({ error: null })
-        },
-      }
+    calls,
+    rpc(fn: "create_match_with_game", args: Record<string, unknown>) {
+      calls.push([fn, args])
+      return Promise.resolve(result)
     },
   }
 }
 
-describe("planCreateMatch", () => {
-  it("maps the setup input onto the match row, house rules included", async () => {
-    const client = fakeClient()
-    const plan = planCreateMatch(input, client)
-    for (const op of plan.ops) await op.run()
+describe("createMatchWithGame", () => {
+  it("maps the setup input onto the RPC args, house rules included", async () => {
+    const client = fakeClient({ data: MATCH_ID, error: null })
+    await createMatchWithGame(input, client)
 
-    const [table, row] = client.inserts[0]
-    expect(table).toBe("matches")
-    expect(row).toMatchObject({
-      id: plan.matchId,
-      date: "2026-07-02",
-      player1_id: input.player1Id,
-      player2_id: input.player2Id,
-      venue: "Local courts",
-      format: 3,
-      target_score: 11,
-      tiebreak: "win_by_2",
-      serves_per_point: 2,
-      let_resets_serve: false,
-      ball_type: "double_yellow",
+    const [fn, args] = client.calls[0]
+    expect(fn).toBe("create_match_with_game")
+    expect(args).toEqual({
+      p_player1_id: input.player1Id,
+      p_player2_id: input.player2Id,
+      p_date: "2026-07-02",
+      p_venue: "Local courts",
+      p_format: 3,
+      p_target_score: 11,
+      p_tiebreak: "win_by_2",
+      p_serves_per_point: 2,
+      p_let_resets_serve: false,
+      p_ball_type: "double_yellow",
     })
   })
 
-  it("orders the match row before game 1, FK-safe under FIFO", async () => {
-    const client = fakeClient()
-    const plan = planCreateMatch(input, client)
-    for (const op of plan.ops) await op.run()
-
-    expect(client.inserts.map(([t]) => t)).toEqual(["matches", "games"])
-    expect(client.inserts[1][1]).toEqual({
-      id: plan.gameId,
-      match_id: plan.matchId,
-      game_number: 1,
-    })
+  it("returns the new match id", async () => {
+    const client = fakeClient({ data: MATCH_ID, error: null })
+    await expect(createMatchWithGame(input, client)).resolves.toBe(MATCH_ID)
   })
 
   it("normalises an empty venue to null and casual format to null", async () => {
-    const client = fakeClient()
+    const client = fakeClient({ data: MATCH_ID, error: null })
     const casual: MatchSetupInput = {
       ...input,
       venue: "",
       houseRules: { ...input.houseRules, format: null, ballType: null },
     }
-    for (const op of planCreateMatch(casual, client).ops) await op.run()
+    await createMatchWithGame(casual, client)
 
-    expect(client.inserts[0][1]).toMatchObject({
-      venue: null,
-      format: null,
-      ball_type: null,
+    expect(client.calls[0][1]).toMatchObject({
+      p_venue: null,
+      p_format: null,
+      p_ball_type: null,
     })
   })
 
-  it("generates distinct client uuids for idempotent retries", () => {
-    const plan = planCreateMatch(input, fakeClient())
-    expect(plan.matchId).not.toBe(plan.gameId)
-    expect(plan.ops.map((op) => op.id)).toEqual([plan.matchId, plan.gameId])
+  // §1.8 — the match and its game 1 used to be two queued writes, so a failed
+  // match left its game queued to FK-fail against a row that never existed,
+  // jamming the queue and souring the next submit. One transactional RPC
+  // makes the half-state unrepresentable: the whole call either lands or
+  // doesn't, and the caller gets a plain rejection to show the user.
+  it("throws the error as-is for the caller to translate", async () => {
+    const denied = { code: "42501", status: 401, message: "RLS denial" }
+    const client = fakeClient({ data: null, error: denied })
+    await expect(createMatchWithGame(input, client)).rejects.toBe(denied)
+  })
+
+  it("makes exactly one call — nothing to half-succeed", async () => {
+    const client = fakeClient({ data: null, error: { status: 503 } })
+    await expect(createMatchWithGame(input, client)).rejects.toBeTruthy()
+    expect(client.calls).toHaveLength(1)
+  })
+
+  it("rejects rather than starting a session on a null id", async () => {
+    const client = fakeClient({ data: null, error: null })
+    await expect(createMatchWithGame(input, client)).rejects.toThrow(
+      /returned no id/
+    )
   })
 })
