@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config"
+import { configDefaults, defineConfig } from "vitest/config"
 import { cloudflare } from "@cloudflare/vite-plugin"
 import { devtools } from "@tanstack/devtools-vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
@@ -20,8 +20,18 @@ const config = defineConfig({
     viteReact(),
   ],
   test: {
-    // Playwright owns e2e/ — keep it out of Vitest's glob.
-    exclude: ["node_modules/**", "dist/**", "e2e/**"],
+    // Spread the defaults rather than replacing them: the default exclude is
+    // `**/node_modules/**`, and the bare `node_modules/**` we used before only
+    // matched the one at the repo root. A git worktree under .claude/worktrees
+    // brings its own, so a single background task left Vitest collecting ~49k
+    // tests out of three copies of the dependency tree. Playwright owns e2e/.
+    exclude: [
+      ...configDefaults.exclude,
+      "dist/**",
+      "e2e/**",
+      ".claude/**",
+      "storybook-static/**",
+    ],
   },
 })
 
