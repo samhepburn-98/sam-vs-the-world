@@ -65,7 +65,7 @@ function PlayerProfilePage() {
   const { playerId } = Route.useParams()
   const data = usePlayerInsights(playerId, {})
   const players = usePlayers()
-  const h2hMatches = usePlayerH2h(playerId)
+  const h2hMatches = usePlayerH2h({ playerId })
   const records = useRecords()
   const player = players.data?.find((p) => p.id === playerId)
 

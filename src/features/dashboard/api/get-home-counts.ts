@@ -2,6 +2,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 // The one headline figure on the hero (§5.1): "N rallies logged across M
 // matches". Two exact head-counts — no rows fetched, just the totals.
 
@@ -24,6 +26,10 @@ export async function fetchHomeCounts(): Promise<HomeCounts> {
 export const homeCountsQueryOptions = () =>
   queryOptions({ queryKey: ["home", "counts"], queryFn: fetchHomeCounts })
 
-export function useHomeCounts() {
-  return useQuery(homeCountsQueryOptions())
+type UseHomeCountsOptions = {
+  queryConfig?: QueryConfig<typeof homeCountsQueryOptions>
+}
+
+export function useHomeCounts({ queryConfig }: UseHomeCountsOptions = {}) {
+  return useQuery({ ...homeCountsQueryOptions(), ...queryConfig })
 }

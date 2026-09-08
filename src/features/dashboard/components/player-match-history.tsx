@@ -12,7 +12,7 @@ import { usePlayers } from "@/lib/api/get-players"
 // itself stays a pure renderer of rows.
 
 export function PlayerMatchHistory({ playerId }: { playerId: string }) {
-  const history = usePlayerMatchHistory(playerId)
+  const history = usePlayerMatchHistory({ playerId })
   const players = usePlayers()
 
   if (!history.data || !players.data) {

@@ -71,7 +71,7 @@ export const Route = createFileRoute("/matches/")({
 function MatchesPage() {
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
-  const matches = useMatches(toParams(search))
+  const matches = useMatches({ params: toParams(search) })
   const players = usePlayers()
   const nameOf = new Map((players.data ?? []).map((p) => [p.id, p.name]))
 

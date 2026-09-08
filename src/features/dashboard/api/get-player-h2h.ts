@@ -5,6 +5,7 @@ import { MATCH_RESULT_COLUMNS, matchResultSummary } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { MatchResultSummary } from "@/lib/schemas/match"
+import type { QueryConfig } from "@/lib/react-query"
 
 // Every match result the player has, for the head-to-head aggregate. The
 // match list API pages at 20 for its table; a rivalry record built from one
@@ -31,6 +32,11 @@ export const playerH2hQueryOptions = (playerId: string) =>
     queryFn: () => fetchPlayerH2h(playerId),
   })
 
-export function usePlayerH2h(playerId: string) {
-  return useQuery(playerH2hQueryOptions(playerId))
+type UsePlayerH2hOptions = {
+  playerId: string
+  queryConfig?: QueryConfig<typeof playerH2hQueryOptions>
+}
+
+export function usePlayerH2h({ playerId, queryConfig }: UsePlayerH2hOptions) {
+  return useQuery({ ...playerH2hQueryOptions(playerId), ...queryConfig })
 }
