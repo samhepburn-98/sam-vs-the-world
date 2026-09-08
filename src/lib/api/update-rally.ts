@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { MutationConfig } from "@/lib/react-query"
 import type { RallyRow } from "@/lib/rally/rally-draft"
 import type { WriteOp } from "@/lib/api/write-queue"
 
@@ -50,16 +51,27 @@ export function updateRallyOp(
 
 /** The same update as a manage mutation (§5.4) — the logger uses the queue
  *  op above; manage edits are direct and invalidate the browsers. */
-export function useUpdateRally() {
+export function updateRally(row: RallyRow) {
+  return updateRallyOp(row).run()
+}
+
+type UseUpdateRallyOptions = {
+  mutationConfig?: MutationConfig<typeof updateRally>
+}
+
+export function useUpdateRally({ mutationConfig }: UseUpdateRallyOptions = {}) {
   const queryClient = useQueryClient()
+  const { onSuccess, ...restConfig } = mutationConfig ?? {}
   return useMutation({
-    mutationFn: (row: RallyRow) => updateRallyOp(row).run(),
-    onSuccess: () => {
+    onSuccess: (...args) => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
       // every insight aggregate is derived from rally rows (no count change,
       // so the home tallies stay put)
       void queryClient.invalidateQueries({ queryKey: ["insights"] })
+      onSuccess?.(...args)
     },
+    ...restConfig,
+    mutationFn: updateRally,
   })
 }

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { MutationConfig } from "@/lib/react-query"
 import type { RallyRow } from "@/lib/rally/rally-draft"
 import type { WriteOp } from "@/lib/api/write-queue"
 
@@ -34,17 +35,28 @@ export function deleteRallyOp(
 }
 
 /** The same delete as a manage mutation (§5.4). */
-export function useDeleteRally() {
+export function deleteRally(row: RallyRow) {
+  return deleteRallyOp(row).run()
+}
+
+type UseDeleteRallyOptions = {
+  mutationConfig?: MutationConfig<typeof deleteRally>
+}
+
+export function useDeleteRally({ mutationConfig }: UseDeleteRallyOptions = {}) {
   const queryClient = useQueryClient()
+  const { onSuccess, ...restConfig } = mutationConfig ?? {}
   return useMutation({
-    mutationFn: (row: RallyRow) => deleteRallyOp(row).run(),
-    onSuccess: () => {
+    onSuccess: (...args) => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
       // every insight aggregate is derived from rally rows
       void queryClient.invalidateQueries({ queryKey: ["insights"] })
       // the home hub counts rallies
       void queryClient.invalidateQueries({ queryKey: ["home"] })
+      onSuccess?.(...args)
     },
+    ...restConfig,
+    mutationFn: deleteRally,
   })
 }
