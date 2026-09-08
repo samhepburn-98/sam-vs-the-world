@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { H2hFilters } from "@/features/dashboard/api/get-h2h"
 import type { RallyScored } from "@/lib/schemas/rally"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The drill-through companion of h2h (§8.4): the rally rows behind the
  *  numbers, filtered by the same SQL the aggregate used. */
@@ -36,16 +37,21 @@ export function h2hRalliesOptions(
   })
 }
 
-export function useH2hRallies(
-  player1Id: string,
-  player2Id: string,
-  filters: H2hFilters = {},
-  /** The compare panel opens this drill-through on demand: a pair's whole
-   *  rally history is a lot to fetch for a panel most visits never expand. */
-  enabled = true
-) {
+type UseH2hRalliesOptions = {
+  player1Id: string
+  player2Id: string
+  filters?: H2hFilters
+  queryConfig?: QueryConfig<typeof h2hRalliesOptions>
+}
+
+export function useH2hRallies({
+  player1Id,
+  player2Id,
+  filters = {},
+  queryConfig,
+}: UseH2hRalliesOptions) {
   return useQuery({
     ...h2hRalliesOptions(player1Id, player2Id, filters),
-    enabled,
+    ...queryConfig,
   })
 }

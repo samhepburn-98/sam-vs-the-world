@@ -157,7 +157,7 @@ function BoxRow({
 
 function Serve({ playerId, filters }: ContentProps) {
   const stats = useServeStats({ playerId, filters })
-  const rallies = useServeRallies(playerId, filters)
+  const rallies = useServeRallies({ playerId, filters })
   if (!stats.data || !rallies.data) return <Loading />
   const s = stats.data
   const twoServe = s.two_serve_rallies_served
@@ -218,7 +218,7 @@ function Serve({ playerId, filters }: ContentProps) {
 // ---- errors ---------------------------------------------------------------
 function Errors({ playerId, filters }: ContentProps) {
   const profile = useErrorProfile({ playerId, filters })
-  const rallies = useErrorRallies(playerId, filters)
+  const rallies = useErrorRallies({ playerId, filters })
   if (!profile.data || !rallies.data) return <Loading />
   const e = profile.data
 
@@ -255,7 +255,7 @@ function Errors({ playerId, filters }: ContentProps) {
 // ---- rallies --------------------------------------------------------------
 function Rallies({ playerId, filters }: ContentProps) {
   const lengths = useRallyLengths({ playerId, filters })
-  const rallies = useRallyLengthRallies(playerId, null, filters)
+  const rallies = useRallyLengthRallies({ playerId, bucket: null, filters })
   if (!lengths.data || !rallies.data) return <Loading />
   const l = lengths.data
 
@@ -292,7 +292,7 @@ function Rallies({ playerId, filters }: ContentProps) {
 // ---- momentum -------------------------------------------------------------
 function Momentum({ playerId, filters }: ContentProps) {
   const mom = useMomentum({ playerId, filters })
-  const rallies = useComebackRallies(playerId, filters)
+  const rallies = useComebackRallies({ playerId, filters })
   if (!mom.data || !rallies.data) return <Loading />
   const m = mom.data
 

@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The drill-through companion of serve_stats (§8.4): every decided rally
  *  the player served, filtered by the same SQL the aggregate used. */
@@ -33,9 +34,16 @@ export function serveRalliesOptions(
   })
 }
 
-export function useServeRallies(
-  playerId: string,
-  filters: InsightFilters = {}
-) {
-  return useQuery(serveRalliesOptions(playerId, filters))
+type UseServeRalliesOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof serveRalliesOptions>
+}
+
+export function useServeRallies({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UseServeRalliesOptions) {
+  return useQuery({ ...serveRalliesOptions(playerId, filters), ...queryConfig })
 }

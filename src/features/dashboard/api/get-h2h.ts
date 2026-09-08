@@ -8,6 +8,7 @@ import type {
   H2hResult,
   InsightFilters,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The h2h filters are the cross-cutting set minus opponent — the second
  *  player IS the opponent. */
@@ -39,10 +40,21 @@ export function h2hOptions(
   })
 }
 
-export function useH2h(
-  player1Id: string,
-  player2Id: string,
-  filters: H2hFilters = {}
-) {
-  return useQuery(h2hOptions(player1Id, player2Id, filters))
+type UseH2hOptions = {
+  player1Id: string
+  player2Id: string
+  filters?: H2hFilters
+  queryConfig?: QueryConfig<typeof h2hOptions>
+}
+
+export function useH2h({
+  player1Id,
+  player2Id,
+  filters = {},
+  queryConfig,
+}: UseH2hOptions) {
+  return useQuery({
+    ...h2hOptions(player1Id, player2Id, filters),
+    ...queryConfig,
+  })
 }

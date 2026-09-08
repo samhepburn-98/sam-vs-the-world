@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The drill-through companion of momentum (§8.4): every rally of the
  *  player's comeback games, so each can draw its own momentum chart. Same
@@ -43,10 +44,21 @@ export function comebackRalliesOptions(
   })
 }
 
-export function useComebackRallies(
-  playerId: string,
-  filters: InsightFilters = {},
+type UseComebackRalliesOptions = {
+  playerId: string
+  filters?: InsightFilters
   deficit?: number
-) {
-  return useQuery(comebackRalliesOptions(playerId, filters, deficit))
+  queryConfig?: QueryConfig<typeof comebackRalliesOptions>
+}
+
+export function useComebackRallies({
+  playerId,
+  filters = {},
+  deficit,
+  queryConfig,
+}: UseComebackRalliesOptions) {
+  return useQuery({
+    ...comebackRalliesOptions(playerId, filters, deficit),
+    ...queryConfig,
+  })
 }

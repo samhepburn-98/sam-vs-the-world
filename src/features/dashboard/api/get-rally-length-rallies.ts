@@ -10,6 +10,7 @@ import type {
   LengthBucket,
 } from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The drill-through companion of rally_lengths (§8.4): the rallies in one
  *  length bucket (undefined = every counted rally), same SQL as the aggregate. */
@@ -39,10 +40,21 @@ export function rallyLengthRalliesOptions(
   })
 }
 
-export function useRallyLengthRallies(
-  playerId: string,
-  bucket: LengthBucket | null,
-  filters: InsightFilters = {}
-) {
-  return useQuery(rallyLengthRalliesOptions(playerId, bucket, filters))
+type UseRallyLengthRalliesOptions = {
+  playerId: string
+  bucket: LengthBucket | null
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof rallyLengthRalliesOptions>
+}
+
+export function useRallyLengthRallies({
+  playerId,
+  bucket,
+  filters = {},
+  queryConfig,
+}: UseRallyLengthRalliesOptions) {
+  return useQuery({
+    ...rallyLengthRalliesOptions(playerId, bucket, filters),
+    ...queryConfig,
+  })
 }

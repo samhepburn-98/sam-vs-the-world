@@ -1,7 +1,4 @@
-import type {
-  DefaultError,
-  UseMutationOptions,
-} from "@tanstack/react-query"
+import type { DefaultError, UseMutationOptions } from "@tanstack/react-query"
 
 // The caller's half of the api/ convention (§8.4, architecture.md), modelled
 // on bulletproof-react's src/lib/react-query.ts.
