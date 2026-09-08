@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
 import {
@@ -10,6 +10,7 @@ import { playerRow } from "@/lib/schemas/player"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { ListPage, ListParams } from "@/features/manage/api/manage-list"
+import type { QueryConfig } from "@/lib/react-query"
 import type { PlayerRow } from "@/lib/schemas/player"
 
 const SORTABLE = new Set(["name", "handedness", "created_at", "updated_at"])
@@ -36,10 +37,22 @@ export async function fetchManagePlayers(
   return { rows: z.array(playerRow).parse(data), total: count ?? 0 }
 }
 
-export function useManagePlayers(params: ListParams) {
-  return useQuery({
+export function managePlayersQueryOptions(params: ListParams) {
+  return queryOptions({
     queryKey: ["manage", "players", params],
     queryFn: () => fetchManagePlayers(params),
     placeholderData: keepPreviousData,
   })
+}
+
+type UseManagePlayersOptions = {
+  params: ListParams
+  queryConfig?: QueryConfig<typeof managePlayersQueryOptions>
+}
+
+export function useManagePlayers({
+  params,
+  queryConfig,
+}: UseManagePlayersOptions) {
+  return useQuery({ ...managePlayersQueryOptions(params), ...queryConfig })
 }

@@ -22,7 +22,7 @@ interface TabProps {
 }
 
 export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
-  const players = useManagePlayers(params)
+  const players = useManagePlayers({ params })
   const del = useDeletePlayer()
   const [editing, setEditing] = useState<PlayerRow | null>(null)
   const [deleting, setDeleting] = useState<PlayerRow | null>(null)

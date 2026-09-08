@@ -30,7 +30,7 @@ interface TabProps {
 }
 
 export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
-  const matches = useManageMatches(params)
+  const matches = useManageMatches({ params })
   const del = useDeleteMatch()
   const [editing, setEditing] = useState<MatchRow | null>(null)
   const [deleting, setDeleting] = useState<MatchRow | null>(null)

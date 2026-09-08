@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
 import { Constants } from "@/lib/database.types"
@@ -11,6 +11,7 @@ import { rallyDbRowWithGame } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { ListPage, ListParams } from "@/features/manage/api/manage-list"
+import type { QueryConfig } from "@/lib/react-query"
 import type { RallyDbRowWithGame } from "@/lib/schemas/rally"
 
 const SORTABLE = new Set([
@@ -62,10 +63,22 @@ export async function fetchManageRallies(
   return { rows: z.array(rallyDbRowWithGame).parse(data), total: count ?? 0 }
 }
 
-export function useManageRallies(params: ListParams) {
-  return useQuery({
+export function manageRalliesQueryOptions(params: ListParams) {
+  return queryOptions({
     queryKey: ["manage", "rallies", params],
     queryFn: () => fetchManageRallies(params),
     placeholderData: keepPreviousData,
   })
+}
+
+type UseManageRalliesOptions = {
+  params: ListParams
+  queryConfig?: QueryConfig<typeof manageRalliesQueryOptions>
+}
+
+export function useManageRallies({
+  params,
+  queryConfig,
+}: UseManageRalliesOptions) {
+  return useQuery({ ...manageRalliesQueryOptions(params), ...queryConfig })
 }

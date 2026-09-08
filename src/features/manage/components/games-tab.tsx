@@ -23,7 +23,7 @@ interface TabProps {
 }
 
 export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
-  const games = useManageGames(params)
+  const games = useManageGames({ params })
   const del = useDeleteGame()
   const [editing, setEditing] = useState<GameBrowserRow | null>(null)
   const [deleting, setDeleting] = useState<GameBrowserRow | null>(null)
