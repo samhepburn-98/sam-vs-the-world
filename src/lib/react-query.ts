@@ -17,8 +17,8 @@ import type { DefaultError, UseMutationOptions } from "@tanstack/react-query"
 
 /** An async fetcher's resolved value, unwrapped from its Promise. */
 export type ApiFnReturnType<
-  FnType extends (...args: Array<never>) => Promise<unknown>,
-> = Awaited<ReturnType<FnType>>
+  TFn extends (...args: Array<never>) => Promise<unknown>,
+> = Awaited<ReturnType<TFn>>
 
 /** Everything a caller may override on a query: the hook's options minus the
  *  queryKey and queryFn that define which request it is. */
@@ -30,9 +30,9 @@ export type QueryConfig<T extends (...args: Array<never>) => unknown> = Omit<
 /** The mutation equivalent. `mutationFn` is likewise not the caller's to
  *  replace, and is applied after the spread in each hook so it can't be. */
 export type MutationConfig<
-  MutationFnType extends (...args: Array<never>) => Promise<unknown>,
+  TMutationFn extends (...args: Array<never>) => Promise<unknown>,
 > = UseMutationOptions<
-  ApiFnReturnType<MutationFnType>,
+  ApiFnReturnType<TMutationFn>,
   DefaultError,
-  Parameters<MutationFnType>[0]
+  Parameters<TMutationFn>[0]
 >
