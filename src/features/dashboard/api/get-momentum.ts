@@ -8,6 +8,7 @@ import type {
   InsightFilters,
   Momentum,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 export async function fetchMomentum(
   playerId: string,
@@ -35,10 +36,21 @@ export function momentumOptions(
   })
 }
 
-export function useMomentum(
-  playerId: string,
-  filters: InsightFilters = {},
+type UseMomentumOptions = {
+  playerId: string
+  filters?: InsightFilters
   deficit?: number
-) {
-  return useQuery(momentumOptions(playerId, filters, deficit))
+  queryConfig?: QueryConfig<typeof momentumOptions>
+}
+
+export function useMomentum({
+  playerId,
+  filters = {},
+  deficit,
+  queryConfig,
+}: UseMomentumOptions) {
+  return useQuery({
+    ...momentumOptions(playerId, filters, deficit),
+    ...queryConfig,
+  })
 }

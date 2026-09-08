@@ -59,7 +59,7 @@ function Loading() {
 
 // ---- head-to-head: results & form (drills to matches, not rallies) --------
 function HeadToHead({ playerId, filters }: ContentProps) {
-  const headline = usePlayerHeadline(playerId, filters)
+  const headline = usePlayerHeadline({ playerId, filters })
   if (!headline.data) return <Loading />
   const h = headline.data
 
@@ -156,7 +156,7 @@ function BoxRow({
 }
 
 function Serve({ playerId, filters }: ContentProps) {
-  const stats = useServeStats(playerId, filters)
+  const stats = useServeStats({ playerId, filters })
   const rallies = useServeRallies(playerId, filters)
   if (!stats.data || !rallies.data) return <Loading />
   const s = stats.data
@@ -217,7 +217,7 @@ function Serve({ playerId, filters }: ContentProps) {
 
 // ---- errors ---------------------------------------------------------------
 function Errors({ playerId, filters }: ContentProps) {
-  const profile = useErrorProfile(playerId, filters)
+  const profile = useErrorProfile({ playerId, filters })
   const rallies = useErrorRallies(playerId, filters)
   if (!profile.data || !rallies.data) return <Loading />
   const e = profile.data
@@ -254,7 +254,7 @@ function Errors({ playerId, filters }: ContentProps) {
 
 // ---- rallies --------------------------------------------------------------
 function Rallies({ playerId, filters }: ContentProps) {
-  const lengths = useRallyLengths(playerId, filters)
+  const lengths = useRallyLengths({ playerId, filters })
   const rallies = useRallyLengthRallies(playerId, null, filters)
   if (!lengths.data || !rallies.data) return <Loading />
   const l = lengths.data
@@ -291,7 +291,7 @@ function Rallies({ playerId, filters }: ContentProps) {
 
 // ---- momentum -------------------------------------------------------------
 function Momentum({ playerId, filters }: ContentProps) {
-  const mom = useMomentum(playerId, filters)
+  const mom = useMomentum({ playerId, filters })
   const rallies = useComebackRallies(playerId, filters)
   if (!mom.data || !rallies.data) return <Loading />
   const m = mom.data

@@ -8,6 +8,7 @@ import type {
   InsightFilters,
   RallyLengths,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 export async function fetchRallyLengths(
   playerId: string,
@@ -32,9 +33,16 @@ export function rallyLengthsOptions(
   })
 }
 
-export function useRallyLengths(
-  playerId: string,
-  filters: InsightFilters = {}
-) {
-  return useQuery(rallyLengthsOptions(playerId, filters))
+type UseRallyLengthsOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof rallyLengthsOptions>
+}
+
+export function useRallyLengths({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UseRallyLengthsOptions) {
+  return useQuery({ ...rallyLengthsOptions(playerId, filters), ...queryConfig })
 }
