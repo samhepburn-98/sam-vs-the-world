@@ -3,6 +3,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 import { matchDetail } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 export async function fetchMatchDetail(matchId: string) {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
@@ -26,6 +28,14 @@ export const matchDetailQueryOptions = (matchId: string) =>
     queryFn: () => fetchMatchDetail(matchId),
   })
 
-export function useMatchDetail(matchId: string) {
-  return useQuery(matchDetailQueryOptions(matchId))
+type UseMatchDetailOptions = {
+  matchId: string
+  queryConfig?: QueryConfig<typeof matchDetailQueryOptions>
+}
+
+export function useMatchDetail({
+  matchId,
+  queryConfig,
+}: UseMatchDetailOptions) {
+  return useQuery({ ...matchDetailQueryOptions(matchId), ...queryConfig })
 }

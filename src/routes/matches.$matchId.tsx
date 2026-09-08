@@ -88,8 +88,8 @@ function MatchDetailPage() {
   const { matchId } = Route.useParams()
   const search = Route.useSearch()
   const { user } = Route.useRouteContext()
-  const match = useMatchDetail(matchId)
-  const result = useMatchResult(matchId)
+  const match = useMatchDetail({ matchId })
+  const result = useMatchResult({ matchId })
   const players = usePlayers()
 
   const [selected, setSelected] = useState<number | null>(null)

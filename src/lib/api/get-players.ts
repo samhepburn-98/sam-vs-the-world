@@ -4,6 +4,8 @@ import { z } from "zod"
 import { PLAYER_SUMMARY_COLUMNS, playerSummary } from "@/lib/schemas/player"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 export async function fetchPlayers() {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
@@ -17,6 +19,10 @@ export async function fetchPlayers() {
 export const playersQueryOptions = () =>
   queryOptions({ queryKey: ["players"], queryFn: fetchPlayers })
 
-export function usePlayers() {
-  return useQuery(playersQueryOptions())
+type UsePlayersOptions = {
+  queryConfig?: QueryConfig<typeof playersQueryOptions>
+}
+
+export function usePlayers({ queryConfig }: UsePlayersOptions = {}) {
+  return useQuery({ ...playersQueryOptions(), ...queryConfig })
 }
