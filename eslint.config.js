@@ -71,6 +71,35 @@ export default [
     },
   },
   {
+    // Fixtures are test scaffolding that happens to live in src/ so it can sit
+    // beside the model it describes. Nothing stops a component importing one —
+    // which is exactly how the .storybook fixture cast once shipped to
+    // dist/client with typecheck, lint and build all green (see the zone
+    // below). This closes the same hole for the in-tree fixtures: only tests
+    // and stories may reach them.
+    files: ["src/**/*.ts", "src/**/*.tsx"],
+    ignores: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.stories.tsx",
+      "**/*.fixtures.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/*.fixtures", "**/*.fixtures.*"],
+              message:
+                "Fixtures are for tests and stories only — production code must not import them.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Stories live beside their component, inside src/, and the harness is the
     // whole point of them — so they are the one thing allowed up into
     // .storybook. Nothing here ships: main.ts globs stories into Storybook's
