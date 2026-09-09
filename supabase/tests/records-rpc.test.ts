@@ -1,24 +1,18 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
+import { applyMigrations, applyMigrationsFrom } from "./migrations"
+
 // records() fixture tests: every record block pinned against a seeded
-// timeline — the first-achiever tie rule, the exclusions (lets and double
-// faults from longest_rally, pending matches from streaks), lets counting
+// timeline — the first-achiever tie rule, the exclusions (lets and untagged
+// rallies from longest_rally, pending matches from streaks), lets counting
 // toward the marathon, and the derived-ace predicate.
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
+//
+// The whole migration chain is applied (§8.7 #1). This suite used to load
+// five hand-picked files and deliberately skip derive_aces, which meant the
+// one thing the records migration pins its ace block to — "the same
+// predicate as serve_stats" — was a claim no test here could check, because
+// serve_stats wasn't in the database. It is now, and they are compared.
 
 interface RecordRow {
   record_key: string
@@ -68,6 +62,10 @@ async function seedGame(
   let n = 0
   for (const r of rallies) {
     n += 1
+    // shot_count goes in explicitly, null when the spec doesn't name one: a
+    // plain winner has to stay untagged, because a 1-shot winner served by
+    // its own winner IS an ace under the derived definition and would be
+    // counted into most_aces.
     await db.query(
       `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
        values ($1, $2, $3, 'left', $4, $5, $6, $7)`,
@@ -114,15 +112,7 @@ async function records(): Promise<Map<string, RecordRow>> {
 
 beforeAll(async () => {
   db = new PGlite()
-  await db.exec(`create role anon; create role authenticated;`)
-  // derive_aces isn't loaded: it only rewrites old 'ace' rows and redefines
-  // serve_stats (whole insights chain). Seeds below use the post-derivation
-  // shape directly (an ace = the server's 1-shot winner).
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("match_results_created_at"))
-  await db.exec(loadMigration("match_outcome"))
-  await db.exec(loadMigration("20260826150000_records"))
+  await applyMigrations(db)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Alex'), ('Ormond') returning id`
@@ -308,6 +298,26 @@ describe("records() over the seeded timeline", () => {
     })
   })
 
+  it("most_aces: the wall counts exactly what serve_stats counts", async () => {
+    // the records migration pins its ace block to serve_stats' predicate, so
+    // hold the two together — a change to either that the other doesn't
+    // follow means the wall and the profile disagree about the same match
+    const acesFor = async (player: string, opponent: string) =>
+      (
+        await db.query<{ aces: number }>(
+          `select aces from serve_stats(p_player_id => $1, p_opponent_id => $2,
+             p_date_from => '2026-06-09', p_date_to => '2026-06-09')`,
+          [player, opponent]
+        )
+      ).rows[0].aces
+
+    const samAces = await acesFor(sam, alex)
+    expect(samAces).toBe(2)
+    expect((await records()).get("most_aces")?.value).toBe(samAces)
+    // and the tie is real: Alex served two of his own on the same night
+    expect(await acesFor(alex, sam)).toBe(2)
+  })
+
   it("most_lets: match-owned, no holder", async () => {
     const r = (await records()).get("most_lets")
     expect(r).toMatchObject({ player_id: null, value: 3, match_id: letsMatch })
@@ -320,5 +330,85 @@ describe("records() over the seeded timeline", () => {
       expect(r.match_id).toBeTruthy()
       expect(r.date).toBeTruthy()
     }
+  })
+})
+
+// The ace retirement (20260710160000), from both sides. most_aces counts by
+// derivation, so this file has to hold two things down: an ace logged before
+// the retirement still reaches the wall, and the stored value it replaced is
+// genuinely dead. The first has to be staged ACROSS the migration, which the
+// fixture above — already at the current schema — can't do, hence a second
+// database that starts before it and is then carried forward.
+describe("the retired 'ace' end reason", () => {
+  let legacy: PGlite
+  let legacySam: string
+  let legacyMatch: string
+  let legacyGame: string
+
+  beforeAll(async () => {
+    legacy = new PGlite()
+    // stop before the retirement, so the rally can be written the way July's
+    // logger wrote one: a stored 'ace' with no shot count at all
+    await applyMigrations(legacy, { stopBefore: "last_shot_derived_ace" })
+
+    const players = await legacy.query<{ id: string }>(
+      `insert into players (name) values ('Sam'), ('Alex') returning id`
+    )
+    const [p1, p2] = players.rows.map((r) => r.id)
+    legacySam = p1
+    const match = await legacy.query<{ id: string }>(
+      `insert into matches (player1_id, player2_id, date)
+       values ($1, $2, '2026-07-05') returning id`,
+      [p1, p2]
+    )
+    legacyMatch = match.rows[0].id
+    const game = await legacy.query<{ id: string }>(
+      `insert into games (match_id, game_number) values ($1, 1) returning id`,
+      [legacyMatch]
+    )
+    legacyGame = game.rows[0].id
+    await legacy.query(
+      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
+       values ($1, 1, $2, 'left', 1, $2, 'ace')`,
+      [legacyGame, legacySam]
+    )
+
+    // ...then the retirement itself and everything after it
+    await applyMigrationsFrom(legacy, "last_shot_derived_ace")
+  })
+
+  afterAll(async () => {
+    await legacy.close()
+  })
+
+  it("folds a legacy row into the shape an ace always described", async () => {
+    const row = await legacy.query<{ end_reason: string; shot_count: number }>(
+      `select end_reason, shot_count from rallies where game_id = $1`,
+      [legacyGame]
+    )
+    expect(row.rows[0]).toEqual({ end_reason: "winner", shot_count: 1 })
+  })
+
+  it("still reaches the wall, now by derivation", async () => {
+    // the row was logged as a stored ace and is counted as a derived one —
+    // the retirement cost the record nothing
+    const res = await legacy.query<RecordRow>(
+      `select * from records() where record_key = 'most_aces'`
+    )
+    expect(res.rows[0]).toMatchObject({
+      player_id: legacySam,
+      value: 1,
+      match_id: legacyMatch,
+    })
+  })
+
+  it("cannot be logged again", async () => {
+    await expect(
+      legacy.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
+         values ($1, 2, $2, 'left', 1, $2, 'ace')`,
+        [legacyGame, legacySam]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
   })
 })

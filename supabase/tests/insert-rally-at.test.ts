@@ -1,23 +1,11 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { applyMigrations } from "./migrations"
 
 // The mid-game insert (§5.4): insert_rally_at renumbers later rallies in one
 // transaction via the DEFERRABLE unique constraint. Verified against a real
 // game inserted through the actual migrations, PGlite-style (§8.7 #1).
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
 
 let db: PGlite
 let gameId: string
@@ -26,12 +14,7 @@ let p2: string
 
 beforeAll(async () => {
   db = new PGlite()
-  // the grant/revoke tail of the function migration needs these to exist
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("insert_rally_at"))
+  await applyMigrations(db)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Dave') returning id`
@@ -100,16 +83,43 @@ describe("insert_rally_at", () => {
   })
 
   it("appending at the end works (position = count + 1)", async () => {
+    // an ace: a winner the server took on shot 1 (named notation — the
+    // signature grew winning/losing shot columns since this was written)
     await db.query(
-      `select insert_rally_at(gen_random_uuid(), $1, 5::smallint, $2, 'left', 1::smallint, $2, 'ace')`,
+      `select insert_rally_at(
+         p_id => gen_random_uuid(), p_game_id => $1, p_rally_number => 5::smallint,
+         p_server_id => $2, p_serve_side => 'left', p_serve_number => 1::smallint,
+         p_winner_id => $2, p_end_reason => 'winner', p_shot_count => 1::smallint
+       )`,
       [gameId, p2]
     )
-    const last = await db.query<{ rally_number: number; end_reason: string }>(
-      `select rally_number, end_reason from rallies
+    const last = await db.query<{
+      rally_number: number
+      end_reason: string
+      shot_count: number
+    }>(
+      `select rally_number, end_reason, shot_count from rallies
        where game_id = $1 order by rally_number desc limit 1`,
       [gameId]
     )
-    expect(last.rows[0]).toEqual({ rally_number: 5, end_reason: "ace" })
+    expect(last.rows[0]).toEqual({
+      rally_number: 5,
+      end_reason: "winner",
+      shot_count: 1,
+    })
+  })
+
+  it("rejects the retired 'ace' end reason outright", async () => {
+    await expect(
+      db.query(
+        `select insert_rally_at(
+           p_id => gen_random_uuid(), p_game_id => $1, p_rally_number => 6::smallint,
+           p_server_id => $2, p_serve_side => 'left', p_serve_number => 1::smallint,
+           p_winner_id => $2, p_end_reason => 'ace'
+         )`,
+        [gameId, p2]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
   })
 
   it("constraint violations abort the whole thing — no half-applied renumber", async () => {

@@ -1,41 +1,37 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { applyMigrations, applyMigrationsFrom } from "./migrations"
 
 // Migration 0004c fixture tests (§8.7 #1): rally_lengths + momentum and their
 // companions, pinning every acceptance criterion from #24 — bucket win rates
 // with null/0 exclusion, a 12–10 overtime's late rallies in the close band,
 // comeback firing AT the deficit threshold not below, and a streak that a
 // let in the middle must not break.
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
+//
+// Runs on the shared bootstrap — every migration, in order — rather than the
+// five this suite once hand-picked. Both companions and the rallies_scored
+// rowtype they return were rewritten under it (decisive_shots, §3.3.4), and a
+// suite pinned to July's five would have gone on passing right through that.
 
 let db: PGlite
 let sam: string
 let dave: string
 let gameA: string // comeback at exactly deficit 4, Sam streak of 7
+let gameF: string // the derived ace
 const DATE_A = "2026-06-01"
 const DATE_B = "2026-06-02" // trailed by only 3, won
 const DATE_C = "2026-06-03" // a let inside a Sam streak
 const DATE_D = "2026-06-04" // 12–10 overtime
 const DATE_E = "2026-06-05" // rally-length buckets
+const DATE_F = "2026-06-06" // a derived ace, and a tagged winner against it
 
 interface RallySpec {
   winner: string | null
   shotCount?: number | null
   server?: string
   reason?: string
+  winningShot?: string
 }
 
 async function seedMatch(date: string) {
@@ -55,8 +51,8 @@ async function seedGame(matchId: string, rallies: Array<RallySpec>) {
   for (const r of rallies) {
     n += 1
     await db.query(
-      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
-       values ($1, $2, $3, 'left', $4, $5, $6, $7)`,
+      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count, winning_shot)
+       values ($1, $2, $3, 'left', $4, $5, $6, $7, $8)`,
       [
         game.rows[0].id,
         n,
@@ -65,25 +61,26 @@ async function seedGame(matchId: string, rallies: Array<RallySpec>) {
         r.winner,
         r.reason ?? (r.winner === null ? "let" : "winner"),
         r.shotCount ?? null,
+        r.winningShot ?? null,
       ]
     )
   }
   return game.rows[0].id
 }
 
-/** n plain-winner rallies for one player, back to back. */
+/**
+ * n plain-winner rallies for one player, back to back — deliberately untagged
+ * (null shot_count). These games are momentum fixtures: a length would pull
+ * them into the rally_lengths numbers below, and a length of 1 on the server's
+ * own winner would make every one of them a derived ace (§3.3.4).
+ */
 function wins(player: string, n: number): Array<RallySpec> {
   return Array.from({ length: n }, () => ({ winner: player }))
 }
 
 beforeAll(async () => {
   db = new PGlite()
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("insights_headline_h2h"))
-  await db.exec(loadMigration("rally_lengths_momentum"))
+  await applyMigrations(db)
 
   const players = await db.query<{ id: string }>(
     `insert into players (name) values ('Sam'), ('Dave') returning id`
@@ -130,6 +127,16 @@ beforeAll(async () => {
     { winner: sam, shotCount: 9 }, //  long, win
     { winner: sam, shotCount: null }, // untagged — excluded
     { winner: sam, shotCount: 0, server: dave, reason: "serve_fault" }, // double fault — excluded
+  ])
+
+  // F — the ace as it exists now (20260710160000): not an end reason but a
+  //     derivation — a winner the server took on shot 1. It is a real rally
+  //     of a real length, so the buckets must count it like any other. Kept
+  //     off in its own game so the A–E numbers above stay untouched; two
+  //     rallies, one each, so it makes neither a comeback nor a streak.
+  gameF = await seedGame(await seedMatch(DATE_F), [
+    { winner: sam, server: sam, shotCount: 1 }, //   the ace: short, win
+    { winner: dave, server: sam, shotCount: 6, winningShot: "drop" }, // medium, loss
   ])
 })
 
@@ -195,6 +202,131 @@ describe("rally_lengths", () => {
       [sam, DATE_E, DATE_E]
     )
     expect(all.rows[0].n).toBe(6)
+  })
+
+  it("counts a derived ace as the one-shot rally it is", async () => {
+    // The ace stopped being storable in July, so the only way to assert the
+    // buckets still see one is to assert the derivation: end_reason 'winner',
+    // shot_count 1, and the server taking their own serve (§3.3.4).
+    const l = await rallyLengths(DATE_F, DATE_F)
+    expect(l).toMatchObject({
+      total_rallies: 2,
+      short_rallies: 1,
+      short_wins: 1, //  Sam's ace
+      medium_rallies: 1,
+      medium_wins: 0, // Dave's 6-shot winner
+      long_rallies: 0,
+    })
+
+    const short = await db.query<{
+      end_reason: string
+      shot_count: number
+      by_server: boolean
+    }>(
+      `select end_reason, shot_count, (winner_id = server_id) as by_server
+       from rally_length_rallies($1, p_date_from => $2, p_date_to => $3, p_bucket => 'short')`,
+      [sam, DATE_F, DATE_F]
+    )
+    expect(short.rows).toEqual([
+      { end_reason: "winner", shot_count: 1, by_server: true },
+    ])
+  })
+
+  it("rejects the retired 'ace' end reason outright", async () => {
+    // The guard on the case above: were rallies_end_reason_current ever to
+    // lapse, aces would go back to being stored under their own reason and
+    // the derivation would quietly stop being the whole of them.
+    await expect(
+      db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+         values ($1, 3, $2, 'left', 1, $2, 'ace', 1)`,
+        [gameF, sam]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
+  })
+
+  it("companion returns the current rallies_scored rowtype", async () => {
+    // decisive_shots (20260710200000) dropped shot_type for winning_shot /
+    // losing_shot and recreated this companion around the new rowtype. Every
+    // count above would pass against either shape, so name the columns: this
+    // is the assertion that fails if the suite is fed a stale schema.
+    const medium = await db.query<{
+      winning_shot: string | null
+      losing_shot: string | null
+    }>(
+      `select winning_shot, losing_shot
+       from rally_length_rallies($1, p_date_from => $2, p_date_to => $3, p_bucket => 'medium')`,
+      [sam, DATE_F, DATE_F]
+    )
+    expect(medium.rows).toEqual([{ winning_shot: "drop", losing_shot: null }])
+  })
+})
+
+describe("rally_lengths over rows written before the ace was retired", () => {
+  it("counts a folded legacy ace as a short rally", async () => {
+    // A deliberate before/after: production still holds rallies logged when
+    // the ace WAS an end reason, and the buckets have to count those the same
+    // as a derived one. stopBefore leaves the schema at the day such a row was
+    // legal (20260706174523 folds them; 20260710160000 adds the CHECK), so it
+    // can be written exactly as it was written then — dropping the constraint
+    // instead would test a schema that never shipped.
+    const legacy = new PGlite()
+    try {
+      await applyMigrations(legacy, { stopBefore: "derive_aces" })
+      const players = await legacy.query<{ id: string }>(
+        `insert into players (name) values ('Sam'), ('Dave') returning id`
+      )
+      const [oldSam, oldDave] = players.rows.map((r) => r.id)
+      const match = await legacy.query<{ id: string }>(
+        `insert into matches (player1_id, player2_id, date) values ($1, $2, $3) returning id`,
+        [oldSam, oldDave, DATE_A]
+      )
+      const game = await legacy.query<{ id: string }>(
+        `insert into games (match_id, game_number) values ($1, 1) returning id`,
+        [match.rows[0].id]
+      )
+      await legacy.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason)
+         values ($1, 1, $2, 'left', 1, $2, 'ace')`,
+        [game.rows[0].id, oldSam]
+      )
+
+      const lengths = async () =>
+        (
+          await legacy.query<Record<string, number>>(
+            `select * from rally_lengths($1)`,
+            [oldSam]
+          )
+        ).rows[0]
+
+      // the old model stored the reason and left the length untagged, so the
+      // buckets skipped the ace entirely
+      expect((await lengths()).total_rallies).toBe(0)
+
+      await applyMigrationsFrom(legacy, "derive_aces")
+
+      // the fold pins shot_count to 1 — the defining property — so the same
+      // row is now a countable short rally, and a win
+      expect(await lengths()).toMatchObject({
+        total_rallies: 1,
+        short_rallies: 1,
+        short_wins: 1,
+      })
+      const row = await legacy.query<{
+        end_reason: string
+        shot_count: number
+        by_server: boolean
+      }>(
+        `select end_reason, shot_count, (winner_id = server_id) as by_server
+         from rally_length_rallies($1, p_bucket => 'short')`,
+        [oldSam]
+      )
+      expect(row.rows).toEqual([
+        { end_reason: "winner", shot_count: 1, by_server: true },
+      ])
+    } finally {
+      await legacy.close()
+    }
   })
 })
 

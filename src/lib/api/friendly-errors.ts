@@ -43,7 +43,10 @@ const STORAGE_MESSAGES: Array<[string, string]> = [
   ],
 ]
 
-export function friendlyWriteError(error: unknown): string {
+export function friendlyWriteError(
+  error: unknown,
+  fallback = "The save failed — check your connection and try again."
+): string {
   const e = error as {
     message?: string
     details?: string
@@ -60,6 +63,11 @@ export function friendlyWriteError(error: unknown): string {
   if (e?.code === "42501") {
     return "You don't have permission to change this — sign in as the owner."
   }
-  // trigger raise_exception (P0001) and anything else: the message is best
-  return e?.message ?? "The save failed — check your connection and try again."
+  // A Postgres rejection carries a SQLSTATE, and its message is a sentence
+  // worth showing — that's how trigger raise_exception (P0001) text reaches
+  // the user. A transport failure carries no code: supabase-js resolves a
+  // dropped connection into a plain object whose message is the raw
+  // "TypeError: Failed to fetch", and a 5xx gateway page arrives as an HTML
+  // body. Neither belongs on screen, so those get the sentence instead.
+  return e?.code ? (e.message ?? fallback) : fallback
 }

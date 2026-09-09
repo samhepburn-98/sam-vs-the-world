@@ -9,7 +9,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 // string, so bumping it is what makes the new photo actually show up.
 
 /** The structural slice of the supabase client the upload needs — injectable
- *  so tests can fake it (same pattern as planCreateMatch). */
+ *  so tests can fake it (same pattern as createMatchWithGame). */
 export interface AvatarStorageClient {
   storage: {
     from: (bucket: string) => {

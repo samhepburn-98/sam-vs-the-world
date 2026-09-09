@@ -1,25 +1,26 @@
-import { readFileSync, readdirSync } from "node:fs"
-import { join } from "node:path"
-
 import { PGlite } from "@electric-sql/pglite"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { applyMigrations, applyMigrationsFrom } from "./migrations"
 
 // Migration 0004b fixture tests (§8.7 #1): serve_stats + error_profile and
 // their companions, including the traps from #23 — a let landing between a
 // first-serve fault and its serve-2 replay (the point must count once), a
 // single-serve match contributing to serve win % but not serve-number stats,
 // and the forced/unforced/untagged three-way.
-
-const MIGRATIONS = join(__dirname, "../migrations")
-
-function loadMigration(nameFragment: string) {
-  const file = readdirSync(MIGRATIONS).find((f) => f.includes(nameFragment))
-  if (!file) throw new Error(`migration matching "${nameFragment}" not found`)
-  return readFileSync(join(MIGRATIONS, file), "utf8").replace(
-    /^create extension if not exists pgcrypto;$/m,
-    ""
-  )
-}
+//
+// The suite runs against the FULL migration chain. It used to hand-pick five
+// migrations, which froze it at the early-July schema: it seeded an `ace`
+// end reason that a CHECK retired on 10 July (20260710160000), so it kept
+// asserting an ace count production can no longer produce. Aces are now
+// DERIVED — a winner the server took on shot 1 — and the fixture states that
+// shape directly.
+//
+// The one deliberate exception is Pat and Quinn's legacy double_bounce row,
+// which has to exist before 20260714120000 retires the value. That pair is
+// seeded with the chain stopped just short of the retirement, then the rest
+// of the chain runs over it; Sam and Dave are seeded afterwards, so every
+// row they own is written against the current schema.
 
 let db: PGlite
 let sam: string
@@ -39,6 +40,12 @@ interface RallySpec {
   reason?: string
   detail?: string | null
   forced?: boolean | null
+  // Rally length, in shots. Every logged rally carries one (the draft opens at
+  // 1 — src/lib/rally/rally-draft.ts), and since 20260710160000 it is half of
+  // the ace derivation: a winner the server took on ONE shot IS an ace. So a
+  // rally that is merely a winner has to state a real length, or serve_stats
+  // will rightly count it as an ace.
+  shots?: number
 }
 
 async function seedGame(
@@ -54,8 +61,8 @@ async function seedGame(
   for (const r of rallies) {
     n += 1
     await db.query(
-      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, error_detail, forced)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, error_detail, forced, shot_count)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
         game.rows[0].id,
         n,
@@ -66,6 +73,7 @@ async function seedGame(
         r.reason ?? (r.winner === null ? "let" : "winner"),
         r.detail ?? null,
         r.forced ?? null,
+        r.shots ?? null,
       ]
     )
   }
@@ -74,88 +82,13 @@ async function seedGame(
 
 beforeAll(async () => {
   db = new PGlite()
-  await db.exec(`create role anon; create role authenticated;`)
-  await db.exec(loadMigration("enums_and_tables"))
-  await db.exec(loadMigration("views"))
-  await db.exec(loadMigration("house_rules"))
-  await db.exec(loadMigration("insights_headline_h2h"))
-  await db.exec(loadMigration("serve_stats_error_profile"))
 
-  const players = await db.query<{ id: string }>(
-    `insert into players (name) values ('Sam'), ('Dave') returning id`
-  )
-  ;[sam, dave] = players.rows.map((r) => r.id)
-
-  // Match 1 — two serves per point (the default), blue ball.
-  const m1 = await db.query<{ id: string }>(
-    `insert into matches (player1_id, player2_id, date, ball_type) values ($1, $2, '2026-06-01', 'blue') returning id`,
-    [sam, dave]
-  )
-  matchTwoServe = m1.rows[0].id
-  await seedGame(matchTwoServe, 1, [
-    // 1: Sam serves left, first serve, clean winner
-    { server: sam, side: "left", serveNo: 1, winner: sam },
-    // 2: Sam's first serve faulted (implicit) → point played on serve 2,
-    //    Sam tins it — an unforced error on the right box
-    {
-      server: sam,
-      side: "right",
-      serveNo: 2,
-      winner: dave,
-      reason: "error",
-      detail: "tin",
-      forced: false,
-    },
-    // 3+4: THE TRAP — first serve faults, then a LET interrupts the serve-2
-    //      point; the replay (still serve 2) is the only decided row. The
-    //      pair must count as ONE served rally and ONE first-serve fault.
-    { server: sam, side: "right", serveNo: 2, winner: null },
-    { server: sam, side: "right", serveNo: 2, winner: sam },
-    // 5: Dave aces Sam
-    { server: dave, side: "left", serveNo: 1, winner: dave, reason: "ace" },
-    // 6: Dave double-faults (second-serve fault → receiver wins, by CHECK)
-    {
-      server: dave,
-      side: "left",
-      serveNo: 2,
-      winner: sam,
-      reason: "serve_fault",
-    },
-    // 7: Sam's forced error (out over the front-wall line)
-    {
-      server: sam,
-      side: "left",
-      serveNo: 1,
-      winner: dave,
-      reason: "error",
-      detail: "out_top",
-      forced: true,
-    },
-    // 8: Sam errs again, nothing tagged — forced NULL, detail NULL
-    { server: sam, side: "left", serveNo: 1, winner: dave, reason: "error" },
-  ])
-
-  // Match 2 — SINGLE-serve squash (§7.7), yellow ball: counts toward serve
-  // win % but must stay out of every serve-number stat.
-  const m2 = await db.query<{ id: string }>(
-    `insert into matches (player1_id, player2_id, date, ball_type, serves_per_point) values ($1, $2, '2026-06-10', 'yellow', 1) returning id`,
-    [sam, dave]
-  )
-  matchSingleServe = m2.rows[0].id
-  await seedGame(matchSingleServe, 1, [
-    { server: sam, winner: sam },
-    { server: sam, winner: sam },
-    {
-      server: sam,
-      winner: dave,
-      reason: "error",
-      detail: "not_up",
-      forced: false,
-    },
-  ])
+  // Stop one migration short of the double_bounce retirement so the legacy
+  // row below can be written the way it was written in June (§8.7 #1).
+  await applyMigrations(db, { stopBefore: "retire_double_bounce" })
 
   // Match 3 — a LEGACY double_bounce error, inserted while the value was
-  // still live, then the retire migration runs over it: the row must fold
+  // still live. The retire migration then runs over it: the row must fold
   // into not_up and the value must be locked out of new rows.
   const p2 = await db.query<{ id: string }>(
     `insert into players (name) values ('Pat'), ('Quinn') returning id`
@@ -172,9 +105,113 @@ beforeAll(async () => {
       reason: "error",
       detail: "double_bounce",
       forced: false,
+      shots: 5,
     },
   ])
-  await db.exec(loadMigration("retire_double_bounce"))
+
+  // …and the rest of the chain, retirement included, over the top of it.
+  await applyMigrationsFrom(db, "retire_double_bounce")
+
+  // Match 4 — Pat and Quinn again, at the CURRENT schema: the three shapes
+  // the ace derivation has to tell apart (see the serve_stats case below).
+  const m4 = await db.query<{ id: string }>(
+    `insert into matches (player1_id, player2_id, date) values ($1, $2, '2026-06-21') returning id`,
+    [pat, quinn]
+  )
+  await seedGame(m4.rows[0].id, 1, [
+    // an ace: Pat's serve, Pat wins it, one shot — the serve itself
+    { server: pat, winner: pat, shots: 1 },
+    // a winning serve, but a rally was played first — not an ace
+    { server: pat, winner: pat, shots: 4 },
+    // one shot, but the RETURNER won it — not an ace either
+    { server: pat, winner: quinn, shots: 1 },
+  ])
+
+  const players = await db.query<{ id: string }>(
+    `insert into players (name) values ('Sam'), ('Dave') returning id`
+  )
+  ;[sam, dave] = players.rows.map((r) => r.id)
+
+  // Match 1 — two serves per point (the default), blue ball.
+  const m1 = await db.query<{ id: string }>(
+    `insert into matches (player1_id, player2_id, date, ball_type) values ($1, $2, '2026-06-01', 'blue') returning id`,
+    [sam, dave]
+  )
+  matchTwoServe = m1.rows[0].id
+  await seedGame(matchTwoServe, 1, [
+    // 1: Sam serves left, first serve, clean winner off a real rally
+    { server: sam, side: "left", serveNo: 1, winner: sam, shots: 7 },
+    // 2: Sam's first serve faulted (implicit) → point played on serve 2,
+    //    Sam tins it — an unforced error on the right box
+    {
+      server: sam,
+      side: "right",
+      serveNo: 2,
+      winner: dave,
+      reason: "error",
+      detail: "tin",
+      forced: false,
+      shots: 9,
+    },
+    // 3+4: THE TRAP — first serve faults, then a LET interrupts the serve-2
+    //      point; the replay (still serve 2) is the only decided row. The
+    //      pair must count as ONE served rally and ONE first-serve fault.
+    { server: sam, side: "right", serveNo: 2, winner: null },
+    { server: sam, side: "right", serveNo: 2, winner: sam, shots: 5 },
+    // 5: Dave aces Sam — since 20260710160000 that is not an end reason but
+    //    a shape: a winner, off Dave's own serve, decided on the first shot
+    { server: dave, side: "left", serveNo: 1, winner: dave, shots: 1 },
+    // 6: Dave double-faults (second-serve fault → receiver wins, by trigger).
+    //    Zero shots: the rally never started.
+    {
+      server: dave,
+      side: "left",
+      serveNo: 2,
+      winner: sam,
+      reason: "serve_fault",
+      shots: 0,
+    },
+    // 7: Sam's forced error (out over the front-wall line)
+    {
+      server: sam,
+      side: "left",
+      serveNo: 1,
+      winner: dave,
+      reason: "error",
+      detail: "out_top",
+      forced: true,
+      shots: 12,
+    },
+    // 8: Sam errs again, nothing tagged — forced NULL, detail NULL
+    {
+      server: sam,
+      side: "left",
+      serveNo: 1,
+      winner: dave,
+      reason: "error",
+      shots: 6,
+    },
+  ])
+
+  // Match 2 — SINGLE-serve squash (§7.7), yellow ball: counts toward serve
+  // win % but must stay out of every serve-number stat.
+  const m2 = await db.query<{ id: string }>(
+    `insert into matches (player1_id, player2_id, date, ball_type, serves_per_point) values ($1, $2, '2026-06-10', 'yellow', 1) returning id`,
+    [sam, dave]
+  )
+  matchSingleServe = m2.rows[0].id
+  await seedGame(matchSingleServe, 1, [
+    { server: sam, winner: sam, shots: 4 },
+    { server: sam, winner: sam, shots: 8 },
+    {
+      server: sam,
+      winner: dave,
+      reason: "error",
+      detail: "not_up",
+      forced: false,
+      shots: 6,
+    },
+  ])
 })
 
 afterAll(async () => {
@@ -221,19 +258,51 @@ describe("serve_stats", () => {
     const s = await serveStats(sam)
     expect(s.rallies_returned).toBe(2) // Dave's two decided serves
     expect(s.return_wins).toBe(1) // Dave's double fault
-    expect(s.aces).toBe(0)
+    expect(s.aces).toBe(0) // Sam wins serves, but never on the serve
     expect(s.double_faults).toBe(0)
 
     const d = await serveStats(dave)
     expect(d).toMatchObject({
       rallies_served: 2,
       serve_wins: 1,
-      aces: 1,
+      aces: 1, // row 5, derived from winner + own serve + one shot
       double_faults: 1,
       rallies_returned: 8,
       return_wins: 4, // rows 2, 7, 8 + the single-serve error
       first_serve_faults: 1, // the double fault was a point on serve 2
     })
+  })
+
+  it("derives aces from the rally, not from a stored end reason", async () => {
+    // Pat's match 4 holds all three shapes. Only the first is an ace: the
+    // server won it, and won it on shot 1 — the serve. The 4-shot winning
+    // serve had a rally in it, and the 1-shot rally the RETURNER won came off
+    // Pat's racket but was never Pat's point (the winner_id half of the
+    // predicate arrived with 20260710160000; 20260706174523 counted any
+    // 1-shot rally the player served, whoever won it).
+    const p = await serveStats(pat)
+    expect(p).toMatchObject({
+      rallies_served: 4, // three here + the legacy error in match 3
+      serve_wins: 2, // the ace and the 4-shot winner
+      aces: 1,
+    })
+    // Quinn never served, so nothing of Quinn's can be an ace
+    const q = await serveStats(quinn)
+    expect(q).toMatchObject({ rallies_served: 0, aces: 0 })
+  })
+
+  it("rejects the retired 'ace' end reason at the DB", async () => {
+    // The value survives in the enum (Postgres cannot drop a member), so only
+    // the CHECK from 20260710160000 keeps it out — and this suite is exactly
+    // where it would drift back in.
+    await expect(
+      db.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+         select game_id, 99, server_id, 'left', 1, $1, 'ace', 1
+         from rallies where server_id = $1 limit 1`,
+        [pat]
+      )
+    ).rejects.toThrow(/rallies_end_reason_current/)
   })
 
   it("splits win rate by serve side", async () => {

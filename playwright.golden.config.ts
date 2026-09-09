@@ -16,7 +16,11 @@ export default defineConfig({
   globalSetup: "./e2e/golden/global-setup.ts",
   fullyParallel: false,
   workers: 1,
-  retries: 0,
+  retries: 0, // a retry would hide flakiness in the one test that proves the pipeline
+  // this single test drives login → 5 rallies → finish → reload → manage edits.
+  // It runs in ~7s, but a cold Vite dev server plus a router navigation mid-flow
+  // can push it past Playwright's 30s default, which then reads as a hang.
+  timeout: 90_000,
   reporter: "list",
   use: {
     baseURL: `http://localhost:${PORT}`,

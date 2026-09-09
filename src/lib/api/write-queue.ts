@@ -1,11 +1,13 @@
 // The logger's strict FIFO write queue (§5.3, §8.3, §8.7 #3).
 //
-// Every logger write — rally saves, undo deletes, inline edits, game creation
-// — flows through here, one at a time, in order. Op n+1 is never sent until
-// op n is confirmed, so an out-of-order failure can't leave a silent hole
-// that shifts every derived score. Client-generated UUIDs make retries
-// idempotent: a timeout-then-retry that actually landed surfaces as a
-// unique violation, which the classifier maps to "already applied" = success.
+// Every logger write — rally saves, undo deletes, inline edits, later-game
+// creation — flows through here, one at a time, in order. (Starting a match
+// does not: that's one transactional RPC, awaited by the form. §1.8) Op n+1
+// is never sent until op n is confirmed, so an out-of-order failure can't
+// leave a silent hole that shifts every derived score. Client-generated
+// UUIDs make retries idempotent: a timeout-then-retry that actually landed
+// surfaces as a unique violation, which the classifier maps to "already
+// applied" = success.
 // A permanent failure hard-pauses the queue — never log past a hole. So does
 // a transient one that never clears: retries are capped, because "retry for
 // ever" is indistinguishable from a hang to anyone awaiting flush().
@@ -99,17 +101,13 @@ export class WriteQueue {
     void this.process()
   }
 
-  /** drop the failed head op (e.g. the user chose to abandon that write) */
-  discardFailed(): void {
-    if (this.status !== "paused") return
-    this.queue.shift()
-    this.failure = undefined
-    this.setStatus(this.queue.length > 0 ? "syncing" : "idle")
-    void this.process()
-  }
-
-  /** resolves when every queued op is confirmed (or the queue pauses) —
-   *  always settles, since retries are bounded */
+  /**
+   * Resolves when the queue stops working — drained OR paused. Check
+   * `state.status` to tell those apart; a paused queue resolves immediately,
+   * so this is a "settled?" wait, not a "succeeded?" one. It always settles,
+   * because retries are bounded. Used by the tests and available for a future
+   * wait-before-leaving; no production caller.
+   */
   flush(): Promise<void> {
     if (this.queue.length === 0 || this.status === "paused") {
       return Promise.resolve()
