@@ -25,7 +25,7 @@ export async function fetchMomentum(
   return momentum.parse(data[0])
 }
 
-export function momentumOptions(
+export function momentumQueryOptions(
   playerId: string,
   filters: InsightFilters = {},
   deficit?: number
@@ -40,7 +40,7 @@ type UseMomentumOptions = {
   playerId: string
   filters?: InsightFilters
   deficit?: number
-  queryConfig?: QueryConfig<typeof momentumOptions>
+  queryConfig?: QueryConfig<typeof momentumQueryOptions>
 }
 
 export function useMomentum({
@@ -50,7 +50,7 @@ export function useMomentum({
   queryConfig,
 }: UseMomentumOptions) {
   return useQuery({
-    ...momentumOptions(playerId, filters, deficit),
+    ...momentumQueryOptions(playerId, filters, deficit),
     ...queryConfig,
   })
 }

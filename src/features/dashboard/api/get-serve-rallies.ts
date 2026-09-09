@@ -24,7 +24,7 @@ export async function fetchServeRallies(
   return z.array(rallyScored).parse(data)
 }
 
-export function serveRalliesOptions(
+export function serveRalliesQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -37,7 +37,7 @@ export function serveRalliesOptions(
 type UseServeRalliesOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof serveRalliesOptions>
+  queryConfig?: QueryConfig<typeof serveRalliesQueryOptions>
 }
 
 export function useServeRallies({
@@ -45,5 +45,8 @@ export function useServeRallies({
   filters = {},
   queryConfig,
 }: UseServeRalliesOptions) {
-  return useQuery({ ...serveRalliesOptions(playerId, filters), ...queryConfig })
+  return useQuery({
+    ...serveRalliesQueryOptions(playerId, filters),
+    ...queryConfig,
+  })
 }

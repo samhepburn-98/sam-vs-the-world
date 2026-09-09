@@ -23,7 +23,7 @@ export async function fetchPlayerHeadline(
   return playerHeadline.parse(data[0])
 }
 
-export function playerHeadlineOptions(
+export function playerHeadlineQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -36,7 +36,7 @@ export function playerHeadlineOptions(
 type UsePlayerHeadlineOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof playerHeadlineOptions>
+  queryConfig?: QueryConfig<typeof playerHeadlineQueryOptions>
 }
 
 export function usePlayerHeadline({
@@ -45,7 +45,7 @@ export function usePlayerHeadline({
   queryConfig,
 }: UsePlayerHeadlineOptions) {
   return useQuery({
-    ...playerHeadlineOptions(playerId, filters),
+    ...playerHeadlineQueryOptions(playerId, filters),
     ...queryConfig,
   })
 }

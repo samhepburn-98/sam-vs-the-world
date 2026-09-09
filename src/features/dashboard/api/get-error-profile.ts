@@ -23,7 +23,7 @@ export async function fetchErrorProfile(
   return errorProfile.parse(data[0])
 }
 
-export function errorProfileOptions(
+export function errorProfileQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -36,7 +36,7 @@ export function errorProfileOptions(
 type UseErrorProfileOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof errorProfileOptions>
+  queryConfig?: QueryConfig<typeof errorProfileQueryOptions>
 }
 
 export function useErrorProfile({
@@ -44,5 +44,8 @@ export function useErrorProfile({
   filters = {},
   queryConfig,
 }: UseErrorProfileOptions) {
-  return useQuery({ ...errorProfileOptions(playerId, filters), ...queryConfig })
+  return useQuery({
+    ...errorProfileQueryOptions(playerId, filters),
+    ...queryConfig,
+  })
 }

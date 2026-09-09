@@ -29,7 +29,7 @@ export async function fetchRallyLengthRallies(
   return z.array(rallyScored).parse(data)
 }
 
-export function rallyLengthRalliesOptions(
+export function rallyLengthRalliesQueryOptions(
   playerId: string,
   bucket: LengthBucket | null,
   filters: InsightFilters = {}
@@ -44,7 +44,7 @@ type UseRallyLengthRalliesOptions = {
   playerId: string
   bucket: LengthBucket | null
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof rallyLengthRalliesOptions>
+  queryConfig?: QueryConfig<typeof rallyLengthRalliesQueryOptions>
 }
 
 export function useRallyLengthRallies({
@@ -54,7 +54,7 @@ export function useRallyLengthRallies({
   queryConfig,
 }: UseRallyLengthRalliesOptions) {
   return useQuery({
-    ...rallyLengthRalliesOptions(playerId, bucket, filters),
+    ...rallyLengthRalliesQueryOptions(playerId, bucket, filters),
     ...queryConfig,
   })
 }

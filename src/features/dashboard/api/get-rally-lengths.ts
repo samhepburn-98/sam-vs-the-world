@@ -23,7 +23,7 @@ export async function fetchRallyLengths(
   return rallyLengths.parse(data[0])
 }
 
-export function rallyLengthsOptions(
+export function rallyLengthsQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -36,7 +36,7 @@ export function rallyLengthsOptions(
 type UseRallyLengthsOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof rallyLengthsOptions>
+  queryConfig?: QueryConfig<typeof rallyLengthsQueryOptions>
 }
 
 export function useRallyLengths({
@@ -44,5 +44,8 @@ export function useRallyLengths({
   filters = {},
   queryConfig,
 }: UseRallyLengthsOptions) {
-  return useQuery({ ...rallyLengthsOptions(playerId, filters), ...queryConfig })
+  return useQuery({
+    ...rallyLengthsQueryOptions(playerId, filters),
+    ...queryConfig,
+  })
 }

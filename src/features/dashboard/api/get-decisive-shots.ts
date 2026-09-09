@@ -26,7 +26,7 @@ export async function fetchDecisiveShots(
   return decisiveShots.parse(data[0])
 }
 
-export function decisiveShotsOptions(
+export function decisiveShotsQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -39,7 +39,7 @@ export function decisiveShotsOptions(
 type UseDecisiveShotsOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof decisiveShotsOptions>
+  queryConfig?: QueryConfig<typeof decisiveShotsQueryOptions>
 }
 
 export function useDecisiveShots({
@@ -48,7 +48,7 @@ export function useDecisiveShots({
   queryConfig,
 }: UseDecisiveShotsOptions) {
   return useQuery({
-    ...decisiveShotsOptions(playerId, filters),
+    ...decisiveShotsQueryOptions(playerId, filters),
     ...queryConfig,
   })
 }

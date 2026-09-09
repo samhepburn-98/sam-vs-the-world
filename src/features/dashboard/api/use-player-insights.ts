@@ -1,25 +1,25 @@
 import {
-  decisiveShotsOptions,
+  decisiveShotsQueryOptions,
   useDecisiveShots,
 } from "@/features/dashboard/api/get-decisive-shots"
 import {
-  errorProfileOptions,
+  errorProfileQueryOptions,
   useErrorProfile,
 } from "@/features/dashboard/api/get-error-profile"
 import {
-  momentumOptions,
+  momentumQueryOptions,
   useMomentum,
 } from "@/features/dashboard/api/get-momentum"
 import {
-  playerHeadlineOptions,
+  playerHeadlineQueryOptions,
   usePlayerHeadline,
 } from "@/features/dashboard/api/get-player-headline"
 import {
-  rallyLengthsOptions,
+  rallyLengthsQueryOptions,
   useRallyLengths,
 } from "@/features/dashboard/api/get-rally-lengths"
 import {
-  serveStatsOptions,
+  serveStatsQueryOptions,
   useServeStats,
 } from "@/features/dashboard/api/get-serve-stats"
 
@@ -38,12 +38,12 @@ export function prefetchPlayerInsights(
   filters: InsightFilters = {}
 ): Promise<unknown> {
   return Promise.all([
-    queryClient.ensureQueryData(playerHeadlineOptions(playerId, filters)),
-    queryClient.ensureQueryData(serveStatsOptions(playerId, filters)),
-    queryClient.ensureQueryData(errorProfileOptions(playerId, filters)),
-    queryClient.ensureQueryData(rallyLengthsOptions(playerId, filters)),
-    queryClient.ensureQueryData(momentumOptions(playerId, filters)),
-    queryClient.ensureQueryData(decisiveShotsOptions(playerId, filters)),
+    queryClient.ensureQueryData(playerHeadlineQueryOptions(playerId, filters)),
+    queryClient.ensureQueryData(serveStatsQueryOptions(playerId, filters)),
+    queryClient.ensureQueryData(errorProfileQueryOptions(playerId, filters)),
+    queryClient.ensureQueryData(rallyLengthsQueryOptions(playerId, filters)),
+    queryClient.ensureQueryData(momentumQueryOptions(playerId, filters)),
+    queryClient.ensureQueryData(decisiveShotsQueryOptions(playerId, filters)),
   ])
 }
 

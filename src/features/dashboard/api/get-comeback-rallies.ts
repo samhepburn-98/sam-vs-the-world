@@ -27,7 +27,7 @@ export async function fetchComebackRallies(
   return z.array(rallyScored).parse(data)
 }
 
-export function comebackRalliesOptions(
+export function comebackRalliesQueryOptions(
   playerId: string,
   filters: InsightFilters = {},
   deficit?: number
@@ -48,7 +48,7 @@ type UseComebackRalliesOptions = {
   playerId: string
   filters?: InsightFilters
   deficit?: number
-  queryConfig?: QueryConfig<typeof comebackRalliesOptions>
+  queryConfig?: QueryConfig<typeof comebackRalliesQueryOptions>
 }
 
 export function useComebackRallies({
@@ -58,7 +58,7 @@ export function useComebackRallies({
   queryConfig,
 }: UseComebackRalliesOptions) {
   return useQuery({
-    ...comebackRalliesOptions(playerId, filters, deficit),
+    ...comebackRalliesQueryOptions(playerId, filters, deficit),
     ...queryConfig,
   })
 }

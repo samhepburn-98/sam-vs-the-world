@@ -23,7 +23,7 @@ export async function fetchServeStats(
   return serveStats.parse(data[0])
 }
 
-export function serveStatsOptions(
+export function serveStatsQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -36,7 +36,7 @@ export function serveStatsOptions(
 type UseServeStatsOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof serveStatsOptions>
+  queryConfig?: QueryConfig<typeof serveStatsQueryOptions>
 }
 
 export function useServeStats({
@@ -44,5 +44,8 @@ export function useServeStats({
   filters = {},
   queryConfig,
 }: UseServeStatsOptions) {
-  return useQuery({ ...serveStatsOptions(playerId, filters), ...queryConfig })
+  return useQuery({
+    ...serveStatsQueryOptions(playerId, filters),
+    ...queryConfig,
+  })
 }
