@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
-import { useUpdateGame } from "@/lib/api/update-game"
+import { useUpdateGame } from "@/features/manage/api/update-game"
 import { gameEditSchema } from "@/lib/schemas/game"
 
 import type { GameBrowserRow, GameEditInput } from "@/lib/schemas/game"

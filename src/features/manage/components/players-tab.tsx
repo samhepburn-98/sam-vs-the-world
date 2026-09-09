@@ -6,7 +6,7 @@ import { ConfirmDelete } from "@/features/manage/components/confirm-delete"
 import { DataTable } from "@/features/manage/components/data-table"
 import { EditPlayerDialog } from "@/features/manage/components/edit-player-dialog"
 import { Button } from "@/components/ui/button"
-import { useDeletePlayer } from "@/lib/api/delete-player"
+import { useDeletePlayer } from "@/features/manage/api/delete-player"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
 import { useManagePlayers } from "@/features/manage/api/get-manage-players"
 

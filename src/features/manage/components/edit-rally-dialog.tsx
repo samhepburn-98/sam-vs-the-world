@@ -3,7 +3,7 @@ import { useState } from "react"
 import { RallyEditor } from "@/components/rally/rally-editor"
 import { EditDialog } from "@/features/manage/components/edit-dialog"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
-import { useInsertRallyAt } from "@/lib/api/insert-rally-at"
+import { useInsertRallyAt } from "@/features/manage/api/insert-rally-at"
 import { useUpdateRally } from "@/lib/api/update-rally"
 import { usePlayers } from "@/lib/api/get-players"
 

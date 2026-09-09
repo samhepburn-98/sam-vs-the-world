@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
-import { useUpdatePlayer } from "@/lib/api/update-player"
+import { useUpdatePlayer } from "@/features/manage/api/update-player"
 import { downscaleImage } from "@/lib/images/downscale"
 import { playerEditSchema } from "@/lib/schemas/player"
 

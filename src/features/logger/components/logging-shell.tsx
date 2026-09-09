@@ -40,7 +40,7 @@ import {
   undo,
 } from "@/features/logger/logic/session"
 import { useMatchDetail } from "@/lib/api/get-match-detail"
-import { intentToOp } from "@/lib/api/session-ops"
+import { intentToOp } from "@/features/logger/api/session-ops"
 import { useMediaQuery } from "@/lib/use-media-query"
 import {
   deriveOutcome,
