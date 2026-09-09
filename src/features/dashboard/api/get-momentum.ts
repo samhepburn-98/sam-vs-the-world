@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 
-import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
 import { momentum } from "@/features/dashboard/schemas/insights"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 

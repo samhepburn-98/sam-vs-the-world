@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
 import { rallyScored } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
