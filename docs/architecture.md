@@ -89,10 +89,13 @@ route could import the fixture cast and ship it to `dist/client` with every gate
 
 ## Where does a new file go?
 
-1. **Only one feature uses it?** → that feature (`features/<x>/{api,components,lib,schemas}`). Those
-   four are the whole vocabulary: requests, UI, pure logic, parsed shapes. A feature grows a fifth
-   folder only when it earns a genuinely new kind of thing (the logger's `logic/`, not a second
-   spelling of `lib/`).
+1. **Only one feature uses it?** → that feature
+   (`features/<x>/{api,components,hooks,lib,schemas}`). Those five are the whole vocabulary:
+   requests, UI, stateful React logic, pure logic, parsed shapes. `hooks/` is the narrow one — it
+   is for a `useXxx` that owns component state and nothing else; a hook that fetches is a request
+   and belongs in `api/`, and a function with no state at all is pure logic and belongs in `lib/`.
+   A feature grows a sixth folder only when it earns a genuinely new kind of thing (the logger's
+   `logic/`, not a second spelling of `lib/`).
 2. **Two or more features use it?** → shared. UI to `components/`, everything else to `lib/`. It is
    _not_ owned by whichever feature happened to build it first.
 3. **A new page?** → a thin file in `routes/` that pulls the pieces together.

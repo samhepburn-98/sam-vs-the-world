@@ -1,7 +1,7 @@
 import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
 
 import { EnumCell, NullCell, TsCell } from "@/features/manage/components/cells"
+import { useRowActions } from "@/features/manage/hooks/use-row-actions"
 import { ConfirmDelete } from "@/features/manage/components/confirm-delete"
 import { DataTable } from "@/features/manage/components/data-table"
 import { EditPlayerDialog } from "@/features/manage/components/edit-player-dialog"
@@ -24,8 +24,8 @@ interface TabProps {
 export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
   const players = useManagePlayers({ params })
   const del = useDeletePlayer()
-  const [editing, setEditing] = useState<PlayerRow | null>(null)
-  const [deleting, setDeleting] = useState<PlayerRow | null>(null)
+  const { editing, deleting, edit, remove, doneEditing, doneDeleting } =
+    useRowActions<PlayerRow>()
 
   const columns: Array<ManageColumn<PlayerRow>> = [
     {
@@ -83,7 +83,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Edit ${p.name}`}
-                  onClick={() => setEditing(p)}
+                  onClick={() => edit(p)}
                 >
                   <PencilIcon />
                 </Button>
@@ -92,7 +92,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Delete ${p.name}`}
-                  onClick={() => setDeleting(p)}
+                  onClick={() => remove(p)}
                 >
                   <Trash2Icon />
                 </Button>
@@ -118,7 +118,7 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(p) => p.id}
       />
       {editing && (
-        <EditPlayerDialog player={editing} onClose={() => setEditing(null)} />
+        <EditPlayerDialog player={editing} onClose={() => doneEditing()} />
       )}
       <ConfirmDelete
         open={deleting !== null}
@@ -127,12 +127,12 @@ export function PlayersTab({ params, owner, onSort, onPage }: TabProps) {
         pending={del.isPending}
         error={del.isError ? friendlyWriteError(del.error) : null}
         onCancel={() => {
-          setDeleting(null)
+          doneDeleting()
           del.reset()
         }}
         onConfirm={() => {
           if (!deleting) return
-          del.mutate(deleting.id, { onSuccess: () => setDeleting(null) })
+          del.mutate(deleting.id, { onSuccess: () => doneDeleting() })
         }}
       />
     </>
