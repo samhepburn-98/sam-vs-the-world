@@ -81,7 +81,7 @@ export function LoggingShell({
   firstServerId,
   onExit,
 }: LoggingShellProps) {
-  const detail = useMatchDetail(matchId)
+  const detail = useMatchDetail({ matchId })
 
   if (detail.isPending) {
     return (

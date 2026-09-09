@@ -8,6 +8,7 @@ import type {
   ErrorProfile,
   InsightFilters,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 export async function fetchErrorProfile(
   playerId: string,
@@ -32,9 +33,16 @@ export function errorProfileOptions(
   })
 }
 
-export function useErrorProfile(
-  playerId: string,
-  filters: InsightFilters = {}
-) {
-  return useQuery(errorProfileOptions(playerId, filters))
+type UseErrorProfileOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof errorProfileOptions>
+}
+
+export function useErrorProfile({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UseErrorProfileOptions) {
+  return useQuery({ ...errorProfileOptions(playerId, filters), ...queryConfig })
 }

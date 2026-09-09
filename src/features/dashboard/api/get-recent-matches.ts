@@ -4,6 +4,8 @@ import { z } from "zod"
 import { matchSummary } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 export async function fetchRecentMatches() {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
@@ -18,6 +20,12 @@ export async function fetchRecentMatches() {
 export const recentMatchesQueryOptions = () =>
   queryOptions({ queryKey: ["matches", "recent"], queryFn: fetchRecentMatches })
 
-export function useRecentMatches() {
-  return useQuery(recentMatchesQueryOptions())
+type UseRecentMatchesOptions = {
+  queryConfig?: QueryConfig<typeof recentMatchesQueryOptions>
+}
+
+export function useRecentMatches({
+  queryConfig,
+}: UseRecentMatchesOptions = {}) {
+  return useQuery({ ...recentMatchesQueryOptions(), ...queryConfig })
 }

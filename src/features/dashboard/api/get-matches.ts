@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { BallType } from "@/lib/schemas/enums"
 import type { MatchListRow } from "@/lib/schemas/match"
+import type { QueryConfig } from "@/lib/react-query"
 
 // The match history list (§5.2): every match newest first, filterable by
 // participant, ball, and date, paged. From `match_results` — names resolved
@@ -60,6 +61,11 @@ export function matchesQueryOptions(params: MatchesParams) {
   })
 }
 
-export function useMatches(params: MatchesParams) {
-  return useQuery(matchesQueryOptions(params))
+type UseMatchesOptions = {
+  params: MatchesParams
+  queryConfig?: QueryConfig<typeof matchesQueryOptions>
+}
+
+export function useMatches({ params, queryConfig }: UseMatchesOptions) {
+  return useQuery({ ...matchesQueryOptions(params), ...queryConfig })
 }

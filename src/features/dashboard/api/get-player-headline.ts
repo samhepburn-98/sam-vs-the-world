@@ -7,6 +7,7 @@ import type {
   InsightFilters,
   PlayerHeadline,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** Maps the client-side filter object onto the RPC's p_* parameters —
  *  omitted filters fall through to the SQL defaults (no filter). */
@@ -42,9 +43,19 @@ export function playerHeadlineOptions(
   })
 }
 
-export function usePlayerHeadline(
-  playerId: string,
-  filters: InsightFilters = {}
-) {
-  return useQuery(playerHeadlineOptions(playerId, filters))
+type UsePlayerHeadlineOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof playerHeadlineOptions>
+}
+
+export function usePlayerHeadline({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UsePlayerHeadlineOptions) {
+  return useQuery({
+    ...playerHeadlineOptions(playerId, filters),
+    ...queryConfig,
+  })
 }

@@ -4,6 +4,8 @@ import { z } from "zod"
 import { MATCH_RESULT_COLUMNS, matchResultSummary } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 // The home hub's recent-matches list (§5.1): the derived result per match,
 // most recently logged first. Ordered by created_at, not date — date is a
 // DATE, so a whole evening's matches tie on it and which eight rows come
@@ -28,6 +30,12 @@ export const recentResultsQueryOptions = () =>
     queryFn: fetchRecentResults,
   })
 
-export function useRecentResults() {
-  return useQuery(recentResultsQueryOptions())
+type UseRecentResultsOptions = {
+  queryConfig?: QueryConfig<typeof recentResultsQueryOptions>
+}
+
+export function useRecentResults({
+  queryConfig,
+}: UseRecentResultsOptions = {}) {
+  return useQuery({ ...recentResultsQueryOptions(), ...queryConfig })
 }

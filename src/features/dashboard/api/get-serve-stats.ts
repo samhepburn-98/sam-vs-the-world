@@ -8,6 +8,7 @@ import type {
   InsightFilters,
   ServeStats,
 } from "@/features/dashboard/schemas/insights"
+import type { QueryConfig } from "@/lib/react-query"
 
 export async function fetchServeStats(
   playerId: string,
@@ -32,6 +33,16 @@ export function serveStatsOptions(
   })
 }
 
-export function useServeStats(playerId: string, filters: InsightFilters = {}) {
-  return useQuery(serveStatsOptions(playerId, filters))
+type UseServeStatsOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof serveStatsOptions>
+}
+
+export function useServeStats({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UseServeStatsOptions) {
+  return useQuery({ ...serveStatsOptions(playerId, filters), ...queryConfig })
 }

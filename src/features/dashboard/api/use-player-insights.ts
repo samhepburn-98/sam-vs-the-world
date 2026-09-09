@@ -1,11 +1,27 @@
-import { useQuery } from "@tanstack/react-query"
-
-import { decisiveShotsOptions } from "@/features/dashboard/api/get-decisive-shots"
-import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
-import { momentumOptions } from "@/features/dashboard/api/get-momentum"
-import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
-import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
-import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
+import {
+  decisiveShotsOptions,
+  useDecisiveShots,
+} from "@/features/dashboard/api/get-decisive-shots"
+import {
+  errorProfileOptions,
+  useErrorProfile,
+} from "@/features/dashboard/api/get-error-profile"
+import {
+  momentumOptions,
+  useMomentum,
+} from "@/features/dashboard/api/get-momentum"
+import {
+  playerHeadlineOptions,
+  usePlayerHeadline,
+} from "@/features/dashboard/api/get-player-headline"
+import {
+  rallyLengthsOptions,
+  useRallyLengths,
+} from "@/features/dashboard/api/get-rally-lengths"
+import {
+  serveStatsOptions,
+  useServeStats,
+} from "@/features/dashboard/api/get-serve-stats"
 
 import type { PlayerData } from "@/features/dashboard/lib/player-attributes"
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
@@ -39,14 +55,16 @@ export function usePlayerInsights(
   playerId: string | undefined,
   filters: InsightFilters = {}
 ): PlayerData {
-  const enabled = Boolean(playerId)
+  // an unpicked compare slot renders without fetching — the one option this
+  // facade needs, and now the one the sibling hooks accept (lib/react-query)
+  const queryConfig = { enabled: Boolean(playerId) }
   const id = playerId ?? ""
-  const headline = useQuery({ ...playerHeadlineOptions(id, filters), enabled })
-  const serve = useQuery({ ...serveStatsOptions(id, filters), enabled })
-  const error = useQuery({ ...errorProfileOptions(id, filters), enabled })
-  const rally = useQuery({ ...rallyLengthsOptions(id, filters), enabled })
-  const momentum = useQuery({ ...momentumOptions(id, filters), enabled })
-  const decisive = useQuery({ ...decisiveShotsOptions(id, filters), enabled })
+  const headline = usePlayerHeadline({ playerId: id, filters, queryConfig })
+  const serve = useServeStats({ playerId: id, filters, queryConfig })
+  const error = useErrorProfile({ playerId: id, filters, queryConfig })
+  const rally = useRallyLengths({ playerId: id, filters, queryConfig })
+  const momentum = useMomentum({ playerId: id, filters, queryConfig })
+  const decisive = useDecisiveShots({ playerId: id, filters, queryConfig })
 
   return {
     headline: headline.data,

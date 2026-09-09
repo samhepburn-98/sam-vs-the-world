@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { GameResultInMatch } from "@/lib/schemas/game"
 import type { MatchListRow } from "@/lib/schemas/match"
+import type { QueryConfig } from "@/lib/react-query"
 
 // The profile's match history: the player's latest matches from
 // `match_results` (one page, newest first, with the true total) plus every
@@ -55,6 +56,17 @@ export const playerMatchHistoryQueryOptions = (playerId: string) =>
     queryFn: () => fetchPlayerMatchHistory(playerId),
   })
 
-export function usePlayerMatchHistory(playerId: string) {
-  return useQuery(playerMatchHistoryQueryOptions(playerId))
+type UsePlayerMatchHistoryOptions = {
+  playerId: string
+  queryConfig?: QueryConfig<typeof playerMatchHistoryQueryOptions>
+}
+
+export function usePlayerMatchHistory({
+  playerId,
+  queryConfig,
+}: UsePlayerMatchHistoryOptions) {
+  return useQuery({
+    ...playerMatchHistoryQueryOptions(playerId),
+    ...queryConfig,
+  })
 }

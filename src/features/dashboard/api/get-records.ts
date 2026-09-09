@@ -4,6 +4,7 @@ import { parseRecordRows } from "@/features/dashboard/schemas/records"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { RecordRow } from "@/features/dashboard/schemas/records"
+import type { QueryConfig } from "@/lib/react-query"
 
 // The all-time records — one global set, cached once. The home wall and the
 // profile's "Records held" filter the same rows, so navigating between them
@@ -23,6 +24,10 @@ export async function fetchRecords(): Promise<Array<RecordRow>> {
 export const recordsQueryOptions = () =>
   queryOptions({ queryKey: ["insights", "records"], queryFn: fetchRecords })
 
-export function useRecords() {
-  return useQuery(recordsQueryOptions())
+type UseRecordsOptions = {
+  queryConfig?: QueryConfig<typeof recordsQueryOptions>
+}
+
+export function useRecords({ queryConfig }: UseRecordsOptions = {}) {
+  return useQuery({ ...recordsQueryOptions(), ...queryConfig })
 }

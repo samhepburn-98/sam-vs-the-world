@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { GameRef } from "@/lib/rally/write-intent"
+import type { MutationConfig } from "@/lib/react-query"
 import type { WriteOp } from "@/lib/api/write-queue"
 
 interface DeleteCapableClient {
@@ -36,17 +37,28 @@ export function deleteGameOp(
 
 /** The same delete as a manage mutation (§5.4) — cascades to the game's
  *  rallies per the schema FKs. */
-export function useDeleteGame() {
+export function deleteGame(game: GameRef) {
+  return deleteGameOp(game).run()
+}
+
+type UseDeleteGameOptions = {
+  mutationConfig?: MutationConfig<typeof deleteGame>
+}
+
+export function useDeleteGame({ mutationConfig }: UseDeleteGameOptions = {}) {
   const queryClient = useQueryClient()
+  const { onSuccess, ...restConfig } = mutationConfig ?? {}
   return useMutation({
-    mutationFn: (game: GameRef) => deleteGameOp(game).run(),
-    onSuccess: () => {
+    onSuccess: (...args) => {
       void queryClient.invalidateQueries({ queryKey: ["manage"] })
       void queryClient.invalidateQueries({ queryKey: ["matches"] })
       // every insight aggregate is derived from rally rows
       void queryClient.invalidateQueries({ queryKey: ["insights"] })
       // the cascade deletes the game's rallies — the home hub counts them
       void queryClient.invalidateQueries({ queryKey: ["home"] })
+      onSuccess?.(...args)
     },
+    ...restConfig,
+    mutationFn: deleteGame,
   })
 }

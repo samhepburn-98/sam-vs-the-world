@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { InsightFilters } from "@/features/dashboard/schemas/insights"
 import type { RallyScored } from "@/lib/schemas/rally"
+import type { QueryConfig } from "@/lib/react-query"
 
 /** The drill-through companion of error_profile (§8.4): the error rows
  *  behind every count, filtered by the same SQL the aggregate used. */
@@ -33,9 +34,16 @@ export function errorRalliesOptions(
   })
 }
 
-export function useErrorRallies(
-  playerId: string,
-  filters: InsightFilters = {}
-) {
-  return useQuery(errorRalliesOptions(playerId, filters))
+type UseErrorRalliesOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof errorRalliesOptions>
+}
+
+export function useErrorRallies({
+  playerId,
+  filters = {},
+  queryConfig,
+}: UseErrorRalliesOptions) {
+  return useQuery({ ...errorRalliesOptions(playerId, filters), ...queryConfig })
 }

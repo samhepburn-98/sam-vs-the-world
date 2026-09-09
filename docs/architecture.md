@@ -38,6 +38,34 @@ Each feature's `api/` follows one convention: **one request per file** — the f
 `queryOptions`, and the `useXxx` hook, colocated (mutations the same way). Components consume hooks;
 nothing outside an `api/` (or `lib/api`) calls Supabase directly.
 
+**Hooks take a single options object, and the caller configures the query.** A hook's `queryKey` and
+`queryFn` are its identity — change either and you're describing a different request — so those stay
+the hook's. Everything else about how the query behaves (`enabled`, `staleTime`, `select`,
+`placeholderData`) belongs to the caller, which is the only party that knows the surface it's
+rendering into:
+
+```ts
+type UseServeStatsOptions = {
+  playerId: string
+  filters?: InsightFilters
+  queryConfig?: QueryConfig<typeof serveStatsOptions>
+}
+
+export function useServeStats({ playerId, filters = {}, queryConfig }: UseServeStatsOptions) {
+  return useQuery({ ...serveStatsOptions(playerId, filters), ...queryConfig })
+}
+```
+
+`QueryConfig` / `MutationConfig` live in [lib/react-query.ts](../src/lib/react-query.ts); `QueryConfig`
+is literally the options minus those two keys. Mutations do the same with `mutationConfig`, with one
+extra rule: a mutation hook owns the cache invalidation its write implies, so it destructures the
+caller's `onSuccess` out, invalidates first, then calls it — a caller's callback runs *after* the
+cache settles, never instead of it. `mutationFn` is applied after the spread so it can't be replaced.
+
+Without this half of the convention, a caller that needs one option has to reach past the hook to its
+`queryOptions` and call `useQuery` itself. That's how `usePlayerInsights` came to fire six queries
+behind a call site that looked like one.
+
 ## The one rule
 
 Dependencies flow **one way**: `shared → features → routes`. Concretely:

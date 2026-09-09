@@ -81,7 +81,7 @@ export function Duel({
   p2Data: PlayerData
   mode: "all" | "h2h"
 }) {
-  const h2h = useH2h(p1.id, p2.id)
+  const h2h = useH2h({ player1Id: p1.id, player2Id: p2.id })
 
   const p1Attrs = computePlayerAttributes(p1Data)
   const p2Attrs = computePlayerAttributes(p2Data)

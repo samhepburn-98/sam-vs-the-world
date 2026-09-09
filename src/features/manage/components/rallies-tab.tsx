@@ -33,7 +33,7 @@ interface TabProps {
 }
 
 export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
-  const rallies = useManageRallies(params)
+  const rallies = useManageRallies({ params })
   const del = useDeleteRally()
   const [sheet, setSheet] = useState<{
     rally: RallyDbRowWithGame

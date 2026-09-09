@@ -3,6 +3,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 import { MATCH_RESULT_COLUMNS, matchResultSummary } from "@/lib/schemas/match"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
+import type { QueryConfig } from "@/lib/react-query"
+
 // The derived verdict for one match. match_results owns who won — or that
 // the match is drawn or still pending — so the detail header reads the view
 // instead of recomputing the clinch rule it would inevitably drift from.
@@ -24,6 +26,14 @@ export const matchResultQueryOptions = (matchId: string) =>
     queryFn: () => fetchMatchResult(matchId),
   })
 
-export function useMatchResult(matchId: string) {
-  return useQuery(matchResultQueryOptions(matchId))
+type UseMatchResultOptions = {
+  matchId: string
+  queryConfig?: QueryConfig<typeof matchResultQueryOptions>
+}
+
+export function useMatchResult({
+  matchId,
+  queryConfig,
+}: UseMatchResultOptions) {
+  return useQuery({ ...matchResultQueryOptions(matchId), ...queryConfig })
 }

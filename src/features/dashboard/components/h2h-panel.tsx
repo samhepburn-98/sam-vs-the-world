@@ -32,7 +32,13 @@ function RalliesBehind({
   player2Id: string
 }) {
   const [open, setOpen] = useState(false)
-  const rallies = useH2hRallies(player1Id, player2Id, {}, open)
+  const rallies = useH2hRallies({
+    player1Id,
+    player2Id,
+    // the compare panel opens this drill-through on demand: a pair's whole
+    // rally history is a lot to fetch for a panel most visits never expand
+    queryConfig: { enabled: open },
+  })
 
   return (
     <div className="flex flex-col gap-3">
@@ -117,8 +123,8 @@ export function H2hPanel({
   p1Name: string
   p2Name: string
 }) {
-  const h2h = useH2h(player1Id, player2Id)
-  if (!h2h.data) return <Skeleton className="h-32 w-full" />
+  const h2h = useH2h({ player1Id, player2Id })
+  if (!h2h.data) return <Skeleton className="h-32 w-full rounded-2xl" />
 
   const h = h2h.data
   const played = h.games_decided > 0 || h.match_history.length > 0
