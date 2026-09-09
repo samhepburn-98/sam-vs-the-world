@@ -2,7 +2,7 @@ import { LoggerDialog } from "@/features/logger/components/logger-dialog"
 import { Overline } from "@/components/typography"
 import { Kbd, KbdHintsContext } from "@/components/ui/kbd"
 import { Toggle } from "@/components/ui/toggle"
-import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { HOTKEY_HINTS } from "@/features/logger/lib/hotkeys"
 
 // The `?` cheat-sheet overlay (§5.3). Rows are built from HOTKEY_HINTS — the
 // same object the resolver and control hints use, so it can't drift.

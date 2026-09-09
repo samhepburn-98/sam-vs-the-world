@@ -13,7 +13,7 @@ src/
   routes/        the app layer — thin files that compose features (TanStack Start file routing)
   features/
     auth/        components (login form)
-    logger/      components + logic/ (session planner, hotkeys) — the live rally logger
+    logger/      components + lib/ (session planner, hotkeys) — the live rally logger
     manage/      api/ (paginated list reads) + components/ (data table, tabs, edit dialogs)
     dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + lib/ + schemas/
   components/    SHARED UI, one folder per kind:
@@ -94,8 +94,11 @@ route could import the fixture cast and ship it to `dist/client` with every gate
    requests, UI, stateful React logic, pure logic, parsed shapes. `hooks/` is the narrow one — it
    is for a `useXxx` that owns component state and nothing else; a hook that fetches is a request
    and belongs in `api/`, and a function with no state at all is pure logic and belongs in `lib/`.
-   A feature grows a sixth folder only when it earns a genuinely new kind of thing (the logger's
-   `logic/`, not a second spelling of `lib/`).
+   A feature grows a sixth folder only when it earns a genuinely new kind of thing — a new
+   *kind*, not a new word for one of these. The logger carried a `logic/` for a while holding
+   exactly what `lib/` holds (its hotkey map and session planner, both pure), which is how you
+   can tell: if the test for the new folder is "what would go in it that could not go in `lib/`",
+   and there is no answer, it is a second spelling.
 2. **Two or more features use it?** → shared. UI to `components/`, everything else to `lib/`. It is
    _not_ owned by whichever feature happened to build it first.
 3. **A new page?** → a thin file in `routes/` that pulls the pieces together.

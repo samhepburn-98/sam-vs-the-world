@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
-import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { HOTKEY_HINTS } from "@/features/logger/lib/hotkeys"
 
 // One-action undo with a redo grace (§5.3): visible only while there is
 // something to reverse; any new save or edit clears both.

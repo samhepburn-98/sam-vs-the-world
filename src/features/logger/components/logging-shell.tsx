@@ -14,7 +14,7 @@ import { WinnerButtons } from "@/features/logger/components/winner-buttons"
 import { Button } from "@/components/ui/button"
 import { KbdHintsContext } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
-import { hotkeyAction, isEditableTarget } from "@/features/logger/logic/hotkeys"
+import { hotkeyAction, isEditableTarget } from "@/features/logger/lib/hotkeys"
 import {
   buildLetRow,
   buildRallyRow,
@@ -38,7 +38,7 @@ import {
   saveRally,
   startGame,
   undo,
-} from "@/features/logger/logic/session"
+} from "@/features/logger/lib/session"
 import { useMatchDetail } from "@/lib/api/get-match-detail"
 import { intentToOp } from "@/features/logger/api/session-ops"
 import { useMediaQuery } from "@/lib/use-media-query"
@@ -51,9 +51,9 @@ import {
   tallyMatch,
 } from "@/lib/scoring"
 
-import type { HotkeyAction } from "@/features/logger/logic/hotkeys"
+import type { HotkeyAction } from "@/features/logger/lib/hotkeys"
 import type { DraftContext, RallyRow } from "@/lib/rally/rally-draft"
-import type { SessionState, Transition } from "@/features/logger/logic/session"
+import type { SessionState, Transition } from "@/features/logger/lib/session"
 import type { MatchDetail } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 import type { WriteQueue } from "@/lib/api/write-queue"

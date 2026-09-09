@@ -1,5 +1,5 @@
 import { Kbd } from "@/components/ui/kbd"
-import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { HOTKEY_HINTS } from "@/features/logger/lib/hotkeys"
 import { cn } from "@/lib/utils"
 
 import type { RallyDraft } from "@/lib/rally/rally-draft"
