@@ -8,6 +8,7 @@ import { ProfileSection } from "@/features/dashboard/components/profile-section"
 import { RallyTable } from "@/features/dashboard/components/rally-table"
 import { StatCard } from "@/features/dashboard/components/stat-card"
 import { ResultChip } from "@/components/broadcast/result-chip"
+import { outcomeChip } from "@/lib/scoring/match"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -80,6 +81,9 @@ function HistoryRow({
 }) {
   const winner =
     m.outcome === "p1" ? p1Name : m.outcome === "p2" ? p2Name : undefined
+  // rows read from p1's side, matching the games_won_p1/p2 columns. A null
+  // chip is the pending case — the one result with nothing to award.
+  const chip = outcomeChip(m.outcome, true)
 
   return (
     <li>
@@ -97,14 +101,12 @@ function HistoryRow({
           <span className="font-heading text-base font-bold tabular-nums">
             {m.games_won_p1}–{m.games_won_p2}
           </span>
-          {m.outcome === "pending" ? (
+          {chip === null ? (
             <span className="font-heading text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
               In play
             </span>
           ) : (
-            <ResultChip
-              result={m.outcome === "p1" ? "w" : m.outcome === "p2" ? "l" : "d"}
-            />
+            <ResultChip result={chip} />
           )}
         </span>
       </Link>

@@ -1,3 +1,6 @@
+import { outcomeChip } from "@/lib/scoring/match"
+
+import type { OutcomeChip } from "@/lib/scoring/match"
 import type { MatchResultSummary } from "@/lib/schemas/match"
 
 // The home rundown's presentation logic (§5.1): the ticker's one line of
@@ -34,22 +37,15 @@ export function tickerLine(
 
 /** A player's recent results, oldest first, from the matches given. Pending
  *  matches are dropped rather than shown as a gap: a match still being
- *  logged has no verdict to report. */
+ *  logged has no verdict to report, which is what outcomeChip's null says. */
 export function formFor(
   playerId: string,
   results: Array<MatchResultSummary>
-): Array<"w" | "l" | "d"> {
+): Array<OutcomeChip> {
   return results
     .slice()
     .reverse()
-    .filter(
-      (m) =>
-        (m.player1_id === playerId || m.player2_id === playerId) &&
-        m.outcome !== "pending"
-    )
-    .map((m) => {
-      if (m.outcome === "draw") return "d"
-      const winner = m.outcome === "p1" ? m.player1_id : m.player2_id
-      return winner === playerId ? "w" : "l"
-    })
+    .filter((m) => m.player1_id === playerId || m.player2_id === playerId)
+    .map((m) => outcomeChip(m.outcome, m.player1_id === playerId))
+    .filter((chip): chip is OutcomeChip => chip !== null)
 }

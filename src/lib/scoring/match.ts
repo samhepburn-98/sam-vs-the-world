@@ -67,3 +67,27 @@ export function orientOutcome(
   if (outcome === "p2") return isP1 ? "lost" : "won"
   return outcome === "draw" ? "drawn" : "pending"
 }
+
+/** The letter a W/L/D chip wears, from one side of the net.
+ *
+ *  Pending returns null rather than a letter: a match still being logged has
+ *  no verdict, and each surface says something different in its place — the
+ *  home form strip drops it, the head-to-head list prints "In play". Making
+ *  that a null forces the caller to decide instead of quietly picking one.
+ *
+ *  Note this answers a different question from a game's nullable `won`, where
+ *  null means the game ended level. There the surface chooses: a form strip
+ *  drops a tied game (it is not a result), a results list shows it as a draw.
+ */
+export type OutcomeChip = "w" | "l" | "d"
+
+export function outcomeChip(
+  outcome: MatchOutcome,
+  isP1: boolean
+): OutcomeChip | null {
+  const oriented = orientOutcome(outcome, isP1)
+  if (oriented === "won") return "w"
+  if (oriented === "lost") return "l"
+  if (oriented === "drawn") return "d"
+  return null
+}
