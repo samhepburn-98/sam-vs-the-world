@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils"
 // Non-rate stats (a count, an average) go through `value` and never grow a
 // percent sign — the only path that divides is the rate path.
 //
-// It speaks in StatTile's voice — condensed display number over a tracked
+// It speaks in StatRow's voice — condensed display number over a tracked
 // label on a flat panel — so the key-stat row on a category page and the KPI
-// grid on the profile read as one system. StatTile stays the shape where the
+// strip on the profile read as one system. StatRow stays the shape where the
 // number is always sayable; this is the shape that can decline to say it.
 
 export interface Rate {
