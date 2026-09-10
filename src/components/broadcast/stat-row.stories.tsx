@@ -4,9 +4,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 // The lower-third line: tracked label left, value right, on a flat panel. The
 // profile header stacks them under the name so its KPIs read as one block.
-// Reach for StatTile when the same figures sit in a grid instead, and for
-// StatCard when the figure is a rate — only StatCard makes the denominator
-// travel with the percentage.
+// Reach for StatCard when the figure is a rate — only StatCard makes the
+// denominator travel with the percentage, and only StatCard can decline to
+// show a figure at all below its sample threshold.
 //
 // Every figure below is one buildKpis (features/dashboard/lib/
 // profile-header.ts) actually emits, so the block reads exactly as the

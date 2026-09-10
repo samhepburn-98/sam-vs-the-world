@@ -1,7 +1,7 @@
 import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
 
 import { NullCell, RelCell, TsCell } from "@/features/manage/components/cells"
+import { useRowActions } from "@/features/manage/hooks/use-row-actions"
 import { ConfirmDelete } from "@/features/manage/components/confirm-delete"
 import { DataTable } from "@/features/manage/components/data-table"
 import { EditGameDialog } from "@/features/manage/components/edit-game-dialog"
@@ -25,8 +25,8 @@ interface TabProps {
 export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
   const games = useManageGames({ params })
   const del = useDeleteGame()
-  const [editing, setEditing] = useState<GameBrowserRow | null>(null)
-  const [deleting, setDeleting] = useState<GameBrowserRow | null>(null)
+  const { editing, deleting, edit, remove, doneEditing, doneDeleting } =
+    useRowActions<GameBrowserRow>()
   const players = usePlayers()
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
@@ -106,7 +106,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Edit game ${g.game_number}`}
-                  onClick={() => setEditing(g)}
+                  onClick={() => edit(g)}
                 >
                   <PencilIcon />
                 </Button>
@@ -115,7 +115,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Delete game ${g.game_number}`}
-                  onClick={() => setDeleting(g)}
+                  onClick={() => remove(g)}
                 >
                   <Trash2Icon />
                 </Button>
@@ -141,7 +141,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
         rowKey={(g) => g.id}
       />
       {editing && (
-        <EditGameDialog game={editing} onClose={() => setEditing(null)} />
+        <EditGameDialog game={editing} onClose={() => doneEditing()} />
       )}
       <ConfirmDelete
         open={deleting !== null}
@@ -150,7 +150,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
         pending={del.isPending}
         error={del.isError ? friendlyWriteError(del.error) : null}
         onCancel={() => {
-          setDeleting(null)
+          doneDeleting()
           del.reset()
         }}
         onConfirm={() => {
@@ -161,7 +161,7 @@ export function GamesTab({ params, owner, onSort, onPage }: TabProps) {
               matchId: deleting.match_id,
               gameNumber: deleting.game_number,
             },
-            { onSuccess: () => setDeleting(null) }
+            { onSuccess: () => doneDeleting() }
           )
         }}
       />

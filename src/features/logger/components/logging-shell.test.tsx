@@ -49,7 +49,7 @@ vi.mock("@/lib/api/get-match-detail", () => ({
 }))
 
 // ops must not touch the real Supabase client — the queue runs them for real
-vi.mock("@/lib/api/session-ops", () => ({
+vi.mock("@/features/logger/api/session-ops", () => ({
   intentToOp: (intent: { kind: string }) => ({
     id: Math.random().toString(),
     label: intent.kind,

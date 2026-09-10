@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Fragment } from "react"
 
-import { TRAIT_META } from "@/features/dashboard/lib/player-attributes"
+import {
+  TRAIT_KEYS,
+  TRAIT_META,
+  traitAt,
+} from "@/features/dashboard/lib/player-attributes"
 import type {
   TraitAgency,
   TraitTempo,
 } from "@/features/dashboard/lib/player-attributes"
 import { Overline, PageTitle, SectionTitle } from "@/components/typography"
 import { cn } from "@/lib/utils"
-
-import type { SignatureTrait } from "@/features/dashboard/schemas/insights"
 
 // The trait reference (§3.2): the in-app explanation of the 3×3 signature
 // trait matrix, so nobody has to remember what a Grafter is. Single-sourced
@@ -31,15 +33,6 @@ const AGENCY_COLS: Array<{ key: TraitAgency; label: string; detail: string }> =
     { key: "mixed", label: "Mixed", detail: "a bit of both" },
     { key: "pressure", label: "Pressure", detail: "the opponent cracks" },
   ]
-
-const TRAIT_KEYS = Object.keys(TRAIT_META) as Array<SignatureTrait>
-
-function cellFor(tempo: TraitTempo, agency: TraitAgency): SignatureTrait {
-  // TRAIT_META covers every cell exactly once, so this always finds one
-  return TRAIT_KEYS.find(
-    (k) => TRAIT_META[k].tempo === tempo && TRAIT_META[k].agency === agency
-  ) as SignatureTrait
-}
 
 function TraitsPage() {
   return (
@@ -93,7 +86,7 @@ function TraitsPage() {
                 </p>
               </div>
               {AGENCY_COLS.map((c) => {
-                const key = cellFor(r.key, c.key)
+                const key = traitAt(r.key, c.key)
                 return (
                   <div
                     key={key}

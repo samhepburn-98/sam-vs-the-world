@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
-import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
-import { AttributeGlossaryDialog } from "@/features/dashboard/components/attribute-glossary"
-import { Duel } from "@/features/dashboard/components/duel"
-import { DuelModeToggle } from "@/features/dashboard/components/duel-mode-toggle"
-import { DuelPicker } from "@/features/dashboard/components/duel-picker"
-import { H2hPanel } from "@/features/dashboard/components/h2h-panel"
+import { usePlayerInsights } from "@/features/dashboard/api/get-player-insights"
+import { AttributeGlossaryDialog } from "@/features/dashboard/components/compare/attribute-glossary"
+import { Duel } from "@/features/dashboard/components/compare/duel"
+import { DuelModeToggle } from "@/features/dashboard/components/compare/duel-mode-toggle"
+import { DuelPicker } from "@/features/dashboard/components/compare/duel-picker"
+import { H2hPanel } from "@/features/dashboard/components/compare/h2h-panel"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
 import {
@@ -71,8 +71,14 @@ function ComparePage() {
   const filtersFor = (i: number): InsightFilters =>
     h2h ? { opponentId: selected[i === 0 ? 1 : 0] } : {}
 
-  const p1Data = usePlayerInsights(selected[0], filtersFor(0))
-  const p2Data = usePlayerInsights(selected[1], filtersFor(1))
+  const p1Data = usePlayerInsights({
+    playerId: selected[0],
+    filters: filtersFor(0),
+  })
+  const p2Data = usePlayerInsights({
+    playerId: selected[1],
+    filters: filtersFor(1),
+  })
 
   const p1 = roster.find((p) => p.id === selected[0])
   const p2 = roster.find((p) => p.id === selected[1])

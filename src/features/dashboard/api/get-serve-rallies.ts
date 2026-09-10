@@ -1,7 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
+import { RALLY_DRILL_LIMIT } from "@/features/dashboard/lib/insight-thresholds"
 import { rallyScored } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
@@ -18,13 +19,14 @@ export async function fetchServeRallies(
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("serve_rallies", {
     p_player_id: playerId,
+    p_limit: RALLY_DRILL_LIMIT,
     ...toRpcFilters(filters),
   })
   if (error) throw error
   return z.array(rallyScored).parse(data)
 }
 
-export function serveRalliesOptions(
+export function serveRalliesQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -37,7 +39,7 @@ export function serveRalliesOptions(
 type UseServeRalliesOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof serveRalliesOptions>
+  queryConfig?: QueryConfig<typeof serveRalliesQueryOptions>
 }
 
 export function useServeRallies({
@@ -45,5 +47,8 @@ export function useServeRallies({
   filters = {},
   queryConfig,
 }: UseServeRalliesOptions) {
-  return useQuery({ ...serveRalliesOptions(playerId, filters), ...queryConfig })
+  return useQuery({
+    ...serveRalliesQueryOptions(playerId, filters),
+    ...queryConfig,
+  })
 }

@@ -1,9 +1,9 @@
+import { useState } from "react"
 import {
   BetweenHorizontalStartIcon,
   PencilIcon,
   Trash2Icon,
 } from "lucide-react"
-import { useState } from "react"
 
 import {
   BoolCell,
@@ -12,6 +12,7 @@ import {
   RelCell,
   TsCell,
 } from "@/features/manage/components/cells"
+import { useRowActions } from "@/features/manage/hooks/use-row-actions"
 import { DataTable } from "@/features/manage/components/data-table"
 import { ConfirmDelete } from "@/features/manage/components/confirm-delete"
 import { EditRallyDialog } from "@/features/manage/components/edit-rally-dialog"
@@ -39,7 +40,7 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
     rally: RallyDbRowWithGame
     mode: "edit" | "insert"
   } | null>(null)
-  const [deleting, setDeleting] = useState<RallyDbRowWithGame | null>(null)
+  const { deleting, remove, doneDeleting } = useRowActions<RallyDbRowWithGame>()
   const players = usePlayers()
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
@@ -168,7 +169,7 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Delete rally #${r.rally_number}`}
-                  onClick={() => setDeleting(r)}
+                  onClick={() => remove(r)}
                 >
                   <Trash2Icon />
                 </Button>
@@ -207,14 +208,14 @@ export function RalliesTab({ params, owner, onSort, onPage }: TabProps) {
         pending={del.isPending}
         error={del.isError ? friendlyWriteError(del.error) : null}
         onCancel={() => {
-          setDeleting(null)
+          doneDeleting()
           del.reset()
         }}
         onConfirm={() => {
           if (!deleting) return
           del.mutate(
             { ...deleting, serve_number: deleting.serve_number === 2 ? 2 : 1 },
-            { onSuccess: () => setDeleting(null) }
+            { onSuccess: () => doneDeleting() }
           )
         }}
       />

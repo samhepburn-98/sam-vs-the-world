@@ -419,9 +419,9 @@ describe("error_profile", () => {
 describe("API exposure", () => {
   it.each([
     "serve_stats(uuid, uuid, ball_type, date, date)",
-    "serve_rallies(uuid, uuid, ball_type, date, date)",
+    "serve_rallies(uuid, uuid, ball_type, date, date, integer)",
     "error_profile(uuid, uuid, ball_type, date, date)",
-    "error_rallies(uuid, uuid, ball_type, date, date)",
+    "error_rallies(uuid, uuid, ball_type, date, date, integer)",
   ])("anon can execute %s", async (signature) => {
     const res = await db.query<{ ok: boolean }>(
       `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`

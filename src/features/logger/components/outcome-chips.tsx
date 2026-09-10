@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import { NumberStepper } from "@/components/ui/number-stepper"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { HOTKEY_HINTS } from "@/features/logger/lib/hotkeys"
 import {
   canSave,
   showsErrorDetail,

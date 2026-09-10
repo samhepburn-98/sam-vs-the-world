@@ -13,9 +13,10 @@ src/
   routes/        the app layer — thin files that compose features (TanStack Start file routing)
   features/
     auth/        components (login form)
-    logger/      components + logic/ (session planner, hotkeys) — the live rally logger
+    logger/      components + lib/ (session planner, hotkeys) — the live rally logger
     manage/      api/ (paginated list reads) + components/ (data table, tabs, edit dialogs)
-    dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + lib/ + schemas/
+    dashboard/   api/ (insight RPC hooks) + components/ (grouped by surface, below)
+                 + lib/ + schemas/
   components/    SHARED UI, one folder per kind:
     ui/          shadcn primitives, themed by tokens only — never edited for one screen
     broadcast/   the design-system graphic kit (ticker, callout, score strip, stat row/tile,
@@ -89,10 +90,16 @@ route could import the fixture cast and ship it to `dist/client` with every gate
 
 ## Where does a new file go?
 
-1. **Only one feature uses it?** → that feature (`features/<x>/{api,components,lib,schemas}`). Those
-   four are the whole vocabulary: requests, UI, pure logic, parsed shapes. A feature grows a fifth
-   folder only when it earns a genuinely new kind of thing (the logger's `logic/`, not a second
-   spelling of `lib/`).
+1. **Only one feature uses it?** → that feature
+   (`features/<x>/{api,components,hooks,lib,schemas}`). Those five are the whole vocabulary:
+   requests, UI, stateful React logic, pure logic, parsed shapes. `hooks/` is the narrow one — it
+   is for a `useXxx` that owns component state and nothing else; a hook that fetches is a request
+   and belongs in `api/`, and a function with no state at all is pure logic and belongs in `lib/`.
+   A feature grows a sixth folder only when it earns a genuinely new kind of thing — a new
+   *kind*, not a new word for one of these. The logger carried a `logic/` for a while holding
+   exactly what `lib/` holds (its hotkey map and session planner, both pure), which is how you
+   can tell: if the test for the new folder is "what would go in it that could not go in `lib/`",
+   and there is no answer, it is a second spelling.
 2. **Two or more features use it?** → shared. UI to `components/`, everything else to `lib/`. It is
    _not_ owned by whichever feature happened to build it first.
 3. **A new page?** → a thin file in `routes/` that pulls the pieces together.
@@ -106,6 +113,22 @@ is shared so `lib/api` can execute them without importing the planner.
 
 Entity **reads** split by use: a read only one feature needs lives in that feature's `api/`; a read
 several surfaces share (`get-players`, `get-match-detail`) lives in `lib/api`.
+
+### Inside a feature's `components/`
+
+`dashboard` is the one feature big enough to need a second level: it serves five screens, and forty
+components in one directory told you nothing about which. They are grouped by **the surface that
+renders them** — `profile/`, `compare/`, `category/`, `home/`, `match/` — with `shared/` for the
+ones more than one surface renders.
+
+That is the whole rule, and it is decidable rather than a matter of taste: follow the imports from
+the routes, and a component reachable from exactly one route belongs to that route's folder. It is
+why `match/` holds a single file — the rule does not bend for a small surface, and a folder that
+starts with one file is honest about what the surface is.
+
+Only `dashboard` is grouped. The other features have seventeen files between them and a flat folder
+is still the fastest thing to read; adding empty ceremony to `logger/components` would cost more
+than it explains.
 
 ## Component API conventions
 

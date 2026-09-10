@@ -2,8 +2,9 @@ import { cn } from "@/lib/utils"
 
 // The stat row: a broadcast lower-third line — tracked label left, value
 // right, on a flat panel. Rows stack into the compact stat blocks the
-// profile and head-to-head strips use; StatTile stays the shape for tiles
-// in a grid.
+// profile and head-to-head strips use. Reach for StatCard instead when the
+// figure is a rate — only StatCard makes the denominator travel with the
+// percentage.
 
 export function StatRow({
   label,

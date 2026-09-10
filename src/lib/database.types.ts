@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -450,27 +470,13 @@ export type Database = {
       }
     }
     Functions: {
-      create_match_with_game: {
-        Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"] | null
-          p_date: string
-          p_format?: number | null
-          p_let_resets_serve?: boolean
-          p_player1_id: string
-          p_player2_id: string
-          p_serves_per_point?: number
-          p_target_score?: number
-          p_tiebreak?: Database["public"]["Enums"]["tiebreak"]
-          p_venue?: string | null
-        }
-        Returns: string
-      }
       comeback_rallies: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
           p_date_from?: string
           p_date_to?: string
           p_deficit?: number
+          p_limit?: number
           p_opponent_id?: string
           p_player_id: string
         }
@@ -506,6 +512,38 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      create_match_with_game: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date: string
+          p_format?: number
+          p_let_resets_serve?: boolean
+          p_player1_id: string
+          p_player2_id: string
+          p_serves_per_point?: number
+          p_target_score?: number
+          p_tiebreak?: Database["public"]["Enums"]["tiebreak"]
+          p_venue?: string
+        }
+        Returns: string
+      }
+      decisive_shots: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
+          p_player_id: string
+        }
+        Returns: {
+          losing_boast: number
+          losing_drive: number
+          losing_drop: number
+          winning_boast: number
+          winning_drive: number
+          winning_drop: number
+        }[]
+      }
       error_profile: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
@@ -534,6 +572,7 @@ export type Database = {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
           p_date_from?: string
           p_date_to?: string
+          p_limit?: number
           p_opponent_id?: string
           p_player_id: string
         }
@@ -728,23 +767,6 @@ export type Database = {
         Returns: string
       }
       is_owner: { Args: never; Returns: boolean }
-      decisive_shots: {
-        Args: {
-          p_ball_type?: Database["public"]["Enums"]["ball_type"]
-          p_date_from?: string
-          p_date_to?: string
-          p_opponent_id?: string
-          p_player_id: string
-        }
-        Returns: {
-          losing_boast: number
-          losing_drive: number
-          losing_drop: number
-          winning_boast: number
-          winning_drive: number
-          winning_drop: number
-        }[]
-      }
       momentum: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
@@ -787,6 +809,23 @@ export type Database = {
           signature_trait: string
         }[]
       }
+      player_insights: {
+        Args: {
+          p_ball_type?: Database["public"]["Enums"]["ball_type"]
+          p_date_from?: string
+          p_date_to?: string
+          p_opponent_id?: string
+          p_player_id: string
+        }
+        Returns: {
+          decisive_shots: Json
+          errors: Json
+          headline: Json
+          momentum: Json
+          rally_lengths: Json
+          serve: Json
+        }[]
+      }
       players_headline: {
         Args: never
         Returns: {
@@ -803,25 +842,13 @@ export type Database = {
           signature_trait: string
         }[]
       }
-      records: {
-        Args: never
-        Returns: {
-          record_key: string
-          player_id: string | null
-          player1_id: string
-          player2_id: string
-          value: number
-          detail: string | null
-          match_id: string
-          date: string
-        }[]
-      }
       rally_length_rallies: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
           p_bucket?: string
           p_date_from?: string
           p_date_to?: string
+          p_limit?: number
           p_opponent_id?: string
           p_player_id: string
         }
@@ -877,11 +904,25 @@ export type Database = {
           total_rallies: number
         }[]
       }
+      records: {
+        Args: never
+        Returns: {
+          date: string
+          detail: string
+          match_id: string
+          player_id: string
+          player1_id: string
+          player2_id: string
+          record_key: string
+          value: number
+        }[]
+      }
       serve_rallies: {
         Args: {
           p_ball_type?: Database["public"]["Enums"]["ball_type"]
           p_date_from?: string
           p_date_to?: string
+          p_limit?: number
           p_opponent_id?: string
           p_player_id: string
         }
@@ -1092,6 +1133,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       ball_type: ["blue", "red", "yellow", "double_yellow"],
@@ -1120,3 +1164,4 @@ export const Constants = {
     },
   },
 } as const
+

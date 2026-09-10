@@ -271,6 +271,23 @@ export const TRAIT_META: Record<
   },
 }
 
+/** Every trait key, in the declaration order of TRAIT_META — the matrix
+ *  read row by row. */
+export const TRAIT_KEYS = Object.keys(TRAIT_META) as Array<SignatureTrait>
+
+/** The trait occupying one cell of the 3×3 matrix. TRAIT_META covers every
+ *  tempo×agency pair exactly once, so a lookup always finds one — which is
+ *  what makes the /traits grid single-sourced from the model rather than a
+ *  hand-written copy of it. */
+export function traitAt(
+  tempo: TraitTempo,
+  agency: TraitAgency
+): SignatureTrait {
+  return TRAIT_KEYS.find(
+    (k) => TRAIT_META[k].tempo === tempo && TRAIT_META[k].agency === agency
+  ) as SignatureTrait
+}
+
 export const TRAIT_LABELS = Object.fromEntries(
   Object.entries(TRAIT_META).map(([key, meta]) => [key, meta.label])
 ) as Record<SignatureTrait, string>

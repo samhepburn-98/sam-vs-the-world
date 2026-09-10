@@ -10,10 +10,14 @@ import {
   matchResultQueryOptions,
   useMatchResult,
 } from "@/lib/api/get-match-result"
-import { GameScoreChart } from "@/features/dashboard/components/game-score-chart"
-import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
-import { foldMatchToScored } from "@/features/dashboard/lib/fold-match"
-import { humanise } from "@/features/dashboard/lib/humanise"
+import { GameScoreChart } from "@/features/dashboard/components/match/game-score-chart"
+import { RallyDetailSheet } from "@/features/dashboard/components/shared/rally-detail-sheet"
+import {
+  foldMatchToScored,
+  gameScores,
+  toRallyRow,
+} from "@/features/dashboard/lib/fold-match"
+import { formatLabel, humanise } from "@/features/dashboard/lib/humanise"
 import { RallyTimeline } from "@/features/logger/components/rally-timeline"
 import { BallDots } from "@/components/broadcast/ball-dots"
 import { Overline, SectionTitle } from "@/components/typography"
@@ -31,9 +35,6 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
-
-import type { RallyRow } from "@/lib/rally/rally-draft"
-import type { RallyScored } from "@/lib/schemas/rally"
 
 // Match detail (§5.2): the deep-drill target — one match told in full. The
 // rallies are folded into the scored shape client-side (§8.4 exception), so
@@ -61,28 +62,6 @@ export const Route = createFileRoute("/matches/$matchId")({
   },
   component: MatchDetailPage,
 })
-
-function toRallyRow(r: RallyScored): RallyRow {
-  return {
-    id: r.id,
-    game_id: r.game_id,
-    rally_number: r.rally_number,
-    server_id: r.server_id,
-    serve_side: r.serve_side,
-    serve_number: r.serve_number === 2 ? 2 : 1,
-    winner_id: r.winner_id,
-    end_reason: r.end_reason,
-    error_detail: r.error_detail,
-    forced: r.forced,
-    winning_shot: r.winning_shot,
-    losing_shot: r.losing_shot,
-    shot_count: r.shot_count,
-  }
-}
-
-function formatBadge(format: number | null) {
-  return format === null ? "Casual" : `Best of ${format}`
-}
 
 function MatchDetailPage() {
   const { matchId } = Route.useParams()
@@ -125,14 +104,7 @@ function MatchDetailPage() {
   const p1Name = nameOf(m.player1_id)
   const p2Name = nameOf(m.player2_id)
 
-  const results = folded.map((g) => {
-    const last = g.rows.at(-1)
-    const scoreP1 = last?.score_p1 ?? 0
-    const scoreP2 = last?.score_p2 ?? 0
-    const winner =
-      scoreP1 > scoreP2 ? m.player1_id : scoreP2 > scoreP1 ? m.player2_id : null
-    return { ...g, scoreP1, scoreP2, winner }
-  })
+  const results = gameScores(folded, m.player1_id, m.player2_id)
   // the match-level verdict is the view's, never recomputed here — the
   // clinch rule lives in match_results (and lib/scoring for the logger)
   const verdict = result.data
@@ -168,7 +140,7 @@ function MatchDetailPage() {
           {m.venue && (
             <span className="text-sm text-muted-foreground">· {m.venue}</span>
           )}
-          <Badge variant="outline">{formatBadge(m.format)}</Badge>
+          <Badge variant="outline">{formatLabel(m.format)}</Badge>
           {m.ball_type && (
             <span className="flex items-center gap-1.5 text-sm">
               <BallDots ball={m.ball_type} />

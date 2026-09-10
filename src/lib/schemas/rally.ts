@@ -19,6 +19,10 @@ export const rallySummary = z.object({
   shot_count: z.number().int().nullable(),
 })
 
+/** The rally columns match detail reads — derived from the schema above, so a
+ *  field added to one is fetched by the other. */
+export const RALLY_SUMMARY_COLUMNS = Object.keys(rallySummary.shape).join(", ")
+
 export type RallySummary = z.infer<typeof rallySummary>
 
 /** Every stored column — the /manage raw browser's row (§5.4). */

@@ -223,3 +223,20 @@ export const insightFilters = z.object({
 })
 
 export type InsightFilters = z.infer<typeof insightFilters>
+
+/** `player_insights(...)` — the six payloads above in one row (audit §3).
+ *
+ *  The columns arrive as jsonb, so each is parsed by the schema that already
+ *  owns it rather than by a second description of the same shape. A payload
+ *  that fails its schema fails here, at the query boundary, exactly as it
+ *  would have when fetched on its own. */
+export const playerInsights = z.object({
+  headline: playerHeadline,
+  serve: serveStats,
+  errors: errorProfile,
+  rally_lengths: rallyLengths,
+  momentum: momentum,
+  decisive_shots: decisiveShots,
+})
+
+export type PlayerInsights = z.infer<typeof playerInsights>

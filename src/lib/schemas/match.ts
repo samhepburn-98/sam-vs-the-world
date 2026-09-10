@@ -151,4 +151,12 @@ export const matchDetail = matchSummary.extend({
 })
 
 export type GameWithRallies = z.infer<typeof gameWithRallies>
+
+/** The match-detail select, derived from the schemas that parse it so the two
+ *  cannot drift. `games` is an embedded relation rather than a column, so it
+ *  is spelled out separately; everything else is exactly what zod keeps. */
+export const MATCH_DETAIL_COLUMNS = Object.keys(matchDetail.shape)
+  .filter((key) => key !== "games")
+  .join(", ")
+
 export type MatchDetail = z.infer<typeof matchDetail>

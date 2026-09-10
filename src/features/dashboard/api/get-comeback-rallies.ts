@@ -1,7 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
+import { COMEBACK_GAME_LIMIT } from "@/features/dashboard/lib/insight-thresholds"
 import { rallyScored } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
@@ -20,6 +21,7 @@ export async function fetchComebackRallies(
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("comeback_rallies", {
     p_player_id: playerId,
+    p_limit: COMEBACK_GAME_LIMIT,
     p_deficit: deficit,
     ...toRpcFilters(filters),
   })
@@ -27,7 +29,7 @@ export async function fetchComebackRallies(
   return z.array(rallyScored).parse(data)
 }
 
-export function comebackRalliesOptions(
+export function comebackRalliesQueryOptions(
   playerId: string,
   filters: InsightFilters = {},
   deficit?: number
@@ -48,7 +50,7 @@ type UseComebackRalliesOptions = {
   playerId: string
   filters?: InsightFilters
   deficit?: number
-  queryConfig?: QueryConfig<typeof comebackRalliesOptions>
+  queryConfig?: QueryConfig<typeof comebackRalliesQueryOptions>
 }
 
 export function useComebackRallies({
@@ -58,7 +60,7 @@ export function useComebackRallies({
   queryConfig,
 }: UseComebackRalliesOptions) {
   return useQuery({
-    ...comebackRalliesOptions(playerId, filters, deficit),
+    ...comebackRalliesQueryOptions(playerId, filters, deficit),
     ...queryConfig,
   })
 }

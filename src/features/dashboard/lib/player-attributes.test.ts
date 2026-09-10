@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  TRAIT_META,
   computePlayerAttributes,
   heroStat,
+  traitAt,
 } from "@/features/dashboard/lib/player-attributes"
 import {
   error,
@@ -68,5 +70,29 @@ describe("heroStat", () => {
       heroStat({ headline: headline({ games_won: 2, games_decided: 3 }) })
         .display
     ).toBe("—") // under threshold
+  })
+})
+
+describe("traitAt", () => {
+  it("finds the trait in each corner of the matrix", () => {
+    expect(traitAt("short", "finisher")).toBe("sniper")
+    expect(traitAt("short", "pressure")).toBe("enforcer")
+    expect(traitAt("long", "finisher")).toBe("hunter")
+    expect(traitAt("long", "pressure")).toBe("wall")
+  })
+
+  it("finds the centre cell", () => {
+    expect(traitAt("all", "mixed")).toBe("all_rounder")
+  })
+
+  // the /traits grid renders one cell per pair and single-sources from
+  // TRAIT_META, so every pair must resolve and no trait may be orphaned
+  it("covers all nine cells exactly once", () => {
+    const tempos = ["short", "all", "long"] as const
+    const agencies = ["finisher", "mixed", "pressure"] as const
+    const found = tempos.flatMap((t) => agencies.map((a) => traitAt(t, a)))
+    expect(found).toHaveLength(9)
+    expect(new Set(found).size).toBe(9)
+    expect(new Set(found)).toEqual(new Set(Object.keys(TRAIT_META)))
   })
 })

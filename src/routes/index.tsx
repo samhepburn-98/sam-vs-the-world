@@ -4,11 +4,16 @@ import { CountUp } from "@/components/broadcast/count-up"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { Overline, PageTitle } from "@/components/typography"
 import { Ticker } from "@/components/broadcast/ticker"
-import { FeaturedPlayer } from "@/features/dashboard/components/featured-player"
-import { MatchRow } from "@/features/dashboard/components/match-row"
-import { RecordsWall } from "@/features/dashboard/components/record-tile"
-import { RosterRow } from "@/features/dashboard/components/roster-row"
+import { FeaturedPlayer } from "@/features/dashboard/components/home/featured-player"
+import { MatchRow } from "@/features/dashboard/components/shared/match-row"
+import { RecordsWall } from "@/features/dashboard/components/shared/record-tile"
+import { RosterRow } from "@/features/dashboard/components/home/roster-row"
 import { buildRecordTiles } from "@/features/dashboard/lib/record-display"
+import {
+  formFor,
+  tickerDate,
+  tickerLine,
+} from "@/features/dashboard/lib/rundown"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -20,7 +25,7 @@ import {
   homeCountsQueryOptions,
   useHomeCounts,
 } from "@/features/dashboard/api/get-home-counts"
-import { prefetchPlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { prefetchPlayerInsights } from "@/features/dashboard/api/get-player-insights"
 import {
   recentResultsQueryOptions,
   useRecentResults,
@@ -31,7 +36,6 @@ import {
 } from "@/features/dashboard/api/get-records"
 import { playersQueryOptions, usePlayers } from "@/lib/api/get-players"
 
-import type { MatchResultSummary } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 
 // The home hub (§5.1): the front door as a broadcast rundown — headline,
@@ -54,45 +58,6 @@ export const Route = createFileRoute("/")({
   },
   component: HomePage,
 })
-
-const MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ")
-
-function tickerDate(iso: string) {
-  const [, m, d] = iso.split("-").map(Number)
-  return `${d} ${MONTHS[m - 1]}`
-}
-
-/** The one-line result for the ticker: winner first, in plain words. */
-function tickerLine(m: MatchResultSummary, nameOf: Map<string, string>) {
-  const p1 = nameOf.get(m.player1_id) ?? "Unknown"
-  const p2 = nameOf.get(m.player2_id) ?? "Unknown"
-  const s1 = m.games_won_p1 ?? 0
-  const s2 = m.games_won_p2 ?? 0
-  if (m.outcome === "p1") return `${p1} beat ${p2} ${s1}–${s2}`
-  if (m.outcome === "p2") return `${p2} beat ${p1} ${s2}–${s1}`
-  if (m.outcome === "draw") return `${p1} ${s1}–${s2} ${p2} · drawn`
-  return `In play · ${p1} v ${p2}`
-}
-
-/** A player's recent results, oldest first, from the matches on this page. */
-function formFor(
-  playerId: string,
-  results: Array<MatchResultSummary>
-): Array<"w" | "l" | "d"> {
-  return results
-    .slice()
-    .reverse()
-    .filter(
-      (m) =>
-        (m.player1_id === playerId || m.player2_id === playerId) &&
-        m.outcome !== "pending"
-    )
-    .map((m) => {
-      if (m.outcome === "draw") return "d"
-      const winner = m.outcome === "p1" ? m.player1_id : m.player2_id
-      return winner === playerId ? "w" : "l"
-    })
-}
 
 function HomePage() {
   const { user } = Route.useRouteContext()

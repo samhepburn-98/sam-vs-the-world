@@ -1,7 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
-import { toRpcFilters } from "@/features/dashboard/api/get-player-headline"
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
+import { RALLY_DRILL_LIMIT } from "@/features/dashboard/lib/insight-thresholds"
 import { rallyScored } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
@@ -22,6 +23,7 @@ export async function fetchRallyLengthRallies(
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("rally_length_rallies", {
     p_player_id: playerId,
+    p_limit: RALLY_DRILL_LIMIT,
     p_bucket: bucket ?? undefined,
     ...toRpcFilters(filters),
   })
@@ -29,7 +31,7 @@ export async function fetchRallyLengthRallies(
   return z.array(rallyScored).parse(data)
 }
 
-export function rallyLengthRalliesOptions(
+export function rallyLengthRalliesQueryOptions(
   playerId: string,
   bucket: LengthBucket | null,
   filters: InsightFilters = {}
@@ -44,7 +46,7 @@ type UseRallyLengthRalliesOptions = {
   playerId: string
   bucket: LengthBucket | null
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof rallyLengthRalliesOptions>
+  queryConfig?: QueryConfig<typeof rallyLengthRalliesQueryOptions>
 }
 
 export function useRallyLengthRallies({
@@ -54,7 +56,7 @@ export function useRallyLengthRallies({
   queryConfig,
 }: UseRallyLengthRalliesOptions) {
   return useQuery({
-    ...rallyLengthRalliesOptions(playerId, bucket, filters),
+    ...rallyLengthRalliesQueryOptions(playerId, bucket, filters),
     ...queryConfig,
   })
 }

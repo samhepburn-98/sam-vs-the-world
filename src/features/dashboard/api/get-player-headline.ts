@@ -1,5 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 
+import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
 import { playerHeadline } from "@/features/dashboard/schemas/insights"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
@@ -8,17 +9,6 @@ import type {
   PlayerHeadline,
 } from "@/features/dashboard/schemas/insights"
 import type { QueryConfig } from "@/lib/react-query"
-
-/** Maps the client-side filter object onto the RPC's p_* parameters —
- *  omitted filters fall through to the SQL defaults (no filter). */
-export function toRpcFilters(filters: InsightFilters) {
-  return {
-    p_opponent_id: filters.opponentId ?? undefined,
-    p_ball_type: filters.ballType ?? undefined,
-    p_date_from: filters.dateFrom ?? undefined,
-    p_date_to: filters.dateTo ?? undefined,
-  }
-}
 
 export async function fetchPlayerHeadline(
   playerId: string,
@@ -33,7 +23,7 @@ export async function fetchPlayerHeadline(
   return playerHeadline.parse(data[0])
 }
 
-export function playerHeadlineOptions(
+export function playerHeadlineQueryOptions(
   playerId: string,
   filters: InsightFilters = {}
 ) {
@@ -46,7 +36,7 @@ export function playerHeadlineOptions(
 type UsePlayerHeadlineOptions = {
   playerId: string
   filters?: InsightFilters
-  queryConfig?: QueryConfig<typeof playerHeadlineOptions>
+  queryConfig?: QueryConfig<typeof playerHeadlineQueryOptions>
 }
 
 export function usePlayerHeadline({
@@ -55,7 +45,7 @@ export function usePlayerHeadline({
   queryConfig,
 }: UsePlayerHeadlineOptions) {
   return useQuery({
-    ...playerHeadlineOptions(playerId, filters),
+    ...playerHeadlineQueryOptions(playerId, filters),
     ...queryConfig,
   })
 }

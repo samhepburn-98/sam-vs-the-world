@@ -22,7 +22,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
-import { useUpdateMatch } from "@/lib/api/update-match"
+import { useUpdateMatch } from "@/features/manage/api/update-match"
 import { matchEditSchema } from "@/lib/schemas/match"
 
 import type { HouseRulesForm } from "@/components/rally/house-rules-fields"

@@ -1,5 +1,4 @@
 import { PencilIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
 
 import { BallDots } from "@/components/broadcast/ball-dots"
 import {
@@ -9,11 +8,12 @@ import {
   RelCell,
   TsCell,
 } from "@/features/manage/components/cells"
+import { useRowActions } from "@/features/manage/hooks/use-row-actions"
 import { DataTable } from "@/features/manage/components/data-table"
 import { ConfirmDelete } from "@/features/manage/components/confirm-delete"
 import { EditMatchDialog } from "@/features/manage/components/edit-match-dialog"
 import { Button } from "@/components/ui/button"
-import { useDeleteMatch } from "@/lib/api/delete-match"
+import { useDeleteMatch } from "@/features/manage/api/delete-match"
 import { friendlyWriteError } from "@/lib/api/friendly-errors"
 import { useManageMatches } from "@/features/manage/api/get-manage-matches"
 import { usePlayers } from "@/lib/api/get-players"
@@ -32,8 +32,8 @@ interface TabProps {
 export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
   const matches = useManageMatches({ params })
   const del = useDeleteMatch()
-  const [editing, setEditing] = useState<MatchRow | null>(null)
-  const [deleting, setDeleting] = useState<MatchRow | null>(null)
+  const { editing, deleting, edit, remove, doneEditing, doneDeleting } =
+    useRowActions<MatchRow>()
   const players = usePlayers()
   const nameOf = (id: string) =>
     players.data?.find((p) => p.id === id)?.name ?? id.slice(0, 8)
@@ -139,7 +139,7 @@ export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Edit match"
-                  onClick={() => setEditing(m)}
+                  onClick={() => edit(m)}
                 >
                   <PencilIcon />
                 </Button>
@@ -148,7 +148,7 @@ export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Delete match"
-                  onClick={() => setDeleting(m)}
+                  onClick={() => remove(m)}
                 >
                   <Trash2Icon />
                 </Button>
@@ -177,7 +177,7 @@ export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
         <EditMatchDialog
           match={editing}
           players={players.data ?? []}
-          onClose={() => setEditing(null)}
+          onClose={() => doneEditing()}
         />
       )}
       <ConfirmDelete
@@ -191,12 +191,12 @@ export function MatchesTab({ params, owner, onSort, onPage }: TabProps) {
         pending={del.isPending}
         error={del.isError ? friendlyWriteError(del.error) : null}
         onCancel={() => {
-          setDeleting(null)
+          doneDeleting()
           del.reset()
         }}
         onConfirm={() => {
           if (!deleting) return
-          del.mutate(deleting.id, { onSuccess: () => setDeleting(null) })
+          del.mutate(deleting.id, { onSuccess: () => doneDeleting() })
         }}
       />
     </>

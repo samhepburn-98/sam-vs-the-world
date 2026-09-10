@@ -26,8 +26,14 @@ export interface PlayerMatchHistoryData {
 export async function fetchPlayerMatchHistory(
   playerId: string
 ): Promise<PlayerMatchHistoryData> {
-  const page = await fetchMatches({ player: playerId, page: 1 })
-  const matches = page.rows.slice(0, HISTORY_LIMIT)
+  // ask for the eight this renders, not a full table page sliced down to
+  // eight; `total` is an exact count regardless of the range
+  const page = await fetchMatches({
+    player: playerId,
+    page: 1,
+    pageSize: HISTORY_LIMIT,
+  })
+  const matches = page.rows
   if (matches.length === 0) {
     return { matches, games: [], total: page.total }
   }

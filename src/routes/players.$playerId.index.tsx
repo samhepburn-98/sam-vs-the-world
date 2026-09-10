@@ -1,27 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { decisiveShotsOptions } from "@/features/dashboard/api/get-decisive-shots"
-import { errorProfileOptions } from "@/features/dashboard/api/get-error-profile"
-import { momentumOptions } from "@/features/dashboard/api/get-momentum"
-import { playerHeadlineOptions } from "@/features/dashboard/api/get-player-headline"
 import {
   playerH2hQueryOptions,
   usePlayerH2h,
 } from "@/features/dashboard/api/get-player-h2h"
-import { rallyLengthsOptions } from "@/features/dashboard/api/get-rally-lengths"
-import { serveStatsOptions } from "@/features/dashboard/api/get-serve-stats"
 import {
   recordsQueryOptions,
   useRecords,
 } from "@/features/dashboard/api/get-records"
-import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
-import { CategoryTiles } from "@/features/dashboard/components/category-tiles"
-import { ProfileHero } from "@/features/dashboard/components/profile-hero"
-import { RecordsWall } from "@/features/dashboard/components/record-tile"
+import {
+  prefetchPlayerInsights,
+  usePlayerInsights,
+} from "@/features/dashboard/api/get-player-insights"
+import { CategoryTiles } from "@/features/dashboard/components/profile/category-tiles"
+import { ProfileHero } from "@/features/dashboard/components/profile/profile-hero"
+import { RecordsWall } from "@/features/dashboard/components/shared/record-tile"
 import { buildRecordTiles } from "@/features/dashboard/lib/record-display"
-import { ProfileMatchesTab } from "@/features/dashboard/components/profile-matches-tab"
-import { ProfileStatsTab } from "@/features/dashboard/components/profile-stats-tab"
-import { ProfileSummaryTab } from "@/features/dashboard/components/profile-summary-tab"
+import { ProfileMatchesTab } from "@/features/dashboard/components/profile/profile-matches-tab"
+import { ProfileStatsTab } from "@/features/dashboard/components/profile/profile-stats-tab"
+import { ProfileSummaryTab } from "@/features/dashboard/components/profile/profile-summary-tab"
 import { computeProfileErrors } from "@/features/dashboard/lib/profile-errors"
 import { computeH2h } from "@/features/dashboard/lib/profile-h2h"
 import { computeProfileHeader } from "@/features/dashboard/lib/profile-header"
@@ -47,12 +44,7 @@ export const Route = createFileRoute("/players/$playerId/")({
   loader: async ({ context, params }) => {
     const id = params.playerId
     await Promise.all([
-      context.queryClient.ensureQueryData(playerHeadlineOptions(id, {})),
-      context.queryClient.ensureQueryData(serveStatsOptions(id, {})),
-      context.queryClient.ensureQueryData(errorProfileOptions(id, {})),
-      context.queryClient.ensureQueryData(rallyLengthsOptions(id, {})),
-      context.queryClient.ensureQueryData(momentumOptions(id, {})),
-      context.queryClient.ensureQueryData(decisiveShotsOptions(id, {})),
+      prefetchPlayerInsights(context.queryClient, id),
       context.queryClient.ensureQueryData(playerH2hQueryOptions(id)),
       context.queryClient.ensureQueryData(playersQueryOptions()),
       context.queryClient.ensureQueryData(recordsQueryOptions()),
@@ -63,7 +55,7 @@ export const Route = createFileRoute("/players/$playerId/")({
 
 function PlayerProfilePage() {
   const { playerId } = Route.useParams()
-  const data = usePlayerInsights(playerId, {})
+  const data = usePlayerInsights({ playerId })
   const players = usePlayers()
   const h2hMatches = usePlayerH2h({ playerId })
   const records = useRecords()

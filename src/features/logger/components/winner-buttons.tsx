@@ -3,7 +3,7 @@ import { forwardRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { HOTKEY_HINTS } from "@/features/logger/logic/hotkeys"
+import { HOTKEY_HINTS } from "@/features/logger/lib/hotkeys"
 import { cn } from "@/lib/utils"
 
 // The primary action: who won the rally — a real single-choice group, with

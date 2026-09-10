@@ -26,17 +26,20 @@ export async function createMatchWithGame(
   input: MatchSetupInput,
   client: RpcCapableClient = getSupabaseBrowserClient()
 ): Promise<string> {
+  // the three nullable parameters are omitted rather than sent as null: each
+  // defaults to null in SQL, so PostgREST dropping the key stores the same
+  // value, and the generated Args type accepts undefined rather than null
   const { data, error } = await client.rpc("create_match_with_game", {
     p_player1_id: input.player1Id,
     p_player2_id: input.player2Id,
     p_date: input.date,
-    p_venue: input.venue?.length ? input.venue : null,
-    p_format: input.houseRules.format,
+    p_venue: input.venue?.length ? input.venue : undefined,
+    p_format: input.houseRules.format ?? undefined,
     p_target_score: input.houseRules.targetScore,
     p_tiebreak: input.houseRules.tiebreak,
     p_serves_per_point: input.houseRules.servesPerPoint,
     p_let_resets_serve: input.houseRules.letResetsServe,
-    p_ball_type: input.houseRules.ballType,
+    p_ball_type: input.houseRules.ballType ?? undefined,
   })
   if (error) throw error
   if (data === null) throw new Error("create_match_with_game returned no id")

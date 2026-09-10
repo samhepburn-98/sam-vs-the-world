@@ -5,8 +5,8 @@ import {
   categoryBlurb,
   categoryLabel,
 } from "@/features/dashboard/lib/categories"
-import { CategoryContent } from "@/features/dashboard/components/category-content"
-import { FilterBar } from "@/features/dashboard/components/filter-bar"
+import { CategoryContent } from "@/features/dashboard/components/category/category-content"
+import { FilterBar } from "@/features/dashboard/components/category/filter-bar"
 import {
   insightSearch,
   searchToFilters,
