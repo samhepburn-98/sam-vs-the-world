@@ -62,3 +62,39 @@ export function toRallyRow(r: RallyScored): RallyRow {
     shot_count: r.shot_count,
   }
 }
+
+export interface GameScore extends FoldedGame {
+  scoreP1: number
+  scoreP2: number
+  /** whoever led at the last rally played, or null if they finished level */
+  winner: string | null
+}
+
+/** Each folded game with its final score and winner.
+ *
+ *  The winner rule is the view's, restated on the rows we already hold:
+ *  whoever leads at the last rally actually played (decision 3). It reads the
+ *  running score off the final row rather than re-scoring, because
+ *  foldMatchToScored has already applied the let-scores-nothing rule that
+ *  produced it — so this cannot disagree with the timeline beside it.
+ *
+ *  A level game returns a null winner, which is the undecided case, not a
+ *  draw to render: the match header takes its verdict from match_results. */
+export function gameScores(
+  games: Array<FoldedGame>,
+  player1Id: string,
+  player2Id: string
+): Array<GameScore> {
+  return games.map((game) => {
+    const last = game.rows.at(-1)
+    const scoreP1 = last?.score_p1 ?? 0
+    const scoreP2 = last?.score_p2 ?? 0
+    return {
+      ...game,
+      scoreP1,
+      scoreP2,
+      winner:
+        scoreP1 > scoreP2 ? player1Id : scoreP2 > scoreP1 ? player2Id : null,
+    }
+  })
+}

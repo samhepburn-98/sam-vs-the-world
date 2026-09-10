@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { foldMatchToScored, toRallyRow } from "./fold-match"
+import { foldMatchToScored, gameScores, toRallyRow } from "./fold-match"
 
 import type { MatchDetail } from "@/lib/schemas/match"
 import type { RallyScored, RallySummary } from "@/lib/schemas/rally"
@@ -117,5 +117,42 @@ describe("toRallyRow", () => {
     } as RallyScored
     expect(toRallyRow(paused).winner_id).toBeNull()
     expect(toRallyRow(paused).end_reason).toBe("let")
+  })
+})
+
+describe("gameScores", () => {
+  const folded = foldMatchToScored(match)
+
+  it("reads the final score off the last rally of each game", () => {
+    const scored = gameScores(folded, P1, P2)
+    expect(scored[0].scoreP1).toBe(folded[0].rows.at(-1)?.score_p1)
+    expect(scored[0].scoreP2).toBe(folded[0].rows.at(-1)?.score_p2)
+  })
+
+  it("gives the game to whoever led at the last rally played", () => {
+    const [g] = gameScores(folded, P1, P2)
+    const expected =
+      g.scoreP1 > g.scoreP2 ? P1 : g.scoreP2 > g.scoreP1 ? P2 : null
+    expect(g.winner).toBe(expected)
+  })
+
+  // a level game is undecided, not a draw to render — the match header takes
+  // its verdict from match_results, which owns the clinch and draw rules
+  it("returns a null winner when the game finished level", () => {
+    const level = [{ ...folded[0], rows: [] }]
+    expect(gameScores(level, P1, P2)[0].winner).toBeNull()
+  })
+
+  it("scores an empty game 0-0 rather than throwing", () => {
+    const empty = [{ ...folded[0], rows: [] }]
+    const [g] = gameScores(empty, P1, P2)
+    expect([g.scoreP1, g.scoreP2]).toEqual([0, 0])
+  })
+
+  it("keeps the folded game's own fields", () => {
+    const [g] = gameScores(folded, P1, P2)
+    expect(g.gameId).toBe(folded[0].gameId)
+    expect(g.gameNumber).toBe(folded[0].gameNumber)
+    expect(g.rows).toBe(folded[0].rows)
   })
 })

@@ -14,6 +14,7 @@ import { GameScoreChart } from "@/features/dashboard/components/game-score-chart
 import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
 import {
   foldMatchToScored,
+  gameScores,
   toRallyRow,
 } from "@/features/dashboard/lib/fold-match"
 import { formatLabel, humanise } from "@/features/dashboard/lib/humanise"
@@ -103,14 +104,7 @@ function MatchDetailPage() {
   const p1Name = nameOf(m.player1_id)
   const p2Name = nameOf(m.player2_id)
 
-  const results = folded.map((g) => {
-    const last = g.rows.at(-1)
-    const scoreP1 = last?.score_p1 ?? 0
-    const scoreP2 = last?.score_p2 ?? 0
-    const winner =
-      scoreP1 > scoreP2 ? m.player1_id : scoreP2 > scoreP1 ? m.player2_id : null
-    return { ...g, scoreP1, scoreP2, winner }
-  })
+  const results = gameScores(folded, m.player1_id, m.player2_id)
   // the match-level verdict is the view's, never recomputed here — the
   // clinch rule lives in match_results (and lib/scoring for the logger)
   const verdict = result.data
