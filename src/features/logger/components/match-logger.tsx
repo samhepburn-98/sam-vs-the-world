@@ -14,13 +14,13 @@ import { UndoBar } from "@/features/logger/components/undo-bar"
 import { WinnerButtons } from "@/features/logger/components/winner-buttons"
 import { Button } from "@/components/ui/button"
 import { KbdHintsContext } from "@/components/ui/kbd"
-import { houseRulesOf, toSessionRow } from "@/features/logger/lib/match-detail"
+import { deriveGameView } from "@/features/logger/lib/game-view"
+import { toSessionRow } from "@/features/logger/lib/match-detail"
 import {
   buildLetRow,
   buildRallyRow,
   canSave,
   createDraft,
-  rowToRallyInput,
   selectEndReason,
   setForced,
   showsErrorDetail,
@@ -32,7 +32,6 @@ import {
   toggleServer,
 } from "@/lib/rally/rally-draft"
 import {
-  currentGame,
   editRally,
   redo,
   saveRally,
@@ -41,22 +40,14 @@ import {
 } from "@/features/logger/lib/session"
 import { intentToOp } from "@/features/logger/api/session-ops"
 import { useMediaQuery } from "@/lib/use-media-query"
-import {
-  deriveOutcome,
-  gameOver,
-  gameResult,
-  suggestNext,
-  suggestNextGameFirstServer,
-  tallyMatch,
-} from "@/lib/scoring"
+import { deriveOutcome, suggestNext } from "@/lib/scoring"
 
 import type { HotkeyAction } from "@/features/logger/lib/hotkeys"
-import type { DraftContext, RallyRow } from "@/lib/rally/rally-draft"
+import type { RallyRow } from "@/lib/rally/rally-draft"
 import type { SessionState, Transition } from "@/features/logger/lib/session"
 import type { MatchDetail } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 import type { WriteQueue } from "@/lib/api/write-queue"
-import type { GameContext } from "@/lib/scoring"
 
 // The logging surface itself (§5.3): score header, winner buttons, outcome
 // chips, editable timeline, one-action undo, game/match end flow. Hotkeys
@@ -81,8 +72,6 @@ export function MatchLogger({
   firstServerId,
   onExit,
 }: MatchLoggerProps) {
-  const rules = houseRulesOf(match)
-
   const [session, setSession] = useState<SessionState>(() => ({
     matchId: match.id,
     games: match.games.map((g) => ({
@@ -113,52 +102,23 @@ export function MatchLogger({
   // digits replace the suggested shot count first, then append (1 → "12" ✓)
   const digitTyped = useRef(false)
 
-  const game = currentGame(session)
+  const {
+    game,
+    rules,
+    gameCtx,
+    draftCtx,
+    priorGames,
+    inputs,
+    result,
+    score,
+    over,
+    tally,
+  } = deriveGameView(session, match, firstServerId)
+
   const nameOf = (id: string | null) =>
-    players.find((p) => p.id === id)?.name ?? "—"
+    players.find((p) => p.id === id)?.name ?? "\u2014"
 
-  // who serves this game's first rally: the stored fact (rally 1), else the
-  // setup choice for game 1, else the previous game's winner (§7.2)
-  const matchFirstServer =
-    session.games[0].rows.at(0)?.server_id ?? firstServerId ?? match.player1_id
-  const baseCtx: GameContext = {
-    player1Id: match.player1_id,
-    player2Id: match.player2_id,
-    firstServerId: matchFirstServer,
-    rules,
-  }
-  const priorGames = session.games.slice(0, -1).map((g) => ({
-    n: g.gameNumber,
-    r: gameResult(g.rows.map(rowToRallyInput), baseCtx),
-  }))
-  const gameCtx: GameContext = {
-    ...baseCtx,
-    firstServerId:
-      game.rows.at(0)?.server_id ??
-      (game.gameNumber === 1
-        ? matchFirstServer
-        : suggestNextGameFirstServer(
-            priorGames.at(-1)?.r.winnerId ?? null,
-            baseCtx
-          )),
-  }
-  const draftCtx: DraftContext = {
-    player1Id: match.player1_id,
-    player2Id: match.player2_id,
-    rules,
-  }
-
-  const inputs = game.rows.map(rowToRallyInput)
-  const result = gameResult(inputs, gameCtx)
-  const score = result.score
   const draft = draftState ?? createDraft(suggestNext(inputs, gameCtx))
-
-  const over = gameOver(score, rules)
-  const tally = tallyMatch([...priorGames.map((g) => g.r), result], {
-    player1Id: match.player1_id,
-    player2Id: match.player2_id,
-    format: match.format,
-  })
   const matchWinnerName =
     match.format !== null && tally.matchWinnerId !== null
       ? nameOf(tally.matchWinnerId)
