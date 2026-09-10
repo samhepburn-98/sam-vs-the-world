@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 
-import { matchDetail } from "@/lib/schemas/match"
+import { MATCH_DETAIL_COLUMNS, matchDetail } from "@/lib/schemas/match"
+import { RALLY_SUMMARY_COLUMNS } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
 import type { QueryConfig } from "@/lib/react-query"
@@ -9,7 +10,13 @@ export async function fetchMatchDetail(matchId: string) {
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase
     .from("matches")
-    .select("*, games(id, game_number, rallies(*))")
+    // explicit columns, not `*`: zod strips whatever the schemas do not
+    // name, so the two stars were fetching updated_at on the match and
+    // created_at/updated_at on every rally only to throw them away — two
+    // extra timestamps per rally, on a view that loads every rally of a match
+    .select(
+      `${MATCH_DETAIL_COLUMNS}, games(id, game_number, rallies(${RALLY_SUMMARY_COLUMNS}))`
+    )
     .eq("id", matchId)
     .single()
   if (error) throw error

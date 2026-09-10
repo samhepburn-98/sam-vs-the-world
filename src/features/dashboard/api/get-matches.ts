@@ -20,6 +20,11 @@ export interface MatchesParams {
   from?: string
   to?: string
   page: number
+  /** rows per page; defaults to the table's own MATCHES_PAGE_SIZE. The
+   *  profile's history renders eight and used to read a full page of twenty
+   *  to do it — the `count` it needs for "See all N" is exact whatever the
+   *  range asks for, so the surplus rows bought nothing. */
+  pageSize?: number
 }
 
 export interface MatchesPage {
@@ -44,11 +49,12 @@ export async function fetchMatches(
   if (params.from) query = query.gte("date", params.from)
   if (params.to) query = query.lte("date", params.to)
 
-  const from = (params.page - 1) * MATCHES_PAGE_SIZE
+  const size = params.pageSize ?? MATCHES_PAGE_SIZE
+  const from = (params.page - 1) * size
   const { data, error, count } = await query
     .order("date", { ascending: false })
     .order("match_id", { ascending: true })
-    .range(from, from + MATCHES_PAGE_SIZE - 1)
+    .range(from, from + size - 1)
   if (error) throw error
   return { rows: z.array(matchListRow).parse(data), total: count ?? 0 }
 }
