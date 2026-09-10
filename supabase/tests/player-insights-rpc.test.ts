@@ -126,7 +126,11 @@ describe("drill-through p_limit", () => {
     expect(res.rows).toHaveLength(5)
   })
 
-  it("keeps the same ordering, so a limit takes the first n", async () => {
+  // The point of the cap: a drill-through shows the rallies behind the stat
+  // as it stands, so it must take the most RECENT n. Taking the first n would
+  // have pinned the table to the earliest points ever logged, where it would
+  // have stayed however many more were played.
+  it("takes the most recent n, not the first n", async () => {
     const all = await db.query<{ rally_number: number }>(
       `select rally_number from serve_rallies($1)`,
       [sam]
@@ -136,8 +140,17 @@ describe("drill-through p_limit", () => {
       [sam]
     )
     expect(capped.rows.map((r) => r.rally_number)).toEqual(
-      all.rows.slice(0, 4).map((r) => r.rally_number)
+      all.rows.slice(-4).map((r) => r.rally_number)
     )
+  })
+
+  it("still hands them back oldest-first", async () => {
+    const capped = await db.query<{ rally_number: number }>(
+      `select rally_number from serve_rallies($1, null, null, null, null, 4)`,
+      [sam]
+    )
+    const numbers = capped.rows.map((r) => r.rally_number)
+    expect(numbers).toEqual([...numbers].sort((a, b) => a - b))
   })
 
   it("applies to error_rallies and rally_length_rallies too", async () => {
@@ -152,6 +165,22 @@ describe("drill-through p_limit", () => {
     )
     expect(lengths.rows).toHaveLength(3)
   })
+
+  it("leaves every payload unchanged when the limit is null", async () => {
+    for (const call of [
+      `serve_rallies($1)`,
+      `error_rallies($1)`,
+      `rally_length_rallies($1)`,
+      `comeback_rallies($1)`,
+    ]) {
+      const explicit = await db.query(
+        `select * from ${call.replace("($1)", "($1, null, null, null, null)")}`,
+        [sam]
+      )
+      const implicit = await db.query(`select * from ${call}`, [sam])
+      expect(implicit.rows).toEqual(explicit.rows)
+    }
+  })
 })
 
 describe("API exposure", () => {
@@ -162,5 +191,89 @@ describe("API exposure", () => {
          'public.player_insights(uuid, uuid, ball_type, date, date)', 'execute') as ok`
     )
     expect(res.rows[0].ok).toBe(true)
+  })
+})
+
+// comeback_rallies caps by GAME, so it gets its own database: the shared
+// fixture above has no game anyone came back to win, and a cap test against a
+// fixture with nothing to cap passes without proving anything.
+describe("comeback_rallies caps by game", () => {
+  let cdb: PGlite
+  let player: string
+
+  beforeAll(async () => {
+    cdb = new PGlite()
+    await applyMigrations(cdb)
+
+    const players = await cdb.query<{ id: string }>(
+      `insert into players (name) values ('Comeback Kid'), ('Rival') returning id`
+    )
+    const [me, them] = players.rows.map((r) => r.id)
+    player = me
+
+    // two games, a fortnight apart, each one lost 0-4 and then won 11-4
+    for (const date of ["2026-07-01", "2026-07-15"]) {
+      const match = await cdb.query<{ id: string }>(
+        `insert into matches (player1_id, player2_id, date, ball_type)
+         values ($1, $2, $3, 'blue') returning id`,
+        [me, them, date]
+      )
+      const game = await cdb.query<{ id: string }>(
+        `insert into games (match_id, game_number) values ($1, 1) returning id`,
+        [match.rows[0].id]
+      )
+      const winners = [
+        ...Array.from({ length: 4 }, () => them),
+        ...Array.from({ length: 11 }, () => me),
+      ]
+      const params: Array<unknown> = [game.rows[0].id, me]
+      const values = winners.map((w, i) => {
+        const at = params.length
+        params.push(w)
+        return `($1, ${i + 1}, $2, 'left', 1, $${at + 1}::uuid, 'winner', 5)`
+      })
+      await cdb.query(
+        `insert into rallies (game_id, rally_number, server_id, serve_side, serve_number, winner_id, end_reason, shot_count)
+         values ${values.join(", ")}`,
+        params
+      )
+    }
+  })
+
+  afterAll(async () => cdb.close())
+
+  const gamesIn = (rows: Array<{ game_id: string | null }>) => [
+    ...new Set(rows.map((r) => r.game_id)),
+  ]
+
+  it("finds both comebacks when uncapped", async () => {
+    const res = await cdb.query<{ game_id: string }>(
+      `select game_id from comeback_rallies($1)`,
+      [player]
+    )
+    expect(gamesIn(res.rows)).toHaveLength(2)
+    expect(res.rows).toHaveLength(30)
+  })
+
+  it("a limit of 1 keeps one game, not one rally", async () => {
+    const res = await cdb.query<{ game_id: string }>(
+      `select game_id from comeback_rallies($1, null, null, null, null, 4, 1)`,
+      [player]
+    )
+    expect(gamesIn(res.rows)).toHaveLength(1)
+    // the whole game came back, all fifteen rallies of it
+    expect(res.rows).toHaveLength(15)
+  })
+
+  it("keeps the most recent game, not the first", async () => {
+    // formatted in SQL: the driver hands dates back as local-zone Date
+    // objects, so asserting on the JS side would pass or fail by timezone
+    const res = await cdb.query<{ day: string }>(
+      `select distinct to_char(date, 'YYYY-MM-DD') as day
+       from comeback_rallies($1, null, null, null, null, 4, 1)`,
+      [player]
+    )
+    expect(res.rows).toHaveLength(1)
+    expect(res.rows[0].day).toBe("2026-07-15")
   })
 })

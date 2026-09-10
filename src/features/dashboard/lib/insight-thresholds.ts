@@ -19,3 +19,14 @@ export const MIN_BOX_SERVES = 15
 
 /** Tagged decisive shots needed before the shot mix is called a pattern. */
 export const MIN_DECISIVE_FOR_MIX = 15
+
+/** Rallies a drill-through table asks for. The list under a stat exists to
+ *  show the rallies behind it, not to be an archive: past this many the table
+ *  is a scroll nobody reads, and the payload grows with every session logged.
+ *  The RPCs take the most recent n, and the table says so when it truncates. */
+export const RALLY_DRILL_LIMIT = 50
+
+/** Comeback games a drill-through asks for. Counted in games, not rallies:
+ *  the momentum page draws one chart per game, and half a comeback is not a
+ *  comeback. */
+export const COMEBACK_GAME_LIMIT = 12

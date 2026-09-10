@@ -22,6 +22,7 @@ import { WinRateTrend } from "@/features/dashboard/components/category/win-rate-
 import {
   MIN_GAMES_FOR_WIN_RATE,
   MIN_RALLIES_FOR_RATE,
+  RALLY_DRILL_LIMIT,
 } from "@/features/dashboard/lib/insight-thresholds"
 import { CourtDiagram } from "@/components/court/court-diagram"
 import { ResultChip } from "@/components/broadcast/result-chip"
@@ -207,9 +208,13 @@ function Serve({ playerId, filters }: ContentProps) {
 
       <ProfileSection
         title="Rallies served"
-        lede="Every rally behind the numbers above. Open one for the full point."
+        lede="The rallies behind the numbers above. Open one for the full point."
       >
-        <RallyTable rallies={rallies.data} playerId={playerId} />
+        <RallyTable
+          rallies={rallies.data}
+          playerId={playerId}
+          limit={RALLY_DRILL_LIMIT}
+        />
       </ProfileSection>
     </div>
   )
@@ -244,9 +249,13 @@ function Errors({ playerId, filters }: ContentProps) {
 
       <ProfileSection
         title="Error rallies"
-        lede="Every rally behind the numbers above. Open one for the full point."
+        lede="The rallies behind the numbers above. Open one for the full point."
       >
-        <RallyTable rallies={rallies.data} playerId={playerId} />
+        <RallyTable
+          rallies={rallies.data}
+          playerId={playerId}
+          limit={RALLY_DRILL_LIMIT}
+        />
       </ProfileSection>
     </div>
   )
@@ -281,9 +290,13 @@ function Rallies({ playerId, filters }: ContentProps) {
 
       <ProfileSection
         title="Rallies"
-        lede="Every rally behind the numbers above. Open one for the full point."
+        lede="The rallies behind the numbers above. Open one for the full point."
       >
-        <RallyTable rallies={rallies.data} playerId={playerId} />
+        <RallyTable
+          rallies={rallies.data}
+          playerId={playerId}
+          limit={RALLY_DRILL_LIMIT}
+        />
       </ProfileSection>
     </div>
   )

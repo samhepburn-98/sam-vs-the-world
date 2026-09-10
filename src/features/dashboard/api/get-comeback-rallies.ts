@@ -2,6 +2,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
 import { toRpcFilters } from "@/features/dashboard/api/rpc-filters"
+import { COMEBACK_GAME_LIMIT } from "@/features/dashboard/lib/insight-thresholds"
 import { rallyScored } from "@/lib/schemas/rally"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
 
@@ -20,6 +21,7 @@ export async function fetchComebackRallies(
   const supabase = getSupabaseBrowserClient()
   const { data, error } = await supabase.rpc("comeback_rallies", {
     p_player_id: playerId,
+    p_limit: COMEBACK_GAME_LIMIT,
     p_deficit: deficit,
     ...toRpcFilters(filters),
   })

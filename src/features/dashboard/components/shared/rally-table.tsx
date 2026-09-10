@@ -28,9 +28,13 @@ import type { RallyScored } from "@/lib/schemas/rally"
 export function RallyTable({
   rallies,
   playerId,
+  limit,
 }: {
   rallies: Array<RallyScored>
   playerId?: string
+  /** The cap the RPC was asked for, so a full list can say it is not the
+   *  whole story (§3.5). Omit when the caller fetched everything. */
+  limit?: number
 }) {
   const [selected, setSelected] = useState<number | null>(null)
 
@@ -92,6 +96,13 @@ export function RallyTable({
           </TableBody>
         </Table>
       </div>
+
+      {limit !== undefined && rallies.length >= limit && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Showing the {limit} most recent rallies behind this stat. The numbers
+          above count every one.
+        </p>
+      )}
 
       <RallyDetailSheet
         rally={selected === null ? null : rallies[selected]}
