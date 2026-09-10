@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
+import { useLoggerHotkeys } from "@/features/logger/hooks/use-logger-hotkeys"
 import { GameOverBanner } from "@/features/logger/components/game-over-banner"
 import { Glossary } from "@/features/logger/components/glossary"
 import { HotkeyHelp } from "@/features/logger/components/hotkey-help"
@@ -13,7 +14,6 @@ import { UndoBar } from "@/features/logger/components/undo-bar"
 import { WinnerButtons } from "@/features/logger/components/winner-buttons"
 import { Button } from "@/components/ui/button"
 import { KbdHintsContext } from "@/components/ui/kbd"
-import { hotkeyAction, isEditableTarget } from "@/features/logger/lib/hotkeys"
 import { houseRulesOf, toSessionRow } from "@/features/logger/lib/match-detail"
 import {
   buildLetRow,
@@ -286,28 +286,15 @@ export function MatchLogger({
     }
   }
 
-  // window-level so no control needs focus; re-bound each render to see
-  // fresh state (§5.3 keyboard-first)
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (finished || isEditableTarget(e.target)) return
-      if (e.key === "Escape") {
-        if (glossaryOpen) setGlossaryOpen(false)
-        else if (helpOpen) setHelpOpen(false)
-        else if (editingId !== null) setEditingId(null)
-        return
-      }
-      if (editingId !== null) return // inline editor owns the keyboard
-      const action = hotkeyAction(e)
-      if (!action) return
-      if (glossaryOpen) return // reading, not logging
-      if (helpOpen && action.type !== "help") return
-      e.preventDefault()
-      dispatchHotkey(action)
+  useLoggerHotkeys(
+    { finished, editingId, helpOpen, glossaryOpen },
+    {
+      dispatch: dispatchHotkey,
+      closeGlossary: () => setGlossaryOpen(false),
+      closeHelp: () => setHelpOpen(false),
+      closeEditor: () => setEditingId(null),
     }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  })
+  )
 
   const undoLabel =
     session.undoable === null
