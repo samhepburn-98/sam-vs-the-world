@@ -9,7 +9,7 @@ import {
 import { BallDots } from "@/components/broadcast/ball-dots"
 import { CourtEmptyMedia } from "@/components/court/court-empty"
 import { PageTitle } from "@/components/typography"
-import { MatchRow } from "@/features/dashboard/components/match-row"
+import { MatchRow } from "@/features/dashboard/components/shared/match-row"
 import { Button } from "@/components/ui/button"
 import {
   Empty,

@@ -10,8 +10,8 @@ import {
   matchResultQueryOptions,
   useMatchResult,
 } from "@/lib/api/get-match-result"
-import { GameScoreChart } from "@/features/dashboard/components/game-score-chart"
-import { RallyDetailSheet } from "@/features/dashboard/components/rally-detail-sheet"
+import { GameScoreChart } from "@/features/dashboard/components/match/game-score-chart"
+import { RallyDetailSheet } from "@/features/dashboard/components/shared/rally-detail-sheet"
 import {
   foldMatchToScored,
   gameScores,

@@ -15,7 +15,8 @@ src/
     auth/        components (login form)
     logger/      components + lib/ (session planner, hotkeys) — the live rally logger
     manage/      api/ (paginated list reads) + components/ (data table, tabs, edit dialogs)
-    dashboard/   api/ (insight RPC hooks) + components/ (stat card, charts) + lib/ + schemas/
+    dashboard/   api/ (insight RPC hooks) + components/ (grouped by surface, below)
+                 + lib/ + schemas/
   components/    SHARED UI, one folder per kind:
     ui/          shadcn primitives, themed by tokens only — never edited for one screen
     broadcast/   the design-system graphic kit (ticker, callout, score strip, stat row/tile,
@@ -112,6 +113,22 @@ is shared so `lib/api` can execute them without importing the planner.
 
 Entity **reads** split by use: a read only one feature needs lives in that feature's `api/`; a read
 several surfaces share (`get-players`, `get-match-detail`) lives in `lib/api`.
+
+### Inside a feature's `components/`
+
+`dashboard` is the one feature big enough to need a second level: it serves five screens, and forty
+components in one directory told you nothing about which. They are grouped by **the surface that
+renders them** — `profile/`, `compare/`, `category/`, `home/`, `match/` — with `shared/` for the
+ones more than one surface renders.
+
+That is the whole rule, and it is decidable rather than a matter of taste: follow the imports from
+the routes, and a component reachable from exactly one route belongs to that route's folder. It is
+why `match/` holds a single file — the rule does not bend for a small surface, and a folder that
+starts with one file is honest about what the surface is.
+
+Only `dashboard` is grouped. The other features have seventeen files between them and a flat folder
+is still the fastest thing to read; adding empty ceremony to `logger/components` would cost more
+than it explains.
 
 ## Component API conventions
 
