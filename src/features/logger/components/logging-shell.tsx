@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { KbdHintsContext } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
 import { hotkeyAction, isEditableTarget } from "@/features/logger/lib/hotkeys"
+import { houseRulesOf, toSessionRow } from "@/features/logger/lib/match-detail"
 import {
   buildLetRow,
   buildRallyRow,
@@ -57,7 +58,7 @@ import type { SessionState, Transition } from "@/features/logger/lib/session"
 import type { MatchDetail } from "@/lib/schemas/match"
 import type { PlayerSummary } from "@/lib/schemas/player"
 import type { WriteQueue } from "@/lib/api/write-queue"
-import type { GameContext, HouseRules } from "@/lib/scoring"
+import type { GameContext } from "@/lib/scoring"
 
 // The logging surface (§5.3): score header, winner buttons, outcome chips,
 // editable timeline, one-action undo, game/match end flow. Hotkeys (#17)
@@ -127,34 +128,7 @@ export function LoggingShell({
   )
 }
 
-function normalizeRow(r: {
-  id: string
-  game_id: string
-  rally_number: number
-  server_id: string
-  serve_side: "left" | "right"
-  serve_number: number
-  winner_id: string | null
-  end_reason: RallyRow["end_reason"]
-  error_detail: RallyRow["error_detail"]
-  forced: boolean | null
-  winning_shot: RallyRow["winning_shot"]
-  losing_shot: RallyRow["losing_shot"]
-  shot_count: number | null
-}): RallyRow {
-  return { ...r, serve_number: r.serve_number === 2 ? 2 : 1 }
-}
-
 const HINTS_PREF_KEY = "svw:show-key-hints"
-
-function rulesOf(match: MatchDetail): HouseRules {
-  return {
-    targetScore: match.target_score,
-    tiebreak: match.tiebreak,
-    servesPerPoint: match.serves_per_point === 1 ? 1 : 2,
-    letResetsServe: match.let_resets_serve,
-  }
-}
 
 interface MatchLoggerProps {
   match: MatchDetail
@@ -171,14 +145,14 @@ function MatchLogger({
   firstServerId,
   onExit,
 }: MatchLoggerProps) {
-  const rules = rulesOf(match)
+  const rules = houseRulesOf(match)
 
   const [session, setSession] = useState<SessionState>(() => ({
     matchId: match.id,
     games: match.games.map((g) => ({
       id: g.id,
       gameNumber: g.game_number,
-      rows: g.rallies.map(normalizeRow),
+      rows: g.rallies.map(toSessionRow),
     })),
     undoable: null,
     redoable: null,
