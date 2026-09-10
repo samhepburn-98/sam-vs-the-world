@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { usePlayerInsights } from "@/features/dashboard/api/get-player-insights"
 import {
   TRAIT_LABELS,
   heroStat,
@@ -27,7 +27,7 @@ export function RosterRow({
   /** Recent results involving this player, oldest first. */
   form: Array<"w" | "l" | "d">
 }) {
-  const data = usePlayerInsights(player.id)
+  const data = usePlayerInsights({ playerId: player.id })
   const trait = playerTrait(data)
   const hero = heroStat(data)
 

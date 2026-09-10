@@ -11,7 +11,7 @@ import {
 import {
   prefetchPlayerInsights,
   usePlayerInsights,
-} from "@/features/dashboard/api/use-player-insights"
+} from "@/features/dashboard/api/get-player-insights"
 import { CategoryTiles } from "@/features/dashboard/components/category-tiles"
 import { ProfileHero } from "@/features/dashboard/components/profile-hero"
 import { RecordsWall } from "@/features/dashboard/components/record-tile"
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/players/$playerId/")({
 
 function PlayerProfilePage() {
   const { playerId } = Route.useParams()
-  const data = usePlayerInsights(playerId, {})
+  const data = usePlayerInsights({ playerId })
   const players = usePlayers()
   const h2hMatches = usePlayerH2h({ playerId })
   const records = useRecords()

@@ -59,7 +59,11 @@ describe("createMatchWithGame", () => {
     await expect(createMatchWithGame(input, client)).resolves.toBe(MATCH_ID)
   })
 
-  it("normalises an empty venue to null and casual format to null", async () => {
+  // An empty venue, a casual format and an unrecorded ball are all "not set".
+  // They are omitted rather than sent as null: each parameter defaults to null
+  // in SQL, so PostgREST dropping the key stores exactly the same value, and
+  // omitting is what the generated Args type accepts.
+  it("omits the unset optional fields rather than sending null", async () => {
     const client = fakeClient({ data: MATCH_ID, error: null })
     const casual: MatchSetupInput = {
       ...input,
@@ -68,11 +72,12 @@ describe("createMatchWithGame", () => {
     }
     await createMatchWithGame(casual, client)
 
-    expect(client.calls[0][1]).toMatchObject({
-      p_venue: null,
-      p_format: null,
-      p_ball_type: null,
-    })
+    const args = client.calls[0][1]
+    expect(args.p_venue).toBeUndefined()
+    expect(args.p_format).toBeUndefined()
+    expect(args.p_ball_type).toBeUndefined()
+    // the set fields still travel
+    expect(args.p_target_score).toBe(input.houseRules.targetScore)
   })
 
   // §1.8 — the match and its game 1 used to be two queued writes, so a failed

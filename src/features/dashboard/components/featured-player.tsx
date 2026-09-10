@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
-import { usePlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { usePlayerInsights } from "@/features/dashboard/api/get-player-insights"
 import { PlayerCard } from "@/features/dashboard/components/player-card"
 import { headerSignature } from "@/features/dashboard/lib/profile-header"
 import {
@@ -18,7 +18,7 @@ import type { PlayerSummary } from "@/lib/schemas/player"
 // accent-bar voice.
 
 export function FeaturedPlayer({ player }: { player: PlayerSummary }) {
-  const data = usePlayerInsights(player.id)
+  const data = usePlayerInsights({ playerId: player.id })
 
   const read = headerSignature(data)
   const h = data.headline

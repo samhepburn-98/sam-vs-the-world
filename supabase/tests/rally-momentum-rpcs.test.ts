@@ -393,9 +393,9 @@ describe("momentum — phase bands", () => {
 describe("API exposure", () => {
   it.each([
     "rally_lengths(uuid, uuid, ball_type, date, date)",
-    "rally_length_rallies(uuid, uuid, ball_type, date, date, text)",
+    "rally_length_rallies(uuid, uuid, ball_type, date, date, text, integer)",
     "momentum(uuid, uuid, ball_type, date, date, integer)",
-    "comeback_rallies(uuid, uuid, ball_type, date, date, integer)",
+    "comeback_rallies(uuid, uuid, ball_type, date, date, integer, integer)",
   ])("anon can execute %s", async (signature) => {
     const res = await db.query<{ ok: boolean }>(
       `select has_function_privilege('anon', 'public.${signature}', 'execute') as ok`

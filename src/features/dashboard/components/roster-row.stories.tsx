@@ -20,39 +20,15 @@ import type { QueryClient } from "@tanstack/react-query"
 // the only caller today. Identity is a prop; the trait and rate come from
 // the same insight payloads every other surface reads, through the hook.
 
-/** The six insight queries `usePlayerInsights` runs, seeded under their exact
- *  keys so the row renders its loaded state with no network. */
+/** The one insight query `usePlayerInsights` runs, seeded under its exact key
+ *  so the row renders its loaded state with no network. It was six keys until
+ *  player_insights collapsed them into a single request. */
 function seedInsights(
   queryClient: QueryClient,
   playerId: string,
   data: PlayerData
 ) {
-  const filters = {}
-  queryClient.setQueryData(
-    ["insights", "player-headline", playerId, filters],
-    data.headline
-  )
-  queryClient.setQueryData(
-    ["insights", "serve-stats", playerId, filters],
-    data.serve
-  )
-  queryClient.setQueryData(
-    ["insights", "error-profile", playerId, filters],
-    data.error
-  )
-  queryClient.setQueryData(
-    ["insights", "rally-lengths", playerId, filters],
-    data.rally
-  )
-  // momentum carries a deficit argument; the profile hook passes none
-  queryClient.setQueryData(
-    ["insights", "momentum", playerId, filters, null],
-    data.momentum
-  )
-  queryClient.setQueryData(
-    ["insights", "decisive-shots", playerId, filters],
-    data.decisive
-  )
+  queryClient.setQueryData(["insights", "player-insights", playerId, {}], data)
 }
 
 /** Ormond has played two decided games — under the five a win rate needs,

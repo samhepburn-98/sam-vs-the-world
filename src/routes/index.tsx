@@ -25,7 +25,7 @@ import {
   homeCountsQueryOptions,
   useHomeCounts,
 } from "@/features/dashboard/api/get-home-counts"
-import { prefetchPlayerInsights } from "@/features/dashboard/api/use-player-insights"
+import { prefetchPlayerInsights } from "@/features/dashboard/api/get-player-insights"
 import {
   recentResultsQueryOptions,
   useRecentResults,
